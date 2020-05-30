@@ -13,7 +13,7 @@
     <option name="templateFile" value="$PROJECT_DIR$/whatsapp_forwarding/template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
-    <option name="input" value="{&#10;  &quot;message&quot;: &quot;this is a message&quot;&#10;}" />
+    <option name="input" value="{&#10;  &quot;message&quot;: &quot;this is a message sent by a user&quot;&#10;}" />
     <option name="inputIsFile" value="false" />
     <sam>
       <option name="additionalBuildArgs" value="" />
