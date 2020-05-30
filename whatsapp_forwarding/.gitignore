@@ -49,9 +49,6 @@ Temporary Items
 
 .idea/*
 
-# Push run configurations to allow sharing debug configs
-!.idea/runConfigurations/*
-
 # User-specific stuff:
 .idea/**/workspace.xml
 .idea/**/tasks.xml
