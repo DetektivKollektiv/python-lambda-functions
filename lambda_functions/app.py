@@ -1,4 +1,3 @@
-import json
 from crud.model import Item
 from crud import operations
 

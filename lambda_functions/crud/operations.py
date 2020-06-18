@@ -1,7 +1,5 @@
 from uuid import uuid4
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from crud.model import Item
 

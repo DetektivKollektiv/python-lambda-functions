@@ -1,24 +1,24 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="[Local] EchoFunction example 1" type="aws.lambda" factoryName="Local">
-    <option name="credentialProviderId" value="profile:DetektivKollektiv" />
+  <configuration default="false" name="[Local] get_all_items" type="aws.lambda" factoryName="Local">
+    <option name="credentialProviderId" value="profile:default" />
     <option name="regionId" value="eu-central-1" />
     <option name="debugHost" value="localhost" />
     <option name="environmentVariables">
       <map />
     </option>
     <option name="handler" />
-    <option name="logicalFunctionName" />
+    <option name="logicalFunctionName" value="GetAllItemsFunction" />
     <option name="memorySize" value="128" />
     <option name="runtime" />
-    <option name="templateFile" value="$PROJECT_DIR$/whatsapp_forwarding/template.yaml" />
+    <option name="templateFile" value="$PROJECT_DIR$/lambda_functions/template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
-    <option name="input" value="{&#10;  &quot;message&quot;: &quot;hello world&quot;&#10;}" />
+    <option name="input" value="{}" />
     <option name="inputIsFile" value="false" />
     <sam>
       <option name="additionalBuildArgs" value="" />
       <option name="additionalLocalArgs" value="" />
-      <option name="buildInContainer" value="false" />
+      <option name="buildInContainer" value="true" />
       <option name="dockerNetwork" value="" />
       <option name="skipImagePull" value="true" />
     </sam>

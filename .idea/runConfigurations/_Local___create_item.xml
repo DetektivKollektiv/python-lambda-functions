@@ -1,19 +1,19 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="[Local] EchoFunction example 2" type="aws.lambda" factoryName="Local">
-    <option name="credentialProviderId" value="profile:DetektivKollektiv" />
+  <configuration default="false" name="[Local]  create_item" type="aws.lambda" factoryName="Local">
+    <option name="credentialProviderId" value="profile:default" />
     <option name="regionId" value="eu-central-1" />
     <option name="debugHost" value="localhost" />
     <option name="environmentVariables">
       <map />
     </option>
     <option name="handler" />
-    <option name="logicalFunctionName" value="EchoFunction" />
+    <option name="logicalFunctionName" value="CreateItemFunction" />
     <option name="memorySize" value="128" />
     <option name="runtime" />
     <option name="templateFile" value="$PROJECT_DIR$/lambda_functions/template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
-    <option name="input" value="{&#10;  &quot;message&quot;: &quot;this is an example text&quot;&#10;}" />
+    <option name="input" value="{&#10;  &quot;content&quot;: &quot;This is an example text. &quot;&#10;}" />
     <option name="inputIsFile" value="false" />
     <sam>
       <option name="additionalBuildArgs" value="" />
