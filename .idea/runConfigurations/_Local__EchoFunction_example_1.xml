@@ -7,7 +7,7 @@
       <map />
     </option>
     <option name="handler" />
-    <option name="logicalFunctionName" value="EchoFunction" />
+    <option name="logicalFunctionName" />
     <option name="memorySize" value="128" />
     <option name="runtime" />
     <option name="templateFile" value="$PROJECT_DIR$/whatsapp_forwarding/template.yaml" />
