@@ -25,7 +25,7 @@ phases:
     commands:
 
       # Use AWS SAM to package the application by using AWS CloudFormation
-      - aws cloudformation package --template-file ./lambda_functions/template.yml --s3-bucket $S3_BUCKET --output-template-file ${STAGE}-template-export.yml
+      - aws cloudformation package --template-file ./lambda_functions/template.yaml --s3-bucket $S3_BUCKET --output-template-file ${STAGE}-template-export.yml
 
       # Do not remove this statement. This command is required for AWS CodeStar projects.
       # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
