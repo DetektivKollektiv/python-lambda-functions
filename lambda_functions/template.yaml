@@ -7,10 +7,21 @@ Description: >
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
+  Api:
+    OpenApiVersion: 3.0.1
   Function:
     Timeout: 30
+    
+Parameters:
+  Stage:
+    Type: String
 
 Resources:
+  Api:
+    Properties:
+      StageName: ${STAGE}
+    Type: AWS::Serverless::Api
+    
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -23,6 +34,7 @@ Resources:
           Properties:
             Path: /whatsapp_forwarding
             Method: post
+            
   CreateItemFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -35,6 +47,7 @@ Resources:
           Properties:
             Path: /create_item
             Method: post
+            
   GetAllItemsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -52,9 +65,9 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  WhatsappForwardingApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  Api:
+    Description: "API Gateway endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${STAGE}"
   WhatsappForwardingFunction:
     Description: "Hello World Lambda Function ARN"
     Value: !GetAtt WhatsappForwardingFunction.Arn
