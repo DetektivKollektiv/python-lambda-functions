@@ -74,11 +74,9 @@ Outputs:
   WhatsappForwardingIamRole:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt WhatsappForwardingFunctionRole.Arn
-    
   CreateItemFunction:
     Description: "Lambda Function to create new item"
-    Value: !GetAtt CreateItemFunction.Arn
-    
+    Value: !GetAtt CreateItemFunction.Arn    
   GetAllItemsFunction:
     Description: "Lambda Function to get all items"
     Value: !GetAtt GetAllItemsFunction.Arn
