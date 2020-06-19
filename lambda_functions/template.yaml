@@ -13,7 +13,7 @@ Globals:
     Timeout: 30
     
 Parameters:
-  Stage:
+  STAGE:
     Type: String
 
 Resources:
