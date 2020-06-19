@@ -27,7 +27,7 @@ Resources:
     Properties:
       CodeUri: whatsapp_forwarding/
       Handler: app.whatsapp_forwarding
-      Runtime: python3.6
+      Runtime: python3.8
       Events:
         WhatsappForwarding:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -40,12 +40,12 @@ Resources:
     Properties:
       CodeUri: .
       Handler: app.create_item
-      Runtime: python3.6
+      Runtime: python3.8
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /create_item
+            Path: /items
             Method: post
             
   GetAllItemsFunction:
@@ -53,12 +53,12 @@ Resources:
     Properties:
       CodeUri: .
       Handler: app.get_all_items
-      Runtime: python3.6
+      Runtime: python3.8
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /get_all_items
+            Path: /items
             Method: get
 
 Outputs:
@@ -74,3 +74,9 @@ Outputs:
   WhatsappForwardingIamRole:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt WhatsappForwardingFunctionRole.Arn
+  CreateItemFunction:
+    Description: "Lambda Function to create new item"
+    Value: !GetAtt CreateItemFunction.Arn    
+  GetAllItemsFunction:
+    Description: "Lambda Function to get all items"
+    Value: !GetAtt GetAllItemsFunction.Arn
