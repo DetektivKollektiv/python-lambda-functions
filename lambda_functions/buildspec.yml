@@ -5,12 +5,15 @@ phases:
     runtime-versions:
       python: 3.8
     commands:
-
+      
+      # Upgrade pip to the latest version
+      - pip install --upgrade pip
+      
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
       
       # Install requirements
-      - pip install requirements.txt 
+      - pip install -r requirements.txt 
       
   pre_build:
     commands:
