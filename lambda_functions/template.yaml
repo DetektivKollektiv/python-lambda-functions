@@ -86,14 +86,14 @@ Resources:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
-        Events:
-          Echo:
-            Type: Api
-            Properties:
-              Path: /submissions
-              Method: post
-              RestApiId:
-                Ref: Api
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /submissions
+            Method: post
+            RestApiId:
+              Ref: Api
 
   GetAllSubmissionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -106,14 +106,14 @@ Resources:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
-        Events:
-          Echo:
-            Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-            Properties:
-              Path: /submissions
-              Method: get              
-              RestApiId:
-                Ref: Api
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /submissions
+            Method: get              
+            RestApiId:
+              Ref: Api
               
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
