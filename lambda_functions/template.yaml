@@ -37,7 +37,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-create_item-${STAGE}'
-      CodeUri: CreateItemFunction
       Handler: app.create_item
       Runtime: python3.8
       Role:
@@ -56,7 +55,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-get_all_items-${STAGE}'
-      CodeUri: GetAllItemsFunction
       Handler: app.get_all_items
       Runtime: python3.8
       Role:
