@@ -31,7 +31,7 @@ def create_item(event, context):
     
     # Parse event dict (= http post payload) to Item object
     item = Item()
-    for key in event:
+    for key in json.loads(event.body):
         setattr(item, key, event[key])
 
     try:
