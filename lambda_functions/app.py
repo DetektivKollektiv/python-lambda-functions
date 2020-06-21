@@ -2,7 +2,6 @@ from crud.model import Item
 from crud import operations
 import json
 
-
 def obj_dict(obj):
     return obj.__dict__
 
@@ -27,7 +26,9 @@ def create_item(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-
+    
+    print(event)
+    
     # Parse event dict (= http post payload) to Item object
     item = Item()
     for key in event:
