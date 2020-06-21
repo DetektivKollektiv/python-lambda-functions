@@ -18,7 +18,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-whatsapp_forwarding-${STAGE}'
-      CodeUri: WhatsappForwardingFunction
+      CodeUri: whatsapp_forwarding/
       Handler: app.whatsapp_forwarding
       Runtime: python3.8
       Role:
