@@ -5,9 +5,13 @@ Description: 'SAM template for DetektivKollektiv API'
 Globals:
   Function:
     Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+    
 Parameters:
   STAGE:
     Type: String
+    
 Resources:
   Api:
     Type: AWS::Serverless::Api
