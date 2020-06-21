@@ -13,7 +13,7 @@
     <option name="templateFile" value="C:\Users\patri\Development\Pycharm\python-lambda-functions\lambda_functions\template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
-    <option name="input" value="{&#10;  &quot;item_id&quot;: &quot;fa23d541-4a1a-4a6a-bf7c-150b9b6ae887\t &quot;,&#10;  &quot;mail&quot;: &quot;user@domain.de&quot;,&#10;  &quot;received_date&quot;: &quot;2020-06-15 23:23:23&quot;&#10;}" />
+    <option name="input" value="{&#10;  &quot;body&quot;: {&#10;  &quot;item_id&quot;: &quot;fa23d541-4a1a-4a6a-bf7c-150b9b6ae887&quot;,&#10;  &quot;mail&quot;: &quot;user@domain.de&quot;,&#10;  &quot;received_date&quot;: &quot;2020-06-15 23:23:23&quot;&#10;}&#10;}" />
     <option name="inputIsFile" value="false" />
     <sam>
       <option name="additionalBuildArgs" value="" />

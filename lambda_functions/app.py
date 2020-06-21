@@ -91,8 +91,9 @@ def create_submission(event, context):
 
     submission = Submission()
 
-    for key in event:
-        setattr(submission, key, event[key])
+    json_event = json.loads(event['body'])
+    for key in json_event:
+        setattr(submission, key, json_event[key])
 
     try:
         operations.create_submission_db(submission)
@@ -119,7 +120,7 @@ def get_all_submissions(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": submissions_serialized
+            "body": json.dumps(submissions_serialized)
         }
     except Exception as e:
         return {
