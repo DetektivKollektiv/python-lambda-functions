@@ -12,7 +12,8 @@ Resources:
   Api:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: ${STAGE}
+      StageName: 
+        Ref: STAGE
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
