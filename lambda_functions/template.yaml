@@ -74,6 +74,47 @@ Resources:
             Method: get
             RestApiId:
               Ref: Api
+              
+  CreateSubmissionFunction:
+    Type: AWS::Serverless::Function
+    Properties:      
+      FunctionName: !Sub 'detektivkollektiv-api-create_submission-${STAGE}'
+      CodeUri: .
+      Handler: app.create_submission
+      Runtime: python3.8        
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+        Events:
+          Echo:
+            Type: Api
+            Properties:
+              Path: /submissions
+              Method: post
+              RestApiId:
+                Ref: Api
+
+  GetAllSubmissionsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_all_submissions-${STAGE}'
+      CodeUri: .
+      Handler: app.get_all_submissions
+      Runtime: python3.8        
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+        Events:
+          Echo:
+            Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+            Properties:
+              Path: /submissions
+              Method: get              
+              RestApiId:
+                Ref: Api
+              
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role

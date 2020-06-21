@@ -1,4 +1,6 @@
-from crud.model import Item
+import json
+
+from crud.model import Item, Submission
 from crud import operations
 import json
 
@@ -89,4 +91,45 @@ def get_all_items(event, context):
         return {
             "statusCode": 400,
             "body": "Could not get items. Check HTTP GET payload. Exception: {}".format(e)
+        }
+
+def create_submission(event, context):
+
+    submission = Submission()
+
+    json_event = json.loads(event['body'])
+    for key in json_event:
+        setattr(submission, key, json_event[key])
+
+    try:
+        operations.create_submission_db(submission)
+        return {
+            "statusCode": 201,
+            "body":"Submission created successfully"
+        }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not create submission. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+def get_all_submissions(event, context):
+
+    try:
+        submissions = operations.get_all_submissions_db()
+        submissions_serialized = []
+
+        for submission in submissions:
+            submissions_serialized.append({"item_id": submission.item_id, "submission_date":submission.submission_date,
+                                           "received_date":submission.received_date, "phone":submission.phone, "mail":submission.mail,
+                                           "source":submission.source, "frequency":submission.frequency})
+        return {
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": json.dumps(submissions_serialized)
+        }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get submissions. Check HTTP GET payload. Exception: {}".format(e)
         }
