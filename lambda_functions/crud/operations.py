@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
-from crud.model import Item
+from crud.model import Item, Submission
 from datetime import datetime
 
 
@@ -86,3 +86,9 @@ def create_submission_db(submission):
     session.commit()
 
     return submission
+
+def get_all_submissions_db():
+
+    session = get_db_session()
+    submissions = session.query(Submission).all()
+    return submissions
