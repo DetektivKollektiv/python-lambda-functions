@@ -3,6 +3,9 @@ from crud import operations
 import json
 
 
+def obj_dict(obj):
+    return obj.__dict__
+
 def create_item(event, context):
     """Creates a new item.
 
@@ -78,7 +81,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(items.__dict__) # items_serialized
+            "body": json.dumps(items, default=obj_dict) # items_serialized
         }
     except Exception as e:
         return {
