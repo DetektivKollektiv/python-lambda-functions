@@ -81,7 +81,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(items, default=obj_dict) # items_serialized
+            "body": json.dumps(items_serialized);
         }
     except Exception as e:
         return {

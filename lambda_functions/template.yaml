@@ -78,7 +78,7 @@ Resources:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'detektivkollektiv-api-Execution${STAGE}'
+      RoleName: !Sub 'detektivkollektiv-api-execution-${STAGE}'
       AssumeRolePolicyDocument:
         Statement:
         - Effect: Allow
