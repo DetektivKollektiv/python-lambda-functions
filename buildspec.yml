@@ -13,7 +13,7 @@ phases:
       - pip install --upgrade awscli
       
       # Install requirements
-      - pip install -r lambda_functions/requirements.txt 
+      - pip install -r lambda_functions/requirements.txt --target lambda_functions
       
   pre_build:
     commands:

@@ -2,7 +2,10 @@ import json
 
 from crud.model import Item, Submission
 from crud import operations
+import json
 
+def obj_dict(obj):
+    return obj.__dict__
 
 def create_item(event, context):
     """Creates a new item.
@@ -25,11 +28,14 @@ def create_item(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-
+    
+    print(event)
+    
     # Parse event dict (= http post payload) to Item object
     item = Item()
-    for key in event:
-        setattr(item, key, event[key])
+    json_event = json.loads(event['body'])
+    for key in json_event:
+        setattr(item, key, json_event[key])
 
     try:
         operations.create_item_db(item)
@@ -79,7 +85,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": items_serialized
+            "body": json.dumps(items_serialized)
         }
     except Exception as e:
         return {
