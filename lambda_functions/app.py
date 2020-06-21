@@ -1,5 +1,6 @@
 from crud.model import Item
 from crud import operations
+import json
 
 
 def create_item(event, context):
@@ -77,7 +78,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": items_serialized
+            "body": json.dumps(items.__dict__) # items_serialized
         }
     except Exception as e:
         return {
