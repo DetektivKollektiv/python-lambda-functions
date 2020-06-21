@@ -1,4 +1,4 @@
-from crud.model import Item
+from crud.model import Item, Submission
 from crud import operations
 
 
@@ -83,4 +83,23 @@ def get_all_items(event, context):
         return {
             "statusCode": 400,
             "body": "Could not get items. Check HTTP GET payload. Exception: {}".format(e)
+        }
+
+def create_submission(event, context):
+
+    submission = Submission()
+
+    for key in event:
+        setattr(submission, key, event[key])
+
+    try:
+        operations.create_submission_db(submission)
+        return {
+            "statusCode": 201,
+            "body":"Submission created successfully"
+        }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not create submission. Check HTTP POST payload. Exception: {}".format(e)
         }
