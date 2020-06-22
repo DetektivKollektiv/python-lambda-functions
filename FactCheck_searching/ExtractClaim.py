@@ -8,6 +8,20 @@ logger.setLevel(logging.INFO)
 
 
 def extract_claim(event, context):
+    """extracts claim from item content
+    Parameters
+    ----------
+    event: dict, required
+        item
+    context: object, required
+        Lambda Context runtime methods and attributes
+    Returns
+    ------
+    urls: list of urls in item, first entry is "" for item content
+    titles: list of url titles, first entry is "" for item content
+    text: list of url paragraphs, first entry is item content
+    """
+
     logger.info('Calling extract_claim with event')
     logger.info(event)
 
@@ -27,18 +41,29 @@ def extract_claim(event, context):
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
+    # extract all urls from item_content
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # titles contains as first entry a placeholder for item_content
+    titles = ["", ]
+    # text contains as first entry a placeholder for item_content
+    text = [item_content, ]
 
-    content = urllib.request.urlopen(urls[0])
-    read_content = content.read()
+    # open all urls and extract the paragraphs
+    for url in urls:
+        content = urllib.request.urlopen(url)
+        read_content = content.read()
 
-    soup = BeautifulSoup(read_content, 'html.parser')
-    text = soup.find_all(text=True)
-    title = soup.find('title').text  # get the title of the web page
-    pAll = soup.find_all('p')  # get all paragraphs of the web page
-    paragraphs = ''
+        soup = BeautifulSoup(read_content, 'html.parser')
+        titles.append(soup.find('title').text)  # get the title of the web page
+        pAll = soup.find_all('p')  # get all paragraphs of the web page
+        paragraphs = ''
 
-    for t in pAll:
-        paragraphs += '{} '.format(t.text)
+        # concatenate all paragraphs for each url
+        for t in pAll:
+            paragraphs += '{} '.format(t.text)
+        text.append(paragraphs)
 
-    return title, paragraphs
+    # add as first entry a placeholder for item_content
+    urls.insert(0, "")
+
+    return urls, titles, text
