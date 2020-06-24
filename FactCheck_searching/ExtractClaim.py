@@ -20,6 +20,7 @@ def extract_claim(event, context):
     urls: list of urls in item, first entry is "" for item content
     titles: list of url titles, first entry is "" for item content
     text: list of url paragraphs, first entry is item content
+    concatenation: Text: concatenation of all paragraphs
     """
 
     logger.info('Calling extract_claim with event')
@@ -47,6 +48,7 @@ def extract_claim(event, context):
     titles = ["", ]
     # text contains as first entry a placeholder for item_content
     text = [item_content, ]
+    allText = item_content
 
     # open all urls and extract the paragraphs
     for url in urls:
@@ -62,8 +64,16 @@ def extract_claim(event, context):
         for t in pAll:
             paragraphs += '{} '.format(t.text)
         text.append(paragraphs)
+        allText += paragraphs
 
     # add as first entry a placeholder for item_content
     urls.insert(0, "")
 
-    return urls, titles, text
+    return {
+        "urls": urls,
+        "titles": titles,
+        "text": text,
+        "concatenation": {
+            "Text": allText
+        }
+    }
