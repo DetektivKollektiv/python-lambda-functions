@@ -116,7 +116,6 @@ Resources:
               Ref: Api
               
   LambdaExecutionRole:
-    Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub 'detektivkollektiv-api-execution-${STAGE}'
