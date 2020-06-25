@@ -64,6 +64,22 @@ def get_all_items_db():
     items = session.query(Item).all()
     return items
 
+def get_item_by_content_db(content):
+    """Returns an item with the specified content from the database
+
+        Returns
+        ------
+        item: Item
+            The item
+        Null, if no item was found
+        """
+    session = get_db_session()
+    item = session.query(Item).filter(Item.content == content).first()
+    if item is None:
+        raise Exception("No item found.")
+    return item
+
+
 def create_submission_db(submission):
     """Inserts a new submission into the database
 

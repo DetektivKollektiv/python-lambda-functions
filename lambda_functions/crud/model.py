@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -10,6 +10,9 @@ class Item(Base):
     id = Column(String, primary_key=True)
     content = Column(String)
     language = Column(String)
+    status = Column(String)
+    variance = Column(Float)
+    result_score = Column(Float)
     submissions = relationship("Submission")
 
 
