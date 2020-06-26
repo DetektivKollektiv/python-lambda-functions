@@ -151,7 +151,7 @@ def get_item_by_content(event, context):
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(item_serialized)
+                "body": item_serialized
             }
         except Exception:
             return {
