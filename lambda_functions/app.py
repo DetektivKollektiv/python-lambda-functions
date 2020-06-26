@@ -40,10 +40,11 @@ def create_item(event, context):
         setattr(item, key, json_event[key])
 
     try:
-        operations.create_item_db(item)
+        item = operations.create_item_db(item)
+        item_serialized = {"id": item.id, "content": item.content, "status": item.status}
         return {
             "statusCode": 201,
-            "body": "Item created successfully."
+            "body": json.dumps(item_serialized)
         }
     except Exception as e:
         return {
@@ -108,7 +109,7 @@ def create_submission(event, context):
         operations.create_submission_db(submission)
         return {
             "statusCode": 201,
-            "body":"Submission created successfully"
+            "body": "Submission created successfully"
         }
     except Exception as e:
         return {
