@@ -60,6 +60,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-get_all_items-${STAGE}'
+      CodeUri: .
       Handler: app.get_all_items
       Runtime: python3.8
       Role:
@@ -114,7 +115,26 @@ Resources:
             Method: get              
             RestApiId:
               Ref: Api
-              
+  GetItemByContentFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_item_by_content-${STAGE}'
+      CodeUri: .
+      Handler: app.get_item_by_content
+      Runtime: python3.8
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /items/byContent
+            Method: get
+            RestApiId:
+              Ref: Api
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:

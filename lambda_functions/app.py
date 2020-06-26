@@ -133,3 +133,28 @@ def get_all_submissions(event, context):
             "statusCode": 400,
             "body": "Could not get submissions. Check HTTP GET payload. Exception: {}".format(e)
         }
+
+def get_item_by_content(event, context):
+
+    try:
+        json_event = event['body']
+        content = json_event.get('content')
+        try:
+            item = operations.get_item_by_content_db(content)
+            item_serialized = {"content": item.content, "language": item.language}
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(item_serialized)
+            }
+        except Exception:
+            return {
+                "statusCode": 404,
+                "body": "No item found with the specified content."
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get item. Check HTTP GET payload. Exception: {}".format(e)
+        }
