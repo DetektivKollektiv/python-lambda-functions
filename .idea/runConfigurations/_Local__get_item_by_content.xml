@@ -10,7 +10,7 @@
     <option name="logicalFunctionName" value="GetItemByContentFunction" />
     <option name="memorySize" value="128" />
     <option name="runtime" />
-    <option name="templateFile" value="C:\Users\patri\Development\Pycharm\python-lambda-functions\lambda_functions\template.yaml" />
+    <option name="templateFile" value="$PROJECT_DIR$/lambda_functions/template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
     <option name="input" value="{&#10;  &quot;body&quot;: {&#10;    &quot;content&quot;: &quot;Test text.&quot;&#10;  }&#10;}" />

@@ -64,6 +64,7 @@ def get_all_items_db():
     items = session.query(Item).all()
     return items
 
+
 def get_item_by_content_db(content):
     """Returns an item with the specified content from the database
 
@@ -102,6 +103,7 @@ def create_submission_db(submission):
     session.commit()
 
     return submission
+
 
 def get_all_submissions_db():
 

@@ -13,7 +13,7 @@
     <option name="templateFile" value="$PROJECT_DIR$/lambda_functions/template.yaml" />
     <option name="timeout" value="30" />
     <option name="useTemplate" value="true" />
-    <option name="input" value="{&#10;  &quot;content&quot;: &quot;This is an example text. &quot;&#10;}" />
+    <option name="input" value="{&#10;  &quot;body&quot;: {&#10;  &quot;content&quot;: &quot;This is an example text.&quot;&#10;}&#10;}" />
     <option name="inputIsFile" value="false" />
     <sam>
       <option name="additionalBuildArgs" value="" />
