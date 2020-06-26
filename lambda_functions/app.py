@@ -4,8 +4,10 @@ from crud.model import Item, Submission
 from crud import operations
 import json
 
+
 def obj_dict(obj):
     return obj.__dict__
+
 
 def create_item(event, context):
     """Creates a new item.
@@ -33,7 +35,7 @@ def create_item(event, context):
     
     # Parse event dict (= http post payload) to Item object
     item = Item()
-    json_event = json.loads(event['body'])
+    json_event = event['body']
     for key in json_event:
         setattr(item, key, json_event[key])
 
@@ -93,11 +95,12 @@ def get_all_items(event, context):
             "body": "Could not get items. Check HTTP GET payload. Exception: {}".format(e)
         }
 
+
 def create_submission(event, context):
 
     submission = Submission()
 
-    json_event = json.loads(event['body'])
+    json_event = event['body']
     for key in json_event:
         setattr(submission, key, json_event[key])
 
@@ -112,6 +115,7 @@ def create_submission(event, context):
             "statusCode": 400,
             "body": "Could not create submission. Check HTTP POST payload. Exception: {}".format(e)
         }
+
 
 def get_all_submissions(event, context):
 
@@ -134,6 +138,7 @@ def get_all_submissions(event, context):
             "body": "Could not get submissions. Check HTTP GET payload. Exception: {}".format(e)
         }
 
+
 def get_item_by_content(event, context):
 
     try:
@@ -141,7 +146,7 @@ def get_item_by_content(event, context):
         content = json_event.get('content')
         try:
             item = operations.get_item_by_content_db(content)
-            item_serialized = {"content": item.content, "language": item.language}
+            item_serialized = {"id": item.id, "content": item.content, "language": item.language}
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
