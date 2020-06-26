@@ -45,6 +45,7 @@ def create_item_db(item):
     session = get_db_session()
 
     item.id = str(uuid4())
+    item.status = "new"
     session.add(item)
     session.commit()
 
