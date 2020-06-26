@@ -44,7 +44,7 @@ def create_item(event, context):
         item_serialized = {"id": item.id, "content": item.content, "status": item.status}
         return {
             "statusCode": 201,
-            "body": json.dumps(item_serialized)
+            "body": item_serialized
         }
     except Exception as e:
         return {
@@ -88,7 +88,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(items_serialized)
+            "body": items_serialized
         }
     except Exception as e:
         return {
@@ -131,7 +131,7 @@ def get_all_submissions(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(submissions_serialized)
+            "body": submissions_serialized
         }
     except Exception as e:
         return {
