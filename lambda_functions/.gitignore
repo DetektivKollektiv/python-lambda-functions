@@ -1,8 +1,3 @@
-# Do not push .idea folder
-.idea/*
-
-# Push run configurations to allow sharing debug configs
-!.idea/runConfigurations
 
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
@@ -53,9 +48,6 @@ Temporary Items
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 .idea/*
-
-# Push run configurations to allow sharing debug configs
-!.idea/runConfigurations
 
 # User-specific stuff:
 .idea/**/workspace.xml
@@ -250,9 +242,5 @@ $RECYCLE.BIN/
 # Build folder
 
 */build/*
-
-# AWS
-
-.aws-sam/*
 
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
