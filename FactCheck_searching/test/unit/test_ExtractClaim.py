@@ -5,10 +5,10 @@ class TestExtractClaim:
     def test_extract_claim_1(self):
         event = {
             "item": {
-                "content": "Wollen wir auch einen Channel für solche Themen anlegen? "
+                "content": "Wollen wir auch einen Channel für solche Themen anlegen?"
                            "https://www.spiegel.de/wissenschaft/mensch/corona-krise-und-klimawandel-fuenf"
                            "-desinformations-tricks-die-jeder-kennen-sollte-a-6892ff9b-fb28-43ae-8438-55b49d607e57"
-                           "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ ",
+                           "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ",
                 "id": "123456",
                 "language": ""
             }
@@ -16,10 +16,10 @@ class TestExtractClaim:
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
 
-        text_0 = "b'Wollen wir auch einen Channel f\\xc3\\xbcr solche Themen anlegen? " \
+        text_0 = "Wollen wir auch einen Channel für solche Themen anlegen?" \
                  "https://www.spiegel.de/wissenschaft/mensch/corona-krise-und-klimawandel-fuenf" \
                  "-desinformations-tricks-die-jeder-kennen-sollte-a-6892ff9b-fb28-43ae-8438-55b49d607e57" \
-                 "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ '"
+                 "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ"
         text_1 = "US-Präsident Donald Trump, Fachmann für Falschinformation Haben Sie auch solche " \
                  "Nachrichten über soziale Medien bekommen: Covid-19 ist nicht schlimmer als die " \
                  "normale Grippe? Und wird in Wahrheit durch Bakterien, nicht Viren verursacht? " \

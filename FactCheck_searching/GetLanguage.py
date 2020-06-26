@@ -8,21 +8,31 @@ logger.setLevel(logging.INFO)
 comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 
 
-# Detect Dominant Language in Item Text
-# returns only the most dominant language code
-# other language codes and scores are dropped
 def get_language(event, context):
+    """ Detect Dominant Language in Item Text
+    returns only the most dominant language code
+    other language codes and scores are dropped
+    Parameters
+    ----------
+    event: dict, required
+        "Text": item content
+    context: object, optional
+        Lambda Context runtime methods and attributes
+    Returns
+    ------
+    LanguageCode, supported language codes are ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
+    """
     logger.info('Calling get_language with event')
     logger.info(event)
 
     # Use UTF-8 encoding for comprehend
     if 'Text' in event:
-        text = str(event['Text'].encode(errors="ignore"))
+        text = str(event['Text'])
     else:
         logger.error("There is no Text!")
         raise Exception('Please provide Text!')
 
-        # comprehend accepts upto 5000 UTF-8 encoded characters
+    # comprehend accepts up to 5000 UTF-8 encoded characters
     if len(text) >= 5000:
         text = text[:4999]
     elif len(text) < 20:

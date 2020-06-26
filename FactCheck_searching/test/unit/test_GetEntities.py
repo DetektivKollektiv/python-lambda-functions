@@ -12,10 +12,9 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['four very critical cases',
-                       'Toulouse, France']
+        assert ret == ['Toulouse', 'four very critical', 'France']
 
-    def test_entities_2(self):
+    def test_get_entities_2(self):
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
                     "coronavirus in [young people] who do not have any health problems. Their problem is that when "
@@ -55,5 +54,15 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['2.000',
-                       '26.000']
+        assert ret == ['2.000', 'Spanien', 'über 26.000', 'Corona', 'CH']
+
+    def test_get_entities_6(self):
+        event = {
+            "Text": "GERADE VON NTV AUFGENOMMEN!!!! MERKEL EMPFÄNGT MINSITERPRÄSIDENTEN IM KANZLERAMT.WO IST DER "
+                    "SICHERHEITSABSTAND, WO SIND DIE MASKEN??? SELBST SÖDER TRÄGT KEINE, ABER WEHE DER STEHT IN "
+                    "BAYERN VOR EINER PK, DA KOMMT DER DANN MIT MASKE REIN.WAS EIN VERLOGENES VOLK",
+            "LanguageCode": "de"
+        }
+        context = ""
+        ret = GetEntities.get_entities(event, context)
+        assert ret == ['NTV', 'SICHERHEITSABSTAND']

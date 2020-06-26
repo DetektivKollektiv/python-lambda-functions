@@ -11,9 +11,9 @@ logger.setLevel(logging.INFO)
 comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 
 
-def get_phrases(event, context):
-    """Detect Key Phrases
-    entities can be of type PERSON | LOCATION | ORGANIZATION | COMMERCIAL_ITEM | EVENT | DATE | QUANTITY | TITLE | OTHER
+# Detect Sentiment
+def get_sentiment(event, context):
+    """detect sentiment of item content
     Parameters
     ----------
     event: dict, required
@@ -23,9 +23,9 @@ def get_phrases(event, context):
         Lambda Context runtime methods and attributes
     Returns
     ------
-    list of strings with key phrases
+    sentiment, valid values are "POSITIVE" | "NEGATIVE" | "NEUTRAL" | "MIXED"
     """
-    logger.info('Calling get_phrases with event')
+    logger.info('Calling get_sentiment with event')
     logger.info(event)
 
     # Use UTF-8 encoding for comprehend
@@ -46,7 +46,7 @@ def get_phrases(event, context):
         raise Exception('Language Code not supported!')
 
     try:
-        response = comprehend.detect_key_phrases(Text=text, LanguageCode=LanguageCode)
+        response = comprehend.detect_sentiment(Text=text, LanguageCode=LanguageCode)
     except ClientError as e:
         logger.error("Received error: %s", e, exc_info=True)
         raise
@@ -54,15 +54,4 @@ def get_phrases(event, context):
         logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
         raise
 
-    # sort list of key phrases according the score
-    keyPhrases_sorted = sorted(response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
-
-    # respond at most 5 key phrases
-    keyPhrases_sorted = keyPhrases_sorted[:min(5, len(keyPhrases_sorted))]
-
-    # extract the strings
-    keyPhrases_strings = []
-    for obj in keyPhrases_sorted:
-        keyPhrases_strings.append(obj.get('Text'))
-
-    return keyPhrases_strings
+    return response['Sentiment']

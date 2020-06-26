@@ -14,12 +14,25 @@ comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 # Detect Entities
 # return a list of strings with the five entities with the highest score
 def get_entities(event, context):
+    """detect entities in item content
+    entities can be of type PERSON | LOCATION | ORGANIZATION | COMMERCIAL_ITEM | EVENT | DATE | QUANTITY | TITLE | OTHER
+    Parameters
+    ----------
+    event: dict, required
+        "Text": item content
+        "LanguageCode": supported language codes are ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
+    context: object, optional
+        Lambda Context runtime methods and attributes
+    Returns
+    ------
+    list of entity strings
+    """
     logger.info('Calling get_entities with event')
     logger.info(event)
 
     # Use UTF-8 encoding for comprehend
     if 'Text' in event:
-        text = str(event['Text'].encode(errors="ignore"))
+        text = str(event['Text'])
     else:
         logger.error("There is no Text!")
         raise Exception('Please provide Text!')

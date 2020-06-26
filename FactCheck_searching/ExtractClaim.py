@@ -29,7 +29,7 @@ def extract_claim(event, context):
     # Use UTF-8 encoding for comprehend
     if 'item' in event:
         if 'content' in event['item']:
-            item_content = str(event['item']['content'].encode(errors="ignore"))
+            item_content = str(event['item']['content'])
         else:
             logger.error("The item has no content!")
             raise Exception('Please provide an item with content!')
