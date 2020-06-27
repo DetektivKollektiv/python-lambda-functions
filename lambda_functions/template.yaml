@@ -11,6 +11,9 @@ Globals:
 Parameters:
   STAGE:
     Type: String
+  DB_NAME:
+    Type: String
+    Default: development_db
     
 Resources:
   Api:
@@ -38,6 +41,11 @@ Resources:
             Method: post
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
+
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -56,6 +64,11 @@ Resources:
             Method: post
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
+
   GetAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -75,6 +88,10 @@ Resources:
             Method: get
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
               
   CreateSubmissionFunction:
     Type: AWS::Serverless::Function
@@ -95,6 +112,10 @@ Resources:
             Method: post
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
 
   GetAllSubmissionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -115,6 +136,11 @@ Resources:
             Method: get              
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
+
   GetItemByContentFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -134,6 +160,10 @@ Resources:
             Method: get
             RestApiId:
               Ref: Api
+      Environment:
+        Variables:
+          DB_NAME:
+            Ref: DB_NAME
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
