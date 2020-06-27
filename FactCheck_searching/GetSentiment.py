@@ -1,7 +1,6 @@
 import boto3
 import logging
 from botocore.exceptions import ClientError, ParamValidationError
-from operator import itemgetter
 
 supportedLanguageCodes = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
 

@@ -1,0 +1,9 @@
+re
+logging
+urllib
+bs4
+operator
+boto3
+botocore
+os
+requests
