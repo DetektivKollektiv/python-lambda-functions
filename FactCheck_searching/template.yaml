@@ -23,9 +23,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-SearchFactChecks-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: SearchFactChecks.get_FactChecks
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -35,9 +35,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetLanguage-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: GetLanguage.get_language
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -47,45 +47,45 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetKeyPhrases-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: GetKeyPhrases.get_phrases
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
 
-GetEntitiesFunction:
+  GetEntitiesFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetEntities-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: GetEntities.get_entities
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
 
-ExtractClaimFunction:
+  ExtractClaimFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-ExtractClaim-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: ExtractClaim.extract_claim
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
 
-GetSentimentFunction:
+  GetSentimentFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetSentiment-${STAGE}'
-      CodeUri: factcheck_searching/
+      CodeUri: .
       Handler: GetSentiment.get_sentiment
-      Runtime: python3.8
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
