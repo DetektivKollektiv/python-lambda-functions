@@ -6,3 +6,5 @@
 
 # Push run configurations to allow sharing debug configs
 !.idea/runConfigurations
+
+/inspectionProfiles/
