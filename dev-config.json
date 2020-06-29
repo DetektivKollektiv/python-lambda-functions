@@ -1,7 +1,7 @@
 {
   "Parameters" : {
     "STAGE" : "dev",
-	"DB_NAME": "development_db"
+	"DBNAME": "development_db"
   },
   "Tags" : {
     "stage" : "dev",

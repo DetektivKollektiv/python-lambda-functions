@@ -11,7 +11,7 @@ Globals:
 Parameters:
   STAGE:
     Type: String
-  DB_NAME:
+  DBNAME:
     Type: String
     Default: development_db
     
@@ -43,8 +43,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -66,8 +66,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
 
   GetAllItemsFunction:
     Type: AWS::Serverless::Function
@@ -90,8 +90,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
               
   CreateSubmissionFunction:
     Type: AWS::Serverless::Function
@@ -114,8 +114,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
 
   GetAllSubmissionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -138,8 +138,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
 
   GetItemByContentFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -162,8 +162,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
-          DB_NAME:
-            Ref: DB_NAME
+          DBNAME:
+            Ref: DBNAME
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
