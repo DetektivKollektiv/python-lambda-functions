@@ -1,3 +1,4 @@
+import os
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
@@ -18,7 +19,9 @@ def get_db_session():
     cluster_arn = "arn:aws:rds:eu-central-1:891514678401:cluster:serverless-db"
     secret_arn = "arn:aws:secretsmanager:eu-central-1:891514678401:secret:ServerlessDBSecret-7oczW5"
 
-    db = create_engine('mysql+auroradataapi://:@/development_db',
+    database_name = os.environ['DB_NAME']
+
+    db = create_engine('mysql+auroradataapi://:@/{0}'.format(database_name),
                        echo=True,
                        connect_args=dict(aurora_cluster_arn=cluster_arn, secret_arn=secret_arn))
 
