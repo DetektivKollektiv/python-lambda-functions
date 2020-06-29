@@ -2,7 +2,6 @@ sqlalchemy
 sqlalchemy-aurora-data-api
 aws-xray-sdk==2.4.3
 
-requests
 psycopg2-binary
 wheel
 certifi==2020.4.5.1
