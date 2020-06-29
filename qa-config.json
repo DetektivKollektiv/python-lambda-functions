@@ -1,0 +1,10 @@
+{
+  "Parameters" : {
+    "STAGE" : "qa",
+	"DB_NAME": "development_db"
+  },
+  "Tags" : {
+    "stage" : "qa",
+	"buildingblock": "api"
+  }
+}

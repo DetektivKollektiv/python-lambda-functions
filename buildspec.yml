@@ -42,4 +42,5 @@ phases:
 artifacts:
   files:
     - ${STAGE}-template-export.yml
+    - ${STAGE}-config.json
     # - template-configuration.json
