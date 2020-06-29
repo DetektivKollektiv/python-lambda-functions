@@ -1,8 +1,14 @@
 import json
-
+import logging
+import os
+import jsonpickle
+import json
+import boto3
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.ext.sqlalchemy.query import XRaySessionMaker
+from aws_xray_sdk.core import patch_all
 from crud.model import Item, Submission
 from crud import operations
-import json
 
 
 def obj_dict(obj):
@@ -74,9 +80,26 @@ def get_all_items(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
+    # X-Ray Tracing
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    patch_all()
+
+    logger.info('Database access for item retrieval.')
+
+    # New x-ray segment
+    segment1 = xray_recorder.begin_subsegment('database-access')
+
     try:
+
+        xray_recorder.put_annotation('point1', 'Getting items...')
+
         # Get all items as a list of Item objects
         items = operations.get_all_items_db()
+
+        xray_recorder.put_annotation('point2', 'Retrieved items.')
+
+        xray_recorder.end_subsegment()
 
         # Prepare response payload (list of serialized items)
         # TODO automatically serialize / dump objects (json.dumps cannot serialize custom classes like Item)

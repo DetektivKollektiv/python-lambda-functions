@@ -67,6 +67,7 @@ Resources:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
+      Tracing: Active
       Events:
         Echo:
           Type: Api
