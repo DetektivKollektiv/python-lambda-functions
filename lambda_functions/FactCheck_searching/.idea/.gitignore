@@ -1,0 +1,10 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Do not push .idea folder
+.idea/*
+
+# Push run configurations to allow sharing debug configs
+!.idea/runConfigurations
+
+/inspectionProfiles/

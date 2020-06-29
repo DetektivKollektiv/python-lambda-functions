@@ -166,6 +166,78 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
+  SearchFactChecksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-SearchFactChecks-${STAGE}'
+      CodeUri: FactCheck_searching/
+      Handler: SearchFactChecks.get_FactChecks
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  GetLanguageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-GetLanguage-${STAGE}'
+      CodeUri: FactCheck_searching/
+      Handler: GetLanguage.get_language
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+    GetKeyPhrasesFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: !Sub 'detektivkollektiv-api-GetKeyPhrases-${STAGE}'
+        CodeUri: FactCheck_searching/
+        Handler: GetKeyPhrases.get_phrases
+        Runtime: python3.7
+        Role:
+          Fn::GetAtt:
+            - LambdaExecutionRole
+            - Arn
+
+    GetEntitiesFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: !Sub 'detektivkollektiv-api-GetEntities-${STAGE}'
+        CodeUri: FactCheck_searching/
+        Handler: GetEntities.get_entities
+        Runtime: python3.7
+        Role:
+          Fn::GetAtt:
+            - LambdaExecutionRole
+            - Arn
+
+    ExtractClaimFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: !Sub 'detektivkollektiv-api-ExtractClaim-${STAGE}'
+        CodeUri: FactCheck_searching/
+        Handler: ExtractClaim.extract_claim
+        Runtime: python3.7
+        Role:
+          Fn::GetAtt:
+            - LambdaExecutionRole
+            - Arn
+
+    GetSentimentFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: !Sub 'detektivkollektiv-api-GetSentiment-${STAGE}'
+        CodeUri: FactCheck_searching/
+        Handler: GetSentiment.get_sentiment
+        Runtime: python3.7
+        Role:
+          Fn::GetAtt:
+            - LambdaExecutionRole
+            - Arn
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
