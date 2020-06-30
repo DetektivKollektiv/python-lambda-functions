@@ -55,6 +55,28 @@ def create_item_db(item):
     return item
 
 
+def update_item_db(item):
+    """Updates an existing item in the database
+
+    Parameters
+    ----------
+    item: Item, required
+        The item to be updates
+
+    Returns
+    ------
+    item: Item
+        The updated item
+    """
+
+    session = get_db_session()
+
+    session.merge(item)
+    session.commit()
+
+    return item
+
+
 def get_all_items_db():
     """Returns all items from the database
 
