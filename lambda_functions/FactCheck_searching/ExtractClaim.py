@@ -33,9 +33,7 @@ def extract_claim(event, context):
         else:
             logger.error("The item has no content!")
             raise Exception('Please provide an item with content!')
-        if 'id' in event['item']:
-            item_id = str(event['item']['id'].encode(errors="ignore"))
-        else:
+        if 'id' not in event['item']:
             logger.error("The item has no ID!")
             raise Exception('Please provide an item with an ID!')
     else:

@@ -59,50 +59,6 @@ def create_item(event, context):
         }
 
 
-def update_item(event, context):
-    """updates an existing item.
-
-    Parameters
-    ----------
-    event: dict, required
-        contains item
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: application/json
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    print(event)
-
-    # Parse event dict (= http post payload) to Item object
-    item = Item()
-    json_event = event['body']
-    for key in json_event:
-        setattr(item, key, json_event[key])
-
-    try:
-        item = operations.update_item_db(item)
-        item_serialized = {"id": item.id, "content": item.content, "status": item.status, "language": item.language}
-        return {
-            "statusCode": 201,
-            "body": item_serialized
-        }
-    except Exception as e:
-        return {
-            "statusCode": 400,
-            "body": "Could not update item. Exception: {}".format(e)
-        }
-
-
 def get_all_items(event, context):
     """Gets all items.
 
