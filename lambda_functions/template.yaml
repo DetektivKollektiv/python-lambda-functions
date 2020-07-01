@@ -50,6 +50,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-create_item-${STAGE}'
+      CodeUri: .
       Handler: app.create_item
       Runtime: python3.8
       Role:
@@ -158,7 +159,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /items/byContent
-            Method: get
+            Method: post
             RestApiId:
               Ref: Api
       Environment:
