@@ -29,6 +29,7 @@ Resources:
       CodeUri: whatsapp_forwarding/
       Handler: app.whatsapp_forwarding
       Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -53,6 +54,7 @@ Resources:
       CodeUri: .
       Handler: app.create_item
       Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -77,6 +79,7 @@ Resources:
       CodeUri: .
       Handler: app.get_all_items
       Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -101,7 +104,8 @@ Resources:
       FunctionName: !Sub 'detektivkollektiv-api-create_submission-${STAGE}'
       CodeUri: .
       Handler: app.create_submission
-      Runtime: python3.8        
+      Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -125,7 +129,8 @@ Resources:
       FunctionName: !Sub 'detektivkollektiv-api-get_all_submissions-${STAGE}'
       CodeUri: .
       Handler: app.get_all_submissions
-      Runtime: python3.8        
+      Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
@@ -150,6 +155,7 @@ Resources:
       CodeUri: .
       Handler: app.get_item_by_content
       Runtime: python3.8
+      MemorySize: 832
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -174,6 +180,7 @@ Resources:
       CodeUri: FactCheck_searching/
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.7
+      MemorySize: 832
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -186,6 +193,7 @@ Resources:
       CodeUri: FactCheck_searching/
       Handler: GetLanguage.get_language
       Runtime: python3.7
+      MemorySize: 832
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -198,6 +206,7 @@ Resources:
         CodeUri: FactCheck_searching/
         Handler: GetKeyPhrases.get_phrases
         Runtime: python3.7
+        MemorySize: 832
         Role:
           Fn::GetAtt:
             - LambdaExecutionRole
@@ -210,6 +219,7 @@ Resources:
         CodeUri: FactCheck_searching/
         Handler: GetEntities.get_entities
         Runtime: python3.7
+        MemorySize: 832
         Role:
           Fn::GetAtt:
             - LambdaExecutionRole
@@ -222,6 +232,7 @@ Resources:
         CodeUri: FactCheck_searching/
         Handler: ExtractClaim.extract_claim
         Runtime: python3.7
+        MemorySize: 832
         Role:
           Fn::GetAtt:
             - LambdaExecutionRole
@@ -234,6 +245,7 @@ Resources:
         CodeUri: FactCheck_searching/
         Handler: GetSentiment.get_sentiment
         Runtime: python3.7
+        MemorySize: 832
         Role:
           Fn::GetAtt:
             - LambdaExecutionRole
