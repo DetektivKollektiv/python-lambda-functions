@@ -7,8 +7,8 @@ wheel
 certifi==2020.4.5.1
 chardet==3.0.4
 click==7.1.2
-Flask==1.1.2
-idna==2.9
+Flask
+idna
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
@@ -20,8 +20,8 @@ urllib3==1.25.9
 Werkzeug==1.0.1
 
 bs4
-beautifulsoup4~=4.9.1
-botocore~=1.13.14
-boto3~=1.10.14
-requests~=2.22.0
-pytest~=5.3.2
+beautifulsoup4
+botocore
+boto3
+requests
+pytest
