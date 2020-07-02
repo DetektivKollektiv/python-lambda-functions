@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
-from crud.model import Item, Submission
+from crud.model import Item, Submission, ExternalFactCheck, FactChecking_Organization, ItemEntity, Entity, ItemURL, URL, ItemSentiment, Sentiment
 from datetime import datetime
 
 
@@ -55,26 +55,25 @@ def create_item_db(item):
     return item
 
 
-def update_item_db(item):
+def update_object_db(obj):
     """Updates an existing item in the database
 
     Parameters
     ----------
-    item: Item, required
+    obj: object to be merged in the DB, required
         The item to be updates
 
     Returns
     ------
-    item: Item
-        The updated item
+    obj: The merged object
     """
 
     session = get_db_session()
 
-    session.merge(item)
+    session.merge(obj)
     session.commit()
 
-    return item
+    return obj
 
 
 def get_all_items_db():
@@ -136,3 +135,5 @@ def get_all_submissions_db():
     session = get_db_session()
     submissions = session.query(Submission).all()
     return submissions
+
+
