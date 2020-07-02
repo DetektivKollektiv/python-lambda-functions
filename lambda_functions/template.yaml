@@ -275,19 +275,6 @@ Resources:
       Runtime: python3.7
       MemorySize: 832
 
-GetSentimentFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-GetSentiment-${STAGE}'
-      CodeUri: FactCheck_searching/
-      Handler: GetSentiment.get_sentiment
-      Runtime: python3.7
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
