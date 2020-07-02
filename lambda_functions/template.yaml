@@ -253,7 +253,7 @@ Resources:
           - LambdaExecutionRole
           - Arn
 
-  EnrichItemFunction:
+  UpdateLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-EnrichItem-${STAGE}'
