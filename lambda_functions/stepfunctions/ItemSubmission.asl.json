@@ -1,0 +1,76 @@
+{
+    "Comment": "If submitted item exists, creates new submission for that item. If it does not exist, creates new item and new submission.",
+    "StartAt": "GetItemByContent",
+    "States": {
+      "GetItemByContent": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-get_item_by_content-dev",
+        "ResultPath": "$.item",
+        "Next": "CheckIfItemExists"
+      },
+      "CheckIfItemExists": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.item.statusCode",
+            "NumericEquals": 404,
+            "Next": "CreateNewItem"
+          },
+          {
+            "Variable": "$.item.statusCode",
+            "NumericEquals": 200,
+            "Next": "CreateSubmissionOnly"
+          }
+        ],
+        "Default": "Error"
+      },
+      "CreateNewItem": {
+        "Comment": "Create new item. TODO: Remove status parameter. Defaults to 'new'",
+        "Type": "Task",
+        "Parameters": {
+          "body": {
+            "content.$": "$.body.content",
+            "status": "new"
+          }
+        },
+        "ResultPath": "$.created_item",
+        "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-create_item-dev",
+        "Next": "CreateSubmissionNewItem"
+      },
+      "CreateSubmissionOnly": {
+        "Comment": "Item already exists. Only create a submission for the item.",
+        "Type": "Task",
+        "Parameters": {
+          "body": {
+            "item_id.$": "$.item.body.id",
+            "mail.$": "$.body.mail",
+            "received_date.$": "$.body.received_date"
+          }
+        },
+        "ResultPath": "$.body",
+        "OutputPath": "$.body",
+        "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-create_submission-dev",
+        "End": true
+      },
+      "CreateSubmissionNewItem": {
+        "Comment": "Create submission for the newly created item.",
+        "Type": "Task",
+        "Parameters": {
+          "body": {
+            "item_id.$": "$.created_item.body.id",
+            "mail.$": "$.body.mail",
+            "received_date.$": "$.body.received_date"
+          }
+        },
+        "ResultPath": "$.body",
+        "OutputPath": "$.body",
+        "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-create_submission-dev",
+        "End": true
+      },
+      "Error": {
+        "Type": "Fail",
+        "Error": "DefaultStateError",
+        "Cause": "Step function failed. This could be caused by an internal server error."
+      }
+    }
+  }
