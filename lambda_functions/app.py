@@ -1,19 +1,14 @@
-import json
 import logging
-import os
-import jsonpickle
-import json
-import boto3
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.sqlalchemy.query import XRaySessionMaker
+
 from aws_xray_sdk.core import patch_all
-from crud.model import Item, Submission
+from aws_xray_sdk.core import xray_recorder
+
 from crud import operations
+from crud.model import Item, Submission
 
 
 def obj_dict(obj):
     return obj.__dict__
-
 
 def create_item(event, context):
     """Creates a new item.
@@ -47,10 +42,9 @@ def create_item(event, context):
 
     try:
         item = operations.create_item_db(item)
-        item_serialized = {"id": item.id, "content": item.content, "status": item.status}
         return {
             "statusCode": 201,
-            "body": item_serialized
+            "body": item.to_dict()
         }
     except Exception as e:
         return {
@@ -84,34 +78,28 @@ def get_all_items(event, context):
     # X-Ray Tracing
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    patch_all()
+    # patch_all()
 
     logger.info('Database access for item retrieval.')
 
-    # New x-ray segment
-    segment1 = xray_recorder.begin_subsegment('database-access')
 
     try:
-
-        xray_recorder.put_annotation('point1', 'Getting items...')
+        # New x-ray segment
+        xray_recorder.begin_subsegment('database-access')
 
         # Get all items as a list of Item objects
         items = operations.get_all_items_db()
 
-        xray_recorder.put_annotation('point2', 'Retrieved items.')
-
         xray_recorder.end_subsegment()
 
-        # Prepare response payload (list of serialized items)
-        # TODO automatically serialize / dump objects (json.dumps cannot serialize custom classes like Item)
-        items_serialized = []
+        items_dict = []
         for item in items:
-            items_serialized.append({"content": item.content, "language": item.language})
+            items_dict.append(item.to_dict())
 
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": items_serialized
+            "body": items_dict
         }
     except Exception as e:
         return {
@@ -129,10 +117,10 @@ def create_submission(event, context):
         setattr(submission, key, json_event[key])
 
     try:
-        operations.create_submission_db(submission)
+        submission = operations.create_submission_db(submission)
         return {
             "statusCode": 201,
-            "body": "Submission created successfully"
+            "body": submission.to_dict()
         }
     except Exception as e:
         return {
@@ -145,16 +133,15 @@ def get_all_submissions(event, context):
 
     try:
         submissions = operations.get_all_submissions_db()
-        submissions_serialized = []
+        submissions_dict = []
 
         for submission in submissions:
-            submissions_serialized.append({"item_id": submission.item_id, "submission_date":submission.submission_date,
-                                           "received_date":submission.received_date, "phone":submission.phone, "mail":submission.mail,
-                                           "source":submission.source, "frequency":submission.frequency})
+            submissions_dict.append(submission.to_dict())
+
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": submissions_serialized
+            "body": submissions_dict
         }
     except Exception as e:
         return {
