@@ -10,6 +10,7 @@ from crud.model import Item, Submission
 def obj_dict(obj):
     return obj.__dict__
 
+
 def create_item(event, context):
     """Creates a new item.
 
