@@ -6,6 +6,7 @@ from aws_xray_sdk.core import xray_recorder
 from crud import operations
 from crud.model import Item, Submission
 
+
 def create_item(event, context):
     """Creates a new item.
 
