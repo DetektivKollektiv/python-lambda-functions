@@ -1,4 +1,5 @@
 import logging
+import json
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -41,7 +42,7 @@ def create_item(event, context):
         item = operations.create_item_db(item)
         return {
             "statusCode": 201,
-            "body": item.to_dict()
+            "body": json.dumps(item.to_dict())
         }
     except Exception as e:
         return {
@@ -96,7 +97,7 @@ def get_all_items(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": items_dict
+            "body": json.dumps(items_dict)
         }
     except Exception as e:
         return {
@@ -117,7 +118,7 @@ def create_submission(event, context):
         submission = operations.create_submission_db(submission)
         return {
             "statusCode": 201,
-            "body": submission.to_dict()
+            "body": json.dumps(submission.to_dict())
         }
     except Exception as e:
         return {
@@ -138,7 +139,7 @@ def get_all_submissions(event, context):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": submissions_dict
+            "body": json.dumps(submissions_dict)
         }
     except Exception as e:
         return {
@@ -158,7 +159,7 @@ def get_item_by_content(event, context):
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": item_serialized
+                "body": json.dumps(item_serialized)
             }
         except Exception:
             return {
