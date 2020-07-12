@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -20,6 +20,8 @@ class Item(Base):
     urls = relationship("ItemURL", back_populates="item")
     sentiments = relationship("ItemSentiment", back_populates="item")
     keyphrases = relationship("ItemKeyphrase", back_populates="item")
+
+    reviews = relationship("Review", backref="item")
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
@@ -114,3 +116,53 @@ class ItemKeyphrase(Base):
     item = relationship("Item", back_populates="keyphrases")
     keyphrase_id = Column(String, ForeignKey('keyphrases.id'))
     keyphrase = relationship("Keyphrase", back_populates="items")
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    score = Column(Integer)
+    level = Column(Integer)
+    experience_points = Column(Integer)
+
+    reviews = relationship("Review", backref="user")
+
+    def to_dict(self):
+        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level,
+                "experience_points": self.experience_points}
+
+class ReviewQuestion(Base):
+    __tablename__ = 'review_questions'
+    id = Column(String, primary_key=True)
+    content = Column(String)
+    mandatory = Column(Boolean)
+
+    review_answers = relationship("ReviewAnswer", backref="review_question")
+
+    def to_dict(self):
+        return {"id": self.id, "content": self.content, "mandatory": self.mandatory}
+
+class ReviewAnswer(Base):
+    __tablename__ = 'review_answers'
+    id = Column(String, primary_key=True)
+    review_id = Column(String, ForeignKey('reviews.id'))
+    review_question_id = Column(String, ForeignKey('review_questions.id'))
+    answer = Column(Integer)
+    comment = Column(String)
+
+    def to_dict(self):
+        return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
+                "answer": self.answer, "comment": self.comment}
+
+class Review(Base):
+    __tablename__ = 'reviews'
+    id = Column(String, primary_key=True)
+    is_peer_review = Column(Boolean)
+    initial_review_id = Column(String)
+    item_id = Column(String, ForeignKey('items.id'))
+    user_id = Column(String, ForeignKey('users.id'))
+    review_answers = relationship("ReviewAnswer", backref="review")
+
+    def to_dict(self):
+        return {"id": self.id, "is_peer_review": self.is_peer_review, "initial_review_id": self.initial_review_id,
+                "item_id": self.item_id, "user_id": self.user_id}

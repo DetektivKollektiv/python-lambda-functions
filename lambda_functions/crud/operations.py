@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
-from crud.model import Item, Submission, ExternalFactCheck, FactChecking_Organization, ItemEntity, Entity, ItemURL, URL, ItemSentiment, Sentiment
+from crud.model import *
 from datetime import datetime
 
 
@@ -136,4 +136,130 @@ def get_all_submissions_db():
     submissions = session.query(Submission).all()
     return submissions
 
+
+def create_user_db(user):
+    """Inserts a new user into the database
+
+    Parameters
+    ----------
+    user: User, required
+        The user to be inserted
+
+    Returns
+    ------
+    user: User
+        The inserted user
+    """
+
+    session = get_db_session()
+
+    user.score = 0
+    user.level = 1
+    user.experience_points = 0
+    session.add(user)
+    session.commit()
+
+    return user
+
+
+def get_all_users_db():
+    """Returns all users from the database
+
+    Returns
+    ------
+    users: User[]
+        The users
+    """
+
+    session = get_db_session()
+    users = session.query(User).all()
+    return users
+
+
+def create_review_db(review):
+    """Inserts a new review into the database
+
+    Parameters
+    ----------
+    review: Review, required
+        The review to be inserted
+
+    Returns
+    ------
+    review: Review
+        The inserted review
+    """
+
+    session = get_db_session()
+
+    review.id = str(uuid4())
+    session.add(review)
+    session.commit()
+
+    return review
+
+
+def get_all_reviews_db():
+    """Returns all reviews from the database
+
+    Returns
+    ------
+    reviews: Review[]
+        The reviews
+    """
+
+    session = get_db_session()
+    reviews = session.query(Review).all()
+    return reviews
+
+
+def create_review_answer_db(review_answer):
+    """Inserts a new review answer into the database
+
+    Parameters
+    ----------
+    review_answer: ReviewAnswer, required
+        The review answer to be inserted
+
+    Returns
+    ------
+    review_answer: reviewAnswer
+        The inserted review answer
+    """
+
+    session = get_db_session()
+
+    review_answer.id = str(uuid4())
+    session.add(review_answer)
+    session.commit()
+
+    return review_answer
+
+
+def get_all_review_answers_db():
+    """Returns all review answers from the database
+
+    Returns
+    ------
+    review_answers: ReviewAnswer[]
+        The review answers
+    """
+
+    session = get_db_session()
+    review_answers = session.query(ReviewAnswer).all()
+    return review_answers
+
+
+def get_all_review_questions_db():
+    """Returns all review answers from the database
+
+    Returns
+    ------
+    review_questions: ReviewQuestion[]
+        The review questions
+    """
+
+    session = get_db_session()
+    review_questions = session.query(ReviewQuestion).all()
+    return review_questions
 
