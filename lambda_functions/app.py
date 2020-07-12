@@ -319,3 +319,44 @@ def get_all_review_questions(event, context):
             "statusCode": 400,
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
+
+
+def item_submission(event, context):
+
+    try:
+
+        json_event = event['body']
+        content = json_event.get('content')
+
+        submission = Submission()
+        submission.mail = json_event.get('mail')
+        submission.received_date = json_event.get('received_date')
+
+        try:
+            # Item already exists, item_id in submission is the id of the found item
+            found_item = operations.get_item_by_content_db(content)
+            submission.item_id = found_item.id
+            new_item_created = False
+            
+        except Exception:
+            # Item does not exist yet, item_id in submission is the id of the newly created item
+            new_item = Item()
+            new_item.content = content
+            created_item = operations.create_item_db(new_item)
+            new_item_created = True
+            submission.item_id = created_item.id
+
+        # Create submission
+        operations.create_submission_db(submission)
+
+        return {
+            "statusCode": 201,
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
+            "body": json.dumps(submission.to_dict())
+        }
+       
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
+        }
