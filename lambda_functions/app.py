@@ -32,11 +32,18 @@ def create_item(event, context):
     
     print(event)
     
-    # Parse event dict (= http post payload) to Item object
     item = Item()
-    json_event = event['body']
-    for key in json_event:
-        setattr(item, key, json_event[key])
+    body = event['body']
+
+    # Deserialize if body is string (--> API Gateway)
+    if isinstance(body , str):
+        body_dict = json.loads(body)
+    else: 
+        body_dict = body
+
+    # Load request body as dict and transform to Item object
+    for key in body_dict:
+        setattr(item, key, body_dict[key])
 
     try:
         item = operations.create_item_db(item)
