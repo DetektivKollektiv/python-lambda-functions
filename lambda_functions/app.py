@@ -343,7 +343,7 @@ def item_submission(event, context):
 
         return {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": "*" },
             "body": json.dumps(submission.to_dict())
         }
        
