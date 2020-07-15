@@ -4,6 +4,36 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import *
 from datetime import datetime
+import json
+
+
+def body_to_object(body, object):
+    """Uses the request body to set the attributes of the specified object.
+
+    Parameters
+    ----------
+    body: str, dict
+        The request body (str or dict)
+    object: Item, User, Review, Submission, etc.
+        The object, e.g. an instance of the class Item or User
+
+    Returns
+    ------
+    obj: Object
+        The object with the set attributes
+    """
+
+    # Deserialize if body is string (--> Lambda called by API Gateway)
+    if isinstance(body, str): 
+        body_dict = json.loads(body)
+    else: 
+        body_dict = body
+
+    # Load request body as dict and transform to Item object
+    for key in body_dict:
+        setattr(object, key, body_dict[key])
+
+    return object
 
 
 def get_db_session():
@@ -49,6 +79,8 @@ def create_item_db(item):
 
     item.id = str(uuid4())
     item.status = "new"
+    item.open_reviews_level_1 = 3
+    item.open_reviews_level_2 = 3
     session.add(item)
     session.commit()
 

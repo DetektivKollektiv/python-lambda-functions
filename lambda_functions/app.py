@@ -29,21 +29,10 @@ def create_item(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-    
-    print(event)
-    
+
     item = Item()
     body = event['body']
-
-    # Deserialize if body is string (--> API Gateway)
-    if isinstance(body , str):
-        body_dict = json.loads(body)
-    else: 
-        body_dict = body
-
-    # Load request body as dict and transform to Item object
-    for key in body_dict:
-        setattr(item, key, body_dict[key])
+    operations.body_to_object(body, item)
 
     try:
         item = operations.create_item_db(item)
@@ -116,10 +105,8 @@ def get_all_items(event, context):
 def create_submission(event, context):
 
     submission = Submission()
-
-    json_event = event['body']
-    for key in json_event:
-        setattr(submission, key, json_event[key])
+    body = event['body']
+    operations.body_to_object(body, submission)
 
     try:
         submission = operations.create_submission_db(submission)
@@ -184,10 +171,8 @@ def get_item_by_content(event, context):
 def create_user(event, context):
 
     user = User()
-
-    json_event = event['body']
-    for key in json_event:
-        setattr(user, key, json_event[key])
+    body = event['body']
+    operations.body_to_object(body, user)
 
     try:
         user = operations.create_user_db(user)
@@ -226,10 +211,8 @@ def get_all_users(event, context):
 def create_review(event, context):
 
     review = Review()
-
-    json_event = event['body']
-    for key in json_event:
-        setattr(review, key, json_event[key])
+    body = event['body']
+    operations.body_to_object(body, review)
 
     try:
         review = operations.create_review_db(review)
@@ -268,10 +251,8 @@ def get_all_reviews(event, context):
 def create_review_answer(event, context):
 
     review_answer = ReviewAnswer()
-
-    json_event = event['body']
-    for key in json_event:
-        setattr(review_answer, key, json_event[key])
+    body = event['body']
+    operations.body_to_object(body, review_answer)
 
     try:
         review_answer = operations.create_review_answer_db(review_answer)
@@ -331,13 +312,17 @@ def get_all_review_questions(event, context):
 def item_submission(event, context):
 
     try:
-
-        json_event = event['body']
-        content = json_event.get('content')
-
         submission = Submission()
-        submission.mail = json_event.get('mail')
-        submission.received_date = json_event.get('received_date')
+        body = event['body']
+
+        if isinstance(body, str): 
+            body_dict = json.loads(body)
+        else: 
+            body_dict = body
+
+        content = body_dict["content"]
+        submission.mail = body_dict["mail"]
+        submission.received_date = body_dict["received_date"]
 
         try:
             # Item already exists, item_id in submission is the id of the found item

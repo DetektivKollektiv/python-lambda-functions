@@ -13,6 +13,8 @@ class Item(Base):
     status = Column(String)
     variance = Column(Float)
     result_score = Column(Float)
+    open_reviews_level_1 = Column(Integer)
+    open_reviews_level_2 = Column(Integer)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -25,7 +27,8 @@ class Item(Base):
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
-                "variance": self.variance, "result_score": self.result_score}
+                "variance": self.variance, "result_score": self.result_score,
+                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2}
 
 class Submission(Base):
     __tablename__ = 'submissions'
@@ -158,11 +161,12 @@ class Review(Base):
     __tablename__ = 'reviews'
     id = Column(String, primary_key=True)
     is_peer_review = Column(Boolean)
+    level = Column(Integer)
     initial_review_id = Column(String)
     item_id = Column(String, ForeignKey('items.id'))
     user_id = Column(String, ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")
 
     def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review, "initial_review_id": self.initial_review_id,
-                "item_id": self.item_id, "user_id": self.user_id}
+        return {"id": self.id, "is_peer_review": self.is_peer_review, "level": self.level, 
+                "initial_review_id": self.initial_review_id, "item_id": self.item_id, "user_id": self.user_id}
