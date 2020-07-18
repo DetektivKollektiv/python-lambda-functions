@@ -351,7 +351,7 @@ def get_open_item_for_user_db(user):
     review_type = 'needs_junior'
     
     # Senior detectives can get level 1 or level 2 reviews
-    if user.level < 1:
+    if user.level > 1:
         review_types = ['needs_junior', 'needs_senior']
         review_type = random.choice(review_types)
 
