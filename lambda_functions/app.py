@@ -102,10 +102,36 @@ def get_all_items(event, context):
         }
 
 
+def get_item_by_id(event, context):
+
+    try:
+        # get id (str) from path
+        id = event['pathParameters']['id']
+
+        try:
+            item = operations.get_item_by_id(id)
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(item.to_dict())
+            }
+        except Exception:
+            return {
+                "statusCode": 404,
+                "body": "No item found with the specified id."
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get item. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+
 def create_submission(event, context):
 
-    submission = Submission()
     body = event['body']
+    submission = Submission()
     operations.body_to_object(body, submission)
 
     try:
@@ -205,6 +231,32 @@ def get_all_users(event, context):
         return {
             "statusCode": 400,
             "body": "Could not get users. Check HTTP GET payload. Exception: {}".format(e)
+        }
+
+
+def get_user_by_id(event, context):
+
+    try:
+        # get id (str) from path
+        id = event['pathParameters']['id']
+
+        try:
+            user = operations.get_user_by_id(id)
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(user.to_dict())
+            }
+        except Exception:
+            return {
+                "statusCode": 404,
+                "body": "No user found with the specified id."
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
 
 
@@ -312,7 +364,6 @@ def get_all_review_questions(event, context):
 def item_submission(event, context):
 
     try:
-        submission = Submission()
         body = event['body']
 
         if isinstance(body, str): 
@@ -321,8 +372,10 @@ def item_submission(event, context):
             body_dict = body
 
         content = body_dict["content"]
-        submission.mail = body_dict["mail"]
-        submission.received_date = body_dict["received_date"]
+        del body_dict["content"]
+
+        submission = Submission()
+        operations.body_to_object(body_dict, submission)
 
         try:
             # Item already exists, item_id in submission is the id of the found item
@@ -351,4 +404,32 @@ def item_submission(event, context):
         return {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+
+def get_open_item_for_user(event, context):
+
+    try:
+        # get user id (str) from path
+        id = event['pathParameters']['id']
+
+        try:
+            user = operations.get_user_by_id(id)
+            item = operations.get_open_item_for_user_db(user)
+
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(item.to_dict())
+            }
+        except Exception:
+            return {
+                "statusCode": 404,
+                "body": "No open item found for the specified user."
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }

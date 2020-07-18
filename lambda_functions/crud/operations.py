@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from crud.model import *
 from datetime import datetime
 import json
-
+import random
 
 def body_to_object(body, object):
     """Uses the request body to set the attributes of the specified object.
@@ -78,9 +78,7 @@ def create_item_db(item):
     session = get_db_session()
 
     item.id = str(uuid4())
-    item.status = "new"
-    item.open_reviews_level_1 = 3
-    item.open_reviews_level_2 = 3
+    item.status = "needs_junior"
     session.add(item)
     session.commit()
 
@@ -135,6 +133,25 @@ def get_item_by_content_db(content):
     item = session.query(Item).filter(Item.content == content).first()
     if item is None:
         raise Exception("No item found.")
+    return item
+
+
+def get_item_by_id(id):
+    """Returns an item by its id
+
+    Parameters
+    ----------
+    id: str, required
+        The id of the item
+
+    Returns
+    ------
+    item: Item
+        The item
+    """
+
+    session = get_db_session()
+    item = session.query(Item).get(id)
     return item
 
 
@@ -206,6 +223,25 @@ def get_all_users_db():
     session = get_db_session()
     users = session.query(User).all()
     return users
+
+
+def get_user_by_id(id):
+    """Returns a user by their id
+
+    Parameters
+    ----------
+    id: str, required
+        The id of the user
+
+    Returns
+    ------
+    user: User
+        The user
+    """
+
+    session = get_db_session()
+    user = session.query(User).get(id)
+    return user
 
 
 def create_review_db(review):
@@ -295,3 +331,43 @@ def get_all_review_questions_db():
     review_questions = session.query(ReviewQuestion).all()
     return review_questions
 
+
+def get_open_item_for_user_db(user):
+    """Inserts a new review answer into the database
+
+    Parameters
+    ----------
+    user: User
+        The user that should receive a case
+
+    Returns
+    ------
+    item: Item
+        The case to be assigned to the user
+    """
+
+    session = get_db_session()
+
+    review_type = 'needs_junior'
+    
+    # Senior detectives can get level 1 or level 2 reviews
+    if user.level > 1:
+        review_types = ['needs_junior', 'needs_senior']
+        review_type = random.choice(review_types)
+
+    sql_query = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
+                reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
+                FROM items
+                INNER JOIN submissions ON items.id = submissions.item_id
+                LEFT JOIN reviews on items.id = reviews.item_id
+                WHERE items.status = :status
+                GROUP BY items.id
+                HAVING reviewed_by_user = 0
+                ORDER BY oldest_submission"""
+
+    result = session.execute(sql_query, {"user_id": user.id, "status": review_type})
+    print(result)
+    item_id = result.fetchone()[0]
+    item = get_item_by_id(item_id)
+
+    return item
