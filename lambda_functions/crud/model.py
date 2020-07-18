@@ -13,6 +13,7 @@ class Item(Base):
     status = Column(String)
     variance = Column(Float)
     result_score = Column(Float)
+    open_reviews = Column(Integer)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -158,11 +159,11 @@ class Review(Base):
     __tablename__ = 'reviews'
     id = Column(String, primary_key=True)
     is_peer_review = Column(Boolean)
-    initial_review_id = Column(String)
+    peer_review_id = Column(String)
     item_id = Column(String, ForeignKey('items.id'))
     user_id = Column(String, ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")
 
     def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review, "initial_review_id": self.initial_review_id,
+        return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
                 "item_id": self.item_id, "user_id": self.user_id}

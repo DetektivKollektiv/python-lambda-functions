@@ -25,3 +25,4 @@ botocore
 boto3
 requests
 pytest
+numpy
