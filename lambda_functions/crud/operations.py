@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import *
 from datetime import datetime
-import numpy
 
 
 def get_db_session():
@@ -388,7 +387,7 @@ def close_open_junior_review(item_id, peer_review_id):
     open_junior_review.peer_review_id = peer_review_id
     update_object_db(open_junior_review)
 
-def get_pair_variance(review_id):
+def get_pair_difference(review_id):
     junior_review = get_review_by_peer_review_id_db(review_id)
     peer_review_answers = get_review_answers_by_review_id_db(review_id)
     junior_review_answers = get_review_answers_by_review_id_db(junior_review.id)
@@ -405,8 +404,8 @@ def get_pair_variance(review_id):
     junior_review_average = junior_review_score_sum / junior_review_answers.count()
     peer_review_average = peer_review_score_sum / peer_review_answers.count()
 
-    variance = numpy.var([junior_review_average, peer_review_average])
-    return variance
+    difference = abs(junior_review_average - peer_review_average)
+    return difference
 
 def compute_item_result_score(item_id):
     total_answer_sum = 0

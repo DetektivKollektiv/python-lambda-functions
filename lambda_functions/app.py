@@ -364,9 +364,9 @@ def submit_review(event, context):
         #If the review is a peer review, compute the variance of the review pair
         if review.is_peer_review == True:
             operations.close_open_junior_review(review.item_id, review.id)
-            variance = operations.get_pair_variance(review.id)
+            difference = operations.get_pair_difference(review.id)
             #If the variance is good, reduce the counter for open review pairs
-            if variance < 1:
+            if difference < 1:
                 item.open_reviews = item.open_reviews - 1
                 #If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
