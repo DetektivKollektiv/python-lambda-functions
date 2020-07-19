@@ -14,6 +14,8 @@ class Item(Base):
     variance = Column(Float)
     result_score = Column(Float)
     open_reviews = Column(Integer)
+    open_reviews_level_1 = Column(Integer)
+    open_reviews_level_2 = Column(Integer)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -26,7 +28,8 @@ class Item(Base):
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
-                "variance": self.variance, "result_score": self.result_score}
+                "variance": self.variance, "result_score": self.result_score,
+                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews}
 
 class Submission(Base):
     __tablename__ = 'submissions'
@@ -167,3 +170,4 @@ class Review(Base):
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
                 "item_id": self.item_id, "user_id": self.user_id}
+
