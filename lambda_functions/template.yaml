@@ -26,8 +26,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-whatsapp_forwarding-${STAGE}'
-      CodeUri: whatsapp_forwarding/
-      Handler: app.whatsapp_forwarding
+      CodeUri: .
+      Handler: whatsapp.whatsapp_forwarding
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -148,6 +148,31 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
+  GetItemByIdFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_item_by_id-${STAGE}'
+      CodeUri: .
+      Handler: app.get_item_by_id
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /items/{id}
+            Method: get              
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
   GetItemByContentFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -173,13 +198,38 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
+  GetOpenItemForUserFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_open_item_for_user-${STAGE}'
+      CodeUri: .
+      Handler: app.get_open_item_for_user
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /open_item_for_user/{id}
+            Method: get
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-SearchFactChecks-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: SearchFactChecks.get_FactChecks
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -190,9 +240,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetLanguage-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: GetLanguage.get_language
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -203,9 +253,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetKeyPhrases-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: GetKeyPhrases.get_phrases
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -216,9 +266,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetEntities-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: GetEntities.get_entities
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -229,9 +279,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-ExtractClaim-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: ExtractClaim.extract_claim
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -242,9 +292,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-GetSentiment-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: GetSentiment.get_sentiment
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -255,9 +305,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-EnrichItem-${STAGE}'
-      CodeUri: FactCheck_searching/
+      CodeUri: .
       Handler: EnrichItem.enrich_item
-      Runtime: python3.7
+      Runtime: python3.8
       MemorySize: 832
 
   CreateUserFunction:
@@ -302,6 +352,31 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users
+            Method: get              
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  GetUserByIdFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_user_by_id-${STAGE}'
+      CodeUri: .
+      Handler: app.get_user_by_id
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /users/{id}
             Method: get              
             RestApiId:
               Ref: Api
@@ -434,6 +509,31 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+      
+  ItemSubmissionFunction:
+      Type: AWS::Serverless::Function
+      Properties:      
+        FunctionName: !Sub 'detektivkollektiv-api-item_submission-${STAGE}'
+        CodeUri: .
+        Handler: app.item_submission
+        Runtime: python3.8
+        MemorySize: 832
+        Role:
+          Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+        Events:
+          Echo:
+            Type: Api
+            Properties:
+              Path: /item-submission
+              Method: post
+              RestApiId:
+                Ref: Api
+        Environment:
+          Variables:
+            DBNAME:
+              Ref: DBNAME
 
   SubmitReviewFunction:
     Type: AWS::Serverless::Function
@@ -475,3 +575,4 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/ComprehendFullAccess
+        
