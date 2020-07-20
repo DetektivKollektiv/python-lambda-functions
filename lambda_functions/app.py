@@ -362,18 +362,11 @@ def get_all_review_questions(event, context):
 
 def submit_review(event, context):
     
-    #Parse Body of request payload into body_dict object
+    #Parse Body of request payload into review object
     try:
-        body = event['body']
-
-        if isinstance(body, str): 
-            body_dict = json.loads(body)
-        else: 
-            body_dict = body
         review = Review()
-        for key in body_dict:
-            if type(body_dict[key]) != list:
-                setattr(review, key, body_dict[key])   
+        operations.body_to_object(event['body'], review)
+        
         #Give the user an experience point
         operations.give_experience_point(review.user_id)
         

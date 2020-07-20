@@ -33,7 +33,8 @@ def body_to_object(body, object):
 
     # Load request body as dict and transform to Item object
     for key in body_dict:
-        setattr(object, key, body_dict[key])
+        if type(body_dict[key]) != list:
+            setattr(object, key, body_dict[key])
 
     return object
 
