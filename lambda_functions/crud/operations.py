@@ -7,6 +7,7 @@ from datetime import datetime
 import numpy
 import json
 import random
+import statistics
 
 def body_to_object(body, object):
     """Uses the request body to set the attributes of the specified object.
@@ -443,15 +444,18 @@ def get_pair_difference(review_id):
     return difference
 
 def compute_item_result_score(item_id):
-    total_answer_sum = 0
-    counter = 0
     reviews = get_reviews_by_item_id(item_id)
+    average_scores = []
     for review in reviews:
         answers = get_review_answers_by_review_id_db(review.id)
+        counter = 0
+        answer_sum = 0
         for answer in answers:
             counter = counter + 1
-            total_answer_sum = total_answer_sum + answer.answer
-    result = total_answer_sum / counter
+            answer_sum = answer_sum + answer.answer
+        answer_average = answer_sum / counter
+        average_scores.append(answer_average)
+    result = statistics.median(average_scores)
     return result
 
 def get_open_item_for_user_db(user):
