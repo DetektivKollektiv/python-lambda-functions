@@ -20,7 +20,8 @@ def get_language(event, context):
         Lambda Context runtime methods and attributes
     Returns
     ------
-    LanguageCode, supported language codes are ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
+    LanguageCode, supported language codes are
+    ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
     """
     logger.info('Calling get_language with event')
     logger.info(event)
