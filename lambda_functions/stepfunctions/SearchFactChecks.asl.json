@@ -87,7 +87,7 @@
         }
       ],
       "ResultPath": "$.FactChecks",
-      "End": true
+      "Next": "Update Item Language"\
     },
     "Update Item Language": {
       "Type": "Task",
