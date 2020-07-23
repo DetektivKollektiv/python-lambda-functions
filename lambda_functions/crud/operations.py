@@ -394,16 +394,17 @@ def give_experience_point(user_id):
         user.level = 2
     update_object_db(user)
 
-def check_if_review_still_needed(item_id, is_peer_review):
+def check_if_review_still_needed(item_id, user_id, is_peer_review):
+    
     item = get_item_by_id(item_id)
     status = item.status
     if is_peer_review == True:
-        if status == "needs_senior":
+        if status == "locked_by_senior" and item.locked_by_user == user_id:
             return True
         else:
             return False
     if is_peer_review == False:
-        if status == "needs_junior":
+        if status == "locked_by_junior" and item.locked_by_user == user_id:
             return True
         else:
             return False

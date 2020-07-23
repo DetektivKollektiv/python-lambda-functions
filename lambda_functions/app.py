@@ -364,6 +364,7 @@ def submit_review(event, context):
     
     #Parse Body of request payload into review object
     try:
+        body = event['body']
         review = Review()
         operations.body_to_object(event['body'], review)
         
@@ -371,7 +372,7 @@ def submit_review(event, context):
         operations.give_experience_point(review.user_id)
         
         #Check if the review is still needed
-        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.is_peer_review)
+        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id, review.is_peer_review)
         #If the review is no longer needed, return an error
         if review_still_needed == False:
             return {
@@ -380,6 +381,11 @@ def submit_review(event, context):
             }
         #If the review is needed, create the review and the answers
         review = operations.create_review_db(review)
+
+        if isinstance(body, str): 
+            body_dict = json.loads(body)
+        else: 
+            body_dict = body
 
         review_answers = []
         for answer in body_dict['review_answers']:

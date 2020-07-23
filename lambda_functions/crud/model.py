@@ -17,6 +17,7 @@ class Item(Base):
     open_reviews_level_1 = Column(Integer)
     open_reviews_level_2 = Column(Integer)
     lock_timestamp = Column(DateTime)
+    locked_by_user = Column(String)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
