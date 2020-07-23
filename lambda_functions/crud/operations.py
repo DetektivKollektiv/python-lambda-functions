@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import *
 from datetime import datetime
-import numpy
+# import numpy
 import json
 import random
 import statistics
@@ -498,3 +498,38 @@ def get_open_item_for_user_db(user):
     item = get_item_by_id(item_id)
 
     return item
+
+def accept_item_db(user, item):
+    """Accepts an item for review
+
+    Parameters
+    ----------
+    user: User
+        The user that reviews the item
+    item: Item
+        The item to be reviewed by the user
+
+    Returns
+    ------
+    item: Item
+        The case to be assigned to the user
+    """
+
+    session = get_db_session()
+
+    # The item cannot be reviewed if it is locked by a user
+    if item.locked_by_user:
+        raise ValueError('Item cannot be acceped since it is locked by user {}'.format(item.locked_by_user))
+
+    # change status in order to lock item
+    if item.status == "needs_junior":
+        item.status = "locked_by_junior"
+    else: 
+        item.status = "locked_by_senior"
+    
+    item.lock_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    item.locked_by_user = user.id
+    update_object_db(item)
+
+    return item
+

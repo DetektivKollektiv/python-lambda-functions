@@ -16,6 +16,8 @@ class Item(Base):
     open_reviews = Column(Integer)
     open_reviews_level_1 = Column(Integer)
     open_reviews_level_2 = Column(Integer)
+    locked_by_user = Column(String)
+    lock_timestamp = Column(DateTime)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -29,7 +31,8 @@ class Item(Base):
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
-                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews}
+                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
+                "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp}
 
 class Submission(Base):
     __tablename__ = 'submissions'
@@ -163,11 +166,12 @@ class Review(Base):
     id = Column(String, primary_key=True)
     is_peer_review = Column(Boolean)
     peer_review_id = Column(String)
+    belongs_to_good_pair = Column(Boolean)
     item_id = Column(String, ForeignKey('items.id'))
     user_id = Column(String, ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
-                "item_id": self.item_id, "user_id": self.user_id}
+                "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id}
 
