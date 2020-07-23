@@ -3,7 +3,7 @@ from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy
 import json
 import random
@@ -158,6 +158,13 @@ def get_item_by_id(id):
     item = session.query(Item).get(id)
     return item
 
+
+def get_locked_items():
+    session = get_db_session()
+    items = session.query(Item).filter(
+        Item.status.in_(['locked_by_junior','locked_by_senior'])
+        )
+    return items
 
 def create_submission_db(submission):
     """Inserts a new submission into the database
@@ -498,3 +505,18 @@ def get_open_item_for_user_db(user):
     item = get_item_by_id(item_id)
 
     return item
+
+def reset_locked_items_db(items):
+    """Updates all locked items in the database 
+    and returns the amount of updated items"""
+    counter = 0
+    for item in items:
+        if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
+            counter = counter + 1
+            item.lock_timestamp = None
+            if item.status == "locked_by_junior":
+                item.status = "needs_junior"
+            if item.status == "locked_by_senior":
+                item.status = "needs_senior"
+            update_object_db(item)
+    return counter

@@ -495,3 +495,18 @@ def get_open_item_for_user(event, context):
             "statusCode": 400,
             "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
+
+def reset_locked_items(event, context):
+    try:
+        items = operations.get_locked_items()
+        updated = operations.reset_locked_items_db(items)        
+        return {
+                    "statusCode": 200,
+                    'headers': {"content-type": "application/json; charset=utf-8"},
+                    "body":"{} Items updated".format(updated)
+                }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
+        }

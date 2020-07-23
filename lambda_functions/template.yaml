@@ -559,6 +559,22 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+  ResetLockedItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:      
+      FunctionName: !Sub 'detektivkollektiv-api-reset_locked_items-${STAGE}'
+      CodeUri: .
+      Handler: app.reset_locked_items
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn      
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
