@@ -360,6 +360,69 @@ def get_all_review_questions(event, context):
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
 
+def submit_review(event, context):
+    
+    #Parse Body of request payload into review object
+    try:
+        review = Review()
+        operations.body_to_object(event['body'], review)
+        
+        #Give the user an experience point
+        operations.give_experience_point(review.user_id)
+        
+        #Check if the review is still needed
+        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.is_peer_review)
+        #If the review is no longer needed, return an error
+        if review_still_needed == False:
+            return {
+                "statusCode": 400,
+                "body": "Could not create review. Review no longer needed. Another detective might have been faster."
+            }
+        #If the review is needed, create the review and the answers
+        review = operations.create_review_db(review)
+
+        review_answers = []
+        for answer in body_dict['review_answers']:
+            review_answer = ReviewAnswer()
+            setattr(review_answer, "review_id",review.id)
+            for key in answer:
+                setattr(review_answer, key, answer[key])
+            review_answers.append(review_answer)
+
+        operations.create_review_answer_set_db(review_answers)
+
+        #Get the corresponding item
+        item = operations.get_item_by_id(review.item_id)
+        #If the review is a peer review, compute the variance of the review pair
+        if review.is_peer_review == True:
+            operations.close_open_junior_review(review.item_id, review.id)
+            difference = operations.get_pair_difference(review.id)
+            #If the variance is good, reduce the counter for open review pairs
+            if difference < 1:
+                item.open_reviews = item.open_reviews - 1
+                #If enough review pairs have been found, set the status to closed
+                if item.open_reviews == 0:
+                    item.status = "closed"
+                    item.result_score = operations.compute_item_result_score(item.id)
+                else:
+                    item.status = "needs_junior"
+        #If the review is not a peer review, set the status to "needs_senior"
+        if review.is_peer_review == False:
+            item.status = "needs_senior"
+
+        operations.update_object_db(item)
+        #for answer in review.review_answers
+        #    operations.create_review_answer_db(answer)
+
+        return {
+                "statusCode": 201,
+                "body": json.dumps(item.to_dict())
+            }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
+        }
 
 def item_submission(event, context):
 
@@ -370,7 +433,6 @@ def item_submission(event, context):
             body_dict = json.loads(body)
         else: 
             body_dict = body
-
         content = body_dict["content"]
         del body_dict["content"]
 
