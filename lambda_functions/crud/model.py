@@ -165,6 +165,7 @@ class Review(Base):
     id = Column(String, primary_key=True)
     is_peer_review = Column(Boolean)
     peer_review_id = Column(String)
+    belongs_to_good_pair = Column(Boolean)
     item_id = Column(String, ForeignKey('items.id'))
     user_id = Column(String, ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")

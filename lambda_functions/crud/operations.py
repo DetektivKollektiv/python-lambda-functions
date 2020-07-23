@@ -297,6 +297,12 @@ def get_reviews_by_item_id(item_id):
     reviews = session.query(Review).filter(Review.item_id == item_id)
     return reviews
 
+def get_good_reviews_by_item_id(item_id):
+    session = get_db_session()
+    reviews = session.query(Review).filter(Review.item_id == item_id).filter(Review.belongs_to_good_pair == True)
+    return reviews
+    
+
 def get_review_by_peer_review_id_db(peer_review_id):
     """Returns a review from the database with the specified peer review id
     
@@ -452,8 +458,24 @@ def get_pair_difference(review_id):
     difference = abs(junior_review_average - peer_review_average)
     return difference
 
+def set_belongs_to_good_pair_db(review, belongs_to_good_pair):
+    peer_review = review
+    junior_review = get_review_by_peer_review_id_db
+
+    if belongs_to_good_pair == True:
+        peer_review.belongs_to_good_pair = True
+        junior_review.belongs_to_good_pair = True
+    if belongs_to_good_pair == False:
+        peer_review.belongs_to_good_pair = False
+        junior_review.belongs_to_good_pair = False
+    session = get_db_session()
+    session.merge(peer_review)
+    session.merge(junior_review)
+    session.commit
+
+
 def compute_item_result_score(item_id):
-    reviews = get_reviews_by_item_id(item_id)
+    reviews = get_good_reviews_by_item_id(item_id)
     average_scores = []
     for review in reviews:
         answers = get_review_answers_by_review_id_db(review.id)

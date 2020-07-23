@@ -405,6 +405,7 @@ def submit_review(event, context):
             difference = operations.get_pair_difference(review.id)
             #If the variance is good, reduce the counter for open review pairs
             if difference < 1:
+                operations.set_belongs_to_good_pair_db(review, True)
                 item.open_reviews = item.open_reviews - 1
                 #If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
@@ -412,6 +413,9 @@ def submit_review(event, context):
                     item.result_score = operations.compute_item_result_score(item.id)
                 else:
                     item.status = "needs_junior"
+            if difference >= 1:
+                operations.set_belongs_to_good_pair_db(review, False)
+
         #If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
             item.status = "needs_senior"
