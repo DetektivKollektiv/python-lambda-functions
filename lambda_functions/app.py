@@ -364,8 +364,9 @@ def submit_review(event, context):
     
     #Parse Body of request payload into review object
     try:
+        body = event['body']
         review = Review()
-        operations.body_to_object(event['body'], review)
+        operations.body_to_object(body, review)
         
         #Give the user an experience point
         operations.give_experience_point(review.user_id)
@@ -381,7 +382,14 @@ def submit_review(event, context):
         #If the review is needed, create the review and the answers
         review = operations.create_review_db(review)
 
+        # Deserialize if body is string 
+        if isinstance(body, str): 
+            body_dict = json.loads(body)
+        else: 
+            body_dict = body
+
         review_answers = []
+        
         for answer in body_dict['review_answers']:
             review_answer = ReviewAnswer()
             setattr(review_answer, "review_id",review.id)
@@ -493,5 +501,39 @@ def get_open_item_for_user(event, context):
     except Exception as e:
         return {
             "statusCode": 400,
-            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not get user. Check URL parameter. Exception: {}".format(e)
+        }
+
+
+def accept_item(event, context):
+
+    try:
+        # get user and item ids (str) from url path
+        user_id = event['pathParameters']['user_id']
+        item_id = event['pathParameters']['item_id']
+
+        # get user and item from the db
+        user = operations.get_user_by_id(user_id)
+        item = operations.get_item_by_id(item_id)
+            
+        # Try to accept item
+        try:
+            operations.accept_item_db(user, item)
+
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(item.to_dict())
+        }
+
+        except Exception as e:
+            return {
+                "statusCode": 400,
+                "body": "Cannot accept item. Exception: {}".format(e)
+        }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
         }
