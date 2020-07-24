@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -466,13 +467,14 @@ def item_submission(event, context):
 
         return {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": "*" },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": json.dumps(submission.to_dict())
         }
        
     except Exception as e:
         return {
             "statusCode": 400,
+            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
 
@@ -489,18 +491,20 @@ def get_open_item_for_user(event, context):
 
             return {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
+                'headers': {"content-type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": json.dumps(item.to_dict())
             }
         except Exception:
             return {
                 "statusCode": 404,
+                'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": "No open item found for the specified user."
             }
 
     except Exception as e:
         return {
             "statusCode": 400,
+            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not get user. Check URL parameter. Exception: {}".format(e)
         }
 
@@ -522,18 +526,20 @@ def accept_item(event, context):
 
             return {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
+                'headers': {"content-type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": json.dumps(item.to_dict())
         }
 
         except Exception as e:
             return {
                 "statusCode": 400,
+                'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": "Cannot accept item. Exception: {}".format(e)
         }
 
     except Exception as e:
         return {
             "statusCode": 400,
+            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
         }
