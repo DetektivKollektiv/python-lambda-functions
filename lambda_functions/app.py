@@ -481,10 +481,16 @@ def item_submission(event, context):
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
         
-    sourceOrigin = event['headers']['Origin']
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+    if 'headers' in event and 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'headers' in event and 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+    else:
+        return response
 
-    if sourceOrigin in allowedOrigins:
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
         
@@ -521,10 +527,14 @@ def get_open_item_for_user(event, context):
             "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
         
-    sourceOrigin = event['headers']['Origin']
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
     allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
 
-    if sourceOrigin in allowedOrigins:
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
         
@@ -582,10 +592,14 @@ def accept_item(event, context):
             "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
         }
         
-    sourceOrigin = event['headers']['Origin']
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
     allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
 
-    if sourceOrigin in allowedOrigins:
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
         
