@@ -469,18 +469,28 @@ def item_submission(event, context):
         # Create submission
         operations.create_submission_db(submission)
 
-        return {
+        response = {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created) },
             "body": json.dumps(submission.to_dict())
         }
        
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
-            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    sourceOrigin = event['headers']['Origin']
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
 
 
 def get_open_item_for_user(event, context):
@@ -493,24 +503,35 @@ def get_open_item_for_user(event, context):
             user = operations.get_user_by_id(id)
             item = operations.get_open_item_for_user_db(user)
 
-            return {
+            response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
+                'headers': {"content-type": "application/json; charset=utf-8" },
                 "body": json.dumps(item.to_dict())
             }
+
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
-                'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": "No open item found for the specified user."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
-            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    sourceOrigin = event['headers']['Origin']
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
+
 
 def reset_locked_items(event, context):
     try:
@@ -543,22 +564,31 @@ def accept_item(event, context):
         try:
             operations.accept_item_db(user, item)
 
-            return {
+            response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
+                'headers': {"content-type": "application/json; charset=utf-8" },
                 "body": json.dumps(item.to_dict())
-        }
+            }
 
         except Exception as e:
-            return {
+            response = {
                 "statusCode": 400,
-                'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
                 "body": "Cannot accept item. Exception: {}".format(e)
         }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
-            'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
             "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
         }
+        
+    sourceOrigin = event['headers']['Origin']
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response

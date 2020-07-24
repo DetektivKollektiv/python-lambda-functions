@@ -26,8 +26,7 @@ Resources:
       Cors:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-        AllowOrigin: 
-          Ref: CorsAllowOrigin
+        AllowOrigin: "'*'"
         AllowCredentials: True 
 
   WhatsappForwardingFunction:
