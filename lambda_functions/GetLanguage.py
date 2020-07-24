@@ -20,7 +20,8 @@ def get_language(event, context):
         Lambda Context runtime methods and attributes
     Returns
     ------
-    LanguageCode, supported language codes are ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
+    LanguageCode, supported language codes are
+    ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
     """
     logger.info('Calling get_language with event')
     logger.info(event)
@@ -33,8 +34,8 @@ def get_language(event, context):
         raise Exception('Please provide Text!')
 
     # comprehend accepts up to 5000 UTF-8 encoded characters
-    if len(text) >= 5000:
-        text = text[:4999]
+    if len(text) >= 4900:
+        text = text[:4899]
     elif len(text) < 20:
         logger.warning("Text is shorter than 20 characters!")
         raise Exception('Please provide a text of at least 20 characters!')
