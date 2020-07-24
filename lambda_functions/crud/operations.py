@@ -3,8 +3,8 @@ from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import *
-from datetime import datetime
-# import numpy
+from datetime import datetime, timedelta
+
 import json
 import random
 import statistics
@@ -159,6 +159,13 @@ def get_item_by_id(id):
     return item
 
 
+def get_locked_items():
+    session = get_db_session()
+    items = session.query(Item).filter(
+        Item.status.in_(['locked_by_junior','locked_by_senior'])
+        )
+    return items
+
 def create_submission_db(submission):
     """Inserts a new submission into the database
 
@@ -290,6 +297,12 @@ def get_reviews_by_item_id(item_id):
     reviews = session.query(Review).filter(Review.item_id == item_id)
     return reviews
 
+def get_good_reviews_by_item_id(item_id):
+    session = get_db_session()
+    reviews = session.query(Review).filter(Review.item_id == item_id).filter(Review.belongs_to_good_pair == True)
+    return reviews
+    
+
 def get_review_by_peer_review_id_db(peer_review_id):
     """Returns a review from the database with the specified peer review id
     
@@ -387,16 +400,17 @@ def give_experience_point(user_id):
         user.level = 2
     update_object_db(user)
 
-def check_if_review_still_needed(item_id, is_peer_review):
+def check_if_review_still_needed(item_id, user_id, is_peer_review):
+    
     item = get_item_by_id(item_id)
     status = item.status
     if is_peer_review == True:
-        if status == "needs_senior":
+        if status == "locked_by_senior" and item.locked_by_user == user_id:
             return True
         else:
             return False
     if is_peer_review == False:
-        if status == "needs_junior":
+        if status == "locked_by_junior" and item.locked_by_user == user_id:
             return True
         else:
             return False
@@ -444,8 +458,24 @@ def get_pair_difference(review_id):
     difference = abs(junior_review_average - peer_review_average)
     return difference
 
+def set_belongs_to_good_pair_db(review, belongs_to_good_pair):
+    peer_review = review
+    junior_review = get_review_by_peer_review_id_db
+
+    if belongs_to_good_pair == True:
+        peer_review.belongs_to_good_pair = True
+        junior_review.belongs_to_good_pair = True
+    if belongs_to_good_pair == False:
+        peer_review.belongs_to_good_pair = False
+        junior_review.belongs_to_good_pair = False
+    session = get_db_session()
+    session.merge(peer_review)
+    session.merge(junior_review)
+    session.commit
+
+
 def compute_item_result_score(item_id):
-    reviews = get_reviews_by_item_id(item_id)
+    reviews = get_good_reviews_by_item_id(item_id)
     average_scores = []
     for review in reviews:
         answers = get_review_answers_by_review_id_db(review.id)
@@ -499,6 +529,21 @@ def get_open_item_for_user_db(user):
 
     return item
 
+def reset_locked_items_db(items):
+    """Updates all locked items in the database 
+    and returns the amount of updated items"""
+    counter = 0
+    for item in items:
+        if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
+            counter = counter + 1
+            item.lock_timestamp = None
+            if item.status == "locked_by_junior":
+                item.status = "needs_junior"
+            if item.status == "locked_by_senior":
+                item.status = "needs_senior"
+            update_object_db(item)
+    return counter
+
 def accept_item_db(user, item):
     """Accepts an item for review
 
@@ -532,4 +577,3 @@ def accept_item_db(user, item):
     update_object_db(item)
 
     return item
-
