@@ -1,7 +1,8 @@
 {
   "Parameters" : {
     "STAGE" : "qa",
-	"DBNAME": "development_db"
+	"DBNAME": "development_db",
+	"CorsAllowOrigin": "'qa.detective-collective.org', 'www.qa.detective-collective.org'"
   },
   "Tags" : {
     "stage" : "qa",
