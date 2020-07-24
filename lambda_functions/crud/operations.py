@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import random
 
+
 def body_to_object(body, object):
     """Uses the request body to set the attributes of the specified object.
 
@@ -371,3 +372,21 @@ def get_open_item_for_user_db(user):
     item = get_item_by_id(item_id)
 
     return item
+
+
+def get_url_by_content_db(content):
+    """Returns an url with the specified content from the database
+
+        Returns
+        ------
+        url: URL
+            An url referenced in an item
+        Null, if no url was found
+        """
+    session = get_db_session()
+    url = session.query(URL).filter(URL.url == content).first()
+    if url is None:
+        raise Exception("No url found.")
+    return url
+
+
