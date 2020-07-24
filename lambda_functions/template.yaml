@@ -198,12 +198,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  GetOpenItemForUserFunction:
+  GetOpenItemsForUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_open_item_for_user-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-get_open_items_for_user-${STAGE}'
       CodeUri: .
-      Handler: app.get_open_item_for_user
+      Handler: app.get_open_items_for_user
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -214,7 +214,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /open_item_for_user/{id}
+            Path: /open_items_for_user/{id}/{num_items}
             Method: get
             RestApiId:
               Ref: Api

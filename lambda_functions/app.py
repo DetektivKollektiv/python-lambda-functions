@@ -481,31 +481,38 @@ def item_submission(event, context):
         }
 
 
-def get_open_item_for_user(event, context):
+def get_open_items_for_user(event, context):
 
     try:
-        # get user id (str) from path
+        # get user id (str) and number of open items from path
         id = event['pathParameters']['id']
+        num_items = event['pathParameters']['num_items']
 
-        try:
-            user = operations.get_user_by_id(id)
-            item = operations.get_open_item_for_user_db(user)
+        user = operations.get_user_by_id(id)
+        items = operations.get_open_items_for_user_db(user, num_items)
 
-            return {
-                "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(item.to_dict())
-            }
-        except Exception:
+        # Return 404 if there are no open items 
+        if len(items) < 1:
             return {
                 "statusCode": 404,
-                "body": "No open item found for the specified user."
-            }
+                "body": "There are currently no open items for this user."
+        }
+
+        # Transform each item into dict
+        items_dict = []
+        for item in items:
+            items_dict.append(item.to_dict())
+
+        return {
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": json.dumps(items_dict)
+        }
 
     except Exception as e:
         return {
             "statusCode": 400,
-            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
         }
 
 def reset_locked_items(event, context):
@@ -554,5 +561,5 @@ def accept_item(event, context):
     except Exception as e:
         return {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
+            "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
         }
