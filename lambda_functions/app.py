@@ -373,7 +373,7 @@ def submit_review(event, context):
         operations.give_experience_point(review.user_id)
         
         #Check if the review is still needed
-        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.is_peer_review)
+        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id, review.is_peer_review)
         #If the review is no longer needed, return an error
         if review_still_needed == False:
             return {
@@ -408,6 +408,7 @@ def submit_review(event, context):
             difference = operations.get_pair_difference(review.id)
             #If the variance is good, reduce the counter for open review pairs
             if difference < 1:
+                operations.set_belongs_to_good_pair_db(review, True)
                 item.open_reviews = item.open_reviews - 1
                 #If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
@@ -415,6 +416,9 @@ def submit_review(event, context):
                     item.result_score = operations.compute_item_result_score(item.id)
                 else:
                     item.status = "needs_junior"
+            if difference >= 1:
+                operations.set_belongs_to_good_pair_db(review, False)
+
         #If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
             item.status = "needs_senior"
@@ -505,7 +509,22 @@ def get_open_item_for_user(event, context):
         return {
             "statusCode": 400,
             'headers': { "Access-Control-Allow-Origin": os.environ['CORS_ALLOW_ORIGIN'] },
-            "body": "Could not get user. Check URL parameter. Exception: {}".format(e)
+            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+def reset_locked_items(event, context):
+    try:
+        items = operations.get_locked_items()
+        updated = operations.reset_locked_items_db(items)        
+        return {
+                    "statusCode": 200,
+                    'headers': {"content-type": "application/json; charset=utf-8"},
+                    "body":"{} Items updated".format(updated)
+                }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Something went wrong. Check HTTP POST payload. Exception: {}".format(e)
         }
 
 
