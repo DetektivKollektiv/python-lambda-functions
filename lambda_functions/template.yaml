@@ -220,7 +220,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /open_items_for_user/{id}/{num_items}
+            Path: /open_items_for_user/{num_items}
             Method: get
             RestApiId:
               Ref: Api
