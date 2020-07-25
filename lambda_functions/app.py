@@ -505,8 +505,12 @@ def get_open_items_for_user(event, context):
 
     try:
         # get user id (str) and number of open items from path
-        id = context.identity.cognito_identity_id
+
+        id = context['identity']['cognito_identity_id']
         logger.info("id: {}".format(id))
+        logger.info("context {}".format(context))
+        logger.info("event: {}".format(event))
+
         num_items = int(event['pathParameters']['num_items'])
 
 
