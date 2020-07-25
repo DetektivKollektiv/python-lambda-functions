@@ -490,45 +490,55 @@ def compute_item_result_score(item_id):
     result = statistics.median(average_scores)
     return result
 
-def get_open_item_for_user_db(user):
-    """Inserts a new review answer into the database
+def get_open_items_for_user_db(user, num_items):
+    """Retreives a list of open items (in random order) to be reviewed by a user.
 
     Parameters
     ----------
     user: User
         The user that should receive a case
+    num_items: int
+        The (maximum) number of open items to be retreived
 
     Returns
     ------
-    item: Item
-        The case to be assigned to the user
+    items: Item[]
+        The list of open items for the user
     """
 
     session = get_db_session()
 
-    review_type = 'needs_junior'
+    sql_query_base = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
+                    reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
+                    FROM items
+                    INNER JOIN submissions ON items.id = submissions.item_id
+                    LEFT JOIN reviews on items.id = reviews.item_id
+                    WHERE {}
+                    GROUP BY items.id
+                    HAVING reviewed_by_user = 0
+                    ORDER BY oldest_submission
+                    LIMIT :num_items"""
     
-    # Senior detectives can get level 1 or level 2 reviews
+    sql_query = sql_query_base.format("items.status = 'needs_junior'")
+
+    # Senior detectives can get junior or senior reviews
     if user.level > 1:
-        review_types = ['needs_junior', 'needs_senior']
-        review_type = random.choice(review_types)
-
-    sql_query = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
-                reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
-                FROM items
-                INNER JOIN submissions ON items.id = submissions.item_id
-                LEFT JOIN reviews on items.id = reviews.item_id
-                WHERE items.status = :status
-                GROUP BY items.id
-                HAVING reviewed_by_user = 0
-                ORDER BY oldest_submission"""
-
-    result = session.execute(sql_query, {"user_id": user.id, "status": review_type})
+        sql_query = sql_query_base.format("(items.status = 'needs_junior' OR items.status = 'needs_senior')")
+    
+    result = session.execute(sql_query, {"user_id": user.id, "num_items": num_items})
     print(result)
-    item_id = result.fetchone()[0]
-    item = get_item_by_id(item_id)
 
-    return item
+    items = []
+
+    for row in result:
+        item_id = row[0]
+        item = get_item_by_id(item_id)
+        items.append(item)
+
+    # shuffle list order
+    random.shuffle(items)
+
+    return items
 
 
 def get_url_by_content_db(content):
