@@ -9,6 +9,7 @@ import json
 import random
 import statistics
 
+
 def body_to_object(body, object):
     """Uses the request body to set the attributes of the specified object.
 
@@ -539,6 +540,23 @@ def get_open_items_for_user_db(user, num_items):
 
     return items
 
+
+def get_url_by_content_db(content):
+    """Returns an url with the specified content from the database
+
+        Returns
+        ------
+        url: URL
+            An url referenced in an item
+        Null, if no url was found
+        """
+    session = get_db_session()
+    url = session.query(URL).filter(URL.url == content).first()
+    if url is None:
+        raise Exception("No url found.")
+    return url
+
+  
 def reset_locked_items_db(items):
     """Updates all locked items in the database 
     and returns the amount of updated items"""
