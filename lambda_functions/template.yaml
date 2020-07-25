@@ -312,11 +312,41 @@ Resources:
   UpdateLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-EnrichItem-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-UpdateItem-${STAGE}'
       CodeUri: .
-      Handler: EnrichItem.enrich_item
+      Handler: EnrichItem.update_item
       Runtime: python3.8
       MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  StoreFactChecksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-StoreFactChecks-${STAGE}'
+      CodeUri: .
+      Handler: EnrichItem.store_factchecks
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  StoreItemURL:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-StoreItemURL-${STAGE}'
+      CodeUri: .
+      Handler: EnrichItem.store_itemurl
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
 
   CreateUserFunction:
     Type: AWS::Serverless::Function
