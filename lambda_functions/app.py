@@ -8,6 +8,8 @@ from aws_xray_sdk.core import xray_recorder
 from crud import operations
 from crud.model import *
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def create_item(event, context):
     """Creates a new item.
@@ -503,7 +505,8 @@ def get_open_items_for_user(event, context):
 
     try:
         # get user id (str) and number of open items from path
-        id = event['pathParameters']['id']
+        id = context.identity.cognito_identity_id
+        logger.info("id: {}".format(id))
         num_items = event['pathParameters']['num_items']
 
         user = operations.get_user_by_id(id)
