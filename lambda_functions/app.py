@@ -504,7 +504,7 @@ def get_open_items_for_user(event, context):
     try:
         # get user id (str) and number of open items from path
         id = event['pathParameters']['id']
-        num_items = event['pathParameters']['num_items']
+        num_items = int(event['pathParameters']['num_items'])
 
         user = operations.get_user_by_id(id)
         items = operations.get_open_items_for_user_db(user, num_items)
