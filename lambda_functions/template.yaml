@@ -547,6 +547,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
       
   ItemSubmissionFunction:
       Type: AWS::Serverless::Function
@@ -599,6 +601,9 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+            
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
     Properties:      
