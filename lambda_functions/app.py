@@ -442,6 +442,12 @@ def submit_review(event, context):
 def item_submission(event, context):
 
     try:
+
+        # Get cognito user id from event
+        print(event)
+        id = event['identity']['requestContext']['authorizer']['claims']['sub']
+        print("cognito id: {}".format(id))
+
         body = event['body']
 
         if isinstance(body, str): 
@@ -507,7 +513,6 @@ def get_open_items_for_user(event, context):
         # get user id (str) and number of open items from path
 
         print(event)
-        print(context)
         id = event['identity']['requestContext']['authorizer']['claims']['sub']
         print("cognito id: {}".format(id))
 
