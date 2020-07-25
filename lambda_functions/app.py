@@ -352,7 +352,7 @@ def get_all_review_questions(event, context):
         for review_question in review_questions:
             review_questions_dict.append(review_question.to_dict())
 
-        return {
+        response = {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
             "body": json.dumps(review_questions_dict)
@@ -362,6 +362,23 @@ def get_all_review_questions(event, context):
             "statusCode": 400,
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
+
+    if 'headers' in event and 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'headers' in event and 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+    else:
+        return response
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
 
 def submit_review(event, context):
     
@@ -429,7 +446,7 @@ def submit_review(event, context):
         #for answer in review.review_answers
         #    operations.create_review_answer_db(answer)
 
-        return {
+        response = {
                 "statusCode": 201,
                 "body": json.dumps(item.to_dict())
             }
@@ -438,6 +455,23 @@ def submit_review(event, context):
             "statusCode": 400,
             "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
         }
+    
+    if 'headers' in event and 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'headers' in event and 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+    else:
+        return response
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
 
 def item_submission(event, context):
 
