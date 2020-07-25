@@ -11,6 +11,8 @@ Globals:
 Parameters:
   STAGE:
     Type: String
+  CorsAllowOrigin:
+    Type: String
   DBNAME:
     Type: String
     Default: development_db
@@ -21,6 +23,10 @@ Resources:
     Properties:
       StageName: 
         Ref: STAGE
+      Cors:
+        AllowMethods: "'OPTIONS, PUT, POST, GET'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
@@ -222,6 +228,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -534,6 +542,8 @@ Resources:
           Variables:
             DBNAME:
               Ref: DBNAME
+            CORS_ALLOW_ORIGIN:
+              Ref: CorsAllowOrigin
 
   SubmitReviewFunction:
     Type: AWS::Serverless::Function
@@ -600,6 +610,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
