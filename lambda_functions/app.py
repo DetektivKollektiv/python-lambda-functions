@@ -445,7 +445,7 @@ def item_submission(event, context):
 
         # Get cognito user id from event
         print(event)
-        id = event['identity']['requestContext']['authorizer']['claims']['sub']
+        id = event['requestContext']['identity']['cognitoIdentityId']
         print("cognito id: {}".format(id))
 
         body = event['body']
