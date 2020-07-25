@@ -506,10 +506,10 @@ def get_open_items_for_user(event, context):
     try:
         # get user id (str) and number of open items from path
 
-        id = context['identity']['cognito_identity_id']
-        logger.info("id: {}".format(id))
-        logger.info("context {}".format(context))
-        logger.info("event: {}".format(event))
+        print(event)
+        print(context)
+        id = event['identity']['requestContext']['authorizer']['claims']['sub']
+        print("cognito id: {}".format(id))
 
         num_items = int(event['pathParameters']['num_items'])
 
@@ -540,12 +540,14 @@ def get_open_items_for_user(event, context):
             "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
         }
         
-    if 'Origin' in event['headers']:
+    if 'headers' in event and 'Origin' in event['headers']:
         sourceOrigin = event['headers']['Origin']
-    elif 'origin' in event['headers']:
+    elif 'headers' in event and 'origin' in event['headers']:
         sourceOrigin = event['headers']['origin']
+    else:
+        return response
 
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
 
     if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
