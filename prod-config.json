@@ -1,7 +1,7 @@
 {
   "Parameters" : {
     "STAGE" : "prod",
-	"DBNAME": "development_db",
+	"DBNAME": "prod_db",
 	"CorsAllowOrigin": "https://detective-collective.org,https://www.detective-collective.org"
   },
   "Tags" : {
