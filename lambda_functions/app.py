@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -360,6 +361,81 @@ def get_all_review_questions(event, context):
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
 
+def submit_review(event, context):
+    
+    #Parse Body of request payload into review object
+    try:
+        body = event['body']
+        review = Review()
+        operations.body_to_object(body, review)
+        
+        #Give the user an experience point
+        operations.give_experience_point(review.user_id)
+        
+        #Check if the review is still needed
+        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id, review.is_peer_review)
+        #If the review is no longer needed, return an error
+        if review_still_needed == False:
+            return {
+                "statusCode": 400,
+                "body": "Could not create review. Review no longer needed. Another detective might have been faster."
+            }
+        #If the review is needed, create the review and the answers
+        review = operations.create_review_db(review)
+
+        # Deserialize if body is string 
+        if isinstance(body, str): 
+            body_dict = json.loads(body)
+        else: 
+            body_dict = body
+
+        review_answers = []
+        
+        for answer in body_dict['review_answers']:
+            review_answer = ReviewAnswer()
+            setattr(review_answer, "review_id",review.id)
+            for key in answer:
+                setattr(review_answer, key, answer[key])
+            review_answers.append(review_answer)
+
+        operations.create_review_answer_set_db(review_answers)
+
+        #Get the corresponding item
+        item = operations.get_item_by_id(review.item_id)
+        #If the review is a peer review, compute the variance of the review pair
+        if review.is_peer_review == True:
+            operations.close_open_junior_review(review.item_id, review.id)
+            difference = operations.get_pair_difference(review.id)
+            #If the variance is good, reduce the counter for open review pairs
+            if difference < 1:
+                operations.set_belongs_to_good_pair_db(review, True)
+                item.open_reviews = item.open_reviews - 1
+                #If enough review pairs have been found, set the status to closed
+                if item.open_reviews == 0:
+                    item.status = "closed"
+                    item.result_score = operations.compute_item_result_score(item.id)
+                else:
+                    item.status = "needs_junior"
+            if difference >= 1:
+                operations.set_belongs_to_good_pair_db(review, False)
+
+        #If the review is not a peer review, set the status to "needs_senior"
+        if review.is_peer_review == False:
+            item.status = "needs_senior"
+
+        operations.update_object_db(item)
+        #for answer in review.review_answers
+        #    operations.create_review_answer_db(answer)
+
+        return {
+                "statusCode": 201,
+                "body": json.dumps(item.to_dict())
+            }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
+        }
 
 def item_submission(event, context):
 
@@ -370,7 +446,6 @@ def item_submission(event, context):
             body_dict = json.loads(body)
         else: 
             body_dict = body
-
         content = body_dict["content"]
         del body_dict["content"]
 
@@ -394,17 +469,34 @@ def item_submission(event, context):
         # Create submission
         operations.create_submission_db(submission)
 
-        return {
+        response = {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": "*" },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created) },
             "body": json.dumps(submission.to_dict())
         }
        
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    if 'headers' in event and 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'headers' in event and 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+    else:
+        return response
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
 
 
 def get_open_item_for_user(event, context):
@@ -417,19 +509,100 @@ def get_open_item_for_user(event, context):
             user = operations.get_user_by_id(id)
             item = operations.get_open_item_for_user_db(user)
 
-            return {
+            response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
+                'headers': {"content-type": "application/json; charset=utf-8" },
                 "body": json.dumps(item.to_dict())
             }
+
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
                 "body": "No open item found for the specified user."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
+
+
+def reset_locked_items(event, context):
+    try:
+        items = operations.get_locked_items()
+        updated = operations.reset_locked_items_db(items)        
+        return {
+                    "statusCode": 200,
+                    'headers': {"content-type": "application/json; charset=utf-8"},
+                    "body":"{} Items updated".format(updated)
+                }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Something went wrong. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+
+def accept_item(event, context):
+
+    try:
+        # get user and item ids (str) from url path
+        user_id = event['pathParameters']['user_id']
+        item_id = event['pathParameters']['item_id']
+
+        # get user and item from the db
+        user = operations.get_user_by_id(user_id)
+        item = operations.get_item_by_id(item_id)
+            
+        # Try to accept item
+        try:
+            operations.accept_item_db(user, item)
+
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8" },
+                "body": json.dumps(item.to_dict())
+            }
+
+        except Exception as e:
+            response = {
+                "statusCode": 400,
+                "body": "Cannot accept item. Exception: {}".format(e)
+        }
+
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
+        }
+        
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
