@@ -547,11 +547,10 @@ def get_open_items_for_user(event, context):
         # get user id (str) and number of open items from path
 
         print(event)
-        id = event['identity']['requestContext']['authorizer']['claims']['sub']
+        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
         print("cognito id: {}".format(id))
 
         num_items = int(event['pathParameters']['num_items'])
-
 
         user = operations.get_user_by_id(id)
         items = operations.get_open_items_for_user_db(user, num_items)
