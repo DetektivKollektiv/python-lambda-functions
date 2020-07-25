@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -468,17 +469,34 @@ def item_submission(event, context):
         # Create submission
         operations.create_submission_db(submission)
 
-        return {
+        response = {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created), "Access-Control-Allow-Origin": "*" },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created) },
             "body": json.dumps(submission.to_dict())
         }
        
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    if 'headers' in event and 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'headers' in event and 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+    else:
+        return response
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
 
 
 def get_open_items_for_user(event, context):
@@ -491,29 +509,44 @@ def get_open_items_for_user(event, context):
         user = operations.get_user_by_id(id)
         items = operations.get_open_items_for_user_db(user, num_items)
 
-        # Return 404 if there are no open items 
         if len(items) < 1:
-            return {
+          response = {
                 "statusCode": 404,
                 "body": "There are currently no open items for this user."
-        }
+          }
+        else:    
+          # Transform each item into dict
+          items_dict = []
+          for item in items:
+              items_dict.append(item.to_dict())
 
-        # Transform each item into dict
-        items_dict = []
-        for item in items:
-            items_dict.append(item.to_dict())
-
-        return {
-            "statusCode": 200,
-            'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(items_dict)
-        }
+          response = {
+              "statusCode": 200,
+              'headers': {"content-type": "application/json; charset=utf-8"},
+              "body": json.dumps(items_dict)
+          }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
         }
+        
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
+
 
 def reset_locked_items(event, context):
     try:
@@ -546,20 +579,35 @@ def accept_item(event, context):
         try:
             operations.accept_item_db(user, item)
 
-            return {
+            response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
+                'headers': {"content-type": "application/json; charset=utf-8" },
                 "body": json.dumps(item.to_dict())
-        }
+            }
 
         except Exception as e:
-            return {
+            response = {
                 "statusCode": 400,
                 "body": "Cannot accept item. Exception: {}".format(e)
         }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
         }
+        
+    if 'Origin' in event['headers']:
+        sourceOrigin = event['headers']['Origin']
+    elif 'origin' in event['headers']:
+        sourceOrigin = event['headers']['origin']
+
+    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+
+    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
+        if 'headers' not in response:
+            response['headers'] = {}
+        
+        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
+    
+    return response
