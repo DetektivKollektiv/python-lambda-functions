@@ -716,4 +716,28 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/ComprehendFullAccess
-        
+  
+  ResetLockedItemsRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "Resets Locked items every 10 minutes."
+      ScheduleExpression: "rate(10 minutes)"
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "ResetLockedItemsFunction"
+              - "Arn"
+          Id: "detektivkollektiv-cloudwatch-trigger-reset_locked_items-${STAGE}"
+  PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: "ResetLockedItemsFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "ResetLockedItemsRule"
+          - "Arn"
