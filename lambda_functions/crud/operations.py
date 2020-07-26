@@ -638,3 +638,18 @@ def accept_item_db(user, item):
     update_object_db(item)
 
     return item
+
+
+def get_all_closed_items_db():
+    """Gets all closed items
+
+    Returns
+    ------
+    items: Item[]
+        The closed items
+    """
+
+    session = get_db_session()
+
+    items = session.query(Item).filter(Item.status == 'closed').all()
+    return items

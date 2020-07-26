@@ -640,3 +640,35 @@ def accept_item(event, context):
         
     response_cors = operations.set_cors(response, event)
     return response_cors
+
+
+def get_all_closed_items(event, context):
+
+    try:
+        # Get all closed items
+        items = operations.get_all_closed_items_db()
+
+        if len(items) == 0:
+            response = {
+                "statusCode": 404,
+                "body": "No closed items found"
+            }
+        else:
+            items_dict = []
+            
+            for item in items:
+                items_dict.append(item.to_dict())
+                
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(items_dict)
+            }
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get closed items. Exception: {}".format(e)
+        }
+
+    response_cors = operations.set_cors(response, event)
+    return response_cors

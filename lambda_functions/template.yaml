@@ -27,6 +27,8 @@ Resources:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
@@ -439,6 +441,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   CreateReviewFunction:
     Type: AWS::Serverless::Function
@@ -656,6 +660,34 @@ Resources:
           Properties:
             Path: /accept_item/{item_id}
             Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+
+  GetAllClosedItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-get_all_closed_items-${STAGE}'
+      CodeUri: .
+      Handler: app.get_all_closed_items
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /items/closed
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
