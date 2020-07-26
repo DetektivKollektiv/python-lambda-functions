@@ -729,7 +729,7 @@ Resources:
             Fn::GetAtt: 
               - "ResetLockedItemsFunction"
               - "Arn"
-          Id: "detektivkollektiv-cloudwatch-trigger-reset_locked_items-${STAGE}"
+          Id: !Sub "detektivkollektiv-cloudwatch-trigger-reset_locked_items-${STAGE}"
   PermissionForEventsToInvokeLambda: 
     Type: AWS::Lambda::Permission
     Properties: 
