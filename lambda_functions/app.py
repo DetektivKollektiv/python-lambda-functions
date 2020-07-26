@@ -199,21 +199,28 @@ def get_item_by_content(event, context):
 
 def create_user(event, context):
 
-    user = User()
-    body = event['body']
-    operations.body_to_object(body, user)
-
     try:
+        user = User()
+        body = event['body']
+        operations.body_to_object(body, user)
+
+        # get cognito id
+        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
+        user.id = id
+
         user = operations.create_user_db(user)
-        return {
+        response = {
             "statusCode": 201,
             "body": json.dumps(user.to_dict())
         }
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
-            "body": "Could not create user. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not create user. Check HTTP POST payload and Cognito authentication. Exception: {}".format(e)
         }
+    
+    response_cors = operations.set_cors(response, event)
+    return response_cors
 
 
 def get_all_users(event, context):
@@ -237,30 +244,33 @@ def get_all_users(event, context):
         }
 
 
-def get_user_by_id(event, context):
+def get_user(event, context):
 
     try:
-        # get id (str) from path
-        id = event['pathParameters']['id']
+        # get cognito id
+        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
 
         try:
             user = operations.get_user_by_id(id)
-            return {
+            response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(user.to_dict())
             }
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
                 "body": "No user found with the specified id."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
-            "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not get user. Check Cognito authentication. Exception: {}".format(e)
         }
+
+    response_cors = operations.set_cors(response, event)
+    return response_cors
 
 
 def create_review(event, context):
@@ -473,15 +483,10 @@ def submit_review(event, context):
     
     return response
 
+
 def item_submission(event, context):
 
     try:
-
-        # Get cognito user id from event
-        print(event)
-        id = event['requestContext']['identity']['cognitoIdentityId']
-        print("cognito id: {}".format(id))
-
         body = event['body']
 
         if isinstance(body, str): 
@@ -523,29 +528,14 @@ def item_submission(event, context):
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
         
-    if 'headers' in event and 'Origin' in event['headers']:
-        sourceOrigin = event['headers']['Origin']
-    elif 'headers' in event and 'origin' in event['headers']:
-        sourceOrigin = event['headers']['origin']
-    else:
-        return response
-
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
-
-    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
-        if 'headers' not in response:
-            response['headers'] = {}
-        
-        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
-    return response
+    response_cors = operations.set_cors(response, event)
+    return response_cors
 
 
 def get_open_items_for_user(event, context):
 
     try:
-        # get user id (str) and number of open items from path
-
+        # get cognito id
         print(event)
         id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
         print("cognito id: {}".format(id))
@@ -577,23 +567,9 @@ def get_open_items_for_user(event, context):
             "statusCode": 400,
             "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
         }
-        
-    if 'headers' in event and 'Origin' in event['headers']:
-        sourceOrigin = event['headers']['Origin']
-    elif 'headers' in event and 'origin' in event['headers']:
-        sourceOrigin = event['headers']['origin']
-    else:
-        return response
 
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
-
-    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
-        if 'headers' not in response:
-            response['headers'] = {}
-        
-        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
-    return response
+    response_cors = operations.set_cors(response, event)
+    return response_cors
 
 
 def reset_locked_items(event, context):
@@ -615,9 +591,11 @@ def reset_locked_items(event, context):
 def accept_item(event, context):
 
     try:
-        # get user and item ids (str) from url path
-        user_id = event['pathParameters']['user_id']
+        # get item id from url path
         item_id = event['pathParameters']['item_id']
+
+        # get cognito id 
+        user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
 
         # get user and item from the db
         user = operations.get_user_by_id(user_id)
@@ -645,17 +623,5 @@ def accept_item(event, context):
             "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
         }
         
-    if 'Origin' in event['headers']:
-        sourceOrigin = event['headers']['Origin']
-    elif 'origin' in event['headers']:
-        sourceOrigin = event['headers']['origin']
-
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
-
-    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
-        if 'headers' not in response:
-            response['headers'] = {}
-        
-        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
-    return response
+    response_cors = operations.set_cors(response, event)
+    return response_cors
