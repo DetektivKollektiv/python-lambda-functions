@@ -218,10 +218,10 @@ def create_user(event, context):
 def create_user_from_cognito(event, context):
             
     user = User()
-    user.name = event.UserName
-    user.id = event.request.userAttributes.sub
+    user.name = event['UserName']
+    user.id = event['request']['userAttributes']['sub']
     if user.id == None or user.name == None:
-        raise Exception("No user id or name found in event")
+        raise Exception("Something went wrong!")
     user = operations.create_user_db(user)
     return json.dumps(event)
 
