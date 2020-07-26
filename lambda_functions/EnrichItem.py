@@ -1,7 +1,5 @@
-# import sys
 import logging
-# sys.path.append("..")
-from crud.model import Item
+from crud.model import Item, ExternalFactCheck, ItemURL
 from crud import operations
 
 logger = logging.getLogger()
