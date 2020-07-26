@@ -373,6 +373,23 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
+  CreateUserFromCognitoFunction:
+    Type: AWS::Serverless::Function
+    Properties:      
+      FunctionName: !Sub 'detektivkollektiv-api-create_user_from_cognito-${STAGE}'
+      CodeUri: .
+      Handler: app.create_user_from_cognito
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn      
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
   GetAllUsersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
