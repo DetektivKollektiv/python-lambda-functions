@@ -364,7 +364,7 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /users
+            Path: /user
             Method: post
             RestApiId:
               Ref: Api
@@ -415,12 +415,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  GetUserByIdFunction:
+  GetUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_user_by_id-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-get_user-${STAGE}'
       CodeUri: .
-      Handler: app.get_user_by_id
+      Handler: app.get_user
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -431,7 +431,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /users/{id}
+            Path: /user
             Method: get              
             RestApiId:
               Ref: Api
@@ -583,7 +583,7 @@ Resources:
           Echo:
             Type: Api
             Properties:
-              Path: /item-submission
+              Path: /item_submission
               Method: post
               RestApiId:
                 Ref: Api
@@ -654,7 +654,7 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /accept_item/{user_id}/{item_id}
+            Path: /accept_item/{item_id}
             Method: post
             RestApiId:
               Ref: Api
