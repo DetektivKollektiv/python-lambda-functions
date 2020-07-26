@@ -27,6 +27,8 @@ Resources:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
