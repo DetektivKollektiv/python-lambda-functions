@@ -223,13 +223,15 @@ def create_user(event, context):
     return response_cors
 
 def create_user_from_cognito(event, context):
-            
-    user = User()
-    user.name = event['userName']
-    user.id = event['request']['userAttributes']['sub']
-    if user.id == None or user.name == None:
-        raise Exception("Something went wrong!")
-    user = operations.create_user_db(user)
+    
+    if event['triggerSource'] == "PostConfirmation_ConfirmSignUp":
+        user = User()
+        user.name = event['userName']
+        user.id = event['request']['userAttributes']['sub']
+        if user.id == None or user.name == None:
+            raise Exception("Something went wrong!")
+        user = operations.create_user_db(user)
+    
     return event
 
     
