@@ -325,6 +325,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
 
   StoreFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -338,6 +342,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
 
   StoreItemURL:
     Type: AWS::Serverless::Function
@@ -351,6 +359,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
 
   CreateUserFunction:
     Type: AWS::Serverless::Function
