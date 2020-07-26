@@ -395,7 +395,10 @@ def submit_review(event, context):
     #Parse Body of request payload into review object
     try:
         body = event['body']
+
         review = Review()
+        review.user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
+
         operations.body_to_object(body, review)
         
         #Give the user an experience point
