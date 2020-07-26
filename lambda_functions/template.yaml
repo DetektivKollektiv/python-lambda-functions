@@ -735,10 +735,6 @@ Resources:
       Description: Resets Locked items every 10 minutes.
       ScheduleExpression: rate(10 minutes)
       State: ENABLED
-      RoleArn:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
       Targets: 
         - 
           Arn: 
@@ -746,3 +742,15 @@ Resources:
               - ResetLockedItemsFunction
               - Arn
           Id: !Sub 'reset_locked_items-${STAGE}'
+              
+  PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: ResetLockedItemsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: 
+        Fn::GetAtt: 
+          - ResetLockedItemsRule
+          - Arn
