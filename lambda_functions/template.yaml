@@ -27,6 +27,10 @@ Resources:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+        AddDefaultAuthorizerToCorsPreflight: false
+        InvokeRole: NONE
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
@@ -220,8 +224,6 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /open_items_for_user/{num_items}
             Method: get
             RestApiId:
@@ -433,8 +435,6 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /user
             Method: get              
             RestApiId:
@@ -562,8 +562,6 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /review_questions
             Method: get              
             RestApiId:
@@ -592,7 +590,7 @@ Resources:
             Type: Api
             Properties:
               Auth:
-                Authorizer: AWS_IAM
+                Authorizer: NONE
               Path: /item_submission
               Method: post
               RestApiId:
@@ -620,8 +618,6 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /submit_review
             Method: post
             RestApiId:
@@ -666,8 +662,6 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /accept_item/{item_id}
             Method: post
             RestApiId:
@@ -696,8 +690,6 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Auth:
-              Authorizer: AWS_IAM
             Path: /items/closed
             Method: get
             RestApiId:
