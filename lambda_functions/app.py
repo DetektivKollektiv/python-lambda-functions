@@ -223,7 +223,7 @@ def create_user_from_cognito(event, context):
     if user.id == None or user.name == None:
         raise Exception("No user id or name found in event")
     user = operations.create_user_db(user)
-    return event
+    return json.dumps(event)
 
     
 def get_all_users(event, context):
