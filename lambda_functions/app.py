@@ -215,7 +215,24 @@ def create_user(event, context):
             "body": "Could not create user. Check HTTP POST payload. Exception: {}".format(e)
         }
 
-
+def create_user_from_cognito(event, context):
+    try:        
+        user = User()
+        user.name = event.UserName
+        user.id = event.request.userAttributes.sub
+        if user.id == None or user.name == None:
+            raise Exception("No user id or name found in event")
+        user = operations.create_user_db(user)
+        return {
+            "statusCode": 201,
+            "body": json.dumps(user.to_dict())
+        }
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not create user. Check HTTP POST payload. Exception: {}".format(e)
+        }
+    
 def get_all_users(event, context):
 
     try:
