@@ -598,6 +598,7 @@ def reset_locked_items_db(items):
         if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
             counter = counter + 1
             item.lock_timestamp = None
+            item.locked_by_user = None
             if item.status == "locked_by_junior":
                 item.status = "needs_junior"
             if item.status == "locked_by_senior":
