@@ -40,6 +40,39 @@ def body_to_object(body, object):
     return object
 
 
+def set_cors(response, event):
+    """Adds a CORS header to a response according to the headers found in the event.
+
+    Parameters
+    ----------
+    response: dict
+        The response to be modified
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    response: dict
+        The modified response
+    """
+    source_origin = None
+    allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+    
+    if 'headers' in event:
+        if 'Origin' in event['headers']:
+            source_origin = event['headers']['Origin']
+        if 'origin' in event['headers']:
+            source_origin = event['headers']['origin']
+        
+        if source_origin and source_origin in allowed_origins:
+            if 'headers' not in response:
+                response['headers'] = {}
+
+            response['headers']['Access-Control-Allow-Origin'] = source_origin           
+
+    return response 
+
+
 def get_db_session():
     """Returns a DB session
 
@@ -605,3 +638,18 @@ def accept_item_db(user, item):
     update_object_db(item)
 
     return item
+
+
+def get_all_closed_items_db():
+    """Gets all closed items
+
+    Returns
+    ------
+    items: Item[]
+        The closed items
+    """
+
+    session = get_db_session()
+
+    items = session.query(Item).filter(Item.status == 'closed').all()
+    return items
