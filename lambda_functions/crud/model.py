@@ -143,11 +143,12 @@ class ReviewQuestion(Base):
     id = Column(String, primary_key=True)
     content = Column(String)
     mandatory = Column(Boolean)
+    info = Column(String)
 
     review_answers = relationship("ReviewAnswer", backref="review_question")
 
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "mandatory": self.mandatory}
+        return {"id": self.id, "content": self.content, "mandatory": self.mandatory, "info": self.info}
 
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
