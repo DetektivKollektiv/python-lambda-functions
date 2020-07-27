@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+import boto3
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -224,7 +225,13 @@ def create_user_from_cognito(event, context):
         if user.id == None or user.name == None:
             raise Exception("Something went wrong!")
         user = operations.create_user_db(user)
-    
+        client = boto3.client('cognito-idp')
+        client.admin_add_user_to_group(
+            UserPoolId = event['userPoolId'],
+            Username = user.name,
+            GroupName ='Detective'
+        )
+
     return event
 
     
