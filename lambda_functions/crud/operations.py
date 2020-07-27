@@ -547,6 +547,21 @@ def get_url_by_content_db(content):
     return url
 
   
+def get_organization_by_content_db(content):
+    """Returns the organization publishing fact checks
+
+        Returns
+        ------
+        org: FactChecking_Organization
+        Null, if no url was found
+        """
+    session = get_db_session()
+    org = session.query(FactChecking_Organization).filter(FactChecking_Organization.name == content).first()
+    if org is None:
+        raise Exception("No Organization found.")
+    return org
+
+
 def reset_locked_items_db(items):
     """Updates all locked items in the database 
     and returns the amount of updated items"""
