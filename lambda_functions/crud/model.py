@@ -21,18 +21,20 @@ class Item(Base):
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
-    entities = relationship("ItemEntity", back_populates="item")
-    urls = relationship("ItemURL", back_populates="item")
-    sentiments = relationship("ItemSentiment", back_populates="item")
-    keyphrases = relationship("ItemKeyphrase", back_populates="item")
+    entities = relationship("ItemEntity")
+    urls = relationship("ItemURL")
+    sentiments = relationship("ItemSentiment")
+    keyphrases = relationship("ItemKeyphrase")
 
     reviews = relationship("Review", backref="item")
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
-                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
+                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2,
+                "open_reviews": self.open_reviews,
                 "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp}
+
 
 class Submission(Base):
     __tablename__ = 'submissions'
@@ -45,11 +47,12 @@ class Submission(Base):
     received_date = Column(DateTime)
     item_id = Column(String, ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")
-    
+
     def to_dict(self):
         return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "phone": self.phone,
                 "source": self.source, "frequency": self.frequency, "received_date": self.received_date,
                 "item_id": self.item_id}
+
 
 class ExternalFactCheck(Base):
     __tablename__ = 'factchecks'
@@ -60,6 +63,7 @@ class ExternalFactCheck(Base):
     item_id = Column(String, ForeignKey('items.id'))
     item = relationship("Item", back_populates="factchecks")
 
+
 class FactChecking_Organization(Base):
     __tablename__ = 'factchecking_organizations'
     id = Column(String, primary_key=True)
@@ -68,11 +72,13 @@ class FactChecking_Organization(Base):
     counter_not_trustworthy = Column(Integer)
     factchecks = relationship("ExternalFactCheck")
 
+
 class Entity(Base):
     __tablename__ = 'entities'
     id = Column(String, primary_key=True)
     entity = Column(String)
-    items = relationship("ItemEntity", back_populates="entity")
+    items = relationship("ItemEntity")
+
 
 class ItemEntity(Base):
     __tablename__ = 'item_entities'
@@ -82,11 +88,13 @@ class ItemEntity(Base):
     entity_id = Column(String, ForeignKey('entities.id'))
     entity = relationship("Entity", back_populates="items")
 
+
 class URL(Base):
     __tablename__ = 'urls'
     id = Column(String, primary_key=True)
     url = Column(String)
-    items = relationship("ItemURL", back_populates="url")
+    items = relationship("ItemURL")
+
 
 class ItemURL(Base):
     __tablename__ = 'item_urls'
@@ -96,11 +104,13 @@ class ItemURL(Base):
     url_id = Column(String, ForeignKey('urls.id'))
     url = relationship("URL", back_populates="items")
 
+
 class Sentiment(Base):
     __tablename__ = 'sentiments'
     id = Column(String, primary_key=True)
     sentiment = Column(String)
-    items = relationship("ItemSentiment", back_populates="sentiment")
+    items = relationship("ItemSentiment")
+
 
 class ItemSentiment(Base):
     __tablename__ = 'item_sentiments'
@@ -110,11 +120,13 @@ class ItemSentiment(Base):
     sentiment_id = Column(String, ForeignKey('sentiments.id'))
     sentiment = relationship("Sentiment", back_populates="items")
 
+
 class Keyphrase(Base):
     __tablename__ = 'keyphrases'
     id = Column(String, primary_key=True)
     keyphrase = Column(String)
-    items = relationship("ItemKeyphrase", back_populates="keyphrase")
+    items = relationship("ItemKeyphrase")
+
 
 class ItemKeyphrase(Base):
     __tablename__ = 'item_keyphrases'
@@ -123,6 +135,7 @@ class ItemKeyphrase(Base):
     item = relationship("Item", back_populates="keyphrases")
     keyphrase_id = Column(String, ForeignKey('keyphrases.id'))
     keyphrase = relationship("Keyphrase", back_populates="items")
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -138,6 +151,7 @@ class User(Base):
         return {"id": self.id, "name": self.name, "score": self.score, "level": self.level,
                 "experience_points": self.experience_points}
 
+
 class ReviewQuestion(Base):
     __tablename__ = 'review_questions'
     id = Column(String, primary_key=True)
@@ -148,6 +162,7 @@ class ReviewQuestion(Base):
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "mandatory": self.mandatory}
+
 
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
@@ -160,6 +175,7 @@ class ReviewAnswer(Base):
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
                 "answer": self.answer, "comment": self.comment}
+
 
 class Review(Base):
     __tablename__ = 'reviews'
@@ -174,4 +190,3 @@ class Review(Base):
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
                 "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id}
-
