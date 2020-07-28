@@ -729,6 +729,7 @@ Resources:
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
   
   ResetLockedItemsRule: 
     Type: AWS::Events::Rule

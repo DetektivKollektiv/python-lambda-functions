@@ -2,6 +2,7 @@ import logging
 import json
 import os
 import boto3
+from datetime import datetime
 
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
@@ -409,6 +410,7 @@ def get_all_review_questions(event, context):
     
     return response
 
+
 def submit_review(event, context):
     
     #Parse Body of request payload into review object
@@ -416,8 +418,8 @@ def submit_review(event, context):
         body = event['body']
 
         review = Review()
-        review.user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
-
+        review.user_id = operations.cognito_id_from_event(event)
+        
         operations.body_to_object(body, review)
         
         #Give the user an experience point
@@ -432,7 +434,20 @@ def submit_review(event, context):
                 "body": "Could not create review. Review no longer needed. Another detective might have been faster."
             }
         #If the review is needed, create the review and the answers
-        review = operations.create_review_db(review)
+
+        #Get the corresponding item to know when it was locked by the user
+        item = operations.get_item_by_id(review.item_id)
+
+        # Set the review open and close timestamp
+        if item.lock_timestamp:
+            review.start_timestamp = item.lock_timestamp
+            review.finish_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            review = operations.create_review_db(review)
+        else:
+            return {
+                "statusCode": 400,
+                "body": "Could not create review. To review an item, it has to be locked by the user."
+            }
 
         # Deserialize if body is string 
         if isinstance(body, str): 
@@ -451,8 +466,6 @@ def submit_review(event, context):
 
         operations.create_review_answer_set_db(review_answers)
 
-        #Get the corresponding item
-        item = operations.get_item_by_id(review.item_id)
         #If the review is a peer review, compute the variance of the review pair
         if review.is_peer_review == True:
             operations.close_open_junior_review(review.item_id, review.id)
@@ -464,6 +477,7 @@ def submit_review(event, context):
                 #If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
                     item.status = "closed"
+                    item.close_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     item.result_score = operations.compute_item_result_score(item.id)
                 else:
                     item.status = "needs_junior"
@@ -472,7 +486,11 @@ def submit_review(event, context):
 
         #If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
-            item.status = "needs_senior"
+            item.status = "needs_senior" 
+
+        # Unlock item
+        item.lock_timestamp = None
+        item.locked_by_user = None
 
         operations.update_object_db(item)
         #for answer in review.review_answers
@@ -483,27 +501,13 @@ def submit_review(event, context):
                 "body": json.dumps(item.to_dict())
             }
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
         }
     
-    if 'headers' in event and 'Origin' in event['headers']:
-        sourceOrigin = event['headers']['Origin']
-    elif 'headers' in event and 'origin' in event['headers']:
-        sourceOrigin = event['headers']['origin']
-    else:
-        return response
-
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
-
-    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
-        if 'headers' not in response:
-            response['headers'] = {}
-        
-        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
-    return response
+    response_cors = operations.set_cors(response, event)
+    return response_cors
 
 
 def item_submission(event, context):
@@ -530,6 +534,7 @@ def item_submission(event, context):
         except Exception:
             # Item does not exist yet, item_id in submission is the id of the newly created item
             new_item = Item()
+            new_item.open_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             new_item.content = content
             created_item = operations.create_item_db(new_item)
             new_item_created = True
@@ -557,11 +562,10 @@ def item_submission(event, context):
 def get_open_items_for_user(event, context):
 
     try:
-        # get cognito id
-        print(event)
-        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
-        print("cognito id: {}".format(id))
+        # get cognito user id
+        id = operations.cognito_id_from_event(event)
 
+        # get number of items from url path
         num_items = int(event['pathParameters']['num_items'])
 
         user = operations.get_user_by_id(id)

@@ -70,7 +70,24 @@ def set_cors(response, event):
 
             response['headers']['Access-Control-Allow-Origin'] = source_origin           
 
-    return response 
+    return response
+
+
+def cognito_id_from_event(event):
+    """Extracts the cognito user id (=sub) from the event.
+
+    Parameters
+    ----------
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    user_id: str
+        The user id
+    """
+    user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1]
+    return user_id
 
 
 def get_db_session():
@@ -590,6 +607,21 @@ def get_url_by_content_db(content):
     return url
 
   
+def get_organization_by_content_db(content):
+    """Returns the organization publishing fact checks
+
+        Returns
+        ------
+        org: FactChecking_Organization
+        Null, if no url was found
+        """
+    session = get_db_session()
+    org = session.query(FactChecking_Organization).filter(FactChecking_Organization.name == content).first()
+    if org is None:
+        raise Exception("No Organization found.")
+    return org
+
+
 def reset_locked_items_db(items):
     """Updates all locked items in the database 
     and returns the amount of updated items"""
@@ -598,6 +630,7 @@ def reset_locked_items_db(items):
         if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
             counter = counter + 1
             item.lock_timestamp = None
+            item.locked_by_user = None
             if item.status == "locked_by_junior":
                 item.status = "needs_junior"
             if item.status == "locked_by_senior":
