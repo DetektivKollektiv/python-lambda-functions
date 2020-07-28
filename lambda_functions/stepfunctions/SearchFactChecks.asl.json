@@ -98,7 +98,7 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "ResultPath": null,
       "Next": "Store Fact Check"
     },
     "Store Fact Check": {
@@ -110,7 +110,7 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "ResultPath": null,
       "Next": "Store Item URL"
     },
     "Store Item URL": {
@@ -122,7 +122,7 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "ResultPath": null,
       "End": true
     },
     "EnrichmentFailed": {
