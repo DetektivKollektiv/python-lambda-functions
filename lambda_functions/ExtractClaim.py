@@ -64,8 +64,8 @@ def extract_claim(event, context):
         text.append(paragraphs)
         allText += paragraphs
 
-    if len(allText) >= 4900:
-        allText = allText[:4899]
+    if len(allText) >= 4800:
+        allText = allText[:4799]
     # add as first entry a placeholder for item_content
     urls.insert(0, "")
 
