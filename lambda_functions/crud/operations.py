@@ -553,13 +553,45 @@ def get_organization_by_content_db(content):
         Returns
         ------
         org: FactChecking_Organization
-        Null, if no url was found
+        Null, if no org was found
         """
     session = get_db_session()
     org = session.query(FactChecking_Organization).filter(FactChecking_Organization.name == content).first()
     if org is None:
         raise Exception("No Organization found.")
     return org
+
+
+def get_factcheck_by_url_and_item_db(factcheck_url, item_id):
+    """Returns the factcheck publishing fact checks
+
+        Returns
+        ------
+        factcheck: ExternalFactCheck
+        Null, if no factcheck was found
+        """
+    session = get_db_session()
+    factcheck = session.query(ExternalFactCheck).filter(ExternalFactCheck.url == factcheck_url,
+                                                        ExternalFactCheck.item_id == item_id).first()
+    if factcheck is None:
+        raise Exception("No Factcheck found.")
+    return factcheck
+
+
+def get_itemurl_by_url_and_item_db(url_id, item_id):
+    """Returns the itemurl for an item and url
+
+        Returns
+        ------
+        itemurl: ItemURL
+        Null, if no itemurl was found
+        """
+    session = get_db_session()
+    itemurl = session.query(ItemURL).filter(ItemURL.url_id == url_id,
+                                            ItemURL.item_id == item_id).first()
+    if itemurl is None:
+        raise Exception("No ItemURL found.")
+    return itemurl
 
 
 def reset_locked_items_db(items):
