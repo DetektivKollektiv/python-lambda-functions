@@ -70,7 +70,24 @@ def set_cors(response, event):
 
             response['headers']['Access-Control-Allow-Origin'] = source_origin           
 
-    return response 
+    return response
+
+
+def cognito_id_from_event(event):
+    """Extracts the cognito user id (=sub) from the event.
+
+    Parameters
+    ----------
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    user_id: str
+        The user id
+    """
+    user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1]
+    return user_id
 
 
 def get_db_session():
