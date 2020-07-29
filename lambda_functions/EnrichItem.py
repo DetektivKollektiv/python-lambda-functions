@@ -1,5 +1,5 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization
+from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity
 from crud import operations
 from uuid import uuid4
 
@@ -174,7 +174,7 @@ def store_itemurl(event, context):
                 raise
 
 
-def store_itementity(event, context):
+def store_itementities(event, context):
     """stores entities of an item
 
     Parameters
@@ -199,30 +199,33 @@ def store_itementity(event, context):
 
     print(event)
 
-    # Store all urls referenced in the item
-    url = URL()
-    for str_url in event['Claim']['urls']:
-        if str_url == "":
-            continue
-        # search for url in database
+    # Store all entities of the item
+    for str_entity in event['Entities']:
+        entity = Entity()
+        # search for entity in database
         try:
-            url = operations.get_url_by_content_db(str_url)
+            entity = operations.get_entity_by_content_db(str_entity)
         except Exception:
-            # store url in database
-            url.id = str(uuid4())
-            url.url = str_url
+            # store entity in database
+            entity.id = str(uuid4())
+            entity.entity = str_entity
             try:
-                operations.update_object_db(url)
+                operations.update_object_db(entity)
             except Exception as e:
-                logger.error("Could not store urls. Exception: %s", e, exc_info=True)
+                logger.error("Could not store entity. Exception: %s", e, exc_info=True)
                 raise
-        # store itemurl in database
-        itemurl = ItemURL()
-        itemurl.id = str(uuid4())
-        itemurl.item_id = event['item']['id']
-        itemurl.url_id = url.id
+        # store item entity in database
+        itementity = ItemEntity()
+        # item entity already exists?
+        item_id = event['item']['id']
         try:
-            operations.update_object_db(itemurl)
-        except Exception as e:
-            logger.error("Could not store itemurls. Exception: %s", e, exc_info=True)
-        raise
+            itementity = operations.get_itementity_by_entity_and_item_db(entity.id, item_id)
+        except Exception:
+            itementity.id = str(uuid4())
+            itementity.item_id = item_id
+            itementity.entity_id = entity.id
+            try:
+                operations.update_object_db(itementity)
+            except Exception as e:
+                logger.error("Could not store item entity. Exception: %s", e, exc_info=True)
+                raise

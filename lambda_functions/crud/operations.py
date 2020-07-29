@@ -546,7 +546,23 @@ def get_url_by_content_db(content):
         raise Exception("No url found.")
     return url
 
-  
+
+def get_entity_by_content_db(content):
+    """Returns an entity with the specified content from the database
+
+        Returns
+        ------
+        entity: Entity
+            An entity of an item
+        Null, if no entity was found
+        """
+    session = get_db_session()
+    entity = session.query(Entity).filter(Entity.entity == content).first()
+    if entity is None:
+        raise Exception("No entity found.")
+    return entity
+
+
 def get_organization_by_content_db(content):
     """Returns the organization publishing fact checks
 
@@ -592,6 +608,22 @@ def get_itemurl_by_url_and_item_db(url_id, item_id):
     if itemurl is None:
         raise Exception("No ItemURL found.")
     return itemurl
+
+
+def get_itementity_by_entity_and_item_db(entity_id, item_id):
+    """Returns the itementity for an item and entity
+
+        Returns
+        ------
+        itementity: ItemEntity
+        Null, if no itementity was found
+    """
+    session = get_db_session()
+    itementity = session.query(ItemEntity).filter(ItemEntity.entity_id == entity_id,
+                                            ItemEntity.item_id == item_id).first()
+    if itementity is None:
+        raise Exception("No ItemEntity found.")
+    return itementity
 
 
 def reset_locked_items_db(items):

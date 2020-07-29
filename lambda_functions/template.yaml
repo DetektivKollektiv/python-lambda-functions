@@ -343,12 +343,29 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  StoreItemURL:
+  StoreItemURLFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-StoreItemURL-${STAGE}'
       CodeUri: .
       Handler: EnrichItem.store_itemurl
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemEntityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-StoreItemEntities-${STAGE}'
+      CodeUri: .
+      Handler: EnrichItem.store_itementities
       Runtime: python3.8
       MemorySize: 832
       Role:
