@@ -1,5 +1,5 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, ItemSentiment
+from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, ItemSentiment, Keyphrase, ItemKeyphrase
 from crud import operations
 from uuid import uuid4
 
@@ -286,3 +286,62 @@ def store_itemsentiment(event, context):
         except Exception as e:
             logger.error("Could not store item sentiment. Exception: %s", e, exc_info=True)
             raise
+
+
+def store_itemphrases(event, context):
+    """stores key phrases of an item
+
+    Parameters
+    ----------
+    event: dict, required
+        item
+        KeyPhrases
+
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+
+    context: object, required
+        Lambda Context runtime methods and attributes
+
+        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
+
+    Returns
+    ------
+    API Gateway Lambda Proxy Output Format: application/json
+
+        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
+    """
+
+    print(event)
+
+    # Store all entities of the item
+    for str_phrase in event['KeyPhrases']:
+        phrase = Keyphrase()
+        # search for entity in database
+        try:
+            phrase = operations.get_phrase_by_content_db(str_phrase)
+        except Exception:
+            # store phrase in database
+            phrase.id = str(uuid4())
+            phrase.phrase = str_phrase
+            try:
+                operations.update_object_db(phrase)
+            except Exception as e:
+                logger.error("Could not store key phrase. Exception: %s", e, exc_info=True)
+                raise
+        # store item keyphrase in database
+        itemphrase = ItemKeyphrase()
+        # item phrase already exists?
+        item_id = event['item']['id']
+        try:
+            itemphrase = operations.get_itemphrase_by_phrase_and_item_db(phrase.id, item_id)
+        except Exception:
+            itemphrase.id = str(uuid4())
+            itemphrase.item_id = item_id
+            itemphrase.keyphrase_id = phrase.id
+            try:
+                operations.update_object_db(itemphrase)
+            except Exception as e:
+                logger.error("Could not store item key phrase. Exception: %s", e, exc_info=True)
+                raise
+
+

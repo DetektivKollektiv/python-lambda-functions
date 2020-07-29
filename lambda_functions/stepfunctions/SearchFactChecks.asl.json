@@ -147,6 +147,18 @@
         }
       ],
       "ResultPath": null,
+      "Next": "Store Item Sentiment"
+    },
+    "Store Item Keyphrases": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemKeyphrases-dev",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.TaskFailed" ],
+          "Next": "EnrichmentFailed"
+        }
+      ],
+      "ResultPath": null,
       "End": true
     },
     "EnrichmentFailed": {

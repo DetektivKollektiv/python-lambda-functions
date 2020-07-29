@@ -658,6 +658,38 @@ def get_itemsentiment_by_sentiment_and_item_db(sentiment_id, item_id):
     return itemsentiment
 
 
+def get_phrase_by_content_db(str_phrase):
+    """Returns a keyphrase with the specified content from the database
+
+        Returns
+        ------
+        keyphrase: Keyphrase
+            A key phrase of an item
+        Null, if no key phrase was found
+        """
+    session = get_db_session()
+    phrase = session.query(Keyphrase).filter(Keyphrase.phrase == content).first()
+    if phrase is None:
+        raise Exception("No key phrase found.")
+    return phrase
+
+
+def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id):
+    """Returns the itemkeyphrase for an item and keyphrase
+
+        Returns
+        ------
+        itemphrase: ItemKeyphrase
+        Null, if no itemphrase was found
+    """
+    session = get_db_session()
+    itemphrase = session.query(ItemKeyphrase).filter(ItemKeyphrase.keyphrase_id == phrase_id,
+                                            ItemKeyphrase.item_id == item_id).first()
+    if itemphrase is None:
+        raise Exception("No ItemKeyphrase found.")
+    return itemphrase
+
+
 def reset_locked_items_db(items):
     """Updates all locked items in the database 
     and returns the amount of updated items"""

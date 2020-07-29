@@ -124,7 +124,7 @@ class ItemSentiment(Base):
 class Keyphrase(Base):
     __tablename__ = 'keyphrases'
     id = Column(String, primary_key=True)
-    keyphrase = Column(String)
+    phrase = Column(String)
     items = relationship("ItemKeyphrase")
 
 
