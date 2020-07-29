@@ -626,6 +626,38 @@ def get_itementity_by_entity_and_item_db(entity_id, item_id):
     return itementity
 
 
+def get_sentiment_by_content_db(content):
+    """Returns the sentiment with the specified content from the database
+
+        Returns
+        ------
+        sentiment: Sentiment
+            The sentiment of an item
+        Null, if no sentiment was found
+        """
+    session = get_db_session()
+    sentiment = session.query(Sentiment).filter(Sentiment.sentiment == content).first()
+    if sentiment is None:
+        raise Exception("No sentiment found.")
+    return sentiment
+
+
+def get_itemsentiment_by_sentiment_and_item_db(sentiment_id, item_id):
+    """Returns the itemsentiment for an item and sentiment
+
+        Returns
+        ------
+        itemsentiment: ItemSentiment
+        Null, if no itemsentiment was found
+    """
+    session = get_db_session()
+    itemsentiment = session.query(ItemSentiment).filter(ItemSentiment.sentiment_id == sentiment_id,
+                                            ItemSentiment.item_id == item_id).first()
+    if itemsentiment is None:
+        raise Exception("No Item Sentiment found.")
+    return itemsentiment
+
+
 def reset_locked_items_db(items):
     """Updates all locked items in the database 
     and returns the amount of updated items"""

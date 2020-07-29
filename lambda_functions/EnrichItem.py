@@ -1,5 +1,5 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity
+from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, ItemSentiment
 from crud import operations
 from uuid import uuid4
 
@@ -229,3 +229,60 @@ def store_itementities(event, context):
             except Exception as e:
                 logger.error("Could not store item entity. Exception: %s", e, exc_info=True)
                 raise
+
+
+def store_itemsentiment(event, context):
+    """stores sentiment of an item
+
+    Parameters
+    ----------
+    event: dict, required
+        item
+        Sentiment
+
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+
+    context: object, required
+        Lambda Context runtime methods and attributes
+
+        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
+
+    Returns
+    ------
+    API Gateway Lambda Proxy Output Format: application/json
+
+        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
+    """
+
+    print(event)
+
+    # Store the sentiment of the item
+    sentiment = Sentiment()
+    # search for sentiment in database
+    str_sentiment = event['Sentiment']
+    try:
+        sentiment = operations.get_sentiment_by_content_db(str_sentiment)
+    except Exception:
+        # store sentiment in database
+        sentiment.id = str(uuid4())
+        sentiment.sentiment = str_sentiment
+        try:
+            operations.update_object_db(sentiment)
+        except Exception as e:
+            logger.error("Could not store sentiment. Exception: %s", e, exc_info=True)
+            raise
+    # store item sentiment in database
+    itemsentiment = ItemSentiment()
+    # item entity already exists?
+    item_id = event['item']['id']
+    try:
+        itemsentiment = operations.get_itemsentiment_by_sentiment_and_item_db(sentiment.id, item_id)
+    except Exception:
+        itemsentiment.id = str(uuid4())
+        itemsentiment.item_id = item_id
+        itemsentiment.sentiment_id = sentiment.id
+        try:
+            operations.update_object_db(itemsentiment)
+        except Exception as e:
+            logger.error("Could not store item sentiment. Exception: %s", e, exc_info=True)
+            raise
