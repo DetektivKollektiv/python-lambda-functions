@@ -31,8 +31,7 @@ class Item(Base):
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
-                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2,
-                "open_reviews": self.open_reviews,
+                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
                 "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp}
 
 
