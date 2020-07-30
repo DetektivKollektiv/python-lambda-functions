@@ -491,20 +491,26 @@ def close_open_junior_review(item_id, peer_review_id):
 
 def get_pair_difference(review_id):
     junior_review = get_review_by_peer_review_id_db(review_id)
+    
     peer_review_answers = get_review_answers_by_review_id_db(review_id)
     junior_review_answers = get_review_answers_by_review_id_db(junior_review.id)
+
+    answers_length = peer_review_answers.count()
+    relevant_answers = 0
 
     junior_review_score_sum = 0
     peer_review_score_sum = 0
 
-    for answer in junior_review_answers:
-        junior_review_score_sum = junior_review_score_sum + answer.answer
+    for i in range(1,answers_length + 1,1):
+        junior_answer = junior_review_answers.filter(ReviewAnswer.review_question_id == i).one().answer
+        peer_answer = peer_review_answers.filter(ReviewAnswer.review_question_id == i).one().answer
+        if junior_answer > 0 and peer_answer > 0:
+            junior_review_score_sum = junior_review_score_sum + junior_answer
+            peer_review_score_sum = peer_review_score_sum + peer_answer
+            relevant_answers = relevant_answers + 1
 
-    for answer in peer_review_answers:
-        peer_review_score_sum = peer_review_score_sum + answer.answer
-    
-    junior_review_average = junior_review_score_sum / junior_review_answers.count()
-    peer_review_average = peer_review_score_sum / peer_review_answers.count()
+    junior_review_average = junior_review_score_sum / relevant_answers
+    peer_review_average = peer_review_score_sum / relevant_answers
 
     difference = abs(junior_review_average - peer_review_average)
     return difference
