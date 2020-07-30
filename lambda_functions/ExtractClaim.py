@@ -43,9 +43,10 @@ def extract_claim(event, context):
     # extract all urls from item_content
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # titles contains as first entry a placeholder for item_content
-    titles = ["", ]
+    # titles = ["", ]
+    titles = []
     # text contains as first entry a placeholder for item_content
-    text = [item_content, ]
+    # text = [item_content, ]
     allText = item_content
 
     # open all urls and extract the paragraphs
@@ -61,18 +62,22 @@ def extract_claim(event, context):
         # concatenate all paragraphs for each url
         for t in pAll:
             paragraphs += '{} '.format(t.text)
-        text.append(paragraphs)
+            # As more paragraphs are appended as higher is the probability that the paragraphs do not belong to the
+            # main article
+            if len(paragraphs) > 1000:
+                break
+        # text.append(paragraphs)
         allText += paragraphs
 
     if len(allText) >= 4800:
         allText = allText[:4799]
     # add as first entry a placeholder for item_content
-    urls.insert(0, "")
+    # urls.insert(0, "")
 
     return {
         "urls": urls,
         "titles": titles,
-        "text": text,
+        # "text": text,
         "concatenation": {
             "Text": allText
         }

@@ -606,20 +606,148 @@ def get_url_by_content_db(content):
         raise Exception("No url found.")
     return url
 
-  
+
+def get_entity_by_content_db(content):
+    """Returns an entity with the specified content from the database
+
+        Returns
+        ------
+        entity: Entity
+            An entity of an item
+        Null, if no entity was found
+        """
+    session = get_db_session()
+    entity = session.query(Entity).filter(Entity.entity == content).first()
+    if entity is None:
+        raise Exception("No entity found.")
+    return entity
+
+
 def get_organization_by_content_db(content):
     """Returns the organization publishing fact checks
 
         Returns
         ------
         org: FactChecking_Organization
-        Null, if no url was found
+        Null, if no org was found
         """
     session = get_db_session()
     org = session.query(FactChecking_Organization).filter(FactChecking_Organization.name == content).first()
     if org is None:
         raise Exception("No Organization found.")
     return org
+
+
+def get_factcheck_by_url_and_item_db(factcheck_url, item_id):
+    """Returns the factcheck publishing fact checks
+
+        Returns
+        ------
+        factcheck: ExternalFactCheck
+        Null, if no factcheck was found
+        """
+    session = get_db_session()
+    factcheck = session.query(ExternalFactCheck).filter(ExternalFactCheck.url == factcheck_url,
+                                                        ExternalFactCheck.item_id == item_id).first()
+    if factcheck is None:
+        raise Exception("No Factcheck found.")
+    return factcheck
+
+
+def get_itemurl_by_url_and_item_db(url_id, item_id):
+    """Returns the itemurl for an item and url
+
+        Returns
+        ------
+        itemurl: ItemURL
+        Null, if no itemurl was found
+        """
+    session = get_db_session()
+    itemurl = session.query(ItemURL).filter(ItemURL.url_id == url_id,
+                                            ItemURL.item_id == item_id).first()
+    if itemurl is None:
+        raise Exception("No ItemURL found.")
+    return itemurl
+
+
+def get_itementity_by_entity_and_item_db(entity_id, item_id):
+    """Returns the itementity for an item and entity
+
+        Returns
+        ------
+        itementity: ItemEntity
+        Null, if no itementity was found
+    """
+    session = get_db_session()
+    itementity = session.query(ItemEntity).filter(ItemEntity.entity_id == entity_id,
+                                            ItemEntity.item_id == item_id).first()
+    if itementity is None:
+        raise Exception("No ItemEntity found.")
+    return itementity
+
+
+def get_sentiment_by_content_db(content):
+    """Returns the sentiment with the specified content from the database
+
+        Returns
+        ------
+        sentiment: Sentiment
+            The sentiment of an item
+        Null, if no sentiment was found
+        """
+    session = get_db_session()
+    sentiment = session.query(Sentiment).filter(Sentiment.sentiment == content).first()
+    if sentiment is None:
+        raise Exception("No sentiment found.")
+    return sentiment
+
+
+def get_itemsentiment_by_sentiment_and_item_db(sentiment_id, item_id):
+    """Returns the itemsentiment for an item and sentiment
+
+        Returns
+        ------
+        itemsentiment: ItemSentiment
+        Null, if no itemsentiment was found
+    """
+    session = get_db_session()
+    itemsentiment = session.query(ItemSentiment).filter(ItemSentiment.sentiment_id == sentiment_id,
+                                            ItemSentiment.item_id == item_id).first()
+    if itemsentiment is None:
+        raise Exception("No Item Sentiment found.")
+    return itemsentiment
+
+
+def get_phrase_by_content_db(str_phrase):
+    """Returns a keyphrase with the specified content from the database
+
+        Returns
+        ------
+        keyphrase: Keyphrase
+            A key phrase of an item
+        Null, if no key phrase was found
+        """
+    session = get_db_session()
+    phrase = session.query(Keyphrase).filter(Keyphrase.phrase == content).first()
+    if phrase is None:
+        raise Exception("No key phrase found.")
+    return phrase
+
+
+def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id):
+    """Returns the itemkeyphrase for an item and keyphrase
+
+        Returns
+        ------
+        itemphrase: ItemKeyphrase
+        Null, if no itemphrase was found
+    """
+    session = get_db_session()
+    itemphrase = session.query(ItemKeyphrase).filter(ItemKeyphrase.keyphrase_id == phrase_id,
+                                            ItemKeyphrase.item_id == item_id).first()
+    if itemphrase is None:
+        raise Exception("No ItemKeyphrase found.")
+    return itemphrase
 
 
 def reset_locked_items_db(items):

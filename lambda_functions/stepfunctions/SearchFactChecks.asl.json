@@ -55,8 +55,8 @@
         }
       ],
       "Parameters": {
-        "Text": "$.Claim.concatenation.Text",
-        "LanguageCode":"$.item.language"
+        "Text.$": "$.Claim.concatenation.Text",
+        "LanguageCode.$":"$.item.language"
       },
       "ResultPath": "$.Entities",
       "Next": "Detect Sentiment"
@@ -71,8 +71,8 @@
         }
       ],
       "Parameters": {
-        "Text": "$.Claim.concatenation.Text",
-        "LanguageCode":"$.item.language"
+        "Text.$": "$.Claim.concatenation.Text",
+        "LanguageCode.$":"$.item.language"
       },
       "ResultPath": "$.Sentiment",
       "Next": "Search Fact Checks"
@@ -86,6 +86,11 @@
           "Next": "EnrichmentFailed"
         }
       ],
+      "Parameters": {
+        "item.$": "$.item",
+        "KeyPhrases.$": "$.KeyPhrases",
+        "Entities.$": "$.Entities"
+      },
       "ResultPath": "$.FactChecks",
       "Next": "Update Item Language"
     },
@@ -98,7 +103,10 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "Parameters": {
+        "item.$": "$.item"
+      },
+      "ResultPath": null,
       "Next": "Store Fact Check"
     },
     "Store Fact Check": {
@@ -110,7 +118,11 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "Parameters": {
+        "item.$": "$.item",
+        "FactChecks.$": "$.FactChecks"
+      },
+      "ResultPath": null,
       "Next": "Store Item URL"
     },
     "Store Item URL": {
@@ -122,7 +134,59 @@
           "Next": "EnrichmentFailed"
         }
       ],
-      "ResultPath": "$.null",
+      "Parameters": {
+        "item.$": "$.item",
+        "Claim.$": "$.Claim"
+      },
+      "ResultPath": null,
+      "Next": "Store Item Entities"
+    },
+    "Store Item Entities": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemEntities-dev",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.TaskFailed" ],
+          "Next": "EnrichmentFailed"
+        }
+      ],
+      "Parameters": {
+        "item.$": "$.item",
+        "Entities.$": "$.Entities"
+      },
+      "ResultPath": null,
+      "Next": "Store Item Sentiment"
+    },
+    "Store Item Sentiment": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemSentiment-dev",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.TaskFailed" ],
+          "Next": "EnrichmentFailed"
+        }
+      ],
+      "Parameters": {
+        "item.$": "$.item",
+        "Sentiment.$": "$.Sentiment"
+      },
+      "ResultPath": null,
+      "Next": "Store Item Keyphrases"
+    },
+    "Store Item Keyphrases": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemKeyphrases-dev",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.TaskFailed" ],
+          "Next": "EnrichmentFailed"
+        }
+      ],
+      "Parameters": {
+        "item.$": "$.item",
+        "KeyPhrases.$": "$.KeyPhrases"
+      },
+      "ResultPath": null,
       "End": true
     },
     "EnrichmentFailed": {
