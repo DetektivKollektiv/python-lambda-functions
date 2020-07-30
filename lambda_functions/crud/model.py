@@ -188,4 +188,6 @@ class Review(Base):
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
-                "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id}
+                "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id,
+                "start_timestamp": self.start_timestamp, "finish_timestamp": self.finish_timestamp}
+
