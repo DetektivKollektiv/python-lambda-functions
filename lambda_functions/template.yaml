@@ -347,7 +347,7 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  StoreItemURLFunction:
+  StoreItemURL:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub 'detektivkollektiv-api-StoreItemURL-${STAGE}'
