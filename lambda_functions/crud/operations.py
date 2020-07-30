@@ -724,7 +724,7 @@ def get_itemsentiment_by_sentiment_and_item_db(sentiment_id, item_id):
     return itemsentiment
 
 
-def get_phrase_by_content_db(str_phrase):
+def get_phrase_by_content_db(content):
     """Returns a keyphrase with the specified content from the database
 
         Returns

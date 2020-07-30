@@ -39,8 +39,8 @@
         }
       ],
     "Parameters": {
-        "Text": "$.Claim.concatenation.Text",
-        "LanguageCode":"$.item.language"
+        "Text.$": "$.Claim.concatenation.Text",
+        "LanguageCode.$":"$.item.language"
       },
       "ResultPath": "$.KeyPhrases",
       "Next": "Detect Entities"
