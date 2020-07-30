@@ -59,6 +59,22 @@
         "LanguageCode.$":"$.item.language"
       },
       "ResultPath": "$.Entities",
+      "Next": "Detect Title Entities"
+    },
+    "Detect Title Entities": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetEntities-dev",
+      "Catch": [
+        {
+          "ErrorEquals": [ "States.TaskFailed" ],
+          "Next": "EnrichmentFailed"
+        }
+      ],
+      "Parameters": {
+        "Text.$": "$.Claim.titles[0]",
+        "LanguageCode.$":"$.item.language"
+      },
+      "ResultPath": "$.TitleEntities",
       "Next": "Detect Sentiment"
     },
     "Detect Sentiment": {
@@ -89,6 +105,7 @@
       "Parameters": {
         "item.$": "$.item",
         "KeyPhrases.$": "$.KeyPhrases",
+        "TitleEntities.$": "$.TitleEntities",
         "Entities.$": "$.Entities"
       },
       "ResultPath": "$.FactChecks",
