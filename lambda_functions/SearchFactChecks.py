@@ -48,6 +48,6 @@ def get_FactChecks(event, context):
         # Get the response data as a python object. Verify that it's a dictionary.
         response_json = response.json()
         if 'claims' in response_json:
-            claims.append(response_json['claims'])
+            claims.append(response_json['claims'][0])
 
     return claims
