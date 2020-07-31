@@ -8,7 +8,7 @@ logger.setLevel(logging.INFO)
 
 # Call Google API for Fact Check search
 def call_googleapi(search_terms, language_code):
-    pageSize = 3  # Count of returned results
+    pageSize = 1  # Count of returned results
     query = ""
     for term in search_terms:
         query += "\"" + term + "\" "
@@ -22,13 +22,6 @@ def get_FactChecks(event, context):
     logger.info('Calling get_FactChecks with event')
     logger.info(event)
 
-    # Check if key phrases are available
-    if 'KeyPhrases' in event:
-        search_terms = event['KeyPhrases']
-    else:
-        logger.error("There are no key phrases!")
-        raise Exception('Please provide key phrases!')
-
     # Check if LanguageCode is available
     if 'item' in event:
         if 'language' in event['item']:
@@ -40,21 +33,21 @@ def get_FactChecks(event, context):
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
-    response = call_googleapi(search_terms, LanguageCode)
+    search_terms = []
+    # Check if search terms are available
+    if 'TitleEntities' in event:
+        search_terms.append(event['TitleEntities'])
+    if 'KeyPhrases' in event:
+        search_terms.append(event['KeyPhrases'])
+    if 'Entities' in event:
+        search_terms.append(event['Entities'])
 
-    # Check if the search was successful
-    # Get the response data as a python object. Verify that it's a dictionary.
-    response_json = response.json()
-    if 'claims' in response_json:
-        claims = response_json['claims']
-    # if the search was not successful, try again with entities as search terms
-    elif 'Entities' in event:
-        search_terms = event['Entities']
-        response = call_googleapi(search_terms, LanguageCode)
+    for terms in search_terms:
+        response = call_googleapi(terms, LanguageCode)
+        # Check if the search was successful
+        # Get the response data as a python object. Verify that it's a dictionary.
         response_json = response.json()
         if 'claims' in response_json:
-            claims = response_json['claims']
-    else:
-        logger.error("There are no search results!")
+            claims.append(response_json['claims'])
 
     return claims
