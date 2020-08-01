@@ -27,10 +27,6 @@ Resources:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
-      Auth:
-        DefaultAuthorizer: AWS_IAM
-        AddDefaultAuthorizerToCorsPreflight: false
-        InvokeRole: NONE
 
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
@@ -208,12 +204,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  GetOpenItemsForUserFunction:
+  GetOpenItemForUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_open_items_for_user-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-get_open_item_for_user-${STAGE}'
       CodeUri: .
-      Handler: app.get_open_items_for_user
+      Handler: app.get_open_item_for_user
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -224,7 +220,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /open_items_for_user/{num_items}
+            Path: /open_item_for_user/{id}
             Method: get
             RestApiId:
               Ref: Api
@@ -431,27 +427,10 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /user
+            Path: /users
             Method: post
             RestApiId:
               Ref: Api
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-
-  CreateUserFromCognitoFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-create_user_from_cognito-${STAGE}'
-      CodeUri: .
-      Handler: app.create_user_from_cognito
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
       Environment:
         Variables:
           DBNAME:
@@ -482,12 +461,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  GetUserFunction:
+  GetUserByIdFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_user-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-get_user_by_id-${STAGE}'
       CodeUri: .
-      Handler: app.get_user
+      Handler: app.get_user_by_id
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -498,7 +477,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /user
+            Path: /users/{id}
             Method: get              
             RestApiId:
               Ref: Api
@@ -506,8 +485,6 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
 
   CreateReviewFunction:
     Type: AWS::Serverless::Function
@@ -633,9 +610,7 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
-
+      
   ItemSubmissionFunction:
       Type: AWS::Serverless::Function
       Properties:      
@@ -652,9 +627,7 @@ Resources:
           Echo:
             Type: Api
             Properties:
-              Auth:
-                Authorizer: NONE
-              Path: /item_submission
+              Path: /item-submission
               Method: post
               RestApiId:
                 Ref: Api
@@ -689,9 +662,6 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
-
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
     Properties:      
@@ -725,36 +695,8 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /accept_item/{item_id}
+            Path: /accept_item/{user_id}/{item_id}
             Method: post
-            RestApiId:
-              Ref: Api
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
-
-  GetAllClosedItemsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_closed_items-${STAGE}'
-      CodeUri: .
-      Handler: app.get_all_closed_items
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      Tracing: Active
-      Events:
-        Echo:
-          Type: Api
-          Properties:
-            Path: /items/closed
-            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -779,32 +721,5 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/ComprehendFullAccess
-        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
         - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
-
-  ResetLockedItemsRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Description: Resets Locked items every 10 minutes.
-      ScheduleExpression: rate(10 minutes)
-      State: ENABLED
-      Targets:
-        -
-          Arn:
-            Fn::GetAtt:
-              - ResetLockedItemsFunction
-              - Arn
-          Id: !Sub 'reset_locked_items-${STAGE}'
-
-  PermissionForEventsToInvokeLambda:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName:
-        Ref: ResetLockedItemsFunction
-      Action: lambda:InvokeFunction
-      Principal: events.amazonaws.com
-      SourceArn:
-        Fn::GetAtt:
-          - ResetLockedItemsRule
-          - Arn
+        
