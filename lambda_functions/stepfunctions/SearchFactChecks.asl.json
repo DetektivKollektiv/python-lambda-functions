@@ -71,7 +71,7 @@
         }
       ],
       "Parameters": {
-        "Text.$": "$.Claim.titles[0]",
+        "Text.$": "$.Claim.title",
         "LanguageCode.$":"$.item.language"
       },
       "ResultPath": "$.TitleEntities",
