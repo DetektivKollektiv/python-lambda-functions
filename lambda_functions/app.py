@@ -8,6 +8,10 @@ from aws_xray_sdk.core import xray_recorder
 from crud import operations
 from crud.model import *
 
+import boto3
+
+client = boto3.client('stepfunctions')
+
 
 def create_item(event, context):
     """Creates a new item.
@@ -77,7 +81,6 @@ def get_all_items(event, context):
 
     logger.info('Database access for item retrieval.')
 
-
     try:
         # New x-ray segment
         xray_recorder.begin_subsegment('database-access')
@@ -104,7 +107,6 @@ def get_all_items(event, context):
 
 
 def get_item_by_id(event, context):
-
     try:
         # get id (str) from path
         id = event['pathParameters']['id']
@@ -130,7 +132,6 @@ def get_item_by_id(event, context):
 
 
 def create_submission(event, context):
-
     body = event['body']
     submission = Submission()
     operations.body_to_object(body, submission)
@@ -149,7 +150,6 @@ def create_submission(event, context):
 
 
 def get_all_submissions(event, context):
-
     try:
         submissions = operations.get_all_submissions_db()
         submissions_dict = []
@@ -170,7 +170,6 @@ def get_all_submissions(event, context):
 
 
 def get_item_by_content(event, context):
-
     try:
         json_event = event['body']
         content = json_event.get('content')
@@ -196,7 +195,6 @@ def get_item_by_content(event, context):
 
 
 def create_user(event, context):
-
     user = User()
     body = event['body']
     operations.body_to_object(body, user)
@@ -215,7 +213,6 @@ def create_user(event, context):
 
 
 def get_all_users(event, context):
-
     try:
         users = operations.get_all_users_db()
         users_dict = []
@@ -236,7 +233,6 @@ def get_all_users(event, context):
 
 
 def get_user_by_id(event, context):
-
     try:
         # get id (str) from path
         id = event['pathParameters']['id']
@@ -262,7 +258,6 @@ def get_user_by_id(event, context):
 
 
 def create_review(event, context):
-
     review = Review()
     body = event['body']
     operations.body_to_object(body, review)
@@ -281,7 +276,6 @@ def create_review(event, context):
 
 
 def get_all_reviews(event, context):
-
     try:
         reviews = operations.get_all_reviews_db()
         reviews_dict = []
@@ -302,7 +296,6 @@ def get_all_reviews(event, context):
 
 
 def create_review_answer(event, context):
-
     review_answer = ReviewAnswer()
     body = event['body']
     operations.body_to_object(body, review_answer)
@@ -321,7 +314,6 @@ def create_review_answer(event, context):
 
 
 def get_all_review_answers(event, context):
-
     try:
         review_answers = operations.get_all_review_answers_db()
         review_answers_dict = []
@@ -342,7 +334,6 @@ def get_all_review_answers(event, context):
 
 
 def get_all_review_questions(event, context):
-
     try:
         review_questions = operations.get_all_review_questions_db()
         review_questions_dict = []
@@ -361,56 +352,57 @@ def get_all_review_questions(event, context):
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
 
+
 def submit_review(event, context):
-    
-    #Parse Body of request payload into review object
+    # Parse Body of request payload into review object
     try:
         body = event['body']
         review = Review()
         operations.body_to_object(body, review)
-        
-        #Give the user an experience point
+
+        # Give the user an experience point
         operations.give_experience_point(review.user_id)
-        
-        #Check if the review is still needed
-        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id, review.is_peer_review)
-        #If the review is no longer needed, return an error
+
+        # Check if the review is still needed
+        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id,
+                                                                      review.is_peer_review)
+        # If the review is no longer needed, return an error
         if review_still_needed == False:
             return {
                 "statusCode": 400,
                 "body": "Could not create review. Review no longer needed. Another detective might have been faster."
             }
-        #If the review is needed, create the review and the answers
+        # If the review is needed, create the review and the answers
         review = operations.create_review_db(review)
 
         # Deserialize if body is string 
-        if isinstance(body, str): 
+        if isinstance(body, str):
             body_dict = json.loads(body)
-        else: 
+        else:
             body_dict = body
 
         review_answers = []
-        
+
         for answer in body_dict['review_answers']:
             review_answer = ReviewAnswer()
-            setattr(review_answer, "review_id",review.id)
+            setattr(review_answer, "review_id", review.id)
             for key in answer:
                 setattr(review_answer, key, answer[key])
             review_answers.append(review_answer)
 
         operations.create_review_answer_set_db(review_answers)
 
-        #Get the corresponding item
+        # Get the corresponding item
         item = operations.get_item_by_id(review.item_id)
-        #If the review is a peer review, compute the variance of the review pair
+        # If the review is a peer review, compute the variance of the review pair
         if review.is_peer_review == True:
             operations.close_open_junior_review(review.item_id, review.id)
             difference = operations.get_pair_difference(review.id)
-            #If the variance is good, reduce the counter for open review pairs
+            # If the variance is good, reduce the counter for open review pairs
             if difference < 1:
                 operations.set_belongs_to_good_pair_db(review, True)
                 item.open_reviews = item.open_reviews - 1
-                #If enough review pairs have been found, set the status to closed
+                # If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
                     item.status = "closed"
                     item.result_score = operations.compute_item_result_score(item.id)
@@ -419,32 +411,32 @@ def submit_review(event, context):
             if difference >= 1:
                 operations.set_belongs_to_good_pair_db(review, False)
 
-        #If the review is not a peer review, set the status to "needs_senior"
+        # If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
             item.status = "needs_senior"
 
         operations.update_object_db(item)
-        #for answer in review.review_answers
+        # for answer in review.review_answers
         #    operations.create_review_answer_db(answer)
 
         return {
-                "statusCode": 201,
-                "body": json.dumps(item.to_dict())
-            }
+            "statusCode": 201,
+            "body": json.dumps(item.to_dict())
+        }
     except Exception as e:
         return {
             "statusCode": 400,
             "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
         }
 
-def item_submission(event, context):
 
+def item_submission(event, context):
     try:
         body = event['body']
 
-        if isinstance(body, str): 
+        if isinstance(body, str):
             body_dict = json.loads(body)
-        else: 
+        else:
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
@@ -457,7 +449,7 @@ def item_submission(event, context):
             found_item = operations.get_item_by_content_db(content)
             submission.item_id = found_item.id
             new_item_created = False
-            
+
         except Exception:
             # Item does not exist yet, item_id in submission is the id of the newly created item
             new_item = Item()
@@ -465,22 +457,27 @@ def item_submission(event, context):
             created_item = operations.create_item_db(new_item)
             new_item_created = True
             submission.item_id = created_item.id
+            client.start_execution(
+                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks',
+                name='SFC_' + created_item.id,
+                input="{\"item\":" + json.dumps(created_item.to_dict()) + "}"
+            )
 
         # Create submission
         operations.create_submission_db(submission)
 
         response = {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created) },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
             "body": json.dumps(submission.to_dict())
         }
-       
+
     except Exception as e:
         response = {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
-        
+
     if 'headers' in event and 'Origin' in event['headers']:
         sourceOrigin = event['headers']['Origin']
     elif 'headers' in event and 'origin' in event['headers']:
@@ -493,14 +490,13 @@ def item_submission(event, context):
     if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
-        
+
         response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
+
     return response
 
 
 def get_open_item_for_user(event, context):
-
     try:
         # get user id (str) from path
         id = event['pathParameters']['id']
@@ -511,7 +507,7 @@ def get_open_item_for_user(event, context):
 
             response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8" },
+                'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(item.to_dict())
             }
 
@@ -526,7 +522,7 @@ def get_open_item_for_user(event, context):
             "statusCode": 400,
             "body": "Could not get user. Check HTTP POST payload. Exception: {}".format(e)
         }
-        
+
     if 'Origin' in event['headers']:
         sourceOrigin = event['headers']['Origin']
     elif 'origin' in event['headers']:
@@ -537,21 +533,21 @@ def get_open_item_for_user(event, context):
     if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
-        
+
         response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
+
     return response
 
 
 def reset_locked_items(event, context):
     try:
         items = operations.get_locked_items()
-        updated = operations.reset_locked_items_db(items)        
+        updated = operations.reset_locked_items_db(items)
         return {
-                    "statusCode": 200,
-                    'headers': {"content-type": "application/json; charset=utf-8"},
-                    "body":"{} Items updated".format(updated)
-                }
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": "{} Items updated".format(updated)
+        }
     except Exception as e:
         return {
             "statusCode": 400,
@@ -560,7 +556,6 @@ def reset_locked_items(event, context):
 
 
 def accept_item(event, context):
-
     try:
         # get user and item ids (str) from url path
         user_id = event['pathParameters']['user_id']
@@ -569,14 +564,14 @@ def accept_item(event, context):
         # get user and item from the db
         user = operations.get_user_by_id(user_id)
         item = operations.get_item_by_id(item_id)
-            
+
         # Try to accept item
         try:
             operations.accept_item_db(user, item)
 
             response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8" },
+                'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(item.to_dict())
             }
 
@@ -584,14 +579,14 @@ def accept_item(event, context):
             response = {
                 "statusCode": 400,
                 "body": "Cannot accept item. Exception: {}".format(e)
-        }
+            }
 
     except Exception as e:
         response = {
             "statusCode": 400,
             "body": "Could not get user and/or item. Check URL parameters. Exception: {}".format(e)
         }
-        
+
     if 'Origin' in event['headers']:
         sourceOrigin = event['headers']['Origin']
     elif 'origin' in event['headers']:
@@ -602,7 +597,7 @@ def accept_item(event, context):
     if sourceOrigin is not None and sourceOrigin in allowedOrigins:
         if 'headers' not in response:
             response['headers'] = {}
-        
+
         response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
+
     return response
