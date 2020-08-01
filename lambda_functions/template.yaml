@@ -474,7 +474,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users
-            Method: get
+            Method: get              
             RestApiId:
               Ref: Api
       Environment:
@@ -499,7 +499,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /user
-            Method: get
+            Method: get              
             RestApiId:
               Ref: Api
       Environment:
@@ -511,7 +511,7 @@ Resources:
 
   CreateReviewFunction:
     Type: AWS::Serverless::Function
-    Properties:
+    Properties:      
       FunctionName: !Sub 'detektivkollektiv-api-create_review-${STAGE}'
       CodeUri: .
       Handler: app.create_review
@@ -551,7 +551,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /reviews
-            Method: get
+            Method: get              
             RestApiId:
               Ref: Api
       Environment:
@@ -561,7 +561,7 @@ Resources:
 
   CreateReviewAnswerFunction:
     Type: AWS::Serverless::Function
-    Properties:
+    Properties:      
       FunctionName: !Sub 'detektivkollektiv-api-create_review_answer-${STAGE}'
       CodeUri: .
       Handler: app.create_review_answer
@@ -601,7 +601,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_answers
-            Method: get
+            Method: get              
             RestApiId:
               Ref: Api
       Environment:
@@ -626,7 +626,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_questions
-            Method: get
+            Method: get              
             RestApiId:
               Ref: Api
       Environment:
@@ -638,7 +638,7 @@ Resources:
 
   ItemSubmissionFunction:
       Type: AWS::Serverless::Function
-      Properties:
+      Properties:      
         FunctionName: !Sub 'detektivkollektiv-api-item_submission-${STAGE}'
         CodeUri: .
         Handler: app.item_submission
@@ -667,7 +667,7 @@ Resources:
 
   SubmitReviewFunction:
     Type: AWS::Serverless::Function
-    Properties:
+    Properties:      
       FunctionName: !Sub 'detektivkollektiv-api-submit_review-${STAGE}'
       CodeUri: .
       Handler: app.submit_review
@@ -694,7 +694,7 @@ Resources:
 
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
-    Properties:
+    Properties:      
       FunctionName: !Sub 'detektivkollektiv-api-reset_locked_items-${STAGE}'
       CodeUri: .
       Handler: app.reset_locked_items
@@ -703,7 +703,7 @@ Resources:
       Role:
         Fn::GetAtt:
         - LambdaExecutionRole
-        - Arn
+        - Arn      
       Environment:
         Variables:
           DBNAME:
@@ -711,7 +711,7 @@ Resources:
 
   AcceptItemFunction:
     Type: AWS::Serverless::Function
-    Properties:
+    Properties:      
       FunctionName: !Sub 'detektivkollektiv-api-accept_item-${STAGE}'
       CodeUri: .
       Handler: app.accept_item
