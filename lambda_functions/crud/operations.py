@@ -40,6 +40,56 @@ def body_to_object(body, object):
     return object
 
 
+def set_cors(response, event):
+    """Adds a CORS header to a response according to the headers found in the event.
+
+    Parameters
+    ----------
+    response: dict
+        The response to be modified
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    response: dict
+        The modified response
+    """
+    source_origin = None
+    allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+    
+    if 'headers' in event:
+        if 'Origin' in event['headers']:
+            source_origin = event['headers']['Origin']
+        if 'origin' in event['headers']:
+            source_origin = event['headers']['origin']
+        
+        if source_origin and source_origin in allowed_origins:
+            if 'headers' not in response:
+                response['headers'] = {}
+
+            response['headers']['Access-Control-Allow-Origin'] = source_origin           
+
+    return response
+
+
+def cognito_id_from_event(event):
+    """Extracts the cognito user id (=sub) from the event.
+
+    Parameters
+    ----------
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    user_id: str
+        The user id
+    """
+    user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1]
+    return user_id
+
+
 def get_db_session():
     """Returns a DB session
 
@@ -441,20 +491,26 @@ def close_open_junior_review(item_id, peer_review_id):
 
 def get_pair_difference(review_id):
     junior_review = get_review_by_peer_review_id_db(review_id)
+    
     peer_review_answers = get_review_answers_by_review_id_db(review_id)
     junior_review_answers = get_review_answers_by_review_id_db(junior_review.id)
+
+    answers_length = peer_review_answers.count()
+    relevant_answers = 0
 
     junior_review_score_sum = 0
     peer_review_score_sum = 0
 
-    for answer in junior_review_answers:
-        junior_review_score_sum = junior_review_score_sum + answer.answer
+    for i in range(1,answers_length + 1,1):
+        junior_answer = junior_review_answers.filter(ReviewAnswer.review_question_id == i).one().answer
+        peer_answer = peer_review_answers.filter(ReviewAnswer.review_question_id == i).one().answer
+        if junior_answer > 0 and peer_answer > 0:
+            junior_review_score_sum = junior_review_score_sum + junior_answer
+            peer_review_score_sum = peer_review_score_sum + peer_answer
+            relevant_answers = relevant_answers + 1
 
-    for answer in peer_review_answers:
-        peer_review_score_sum = peer_review_score_sum + answer.answer
-    
-    junior_review_average = junior_review_score_sum / junior_review_answers.count()
-    peer_review_average = peer_review_score_sum / peer_review_answers.count()
+    junior_review_average = junior_review_score_sum / relevant_answers
+    peer_review_average = peer_review_score_sum / relevant_answers
 
     difference = abs(junior_review_average - peer_review_average)
     return difference
@@ -490,45 +546,55 @@ def compute_item_result_score(item_id):
     result = statistics.median(average_scores)
     return result
 
-def get_open_item_for_user_db(user):
-    """Inserts a new review answer into the database
+def get_open_items_for_user_db(user, num_items):
+    """Retreives a list of open items (in random order) to be reviewed by a user.
 
     Parameters
     ----------
     user: User
         The user that should receive a case
+    num_items: int
+        The (maximum) number of open items to be retreived
 
     Returns
     ------
-    item: Item
-        The case to be assigned to the user
+    items: Item[]
+        The list of open items for the user
     """
 
     session = get_db_session()
 
-    review_type = 'needs_junior'
+    sql_query_base = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
+                    reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
+                    FROM items
+                    INNER JOIN submissions ON items.id = submissions.item_id
+                    LEFT JOIN reviews on items.id = reviews.item_id
+                    WHERE {}
+                    GROUP BY items.id
+                    HAVING reviewed_by_user = 0
+                    ORDER BY oldest_submission
+                    LIMIT :num_items"""
     
-    # Senior detectives can get level 1 or level 2 reviews
+    sql_query = sql_query_base.format("items.status = 'needs_junior'")
+
+    # Senior detectives can get junior or senior reviews
     if user.level > 1:
-        review_types = ['needs_junior', 'needs_senior']
-        review_type = random.choice(review_types)
-
-    sql_query = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
-                reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
-                FROM items
-                INNER JOIN submissions ON items.id = submissions.item_id
-                LEFT JOIN reviews on items.id = reviews.item_id
-                WHERE items.status = :status
-                GROUP BY items.id
-                HAVING reviewed_by_user = 0
-                ORDER BY oldest_submission"""
-
-    result = session.execute(sql_query, {"user_id": user.id, "status": review_type})
+        sql_query = sql_query_base.format("(items.status = 'needs_junior' OR items.status = 'needs_senior')")
+    
+    result = session.execute(sql_query, {"user_id": user.id, "num_items": num_items})
     print(result)
-    item_id = result.fetchone()[0]
-    item = get_item_by_id(item_id)
 
-    return item
+    items = []
+
+    for row in result:
+        item_id = row[0]
+        item = get_item_by_id(item_id)
+        items.append(item)
+
+    # shuffle list order
+    random.shuffle(items)
+
+    return items
 
 
 def get_url_by_content_db(content):
@@ -698,6 +764,7 @@ def reset_locked_items_db(items):
         if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
             counter = counter + 1
             item.lock_timestamp = None
+            item.locked_by_user = None
             if item.status == "locked_by_junior":
                 item.status = "needs_junior"
             if item.status == "locked_by_senior":
@@ -738,3 +805,18 @@ def accept_item_db(user, item):
     update_object_db(item)
 
     return item
+
+
+def get_all_closed_items_db():
+    """Gets all closed items
+
+    Returns
+    ------
+    items: Item[]
+        The closed items
+    """
+
+    session = get_db_session()
+
+    items = session.query(Item).filter(Item.status == 'closed').all()
+    return items

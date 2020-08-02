@@ -18,6 +18,8 @@ class Item(Base):
     open_reviews_level_2 = Column(Integer)
     locked_by_user = Column(String)
     lock_timestamp = Column(DateTime)
+    open_timestamp = Column(DateTime)
+    close_timestamp = Column(DateTime)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -32,7 +34,8 @@ class Item(Base):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
                 "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
-                "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp}
+                "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp,
+                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp}
 
 
 class Submission(Base):
@@ -156,11 +159,12 @@ class ReviewQuestion(Base):
     id = Column(String, primary_key=True)
     content = Column(String)
     mandatory = Column(Boolean)
+    info = Column(String)
 
     review_answers = relationship("ReviewAnswer", backref="review_question")
 
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "mandatory": self.mandatory}
+        return {"id": self.id, "content": self.content, "mandatory": self.mandatory, "info": self.info}
 
 
 class ReviewAnswer(Base):
@@ -185,6 +189,8 @@ class Review(Base):
     item_id = Column(String, ForeignKey('items.id'))
     user_id = Column(String, ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")
+    start_timestamp = Column(DateTime)
+    finish_timestamp = Column(DateTime)
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
