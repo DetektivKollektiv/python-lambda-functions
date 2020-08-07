@@ -6,7 +6,7 @@
             "States": {
               "Extract Claim": {
                 "Type": "Task",
-                "Resource": "${ExtractClaimFunctionArn",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-ExtractClaimFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -18,7 +18,7 @@
               },
               "Detect Dominant Language": {
                 "Type": "Task",
-                "Resource": "${GetLanguageFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetLanguageFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -31,7 +31,7 @@
               },
               "Detect Key Phrases": {
                 "Type": "Task",
-                "Resource": "${GetKeyPhrasesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetKeyPhrasesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -47,7 +47,7 @@
               },
               "Detect Entities": {
                 "Type": "Task",
-                "Resource": "${GetEntitiesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetEntitiesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -63,7 +63,7 @@
               },
               "Detect Title Entities": {
                 "Type": "Task",
-                "Resource": "${GetEntitiesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetEntitiesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -79,7 +79,7 @@
               },
               "Detect Sentiment": {
                 "Type": "Task",
-                "Resource": "${GetSentimentFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetSentimentFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -95,7 +95,7 @@
               },
               "Search Fact Checks": {
                 "Type": "Task",
-                "Resource": "${SearchFactChecksFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-SearchFactChecksFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -113,7 +113,7 @@
               },
               "Update Item Language": {
                 "Type": "Task",
-                "Resource": "${UpdateItemFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-UpdateItemFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -128,7 +128,7 @@
               },
               "Store Fact Check": {
                 "Type": "Task",
-                "Resource": "${StoreFactChecksFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreFactChecksFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -144,7 +144,7 @@
               },
               "Store Item URL": {
                 "Type": "Task",
-                "Resource": "${StoreItemURLFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemURLFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -160,7 +160,7 @@
               },
               "Store Item Entities": {
                 "Type": "Task",
-                "Resource": "${StoreItemEntitiesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemEntitiesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -176,7 +176,7 @@
               },
               "Store Item Title Entities": {
                 "Type": "Task",
-                "Resource": "${StoreItemEntitiesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemEntitiesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -192,7 +192,7 @@
               },
               "Store Item Sentiment": {
                 "Type": "Task",
-                "Resource": "${StoreItemSentimentFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemSentimentFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
@@ -208,7 +208,7 @@
               },
               "Store Item Keyphrases": {
                 "Type": "Task",
-                "Resource": "${StoreItemKeyphrasesFunctionArn}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemKeyphrasesFunctionArn-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
