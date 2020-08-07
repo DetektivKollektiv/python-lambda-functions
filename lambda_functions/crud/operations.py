@@ -482,7 +482,7 @@ def close_open_junior_review(item_id, peer_review_id):
     session = get_db_session()
     query_result = session.query(Review).filter(
         Review.item_id == item_id,
-        Review.is_peer_review == "false",
+        Review.is_peer_review == False,
         Review.peer_review_id == None
         )
     open_junior_review = query_result.one()
