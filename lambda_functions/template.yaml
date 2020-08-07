@@ -808,3 +808,46 @@ Resources:
         Fn::GetAtt: 
           - ResetLockedItemsRule
           - Arn
+
+  SearchFactCheckStepFunction:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionUri: stepfunctions/SearchFactChecks.asl.json
+      DefinitionSubstitutions:
+        ExtractClaimFunctionArn: !GetAtt ExtractClaimFunction.Arn
+        GetLanguageFunctionArn: !GetAtt GetLanguageFunction.Arn
+        GetKeyPhrasesFunctionArn: !GetAtt GetKeyPhrasesFunction.Arn
+        GetEntitiesFunctionArn: !GetAtt GetEntitiesFunction.Arn
+        GetSentimentFunctionArn: !GetAtt GetSentimentFunction.Arn
+        SearchFactChecksFunctionArn: !GetAtt SearchFactChecksFunction.Arn
+        UpdateItemFunctionArn: !GetAtt UpdateLanguageFunction.Arn
+        StoreFactChecksFunctionArn: !GetAtt StoreFactChecksFunction.Arn
+        StoreItemURLFunctionArn: !GetAtt StoreItemURLFunction.Arn
+        StoreItemEntitiesFunctionArn: !GetAtt StoreItemEntityFunction.Arn
+        StoreItemSentimentFunctionArn: !GetAtt StoreItemSentimentFunction.Arn
+        StoreItemKeyphrasesFunctionArn: !GetAtt StoreItemKeyphraseFunction.Arn
+      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ExtractClaimFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetLanguageFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetKeyPhrasesFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetEntitiesFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetSentimentFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SearchFactChecksFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref UpdateLanguageFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StoreFactChecksFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StoreItemURLFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StoreItemEntityFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StoreItemSentimentFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StoreItemKeyphraseFunction
