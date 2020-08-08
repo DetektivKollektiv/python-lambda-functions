@@ -664,6 +664,8 @@ Resources:
               Ref: DBNAME
             CORS_ALLOW_ORIGIN:
               Ref: CorsAllowOrigin
+            STAGE:
+              Ref: STAGE
 
   SubmitReviewFunction:
     Type: AWS::Serverless::Function
