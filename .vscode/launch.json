@@ -1,0 +1,76 @@
+{
+    "configurations": [
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "python-lambda-functions:app.get_all_items (python3.8)",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "lambda_functions",
+                "lambdaHandler": "app.get_all_items"
+            },
+            "sam": {
+                "containerBuild": true,
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {},
+                "environmentVariables": {
+                    "DBNAME": "development_db",
+                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Submit Review",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "lambda_functions",
+                "lambdaHandler": "app.submit_review"
+            },
+            "sam": {
+                "containerBuild": true,
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {
+                    "path": "test-payloads/submit_review.json"
+                },
+               
+                "environmentVariables": {
+                    "DBNAME": "development_db",
+                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Accept Item",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "lambda_functions",
+                "lambdaHandler": "app.accept_item"
+            },
+            "sam": {
+                "containerBuild": true,
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {
+                    "path": "test-payloads/accept_item.json"
+                },
+               
+                "environmentVariables": {
+                    "DBNAME": "development_db",
+                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        }
+    ]
+}
