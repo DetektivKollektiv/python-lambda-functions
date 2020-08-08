@@ -55,10 +55,7 @@ def extract_claim(event, context):
         read_content = content.read()
 
         soup = BeautifulSoup(read_content, 'html.parser')
-        titles = soup.find_all('title')  # get the title of the web page
-        title = ""
-        if len(titles) > 0:
-            title = '{} '.format(titles[0].text)
+        titles.append(soup.find('title').text)  # get the title of the web page
         pAll = soup.find_all('p')  # get all paragraphs of the web page
         paragraphs = ''
 
@@ -79,7 +76,7 @@ def extract_claim(event, context):
 
     return {
         "urls": urls,
-        "title": title,
+        "titles": titles,
         # "text": text,
         "concatenation": {
             "Text": allText

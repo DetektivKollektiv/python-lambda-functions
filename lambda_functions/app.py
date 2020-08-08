@@ -13,9 +13,6 @@ from crud.model import *
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-client = boto3.client('stepfunctions')
-
-
 def create_item(event, context):
     """Creates a new item.
 
@@ -486,7 +483,6 @@ def submit_review(event, context):
                     item.status = "needs_junior"
             if difference >= 1:
                 operations.set_belongs_to_good_pair_db(review, False)
-                item.status = "needs_junior"
 
         #If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
@@ -543,12 +539,6 @@ def item_submission(event, context):
             created_item = operations.create_item_db(new_item)
             new_item_created = True
             submission.item_id = created_item.id
-            stage = os.environ['STAGE']
-            client.start_execution(
-                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks-'+stage,
-                name='SFC_' + created_item.id,
-                input="{\"item\":" + json.dumps(created_item.to_dict()) + "}"
-            )
 
         # Create submission
         operations.create_submission_db(submission)

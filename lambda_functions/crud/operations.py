@@ -482,7 +482,7 @@ def close_open_junior_review(item_id, peer_review_id):
     session = get_db_session()
     query_result = session.query(Review).filter(
         Review.item_id == item_id,
-        Review.is_peer_review == False,
+        Review.is_peer_review == "false",
         Review.peer_review_id == None
         )
     open_junior_review = query_result.one()
@@ -517,7 +517,7 @@ def get_pair_difference(review_id):
 
 def set_belongs_to_good_pair_db(review, belongs_to_good_pair):
     peer_review = review
-    junior_review = get_review_by_peer_review_id_db(peer_review.id)
+    junior_review = get_review_by_peer_review_id_db
 
     if belongs_to_good_pair == True:
         peer_review.belongs_to_good_pair = True
@@ -528,7 +528,7 @@ def set_belongs_to_good_pair_db(review, belongs_to_good_pair):
     session = get_db_session()
     session.merge(peer_review)
     session.merge(junior_review)
-    session.commit()
+    session.commit
 
 
 def compute_item_result_score(item_id):
@@ -539,9 +539,8 @@ def compute_item_result_score(item_id):
         counter = 0
         answer_sum = 0
         for answer in answers:
-            if answer.answer > 0:
-                counter = counter + 1
-                answer_sum = answer_sum + answer.answer
+            counter = counter + 1
+            answer_sum = answer_sum + answer.answer
         answer_average = answer_sum / counter
         average_scores.append(answer_average)
     result = statistics.median(average_scores)
