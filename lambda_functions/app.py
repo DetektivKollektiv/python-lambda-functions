@@ -486,6 +486,7 @@ def submit_review(event, context):
                     item.status = "needs_junior"
             if difference >= 1:
                 operations.set_belongs_to_good_pair_db(review, False)
+                item.status = "needs_junior"
 
         #If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
