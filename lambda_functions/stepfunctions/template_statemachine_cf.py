@@ -74,11 +74,12 @@ def template_state_machine(
                    "  SearchFactCheckStepFunction:\n" + \
                    "    Type: AWS::StepFunctions::StateMachine\n" + \
                    "    Properties:\n" + \
-                   "      DefinitionString:  !Sub |\n" + sm_def + "\n" + \
+                   "      DefinitionString: !Sub |\n" + sm_def + "\n" + \
                    "      RoleArn:\n" + \
                    "        Fn::GetAtt:\n" + \
                    "        - StateMachineLambdaRole\n" + \
-                   "        - Arn\n"
+                   "        - Arn\n" + \
+                   "      StateMachineName: !Sub 'SearchFactChecks-${STAGE}'\n"
 
     return template_out_str + templated_cf
 
