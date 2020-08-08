@@ -18,7 +18,7 @@
               },
               "Detect Dominant Language": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-UpdateItem-${STAGE}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetLanguage-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
