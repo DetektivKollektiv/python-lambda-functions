@@ -44,7 +44,7 @@ def extract_claim(event, context):
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
-    titles = []
+    title = ""
     # text contains as first entry a placeholder for item_content
     # text = [item_content, ]
     allText = item_content
