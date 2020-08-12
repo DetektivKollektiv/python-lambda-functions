@@ -35,7 +35,7 @@
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
-                    "Next": "EnrichmentFailed"
+                    "Next": "Detect Entities"
                   }
                 ],
               "Parameters": {
@@ -51,7 +51,7 @@
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
-                    "Next": "EnrichmentFailed"
+                    "Next": "Detect Title Entities"
                   }
                 ],
                 "Parameters": {
@@ -67,7 +67,7 @@
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
-                    "Next": "EnrichmentFailed"
+                    "Next": "Detect Sentiment"
                   }
                 ],
                 "Parameters": {
@@ -83,7 +83,7 @@
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
-                    "Next": "EnrichmentFailed"
+                    "Next": "Search Fact Checks"
                   }
                 ],
                 "Parameters": {
