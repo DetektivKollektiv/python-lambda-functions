@@ -83,11 +83,6 @@ def get_all_items(event, context, is_test=False, session=None):
     if session == None:
         session = initial_session
 
-    # X-Ray Tracing
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    # patch_all()
-
     logger.info('Database access for item retrieval.')
 
     try:
