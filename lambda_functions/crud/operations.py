@@ -10,6 +10,10 @@ import random
 import statistics
 import sqlite3
 import sys
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def get_db_session(is_test, session):
@@ -25,6 +29,8 @@ def get_db_session(is_test, session):
 
     if session != None:
         return session
+
+    logger.info('New DB Session initiated')
 
     cluster_arn = "arn:aws:rds:eu-central-1:891514678401:cluster:serverless-db"
     secret_arn = "arn:aws:secretsmanager:eu-central-1:891514678401:secret:ServerlessDBSecret-7oczW5"
