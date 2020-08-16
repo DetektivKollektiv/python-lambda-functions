@@ -28,11 +28,7 @@ def get_db_session(is_test, session):
     # put db session in seperate class
 
     if session != None:
-        try:
-            session.connection()
-            return session
-        except:
-            pass
+        return session
 
     logger.info('New DB Session initiated')
 

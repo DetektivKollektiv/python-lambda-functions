@@ -15,8 +15,6 @@ logger.setLevel(logging.INFO)
 
 client = boto3.client('stepfunctions')
 
-initial_session = operations.get_db_session(False, None)
-
 
 def create_item(event, context, is_test=False, session=None):
     """Creates a new item.
@@ -42,7 +40,7 @@ def create_item(event, context, is_test=False, session=None):
 
     helper.log_method_initiated("Create item", event, logger)
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     item = Item()
     body = event['body']
@@ -83,7 +81,7 @@ def get_all_items(event, context, is_test=False, session=None):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     helper.log_method_initiated("Get all items", event, logger)
 
@@ -112,7 +110,7 @@ def get_item_by_id(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get item by id", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         # get id (str) from path
@@ -143,7 +141,7 @@ def create_submission(event, context, is_test=False, session=None):
     helper.log_method_initiated("Create submission", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     body = event['body']
     submission = Submission()
@@ -168,7 +166,7 @@ def get_all_submissions(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all submissions", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         submissions = operations.get_all_submissions_db(is_test, session)
@@ -194,7 +192,7 @@ def get_item_by_content(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get item by content", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         json_event = event['body']
@@ -226,7 +224,7 @@ def create_user(event, context, is_test=False, session=None):
     helper.log_method_initiated("Create user", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         user = User()
@@ -258,7 +256,7 @@ def create_user_from_cognito(event, context, is_test=False, session=None):
     helper.log_method_initiated("Create user from cognito", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     if event['triggerSource'] == "PostConfirmation_ConfirmSignUp":
         user = User()
@@ -282,7 +280,7 @@ def get_all_users(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all users", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         users = operations.get_all_users_db(is_test, session)
@@ -308,7 +306,7 @@ def get_user(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get user", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         # get cognito id
@@ -343,7 +341,7 @@ def create_review(event, context, is_test=False, session=None):
     helper.log_method_initiated("Create review", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     review = Review()
     body = event['body']
@@ -367,7 +365,7 @@ def get_all_reviews(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all reviews", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         reviews = operations.get_all_reviews_db(is_test, session)
@@ -393,7 +391,7 @@ def create_review_answer(event, context, is_test=False, session=None):
     helper.log_method_initiated("Create review answer", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     review_answer = ReviewAnswer()
     body = event['body']
@@ -418,7 +416,7 @@ def get_all_review_answers(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all review answers", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         review_answers = operations.get_all_review_answers_db(is_test, session)
@@ -444,7 +442,7 @@ def get_all_review_questions(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all review questions", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         review_questions = operations.get_all_review_questions_db(
@@ -474,7 +472,7 @@ def submit_review(event, context, is_test=False, session=None):
     helper.log_method_initiated("Submit review", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     # Parse Body of request payload into review object
     try:
@@ -586,7 +584,7 @@ def item_submission(event, context, is_test=False, session=None):
     helper.log_method_initiated("Item submission", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         body = event['body']
@@ -648,7 +646,7 @@ def get_open_items_for_user(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get open items for user", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         # get cognito user id
@@ -693,7 +691,7 @@ def reset_locked_items(event, context, is_test=False, session=None):
     helper.log_method_initiated("Reset locked items", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         items = operations.get_locked_items(is_test, session)
@@ -715,7 +713,7 @@ def accept_item(event, context, is_test=False, session=None):
     helper.log_method_initiated("Accept item", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         # get item id from url path
@@ -760,7 +758,7 @@ def get_all_closed_items(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get all closed items", event, logger)
 
     if session == None:
-        session = initial_session
+        session = operations.get_db_session(False, None)
 
     try:
         # Get all closed items
