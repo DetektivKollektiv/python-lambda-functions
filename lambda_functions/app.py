@@ -39,6 +39,8 @@ def create_item(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+
+    helper.log_method_initiated("Create item", event, logger)
     if session == None:
         session = initial_session
 
@@ -83,7 +85,7 @@ def get_all_items(event, context, is_test=False, session=None):
     if session == None:
         session = initial_session
 
-    logger.info('Database access for item retrieval.')
+    helper.log_method_initiated("Get all items", event, logger)
 
     try:
         # Get all items as a list of Item objects
@@ -106,6 +108,8 @@ def get_all_items(event, context, is_test=False, session=None):
 
 
 def get_item_by_id(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get item by id", event, logger)
 
     if session == None:
         session = initial_session
@@ -136,6 +140,8 @@ def get_item_by_id(event, context, is_test=False, session=None):
 
 def create_submission(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Create submission", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -158,6 +164,8 @@ def create_submission(event, context, is_test=False, session=None):
 
 
 def get_all_submissions(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all submissions", event, logger)
 
     if session == None:
         session = initial_session
@@ -182,6 +190,8 @@ def get_all_submissions(event, context, is_test=False, session=None):
 
 
 def get_item_by_content(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get item by content", event, logger)
 
     if session == None:
         session = initial_session
@@ -213,6 +223,8 @@ def get_item_by_content(event, context, is_test=False, session=None):
 
 def create_user(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Create user", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -243,6 +255,8 @@ def create_user(event, context, is_test=False, session=None):
 
 def create_user_from_cognito(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Create user from cognito", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -264,6 +278,8 @@ def create_user_from_cognito(event, context, is_test=False, session=None):
 
 
 def get_all_users(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all users", event, logger)
 
     if session == None:
         session = initial_session
@@ -288,6 +304,8 @@ def get_all_users(event, context, is_test=False, session=None):
 
 
 def get_user(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get user", event, logger)
 
     if session == None:
         session = initial_session
@@ -322,6 +340,8 @@ def get_user(event, context, is_test=False, session=None):
 
 def create_review(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Create review", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -343,6 +363,8 @@ def create_review(event, context, is_test=False, session=None):
 
 
 def get_all_reviews(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all reviews", event, logger)
 
     if session == None:
         session = initial_session
@@ -368,6 +390,8 @@ def get_all_reviews(event, context, is_test=False, session=None):
 
 def create_review_answer(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Create review answer", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -390,6 +414,8 @@ def create_review_answer(event, context, is_test=False, session=None):
 
 
 def get_all_review_answers(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all review answers", event, logger)
 
     if session == None:
         session = initial_session
@@ -414,6 +440,8 @@ def get_all_review_answers(event, context, is_test=False, session=None):
 
 
 def get_all_review_questions(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all review questions", event, logger)
 
     if session == None:
         session = initial_session
@@ -442,6 +470,8 @@ def get_all_review_questions(event, context, is_test=False, session=None):
 
 
 def submit_review(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Submit review", event, logger)
 
     if session == None:
         session = initial_session
@@ -553,6 +583,8 @@ def submit_review(event, context, is_test=False, session=None):
 
 def item_submission(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Item submission", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -613,6 +645,8 @@ def item_submission(event, context, is_test=False, session=None):
 
 def get_open_items_for_user(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Get open items for user", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -656,6 +690,8 @@ def get_open_items_for_user(event, context, is_test=False, session=None):
 
 def reset_locked_items(event, context, is_test=False, session=None):
 
+    helper.log_method_initiated("Reset locked items", event, logger)
+
     if session == None:
         session = initial_session
 
@@ -675,6 +711,8 @@ def reset_locked_items(event, context, is_test=False, session=None):
 
 
 def accept_item(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Accept item", event, logger)
 
     if session == None:
         session = initial_session
@@ -718,6 +756,8 @@ def accept_item(event, context, is_test=False, session=None):
 
 
 def get_all_closed_items(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get all closed items", event, logger)
 
     if session == None:
         session = initial_session

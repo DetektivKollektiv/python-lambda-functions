@@ -92,3 +92,8 @@ def cognito_id_from_event(event):
     user_id = str(event['requestContext']['identity']
                   ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
     return user_id
+
+
+def log_method_initiated(method_name, event, logger):
+    logger.info("Method {} initiated".format(method_name))
+    logger.info("Event: {}".format(event))
