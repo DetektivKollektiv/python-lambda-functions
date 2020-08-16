@@ -7,8 +7,8 @@ from datetime import datetime
 from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
 
-from crud import operations
-from crud.model import *
+from crud import operations, helper
+from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 client = boto3.client('stepfunctions')
 
 
-def create_item(event, context):
+def create_item(event, context, is_test=False, session=None):
     """Creates a new item.
 
     Parameters
@@ -40,10 +40,10 @@ def create_item(event, context):
 
     item = Item()
     body = event['body']
-    operations.body_to_object(body, item)
+    helper.body_to_object(body, item)
 
     try:
-        item = operations.create_item_db(item)
+        item = operations.create_item_db(item, is_test, session)
         return {
             "statusCode": 201,
             "body": json.dumps(item.to_dict())
@@ -55,7 +55,7 @@ def create_item(event, context):
         }
 
 
-def get_all_items(event, context):
+def get_all_items(event, context, is_test=False, session=None):
     """Gets all items.
 
     Parameters
@@ -84,15 +84,9 @@ def get_all_items(event, context):
 
     logger.info('Database access for item retrieval.')
 
-
     try:
-        # New x-ray segment
-        xray_recorder.begin_subsegment('database-access')
-
         # Get all items as a list of Item objects
-        items = operations.get_all_items_db()
-
-        xray_recorder.end_subsegment()
+        items = operations.get_all_items_db(is_test, session)
 
         items_dict = []
         for item in items:
@@ -110,14 +104,14 @@ def get_all_items(event, context):
         }
 
 
-def get_item_by_id(event, context):
+def get_item_by_id(event, context, is_test=False, session=None):
 
     try:
         # get id (str) from path
         id = event['pathParameters']['id']
 
         try:
-            item = operations.get_item_by_id(id)
+            item = operations.get_item_by_id(id, is_test, session)
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
@@ -136,14 +130,15 @@ def get_item_by_id(event, context):
         }
 
 
-def create_submission(event, context):
+def create_submission(event, context, is_test=False, session=None):
 
     body = event['body']
     submission = Submission()
-    operations.body_to_object(body, submission)
+    helper.body_to_object(body, submission)
 
     try:
-        submission = operations.create_submission_db(submission)
+        submission = operations.create_submission_db(
+            submission, is_test, session)
         return {
             "statusCode": 201,
             "body": json.dumps(submission.to_dict())
@@ -155,10 +150,10 @@ def create_submission(event, context):
         }
 
 
-def get_all_submissions(event, context):
+def get_all_submissions(event, context, is_test=False, session=None):
 
     try:
-        submissions = operations.get_all_submissions_db()
+        submissions = operations.get_all_submissions_db(is_test, session)
         submissions_dict = []
 
         for submission in submissions:
@@ -176,14 +171,15 @@ def get_all_submissions(event, context):
         }
 
 
-def get_item_by_content(event, context):
+def get_item_by_content(event, context, is_test=False, session=None):
 
     try:
         json_event = event['body']
         content = json_event.get('content')
         try:
-            item = operations.get_item_by_content_db(content)
-            item_serialized = {"id": item.id, "content": item.content, "language": item.language}
+            item = operations.get_item_by_content_db(content, is_test, session)
+            item_serialized = {
+                "id": item.id, "content": item.content, "language": item.language}
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
@@ -202,18 +198,19 @@ def get_item_by_content(event, context):
         }
 
 
-def create_user(event, context):
+def create_user(event, context, is_test=False, session=None):
 
     try:
         user = User()
         body = event['body']
-        operations.body_to_object(body, user)
+        helper.body_to_object(body, user)
 
         # get cognito id
-        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
+        id = str(event['requestContext']['identity']
+                 ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
         user.id = id
 
-        user = operations.create_user_db(user)
+        user = operations.create_user_db(user, is_test, session)
         response = {
             "statusCode": 201,
             "body": json.dumps(user.to_dict())
@@ -223,33 +220,34 @@ def create_user(event, context):
             "statusCode": 400,
             "body": "Could not create user. Check HTTP POST payload and Cognito authentication. Exception: {}".format(e)
         }
-    
-    response_cors = operations.set_cors(response, event)
+
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
-def create_user_from_cognito(event, context):
-    
+
+def create_user_from_cognito(event, context, is_test=False, session=None):
+
     if event['triggerSource'] == "PostConfirmation_ConfirmSignUp":
         user = User()
         user.name = event['userName']
         user.id = event['request']['userAttributes']['sub']
         if user.id == None or user.name == None:
             raise Exception("Something went wrong!")
-        user = operations.create_user_db(user)
+        user = operations.create_user_db(user, is_test, session)
         client = boto3.client('cognito-idp')
         client.admin_add_user_to_group(
-            UserPoolId = event['userPoolId'],
-            Username = user.name,
-            GroupName ='Detective'
+            UserPoolId=event['userPoolId'],
+            Username=user.name,
+            GroupName='Detective'
         )
 
     return event
 
-    
-def get_all_users(event, context):
+
+def get_all_users(event, context, is_test=False, session=None):
 
     try:
-        users = operations.get_all_users_db()
+        users = operations.get_all_users_db(is_test, session)
         users_dict = []
 
         for user in users:
@@ -267,14 +265,15 @@ def get_all_users(event, context):
         }
 
 
-def get_user(event, context):
+def get_user(event, context, is_test=False, session=None):
 
     try:
         # get cognito id
-        id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
+        id = str(event['requestContext']['identity']
+                 ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
 
         try:
-            user = operations.get_user_by_id(id)
+            user = operations.get_user_by_id(id, is_test, session)
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
@@ -292,18 +291,18 @@ def get_user(event, context):
             "body": "Could not get user. Check Cognito authentication. Exception: {}".format(e)
         }
 
-    response_cors = operations.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
 
-def create_review(event, context):
+def create_review(event, context, is_test=False, session=None):
 
     review = Review()
     body = event['body']
-    operations.body_to_object(body, review)
+    helper.body_to_object(body, review)
 
     try:
-        review = operations.create_review_db(review)
+        review = operations.create_review_db(review, is_test, session)
         return {
             "statusCode": 201,
             "body": json.dumps(review.to_dict())
@@ -315,10 +314,10 @@ def create_review(event, context):
         }
 
 
-def get_all_reviews(event, context):
+def get_all_reviews(event, context, is_test=False, session=None):
 
     try:
-        reviews = operations.get_all_reviews_db()
+        reviews = operations.get_all_reviews_db(is_test, session)
         reviews_dict = []
 
         for review in reviews:
@@ -336,14 +335,15 @@ def get_all_reviews(event, context):
         }
 
 
-def create_review_answer(event, context):
+def create_review_answer(event, context, is_test=False, session=None):
 
     review_answer = ReviewAnswer()
     body = event['body']
-    operations.body_to_object(body, review_answer)
+    helper.body_to_object(body, review_answer)
 
     try:
-        review_answer = operations.create_review_answer_db(review_answer)
+        review_answer = operations.create_review_answer_db(
+            review_answer, is_test, session)
         return {
             "statusCode": 201,
             "body": json.dumps(review_answer.to_dict())
@@ -355,10 +355,10 @@ def create_review_answer(event, context):
         }
 
 
-def get_all_review_answers(event, context):
+def get_all_review_answers(event, context, is_test=False, session=None):
 
     try:
-        review_answers = operations.get_all_review_answers_db()
+        review_answers = operations.get_all_review_answers_db(is_test, session)
         review_answers_dict = []
 
         for review_answer in review_answers:
@@ -376,10 +376,11 @@ def get_all_review_answers(event, context):
         }
 
 
-def get_all_review_questions(event, context):
+def get_all_review_questions(event, context, is_test=False, session=None):
 
     try:
-        review_questions = operations.get_all_review_questions_db()
+        review_questions = operations.get_all_review_questions_db(
+            is_test, session)
         review_questions_dict = []
 
         for review_question in review_questions:
@@ -391,156 +392,151 @@ def get_all_review_questions(event, context):
             "body": json.dumps(review_questions_dict)
         }
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get review questions. Check HTTP GET payload. Exception: {}".format(e)
         }
 
-    if 'headers' in event and 'Origin' in event['headers']:
-        sourceOrigin = event['headers']['Origin']
-    elif 'headers' in event and 'origin' in event['headers']:
-        sourceOrigin = event['headers']['origin']
-    else:
-        return response
-
-    allowedOrigins = os.environ['CORS_ALLOW_ORIGIN'].split(',') or []
-
-    if sourceOrigin is not None and sourceOrigin in allowedOrigins:
-        if 'headers' not in response:
-            response['headers'] = {}
-        
-        response['headers']['Access-Control-Allow-Origin'] = sourceOrigin
-    
-    return response
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
 
 
-def submit_review(event, context):
-    
-    #Parse Body of request payload into review object
+def submit_review(event, context, is_test=False, session=None):
+
+    # Parse Body of request payload into review object
     try:
         body = event['body']
 
         review = Review()
-        review.user_id = operations.cognito_id_from_event(event)
-        
-        operations.body_to_object(body, review)
-        
-        #Give the user an experience point
-        operations.give_experience_point(review.user_id)
-        
-        #Check if the review is still needed
-        review_still_needed = operations.check_if_review_still_needed(review.item_id, review.user_id, review.is_peer_review)
-        #If the review is no longer needed, return an error
+        review.user_id = helper.cognito_id_from_event(event)
+
+        helper.body_to_object(body, review)
+
+        # Give the user an experience point
+        operations.give_experience_point(review.user_id, is_test, session)
+
+        # Check if the review is still needed
+        review_still_needed = operations.check_if_review_still_needed(
+            review.item_id, review.user_id, review.is_peer_review, is_test, session)
+        # If the review is no longer needed, return an error
         if review_still_needed == False:
             return {
                 "statusCode": 400,
                 "body": "Could not create review. Review no longer needed. Another detective might have been faster."
             }
-        #If the review is needed, create the review and the answers
+        # If the review is needed, create the review and the answers
 
-        #Get the corresponding item to know when it was locked by the user
-        item = operations.get_item_by_id(review.item_id)
+        # Get the corresponding item to know when it was locked by the user
+        item = operations.get_item_by_id(review.item_id, is_test, session)
 
         # Set the review open and close timestamp
         if item.lock_timestamp:
             review.start_timestamp = item.lock_timestamp
-            review.finish_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            review = operations.create_review_db(review)
+            review.finish_timestamp = helper.get_date_time_now(is_test)
+            review = operations.create_review_db(review, is_test, session)
         else:
             return {
                 "statusCode": 400,
                 "body": "Could not create review. To review an item, it has to be locked by the user."
             }
 
-        # Deserialize if body is string 
-        if isinstance(body, str): 
+        # Deserialize if body is string
+        if isinstance(body, str):
             body_dict = json.loads(body)
-        else: 
+        else:
             body_dict = body
 
         review_answers = []
-        
+
         for answer in body_dict['review_answers']:
             review_answer = ReviewAnswer()
-            setattr(review_answer, "review_id",review.id)
+            setattr(review_answer, "review_id", review.id)
             for key in answer:
                 setattr(review_answer, key, answer[key])
             review_answers.append(review_answer)
 
-        operations.create_review_answer_set_db(review_answers)
+        operations.create_review_answer_set_db(
+            review_answers, is_test, session)
 
-        #If the review is a peer review, compute the variance of the review pair
+        # If the review is a peer review, compute the variance of the review pair
         if review.is_peer_review == True:
-            operations.close_open_junior_review(review.item_id, review.id)
-            difference = operations.get_pair_difference(review.id)
-            #If the variance is good, reduce the counter for open review pairs
+            operations.close_open_junior_review(
+                review.item_id, review.id, is_test, session)
+            difference = operations.get_pair_difference(
+                review.id, is_test, session)
+            # If the variance is good, reduce the counter for open review pairs
             if difference < 1:
-                operations.set_belongs_to_good_pair_db(review, True)
+                operations.set_belongs_to_good_pair_db(
+                    review, True, is_test, session)
                 item.open_reviews = item.open_reviews - 1
-                #If enough review pairs have been found, set the status to closed
+                # If enough review pairs have been found, set the status to closed
                 if item.open_reviews == 0:
                     item.status = "closed"
-                    item.close_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    item.result_score = operations.compute_item_result_score(item.id)
+                    item.close_timestamp = helper.get_date_time_now(is_test)
+                    item.result_score = operations.compute_item_result_score(
+                        item.id, is_test, session)
                 else:
                     item.status = "needs_junior"
             if difference >= 1:
-                operations.set_belongs_to_good_pair_db(review, False)
+                operations.set_belongs_to_good_pair_db(
+                    review, False, is_test, session)
                 item.status = "needs_junior"
 
-        #If the review is not a peer review, set the status to "needs_senior"
+        # If the review is not a peer review, set the status to "needs_senior"
         if review.is_peer_review == False:
-            item.status = "needs_senior" 
+            item.status = "needs_senior"
 
         # Unlock item
         item.lock_timestamp = None
         item.locked_by_user = None
 
-        operations.update_object_db(item)
-        #for answer in review.review_answers
+        operations.update_object_db(item, is_test, session)
+        # for answer in review.review_answers
         #    operations.create_review_answer_db(answer)
 
         response = {
-                "statusCode": 201,
-                "body": json.dumps(item.to_dict())
-            }
+            "statusCode": 201,
+            "body": json.dumps(item.to_dict())
+        }
     except Exception as e:
         response = {
             "statusCode": 400,
             "body": "Could not submit review. Check HTTP GET payload. Exception: {}".format(e)
         }
-    
-    response_cors = operations.set_cors(response, event)
+
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
 
-def item_submission(event, context):
+def item_submission(event, context, is_test=False, session=None):
 
     try:
         body = event['body']
 
-        if isinstance(body, str): 
+        if isinstance(body, str):
             body_dict = json.loads(body)
-        else: 
+        else:
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
 
         submission = Submission()
-        operations.body_to_object(body_dict, submission)
+        helper.body_to_object(body_dict, submission)
 
         try:
             # Item already exists, item_id in submission is the id of the found item
-            found_item = operations.get_item_by_content_db(content)
+            found_item = operations.get_item_by_content_db(
+                content, is_test, session)
             submission.item_id = found_item.id
             new_item_created = False
-            
+
         except Exception:
             # Item does not exist yet, item_id in submission is the id of the newly created item
             new_item = Item()
-            new_item.open_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_item.open_timestamp = helper.get_date_time_now(is_test)
             new_item.content = content
-            created_item = operations.create_item_db(new_item)
+            created_item = operations.create_item_db(
+                new_item, is_test, session)
             new_item_created = True
             submission.item_id = created_item.id
             stage = os.environ['STAGE']
@@ -551,52 +547,53 @@ def item_submission(event, context):
             )
 
         # Create submission
-        operations.create_submission_db(submission)
+        operations.create_submission_db(submission, is_test, session)
 
         response = {
             "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created) },
+            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
             "body": json.dumps(submission.to_dict())
         }
-       
+
     except Exception as e:
         response = {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
         }
-        
-    response_cors = operations.set_cors(response, event)
+
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
 
-def get_open_items_for_user(event, context):
+def get_open_items_for_user(event, context, is_test=False, session=None):
 
     try:
         # get cognito user id
-        id = operations.cognito_id_from_event(event)
+        id = helper.cognito_id_from_event(event)
 
         # get number of items from url path
         num_items = int(event['pathParameters']['num_items'])
 
-        user = operations.get_user_by_id(id)
-        items = operations.get_open_items_for_user_db(user, num_items)
+        user = operations.get_user_by_id(id, is_test, session)
+        items = operations.get_open_items_for_user_db(
+            user, num_items, is_test, session)
 
         if len(items) < 1:
-          response = {
+            response = {
                 "statusCode": 404,
                 "body": "There are currently no open items for this user."
-          }
-        else:    
-          # Transform each item into dict
-          items_dict = []
-          for item in items:
-              items_dict.append(item.to_dict())
+            }
+        else:
+            # Transform each item into dict
+            items_dict = []
+            for item in items:
+                items_dict.append(item.to_dict())
 
-          response = {
-              "statusCode": 200,
-              'headers': {"content-type": "application/json; charset=utf-8"},
-              "body": json.dumps(items_dict)
-          }
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(items_dict)
+            }
 
     except Exception as e:
         response = {
@@ -604,19 +601,19 @@ def get_open_items_for_user(event, context):
             "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
         }
 
-    response_cors = operations.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
 
-def reset_locked_items(event, context):
+def reset_locked_items(event, context, is_test=False, session=None):
     try:
-        items = operations.get_locked_items()
-        updated = operations.reset_locked_items_db(items)        
+        items = operations.get_locked_items(is_test, session)
+        updated = operations.reset_locked_items_db(items, is_test, session)
         return {
-                    "statusCode": 200,
-                    'headers': {"content-type": "application/json; charset=utf-8"},
-                    "body":"{} Items updated".format(updated)
-                }
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": "{} Items updated".format(updated)
+        }
     except Exception as e:
         return {
             "statusCode": 400,
@@ -624,26 +621,27 @@ def reset_locked_items(event, context):
         }
 
 
-def accept_item(event, context):
+def accept_item(event, context, is_test=False, session=None):
 
     try:
         # get item id from url path
         item_id = event['pathParameters']['item_id']
 
-        # get cognito id 
-        user_id = str(event['requestContext']['identity']['cognitoAuthenticationProvider']).split("CognitoSignIn:",1)[1] 
+        # get cognito id
+        user_id = str(event['requestContext']['identity']
+                      ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
 
         # get user and item from the db
-        user = operations.get_user_by_id(user_id)
-        item = operations.get_item_by_id(item_id)
-            
+        user = operations.get_user_by_id(user_id, is_test, session)
+        item = operations.get_item_by_id(item_id, is_test, session)
+
         # Try to accept item
         try:
-            operations.accept_item_db(user, item)
+            operations.accept_item_db(user, item, is_test, session)
 
             response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8" },
+                'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(item.to_dict())
             }
 
@@ -651,23 +649,23 @@ def accept_item(event, context):
             response = {
                 "statusCode": 400,
                 "body": "Cannot accept item. Exception: {}".format(e)
-        }
+            }
 
     except Exception as e:
         response = {
             "statusCode": 400,
             "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
         }
-        
-    response_cors = operations.set_cors(response, event)
+
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
 
-def get_all_closed_items(event, context):
+def get_all_closed_items(event, context, is_test=False, session=None):
 
     try:
         # Get all closed items
-        items = operations.get_all_closed_items_db()
+        items = operations.get_all_closed_items_db(is_test, session)
 
         if len(items) == 0:
             response = {
@@ -676,10 +674,10 @@ def get_all_closed_items(event, context):
             }
         else:
             items_dict = []
-            
+
             for item in items:
                 items_dict.append(item.to_dict())
-                
+
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
@@ -691,5 +689,5 @@ def get_all_closed_items(event, context):
             "body": "Could not get closed items. Exception: {}".format(e)
         }
 
-    response_cors = operations.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
