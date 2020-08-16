@@ -39,6 +39,8 @@ def create_item(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+    if session == None:
+        session = initial_session
 
     item = Item()
     body = event['body']
