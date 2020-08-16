@@ -28,7 +28,11 @@ def get_db_session(is_test, session):
     # put db session in seperate class
 
     if session != None:
-        return session
+        try:
+            session.connection()
+            return session
+        except:
+            pass
 
     logger.info('New DB Session initiated')
 
@@ -46,7 +50,7 @@ def get_db_session(is_test, session):
         db = create_engine('sqlite://', creator=creator)
         Base.metadata.create_all(db)
 
-    Session = sessionmaker(bind=db)
+    Session = sessionmaker(bind=db, expire_on_commit=False)
     session = Session()
 
     return session
@@ -103,8 +107,7 @@ def get_all_items_db(is_test, session):
     items: Item[]
         The items
     """
-    if session == None:
-        session = get_db_session(is_test, session)
+    session = get_db_session(is_test, session)
     items = session.query(Item).all()
     return items
 
