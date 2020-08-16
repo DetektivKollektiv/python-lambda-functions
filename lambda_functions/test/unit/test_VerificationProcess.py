@@ -1,4 +1,3 @@
-import app
 import crud.operations as operations
 from crud.model import User, Item
 import pytest
@@ -6,9 +5,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 
 
-def test_verification_process():
+def test_verification_process(monkeypatch):
+    monkeypatch.setenv("DBNAME", "Test")
+    import app
 
     session = operations.get_db_session(True, None)
+
     # Creating six users
     junior_detective1 = User()
     junior_detective1.id = "1"

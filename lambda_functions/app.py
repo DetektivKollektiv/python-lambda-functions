@@ -15,6 +15,8 @@ logger.setLevel(logging.INFO)
 
 client = boto3.client('stepfunctions')
 
+initial_session = operations.get_db_session(False, None)
+
 
 def create_item(event, context, is_test=False, session=None):
     """Creates a new item.
@@ -76,6 +78,8 @@ def get_all_items(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+    if session == None:
+        session = initial_session
 
     # X-Ray Tracing
     logger = logging.getLogger()
@@ -106,6 +110,9 @@ def get_all_items(event, context, is_test=False, session=None):
 
 def get_item_by_id(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     try:
         # get id (str) from path
         id = event['pathParameters']['id']
@@ -132,6 +139,9 @@ def get_item_by_id(event, context, is_test=False, session=None):
 
 def create_submission(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     body = event['body']
     submission = Submission()
     helper.body_to_object(body, submission)
@@ -151,6 +161,9 @@ def create_submission(event, context, is_test=False, session=None):
 
 
 def get_all_submissions(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         submissions = operations.get_all_submissions_db(is_test, session)
@@ -172,6 +185,9 @@ def get_all_submissions(event, context, is_test=False, session=None):
 
 
 def get_item_by_content(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         json_event = event['body']
@@ -200,6 +216,9 @@ def get_item_by_content(event, context, is_test=False, session=None):
 
 def create_user(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     try:
         user = User()
         body = event['body']
@@ -227,6 +246,9 @@ def create_user(event, context, is_test=False, session=None):
 
 def create_user_from_cognito(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     if event['triggerSource'] == "PostConfirmation_ConfirmSignUp":
         user = User()
         user.name = event['userName']
@@ -245,6 +267,9 @@ def create_user_from_cognito(event, context, is_test=False, session=None):
 
 
 def get_all_users(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         users = operations.get_all_users_db(is_test, session)
@@ -266,6 +291,9 @@ def get_all_users(event, context, is_test=False, session=None):
 
 
 def get_user(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         # get cognito id
@@ -297,6 +325,9 @@ def get_user(event, context, is_test=False, session=None):
 
 def create_review(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     review = Review()
     body = event['body']
     helper.body_to_object(body, review)
@@ -315,6 +346,9 @@ def create_review(event, context, is_test=False, session=None):
 
 
 def get_all_reviews(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         reviews = operations.get_all_reviews_db(is_test, session)
@@ -337,6 +371,9 @@ def get_all_reviews(event, context, is_test=False, session=None):
 
 def create_review_answer(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     review_answer = ReviewAnswer()
     body = event['body']
     helper.body_to_object(body, review_answer)
@@ -356,6 +393,9 @@ def create_review_answer(event, context, is_test=False, session=None):
 
 
 def get_all_review_answers(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         review_answers = operations.get_all_review_answers_db(is_test, session)
@@ -377,6 +417,9 @@ def get_all_review_answers(event, context, is_test=False, session=None):
 
 
 def get_all_review_questions(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         review_questions = operations.get_all_review_questions_db(
@@ -402,6 +445,9 @@ def get_all_review_questions(event, context, is_test=False, session=None):
 
 
 def submit_review(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     # Parse Body of request payload into review object
     try:
@@ -510,6 +556,9 @@ def submit_review(event, context, is_test=False, session=None):
 
 def item_submission(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     try:
         body = event['body']
 
@@ -567,6 +616,9 @@ def item_submission(event, context, is_test=False, session=None):
 
 def get_open_items_for_user(event, context, is_test=False, session=None):
 
+    if session == None:
+        session = initial_session
+
     try:
         # get cognito user id
         id = helper.cognito_id_from_event(event)
@@ -606,6 +658,10 @@ def get_open_items_for_user(event, context, is_test=False, session=None):
 
 
 def reset_locked_items(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
+
     try:
         items = operations.get_locked_items(is_test, session)
         updated = operations.reset_locked_items_db(items, is_test, session)
@@ -622,6 +678,9 @@ def reset_locked_items(event, context, is_test=False, session=None):
 
 
 def accept_item(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         # get item id from url path
@@ -662,6 +721,9 @@ def accept_item(event, context, is_test=False, session=None):
 
 
 def get_all_closed_items(event, context, is_test=False, session=None):
+
+    if session == None:
+        session = initial_session
 
     try:
         # Get all closed items
