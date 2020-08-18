@@ -6,8 +6,10 @@ from uuid import uuid4
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+initial_session = operations.get_db_session(False, None)
 
-def update_item(event, context):
+
+def update_item(event, context, is_test=False, session=None):
     """stores data related to item
 
     Parameters
@@ -29,7 +31,8 @@ def update_item(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Parse event dict to Item object
     item = Item()
@@ -38,13 +41,13 @@ def update_item(event, context):
         setattr(item, key, json_event[key])
 
     try:
-        operations.update_object_db(item)
+        operations.update_object_db(item, is_test, session)
     except Exception as e:
         logger.error("Could not update item. Exception: %s", e, exc_info=True)
         raise
 
 
-def store_factchecks(event, context):
+def store_factchecks(event, context, is_test=False, session=None):
     """stores data related to factchecks
 
     Parameters
@@ -67,7 +70,8 @@ def store_factchecks(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
@@ -84,7 +88,7 @@ def store_factchecks(event, context):
             org_name = "Unknown"
         # Does the publishing organization already exist?
         try:
-            organization = operations.get_organization_by_content_db(org_name)
+            organization = operations.get_organization_by_content_db(org_name, is_test, session)
         except Exception:
             # store organization in database
             organization.id = str(uuid4())
@@ -92,7 +96,7 @@ def store_factchecks(event, context):
             organization.counter_trustworthy = 0
             organization.counter_not_trustworthy = 0
             try:
-                operations.update_object_db(organization)
+                operations.update_object_db(organization, is_test, session)
             except Exception as e:
                 logger.error("Could not store Organization. Exception: %s", e, exc_info=True)
 
@@ -100,7 +104,7 @@ def store_factchecks(event, context):
         item_id = event['item']['id']
         try:
             # Does the factcheck already exist?
-            factcheck = operations.get_factcheck_by_url_and_item_db(factcheck_url, item_id)
+            factcheck = operations.get_factcheck_by_url_and_item_db(factcheck_url, item_id, is_test, session)
         except Exception as e:
             # create new factcheck in database
             factcheck.id = str(uuid4())
@@ -109,13 +113,13 @@ def store_factchecks(event, context):
         factcheck.item_id = item_id
         factcheck.factchecking_organization_id = organization.id
         try:
-            operations.update_object_db(factcheck)
+            operations.update_object_db(factcheck, is_test, session)
         except Exception as e:
             logger.error("Could not store factchecks. Exception: %s", e, exc_info=True)
             raise
 
 
-def store_itemurl(event, context):
+def store_itemurl(event, context, is_test=False, session=None):
     """stores urls referenced in item
 
     Parameters
@@ -138,7 +142,8 @@ def store_itemurl(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Store all urls referenced in the item
     for str_url in event['Claim']['urls']:
@@ -147,13 +152,13 @@ def store_itemurl(event, context):
         # search for url in database
         url = URL()
         try:
-            url = operations.get_url_by_content_db(str_url)
+            url = operations.get_url_by_content_db(str_url, is_test, session)
         except Exception:
             # store url in database
             url.id = str(uuid4())
             url.url = str_url
             try:
-                operations.update_object_db(url)
+                operations.update_object_db(url, is_test, session)
             except Exception as e:
                 logger.error("Could not store urls. Exception: %s", e, exc_info=True)
                 raise
@@ -161,20 +166,20 @@ def store_itemurl(event, context):
         # itemurl already exists?
         item_id = event['item']['id']
         try:
-            itemurl = operations.get_itemurl_by_url_and_item_db(url.id, item_id)
+            itemurl = operations.get_itemurl_by_url_and_item_db(url.id, item_id, is_test, session)
         except Exception:
             # store itemurl in database
             itemurl.id = str(uuid4())
             itemurl.item_id = item_id
             itemurl.url_id = url.id
             try:
-                operations.update_object_db(itemurl)
+                operations.update_object_db(itemurl, is_test, session)
             except Exception as e:
                 logger.error("Could not store itemurls. Exception: %s", e, exc_info=True)
                 raise
 
 
-def store_itementities(event, context):
+def store_itementities(event, context, is_test=False, session=None):
     """stores entities of an item
 
     Parameters
@@ -197,20 +202,21 @@ def store_itementities(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Store all entities of the item
     for str_entity in event['Entities']:
         entity = Entity()
         # search for entity in database
         try:
-            entity = operations.get_entity_by_content_db(str_entity)
+            entity = operations.get_entity_by_content_db(str_entity, is_test, session)
         except Exception:
             # store entity in database
             entity.id = str(uuid4())
             entity.entity = str_entity
             try:
-                operations.update_object_db(entity)
+                operations.update_object_db(entity, is_test, session)
             except Exception as e:
                 logger.error("Could not store entity. Exception: %s", e, exc_info=True)
                 raise
@@ -219,19 +225,19 @@ def store_itementities(event, context):
         # item entity already exists?
         item_id = event['item']['id']
         try:
-            itementity = operations.get_itementity_by_entity_and_item_db(entity.id, item_id)
+            itementity = operations.get_itementity_by_entity_and_item_db(entity.id, item_id, is_test, session)
         except Exception:
             itementity.id = str(uuid4())
             itementity.item_id = item_id
             itementity.entity_id = entity.id
             try:
-                operations.update_object_db(itementity)
+                operations.update_object_db(itementity, is_test, session)
             except Exception as e:
                 logger.error("Could not store item entity. Exception: %s", e, exc_info=True)
                 raise
 
 
-def store_itemsentiment(event, context):
+def store_itemsentiment(event, context, is_test=False, session=None):
     """stores sentiment of an item
 
     Parameters
@@ -254,20 +260,21 @@ def store_itemsentiment(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Store the sentiment of the item
     sentiment = Sentiment()
     # search for sentiment in database
     str_sentiment = event['Sentiment']
     try:
-        sentiment = operations.get_sentiment_by_content_db(str_sentiment)
+        sentiment = operations.get_sentiment_by_content_db(str_sentiment, is_test, session)
     except Exception:
         # store sentiment in database
         sentiment.id = str(uuid4())
         sentiment.sentiment = str_sentiment
         try:
-            operations.update_object_db(sentiment)
+            operations.update_object_db(sentiment, is_test, session)
         except Exception as e:
             logger.error("Could not store sentiment. Exception: %s", e, exc_info=True)
             raise
@@ -276,19 +283,19 @@ def store_itemsentiment(event, context):
     # item entity already exists?
     item_id = event['item']['id']
     try:
-        itemsentiment = operations.get_itemsentiment_by_sentiment_and_item_db(sentiment.id, item_id)
+        itemsentiment = operations.get_itemsentiment_by_sentiment_and_item_db(sentiment.id, item_id, is_test, session)
     except Exception:
         itemsentiment.id = str(uuid4())
         itemsentiment.item_id = item_id
         itemsentiment.sentiment_id = sentiment.id
         try:
-            operations.update_object_db(itemsentiment)
+            operations.update_object_db(itemsentiment, is_test, session)
         except Exception as e:
             logger.error("Could not store item sentiment. Exception: %s", e, exc_info=True)
             raise
 
 
-def store_itemphrases(event, context):
+def store_itemphrases(event, context, is_test=False, session=None):
     """stores key phrases of an item
 
     Parameters
@@ -311,20 +318,21 @@ def store_itemphrases(event, context):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    print(event)
+    if session is None:
+        session = initial_session
 
     # Store all entities of the item
     for str_phrase in event['KeyPhrases']:
         phrase = Keyphrase()
         # search for entity in database
         try:
-            phrase = operations.get_phrase_by_content_db(str_phrase)
+            phrase = operations.get_phrase_by_content_db(str_phrase, is_test, session)
         except Exception:
             # store phrase in database
             phrase.id = str(uuid4())
             phrase.phrase = str_phrase
             try:
-                operations.update_object_db(phrase)
+                operations.update_object_db(phrase, is_test, session)
             except Exception as e:
                 logger.error("Could not store key phrase. Exception: %s", e, exc_info=True)
                 raise
@@ -333,13 +341,13 @@ def store_itemphrases(event, context):
         # item phrase already exists?
         item_id = event['item']['id']
         try:
-            itemphrase = operations.get_itemphrase_by_phrase_and_item_db(phrase.id, item_id)
+            itemphrase = operations.get_itemphrase_by_phrase_and_item_db(phrase.id, item_id, is_test, session)
         except Exception:
             itemphrase.id = str(uuid4())
             itemphrase.item_id = item_id
             itemphrase.keyphrase_id = phrase.id
             try:
-                operations.update_object_db(itemphrase)
+                operations.update_object_db(itemphrase, is_test, session)
             except Exception as e:
                 logger.error("Could not store item key phrase. Exception: %s", e, exc_info=True)
                 raise
