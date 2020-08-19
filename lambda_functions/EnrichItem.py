@@ -6,8 +6,6 @@ from uuid import uuid4
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-initial_session = operations.get_db_session(False, None)
-
 
 def update_item(event, context, is_test=False, session=None):
     """stores data related to item
@@ -32,7 +30,7 @@ def update_item(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Parse event dict to Item object
     item = Item()
@@ -71,7 +69,7 @@ def store_factchecks(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
@@ -143,7 +141,7 @@ def store_itemurl(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Store all urls referenced in the item
     for str_url in event['Claim']['urls']:
@@ -203,7 +201,7 @@ def store_itementities(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Store all entities of the item
     for str_entity in event['Entities']:
@@ -261,7 +259,7 @@ def store_itemsentiment(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Store the sentiment of the item
     sentiment = Sentiment()
@@ -319,7 +317,7 @@ def store_itemphrases(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = initial_session
+        session = operations.get_db_session(is_test, session)
 
     # Store all entities of the item
     for str_phrase in event['KeyPhrases']:
@@ -351,5 +349,3 @@ def store_itemphrases(event, context, is_test=False, session=None):
             except Exception as e:
                 logger.error("Could not store item key phrase. Exception: %s", e, exc_info=True)
                 raise
-
-
