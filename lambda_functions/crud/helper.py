@@ -26,7 +26,7 @@ def set_cors(response, event, is_test):
         The modified response
     """
     if is_test:
-        return event
+        return response
 
     source_origin = None
     allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')

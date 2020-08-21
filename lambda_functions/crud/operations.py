@@ -337,10 +337,11 @@ def create_review_answer_db(review_answer, is_test, session):
     return review_answer
 
 
-def create_review_answer_set_db(review_answers, is_test, session):
+def create_review_answer_set_db(review_answers, review_id, is_test, session):
     session = get_db_session(is_test, session)
     for review_answer in review_answers:
         review_answer.id = str(uuid4())
+        review_answer.review_id = review_id
         session.add(review_answer)
     session.commit()
 
@@ -436,12 +437,10 @@ def close_open_junior_review(item_id, peer_review_id, is_test, session):
     update_object_db(open_junior_review, is_test, session)
 
 
-def get_pair_difference(review_id, is_test, session):
-    junior_review = get_review_by_peer_review_id_db(
-        review_id, is_test, session)
+def get_pair_difference(junior_review, peer_review, is_test, session):
 
     peer_review_answers = get_review_answers_by_review_id_db(
-        review_id, is_test, session)
+        peer_review.id, is_test, session)
     junior_review_answers = get_review_answers_by_review_id_db(
         junior_review.id, is_test, session)
 
@@ -794,3 +793,100 @@ def get_all_closed_items_db(is_test, session):
 
     items = session.query(Item).filter(Item.status == 'closed').all()
     return items
+
+
+def get_review_in_progress(user_id, item_id, is_test, session):
+    session = get_db_session(is_test, session)
+    try:
+        review_in_progress = session.query(ReviewInProgress).filter(
+            ReviewInProgress.item_id == item_id,
+            ReviewInProgress.user_id == user_id).one()
+        return review_in_progress
+
+    except Exception as e:
+        raise Exception(
+            "Could not get review_in_progress. Either none or multiple objects exist." + e)
+
+
+def review_submission_db(review, review_answers, is_test, session):
+    rip = ReviewInProgress()
+
+    # Gets review_in_progress. If none exists, exception is intercepted
+    try:
+        rip = get_review_in_progress(
+            review.user_id, review.item_id, is_test, session)
+    except Exception as e:
+        raise Exception("Could not get review_in_progress" + e)
+
+    review.is_peer_review = rip.is_peer_review
+    review.start_timestamp = rip.start_timestamp
+    review.finish_timestamp = helper.get_date_time_now(is_test)
+
+    review = create_review_db(review, is_test, session)
+    create_review_answer_set_db(
+        review_answers, review.id, is_test, session)
+    session.delete(rip)
+    session.commit()
+
+    item = Item()
+    item = get_item_by_id(review.item_id, is_test, session)
+    if review.is_peer_review == True:
+        item.open_reviews_level_2 -= 1
+        item.in_progress_reviews_level_2 -= 1
+    else:
+        item.open_reviews_level_1 -= 1
+        item.in_progress_reviews_level_1 -= 1
+
+    item = update_object_db(item, is_test, session)
+    return item
+
+
+def build_review_pairs(item, is_test, session):
+    junior_reviews = session.query(Review).filter(
+        Review.item_id == item.id,
+        Review.is_peer_review == False
+    )
+    senior_reviews = session.query(Review).filter(
+        Review.item_id == item.id,
+        Review.is_peer_review == True
+    )
+
+    if senior_reviews.count() != junior_reviews.count():
+        raise Exception(
+            "Number of junior reviews does not equal number of senior reviews.")
+    for senior_review in senior_reviews:
+        junior_review = junior_reviews.first()
+        junior_review.peer_review_id = senior_review.id
+
+        difference = get_pair_difference(
+            junior_review, senior_review, is_test, session)
+
+        if difference < 1:
+            junior_review.belongs_to_good_pair = True
+            senior_review.belongs_to_good_pair = True
+            item.open_reviews -= 1
+
+        else:
+            junior_review.belongs_to_good_pair = False
+            senior_review.belongs_to_good_pair = False
+
+        session.merge(junior_review)
+        session.merge(senior_review)
+        # session.commit()
+
+        junior_reviews = junior_reviews.filter(
+            Review.id != junior_review.id
+        )
+
+    if item.open_reviews <= 0:
+        item.status = "closed"
+        item.result_score = compute_item_result_score(
+            item.id, is_test, session)
+
+    else:
+        item.open_reviews_level_1 = item.open_reviews
+        item.open_reviews_level_2 = item.open_reviews
+
+    session.merge(item)
+    session.commit()
+    return item

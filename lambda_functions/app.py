@@ -8,7 +8,7 @@ from aws_xray_sdk.core import patch_all
 from aws_xray_sdk.core import xray_recorder
 
 from crud import operations, helper
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -479,39 +479,9 @@ def submit_review(event, context, is_test=False, session=None):
         body = event['body']
 
         review = Review()
+        helper.body_to_object(body, review)
         review.user_id = helper.cognito_id_from_event(event)
 
-        helper.body_to_object(body, review)
-
-        # Give the user an experience point
-        operations.give_experience_point(review.user_id, is_test, session)
-
-        # Check if the review is still needed
-        review_still_needed = operations.check_if_review_still_needed(
-            review.item_id, review.user_id, review.is_peer_review, is_test, session)
-        # If the review is no longer needed, return an error
-        if review_still_needed == False:
-            return {
-                "statusCode": 400,
-                "body": "Could not create review. Review no longer needed. Another detective might have been faster."
-            }
-        # If the review is needed, create the review and the answers
-
-        # Get the corresponding item to know when it was locked by the user
-        item = operations.get_item_by_id(review.item_id, is_test, session)
-
-        # Set the review open and close timestamp
-        if item.lock_timestamp:
-            review.start_timestamp = item.lock_timestamp
-            review.finish_timestamp = helper.get_date_time_now(is_test)
-            review = operations.create_review_db(review, is_test, session)
-        else:
-            return {
-                "statusCode": 400,
-                "body": "Could not create review. To review an item, it has to be locked by the user."
-            }
-
-        # Deserialize if body is string
         if isinstance(body, str):
             body_dict = json.loads(body)
         else:
@@ -526,44 +496,13 @@ def submit_review(event, context, is_test=False, session=None):
                 setattr(review_answer, key, answer[key])
             review_answers.append(review_answer)
 
-        operations.create_review_answer_set_db(
-            review_answers, is_test, session)
+        item = operations.review_submission_db(
+            review, review_answers, is_test, session)
 
-        # If the review is a peer review, compute the variance of the review pair
-        if review.is_peer_review == True:
-            operations.close_open_junior_review(
-                review.item_id, review.id, is_test, session)
-            difference = operations.get_pair_difference(
-                review.id, is_test, session)
-            # If the variance is good, reduce the counter for open review pairs
-            if difference < 1:
-                operations.set_belongs_to_good_pair_db(
-                    review, True, is_test, session)
-                item.open_reviews = item.open_reviews - 1
-                # If enough review pairs have been found, set the status to closed
-                if item.open_reviews == 0:
-                    item.status = "closed"
-                    item.close_timestamp = helper.get_date_time_now(is_test)
-                    item.result_score = operations.compute_item_result_score(
-                        item.id, is_test, session)
-                else:
-                    item.status = "needs_junior"
-            if difference >= 1:
-                operations.set_belongs_to_good_pair_db(
-                    review, False, is_test, session)
-                item.status = "needs_junior"
+        operations.give_experience_point(review.user_id, is_test, session)
 
-        # If the review is not a peer review, set the status to "needs_senior"
-        if review.is_peer_review == False:
-            item.status = "needs_senior"
-
-        # Unlock item
-        item.lock_timestamp = None
-        item.locked_by_user = None
-
-        operations.update_object_db(item, is_test, session)
-        # for answer in review.review_answers
-        #    operations.create_review_answer_db(answer)
+        if item.open_reviews_level_1 == 0 and item.open_reviews_level_2 == 0:
+            item = operations.build_review_pairs(item, is_test, session)
 
         response = {
             "statusCode": 201,
