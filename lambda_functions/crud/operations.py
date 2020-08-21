@@ -2,9 +2,9 @@ import os
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 from datetime import datetime, timedelta
-
+from . import helper
 import json
 import random
 import statistics
@@ -69,7 +69,11 @@ def create_item_db(item, is_test, session):
 
     item.id = str(uuid4())
     item.open_reviews = 3
-    item.status = "needs_junior"
+    item.open_reviews_level_1 = 3
+    item.open_reviews_level_2 = 3
+    item.in_progress_reviews_level_1 = 0
+    item.in_progress_reviews_level_2 = 0
+    item.status = "open"
     session.add(item)
     session.commit()
 
@@ -715,7 +719,7 @@ def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id, is_test, session):
 
 
 def reset_locked_items_db(items, is_test, session):
-    """Updates all locked items in the database 
+    """Updates all locked items in the database
     and returns the amount of updated items"""
     counter = 0
     for item in items:
@@ -746,25 +750,34 @@ def accept_item_db(user, item, is_test, session):
     item: Item
         The case to be assigned to the user
     """
+    # If the amount of reviews in progress equals the amount of reviews needed, raise an error
+    if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
+        if user.level > 1:
+            if item.in_progress_reviews_level_2 >= item.open_reviews_level_2:
+                raise Exception(
+                    'Item cannot be accepted since enough other detecitves are already working on the case')
+        else:
+            raise Exception(
+                'Item cannot be accepted since enough other detecitves are already working on the case')
+    # Create a new ReviewInProgress
+    rip = ReviewInProgress()
+    rip.id = str(uuid4())
+    rip.item_id = item.id
+    rip.user_id = user.id
+    rip.start_timestamp = helper.get_date_time_now(is_test)
 
-    # The item cannot be reviewed if it is locked by a user
-    if item.locked_by_user:
-        raise ValueError('Item cannot be accepted since it is locked by user {}'.format(
-            item.locked_by_user))
-
-    # change status in order to lock item
-    if item.status == "needs_junior":
-        item.status = "locked_by_junior"
+    # If a user is a senior, the review will by default be a senior review,
+    # except if no senior reviews are needed
+    if user.level > 1 and item.open_reviews_level_2 > 0:
+        rip.is_peer_review = True
+        item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
     else:
-        item.status = "locked_by_senior"
+        rip.is_peer_review = False
+        item.in_progress_reviews_level_1 = item.in_progress_reviews_level_1 + 1
 
-    if is_test == True:
-        item.lock_timestamp = datetime.now()
-    else:
-        item.lock_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    item.locked_by_user = user.id
-    update_object_db(item, is_test, session)
-
+    session.add(rip)
+    session.merge(item)
+    session.commit()
     return item
 
 

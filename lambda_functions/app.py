@@ -720,8 +720,7 @@ def accept_item(event, context, is_test=False, session=None):
         item_id = event['pathParameters']['item_id']
 
         # get cognito id
-        user_id = str(event['requestContext']['identity']
-                      ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
+        user_id = helper.cognito_id_from_event(event)
 
         # get user and item from the db
         user = operations.get_user_by_id(user_id, is_test, session)
