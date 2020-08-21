@@ -146,12 +146,12 @@ def get_item_by_id(id, is_test, session):
     return item
 
 
-def get_locked_items(is_test, session):
+def get_old_reviews_in_progress(is_test, session):
+    old_time = helper.get_date_time_one_hour_ago(is_test)
     session = get_db_session(is_test, session)
-    items = session.query(Item).filter(
-        Item.status.in_(['locked_by_junior', 'locked_by_senior'])
-    )
-    return items
+    rips = session.query(ReviewInProgress).filter(
+        ReviewInProgress.start_timestamp < old_time)
+    return rips
 
 
 def create_submission_db(submission, is_test, session):
@@ -395,22 +395,6 @@ def give_experience_point(user_id, is_test, session):
     if user.experience_points >= 5:
         user.level = 2
     update_object_db(user, is_test, session)
-
-
-def check_if_review_still_needed(item_id, user_id, is_peer_review, is_test, session):
-
-    item = get_item_by_id(item_id, is_test, session)
-    status = item.status
-    if is_peer_review == True:
-        if status == "locked_by_senior" and item.locked_by_user == user_id:
-            return True
-        else:
-            return False
-    if is_peer_review == False:
-        if status == "locked_by_junior" and item.locked_by_user == user_id:
-            return True
-        else:
-            return False
 
 
 def close_open_junior_review(item_id, peer_review_id, is_test, session):
@@ -717,21 +701,16 @@ def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id, is_test, session):
     return itemphrase
 
 
-def reset_locked_items_db(items, is_test, session):
-    """Updates all locked items in the database
-    and returns the amount of updated items"""
-    counter = 0
-    for item in items:
-        if datetime.strptime(item.lock_timestamp, '%Y-%m-%d %H:%M:%S') < datetime.now() - timedelta(hours=1):
-            counter = counter + 1
-            item.lock_timestamp = None
-            item.locked_by_user = None
-            if item.status == "locked_by_junior":
-                item.status = "needs_junior"
-            if item.status == "locked_by_senior":
-                item.status = "needs_senior"
-            update_object_db(item, is_test, session)
-    return counter
+def delete_old_reviews_in_progress(rips, is_test, session):
+    for rip in rips:
+        item = get_item_by_id(rip.item_id, is_test, session)
+        if rip.is_peer_review == True:
+            item.in_progress_reviews_level_2 -= 1
+        else:
+            item.in_progress_reviews_level_1 -= 1
+        session.merge(item)
+        session.delete(rip)
+    session.commit()
 
 
 def accept_item_db(user, item, is_test, session):

@@ -633,12 +633,14 @@ def reset_locked_items(event, context, is_test=False, session=None):
         session = operations.get_db_session(False, None)
 
     try:
-        items = operations.get_locked_items(is_test, session)
-        updated = operations.reset_locked_items_db(items, is_test, session)
+        reviews_in_progress = operations.get_old_reviews_in_progress(
+            is_test, session)
+        operations.delete_old_reviews_in_progress(
+            reviews_in_progress, is_test, session)
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": "{} Items updated".format(updated)
+            "body": "Items updated"
         }
     except Exception as e:
         return {
