@@ -142,6 +142,27 @@ def get_item_by_id(id, is_test, session):
     return item
 
 
+def get_factcheck_by_itemid_db(id, is_test, session):
+    """Returns factchecks referenced by an item id
+
+    Parameters
+    ----------
+    id: str, required
+        The id of the item
+
+    Returns
+    ------
+    factcheck: ExternalFactCheck
+        The first factcheck referenced by the item
+        None if no factcheck referenced by the item
+    """
+    session = get_db_session(is_test, session)
+    factcheck = session.query(ExternalFactCheck).select_from(Item).\
+                join(Item.factchecks).\
+                filter(Item.id == id)
+    return factcheck.first()
+
+
 def get_locked_items(is_test, session):
     session = get_db_session(is_test, session)
     items = session.query(Item).filter(
