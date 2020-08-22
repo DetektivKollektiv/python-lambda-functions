@@ -48,7 +48,8 @@ def template_state_machine(
         print(e)
         sys.exit(1)
 
-    templated_cf = "  StateMachineLambdaRole:\n" + \
+    templated_cf = "\n" + \
+                   "  StateMachineLambdaRole:\n" + \
                    "    Type: AWS::IAM::Role\n" + \
                    "    Properties:\n" + \
                    "      AssumeRolePolicyDocument:\n" + \
