@@ -40,15 +40,15 @@ def extract_claim(event, context):
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
-    # extract all urls from item_content
-    # urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # extract all urls from item_content urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),
+    # ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
     title = ""
     # text contains as first entry a placeholder for item_content
     # text = [item_content, ]
-    allText = item_content
+    allText = item_content+' '
 
     # open all urls and extract the paragraphs
     for url in urls:
@@ -60,8 +60,8 @@ def extract_claim(event, context):
             continue
         content = urllib.request.urlopen(url)
         read_content = content.read()
-
-        soup = BeautifulSoup(read_content, 'html.parser')
+        read_content_hidden = read_content.replace(b'<!--', b'')
+        soup = BeautifulSoup(read_content_hidden, 'html.parser')
         titles = soup.find_all('title')  # get the title of the web page
         title = ""
         if len(titles) > 0:
