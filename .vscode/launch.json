@@ -9,6 +9,9 @@
                 "projectRoot": "lambda_functions",
                 "lambdaHandler": "user_handler.delete_user"
             },
+            "sam": {
+                "containerBuild": true
+            },
             "lambda": {
                 "runtime": "python3.8",
                 "payload": {
@@ -30,14 +33,14 @@
                 "lambdaHandler": "app.get_all_items"
             },
             "sam": {
-                "containerBuild": true,
+                "containerBuild": true
             },
             "lambda": {
                 "runtime": "python3.8",
                 "payload": {},
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
                 },
                 "timeoutSec": 120
             }
@@ -52,17 +55,16 @@
                 "lambdaHandler": "app.submit_review"
             },
             "sam": {
-                "containerBuild": true,
+                "containerBuild": true
             },
             "lambda": {
                 "runtime": "python3.8",
                 "payload": {
                     "path": "test-payloads/submit_review.json"
                 },
-               
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
                 },
                 "timeoutSec": 120
             }
@@ -77,17 +79,16 @@
                 "lambdaHandler": "app.accept_item"
             },
             "sam": {
-                "containerBuild": true,
+                "containerBuild": true
             },
             "lambda": {
                 "runtime": "python3.8",
                 "payload": {
                     "path": "test-payloads/accept_item.json"
                 },
-               
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN":"http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
                 },
                 "timeoutSec": 120
             }

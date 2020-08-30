@@ -1,7 +1,7 @@
 {
     "requestContext": {
         "identity": {
-            "cognitoAuthenticationProvider": "http://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_edLkAIQVL,cognito-idp.eu-central-1.amazonaws.com/eu-central-1_edLkAIQVL:CognitoSignIn:8b8fe3ad-1aba-420a-bb9a-3b13d524f726"
+            "cognitoAuthenticationProvider": "http://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_edLkAIQVL,cognito-idp.eu-central-1.amazonaws.com/eu-central-1_edLkAIQVL:CognitoSignIn:94fcf817-27b5-4d99-8652-49b373b85537"
         }
     }
 }
