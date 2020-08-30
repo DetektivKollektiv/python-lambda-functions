@@ -41,16 +41,23 @@ def extract_claim(event, context):
         raise Exception('Please provide an item!')
 
     # extract all urls from item_content
+    # urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
-    titles = []
+    title = ""
     # text contains as first entry a placeholder for item_content
     # text = [item_content, ]
     allText = item_content
 
     # open all urls and extract the paragraphs
     for url in urls:
+        # do not accept urls referencing localhost
+        try:
+            if re.search('127\.', url) or re.search('localhost', url, re.IGNORECASE):
+                continue
+        except (AttributeError, TypeError):
+            continue
         content = urllib.request.urlopen(url)
         read_content = content.read()
 

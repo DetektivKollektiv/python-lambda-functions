@@ -1,6 +1,6 @@
 from crud import operations
 
-def delete_user(event, context, session=None):
+def delete_user(event, context, is_test=False, session=None):
     """Deletes a user from DB and Cognito.
 
     Parameters
@@ -22,7 +22,10 @@ def delete_user(event, context, session=None):
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
     try:
-        operations.delete_user(event, session)
+        if session == None:
+            session = operations.get_db_session(is_test, session)
+
+        operations.delete_user(event, is_test, session)
 
         response = {
             "statusCode": 200

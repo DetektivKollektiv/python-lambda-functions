@@ -3,10 +3,12 @@ import json
 import requests
 import boto3
 import base64
+import re
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
 
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
@@ -59,6 +61,7 @@ def get_secret():
             decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
 
+
 # Call Google API for Fact Check search
 def call_googleapi(search_terms, language_code):
     pageSize = 1  # Count of returned results
@@ -95,12 +98,27 @@ def get_FactChecks(event, context):
     if 'Entities' in event:
         search_terms.append(event['Entities'])
 
+    article_bestfit = ""
+    count_bestfit = 1 # minimum fit should be at least 2 search terms in the claim
     for terms in search_terms:
         response = call_googleapi(terms, LanguageCode)
         # Check if the search was successful
         # Get the response data as a python object. Verify that it's a dictionary.
         response_json = response.json()
         if 'claims' in response_json:
-            claims.append(response_json['claims'][0])
+            # verify if the fact check articles fit to search terms
+            # consider that there could be multiple equal entries in terms
+            unique_terms = []
+            for article in response_json['claims']:
+                if 'text' in article:
+                    for term in terms:
+                        if term not in unique_terms:
+                            if re.search(term, article['text']):
+                                unique_terms.append(term)
+            if len(unique_terms) > count_bestfit:
+                article_bestfit = article
+                count_bestfit = len(unique_terms)
+
+    claims.append(article_bestfit)
 
     return claims

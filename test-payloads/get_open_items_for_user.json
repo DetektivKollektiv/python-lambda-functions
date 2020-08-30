@@ -1,0 +1,10 @@
+{
+    "pathParameters": {
+        "num_items": "5"
+    },
+    "requestContext": {
+        "identity": {
+            "cognitoAuthenticationProvider": "...CognitoSignIn:8b8fe3ad-1aba-420a-bb9a-3b13d524f726"
+        }
+    }
+}

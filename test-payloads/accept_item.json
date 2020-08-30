@@ -4,7 +4,7 @@
     },
     "requestContext": {
         "identity": {
-            "cognitoAuthenticationProvider": "...CognitoSignIn:8b8fe3ad-1aba-420a-bb9a-3b13d524f726"
+            "cognitoAuthenticationProvider": "...CognitoSignIn:dc02f744-99fa-49e3-8b62-3c3d4183aa3d"
         }
     }
 }
