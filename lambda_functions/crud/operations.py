@@ -325,6 +325,9 @@ def delete_user(event, session):
     user_id = cognito_id_from_event(event)
     user = session.query(User).get(user_id)
 
+    if(user == None):
+        raise Exception(f"User with id {user_id} could not be found in database.")
+
     client = boto3.client('cognito-idp')
     client.admin_delete_user(
         UserPoolId=event['requestContext']['identity']['cognitoAuthenticationProvider'].split(',')[0].split('amazonaws.com/')[1],
