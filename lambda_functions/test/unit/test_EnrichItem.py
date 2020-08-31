@@ -159,3 +159,30 @@ class TestGetFactChecks:
         else:
             factcheck = body
         assert factcheck['url'] == "https://dpa-factchecking.com/austria/200625-99-562594/"
+
+    def test_store_factcheck_empty(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        import EnrichItem
+
+        session = operations.get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "item is referencing some fact checks"
+        item = operations.create_item_db(item, True, session)
+
+        # store a fact check
+        event = {
+            "item": {
+                "id": item.id,
+                "content": item.content,
+                "language": "en",
+            },
+            "FactChecks": [
+                ""
+            ]
+        }
+        context = ""
+        with pytest.raises(Exception) as excinfo:
+            EnrichItem.store_factchecks(event, context, True, session)
+        assert "No claimReview found in factchecks!" in str(excinfo.value)

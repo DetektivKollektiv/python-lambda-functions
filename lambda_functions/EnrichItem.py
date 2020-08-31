@@ -63,9 +63,7 @@ def store_factchecks(event, context, is_test=False, session=None):
 
     Returns
     ------
-    API Gateway Lambda Proxy Output Format: application/json
 
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
     if session is None:
@@ -73,6 +71,8 @@ def store_factchecks(event, context, is_test=False, session=None):
 
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
+        if 'claimReview' not in json_event:
+            raise Exception('No claimReview found in factchecks!')
         organization = FactChecking_Organization()
         factcheck = ExternalFactCheck()
         # What is the publishing organization?
