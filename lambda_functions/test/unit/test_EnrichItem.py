@@ -159,6 +159,7 @@ class TestGetFactChecks:
         else:
             factcheck = body
         assert factcheck['url'] == "https://dpa-factchecking.com/austria/200625-99-562594/"
+        assert factcheck['title'] == "Fotos zeigen Polizisten in Australien - kein Zusammenhang zu Stuttgart"
 
     def test_store_factcheck_empty(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")

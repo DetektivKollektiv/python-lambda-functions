@@ -72,7 +72,8 @@ def store_factchecks(event, context, is_test=False, session=None):
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
         if 'claimReview' not in json_event:
-            raise Exception('No claimReview found in factchecks!')
+            # raise Exception('No claimReview found in factchecks!')
+            return
         organization = FactChecking_Organization()
         factcheck = ExternalFactCheck()
         # What is the publishing organization?
@@ -99,6 +100,7 @@ def store_factchecks(event, context, is_test=False, session=None):
                 logger.error("Could not store Organization. Exception: %s", e, exc_info=True)
 
         factcheck_url = json_event['claimReview'][0]['url']
+        factcheck_title = json_event['claimReview'][0]['title']
         item_id = event['item']['id']
         try:
             # Does the factcheck already exist?
@@ -108,6 +110,7 @@ def store_factchecks(event, context, is_test=False, session=None):
             factcheck.id = str(uuid4())
         # store factcheck in database
         factcheck.url = factcheck_url
+        factcheck.title = factcheck_title
         factcheck.item_id = item_id
         factcheck.factchecking_organization_id = organization.id
         try:
