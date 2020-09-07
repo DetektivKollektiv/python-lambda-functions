@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import json
 
@@ -8,6 +8,14 @@ def get_date_time_now(is_test):
         return datetime.now()
     else:
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def get_date_time_one_hour_ago(is_test):
+    dt = datetime.now() + timedelta(hours=-1)
+    if is_test:
+        return dt
+    else:
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def set_cors(response, event, is_test):
@@ -26,7 +34,7 @@ def set_cors(response, event, is_test):
         The modified response
     """
     if is_test:
-        return event
+        return response
 
     source_origin = None
     allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
