@@ -64,7 +64,7 @@ def get_secret():
 
 # Call Google API for Fact Check search
 def call_googleapi(search_terms, language_code):
-    pageSize = 1  # Count of returned results
+    pageSize = 5  # Count of returned results
     query = ""
     for term in search_terms:
         query += "\"" + term + "\" "
@@ -98,6 +98,8 @@ def get_FactChecks(event, context):
     if 'Entities' in event:
         search_terms.append(event['Entities'])
 
+    article_bestfit = ""
+    count_bestfit = 1 # minimum fit should be at least 2 search terms in the claim
     for terms in search_terms:
         response = call_googleapi(terms, LanguageCode)
         # Check if the search was successful
@@ -106,14 +108,17 @@ def get_FactChecks(event, context):
         if 'claims' in response_json:
             # verify if the fact check articles fit to search terms
             # consider that there could be multiple equal entries in terms
-            unique_terms = []
             for article in response_json['claims']:
+                unique_terms = []
                 if 'text' in article:
                     for term in terms:
                         if term not in unique_terms:
                             if re.search(term, article['text']):
                                 unique_terms.append(term)
-            if len(unique_terms) > 1:
-                claims.append(article)
+                    if len(unique_terms) > count_bestfit:
+                        article_bestfit = article
+                        count_bestfit = len(unique_terms)
+
+    claims.append(article_bestfit)
 
     return claims

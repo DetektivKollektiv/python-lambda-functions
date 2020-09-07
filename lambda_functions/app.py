@@ -4,8 +4,6 @@ import os
 import boto3
 from datetime import datetime
 
-from aws_xray_sdk.core import patch_all
-from aws_xray_sdk.core import xray_recorder
 
 from crud import operations, helper
 from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
@@ -133,6 +131,40 @@ def get_item_by_id(event, context, is_test=False, session=None):
         return {
             "statusCode": 400,
             "body": "Could not get item. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
+
+def get_factcheck_by_itemid(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated("Get factchecks by item id", event, logger)
+
+    if session is None:
+        session = operations.get_db_session(False, None)
+
+    try:
+        # get id (str) from path
+        id = event['pathParameters']['id']
+
+        try:
+            factcheck = operations.get_factcheck_by_itemid_db(id, is_test, session)
+
+            factcheck_dict = factcheck.to_dict()
+
+            return {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(factcheck_dict)
+            }
+        except Exception:
+            return {
+                "statusCode": 404,
+                "body": "No item found with the specified id."
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "body": "Could not get factchecks. Check HTTP POST payload. Exception: {}".format(e)
         }
 
 

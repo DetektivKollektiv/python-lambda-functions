@@ -152,8 +152,28 @@ def get_old_reviews_in_progress(is_test, session):
     rips = session.query(ReviewInProgress).filter(
         ReviewInProgress.start_timestamp < old_time)
     return rips
+  
+def get_factcheck_by_itemid_db(id, is_test, session):
+    """Returns factchecks referenced by an item id
 
+    Parameters
+    ----------
+    id: str, required
+        The id of the item
 
+    Returns
+    ------
+    factcheck: ExternalFactCheck
+        The first factcheck referenced by the item
+        None if no factcheck referenced by the item
+    """
+    session = get_db_session(is_test, session)
+    factcheck = session.query(ExternalFactCheck).select_from(Item).\
+                join(Item.factchecks).\
+                filter(Item.id == id)
+    return factcheck.first()   
+
+  
 def create_submission_db(submission, is_test, session):
     """Inserts a new submission into the database
 

@@ -70,6 +70,9 @@ class ExternalFactCheck(Base):
     item_id = Column(String, ForeignKey('items.id'))
     item = relationship("Item", back_populates="factchecks")
 
+    def to_dict(self):
+        return {"id": self.id, "url": self.url, "title": self.title}
+
 
 class FactChecking_Organization(Base):
     __tablename__ = 'factchecking_organizations'
