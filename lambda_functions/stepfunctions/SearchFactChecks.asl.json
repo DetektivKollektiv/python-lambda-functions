@@ -132,7 +132,7 @@
                 "Catch": [
                   {
                     "ErrorEquals": [ "States.TaskFailed" ],
-                    "Next": "EnrichmentFailed"
+                    "Next": "Store Item URL"
                   }
                 ],
                 "Parameters": {
