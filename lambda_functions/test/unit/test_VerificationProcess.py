@@ -3,6 +3,7 @@ from crud.model import User, Item
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
+import test.unit.event_creator as event_creator
 
 
 def test_verification_process_best_case(monkeypatch):
@@ -118,23 +119,27 @@ def test_verification_process_best_case(monkeypatch):
 
     # Junior detectives reviewing item
 
-    review_event = get_review_event(item.id, junior_detective4.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective4.id, 1)
     response = app.submit_review(review_event, None, True, session)
     assert response['statusCode'] == 400
 
-    review_event = get_review_event(item.id, junior_detective1.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective1.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 2
     assert item.in_progress_reviews_level_1 == 2
 
-    review_event = get_review_event(item.id, junior_detective2.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective2.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 1
     assert item.in_progress_reviews_level_1 == 1
 
-    review_event = get_review_event(item.id, junior_detective3.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective3.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 0
@@ -142,23 +147,27 @@ def test_verification_process_best_case(monkeypatch):
 
     # Senior detectives reviewing item
 
-    review_event = get_review_event(item.id, senior_detective4.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective4.id, 1)
     response = app.submit_review(review_event, None, True, session)
     assert response['statusCode'] == 400
 
-    review_event = get_review_event(item.id, senior_detective1.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective1.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 2
     assert item.in_progress_reviews_level_2 == 2
 
-    review_event = get_review_event(item.id, senior_detective2.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective2.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 1
     assert item.in_progress_reviews_level_2 == 1
 
-    review_event = get_review_event(item.id, senior_detective3.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective3.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 0
@@ -281,23 +290,27 @@ def test_verification_process_worst_case(monkeypatch):
 
     # Junior detectives reviewing item
 
-    review_event = get_review_event(item.id, junior_detective4.id, 4)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective4.id, 4)
     response = app.submit_review(review_event, None, True, session)
     assert response['statusCode'] == 400
 
-    review_event = get_review_event(item.id, junior_detective1.id, 4)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective1.id, 4)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 2
     assert item.in_progress_reviews_level_1 == 2
 
-    review_event = get_review_event(item.id, junior_detective2.id, 4)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective2.id, 4)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 1
     assert item.in_progress_reviews_level_1 == 1
 
-    review_event = get_review_event(item.id, junior_detective3.id, 4)
+    review_event = event_creator.get_review_event(
+        item.id, junior_detective3.id, 4)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 0
@@ -305,23 +318,27 @@ def test_verification_process_worst_case(monkeypatch):
 
     # Senior detectives reviewing item
 
-    review_event = get_review_event(item.id, senior_detective4.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective4.id, 1)
     response = app.submit_review(review_event, None, True, session)
     assert response['statusCode'] == 400
 
-    review_event = get_review_event(item.id, senior_detective1.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective1.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 2
     assert item.in_progress_reviews_level_2 == 2
 
-    review_event = get_review_event(item.id, senior_detective2.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective2.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 1
     assert item.in_progress_reviews_level_2 == 1
 
-    review_event = get_review_event(item.id, senior_detective3.id, 1)
+    review_event = event_creator.get_review_event(
+        item.id, senior_detective3.id, 1)
     app.submit_review(review_event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
 
@@ -329,71 +346,3 @@ def test_verification_process_worst_case(monkeypatch):
     assert item.open_reviews_level_2 == 3
     assert item.open_reviews == 3
     assert item.result_score == None
-
-
-def get_review_event(item_id, user_id, score):
-    review_event = {
-        "body": {
-            "item_id": item_id,
-            "review_answers": [
-                {
-                    "review_question_id": "1",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "2",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "3",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "4",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "5",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "6",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "7",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "8",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "9",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "10",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "11",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "12",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "13",
-                    "answer": score
-                }
-            ]
-        },
-        "requestContext": {
-            "identity": {
-                "cognitoAuthenticationProvider": "...CognitoSignIn:{}".format(user_id)
-            }
-        }
-    }
-    return review_event

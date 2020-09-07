@@ -503,39 +503,43 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
     """
 
     session = get_db_session(is_test, session)
-
-    sql_query_base = """SELECT items.id, min(submissions.submission_date) as oldest_submission,
-                    reviews.id as review_id, SUM(IF(reviews.user_id = :user_id, 1,0)) AS reviewed_by_user
-                    FROM items
-                    INNER JOIN submissions ON items.id = submissions.item_id
-                    LEFT JOIN reviews on items.id = reviews.item_id
-                    WHERE {}
-                    GROUP BY items.id
-                    HAVING reviewed_by_user = 0
-                    ORDER BY oldest_submission
-                    LIMIT :num_items"""
-
-    sql_query = sql_query_base.format("items.status = 'needs_junior'")
-
-    # Senior detectives can get junior or senior reviews
-    if user.level > 1:
-        sql_query = sql_query_base.format(
-            "(items.status = 'needs_junior' OR items.status = 'needs_senior')")
-
-    result = session.execute(
-        sql_query, {"user_id": user.id, "num_items": num_items})
-    print(result)
-
     items = []
 
-    for row in result:
-        item_id = row[0]
-        item = get_item_by_id(item_id, is_test, session)
+    # If review in progress exists for user, return the corresponding item(s)
+    result = session.query(ReviewInProgress).filter(
+        ReviewInProgress.user_id == user.id).limit(num_items)
+    if result.count() > 0:
+        for rip in result:
+            item_id = rip.item_id
+            item = get_item_by_id(item_id, is_test, session)
+            items.append(item)
+        # shuffle list order
+        random.shuffle(items)
+        return items
+
+    if user.level > 1:
+        # Get open items for senior review
+        result = session.query(Item) \
+            .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
+            .filter(~Item.reviews.any(Review.user_id == user.id)) \
+            .limit(num_items).all()
+
+        # If open items are available, return them
+        if len(result) > 0:
+            for item in result:
+                items.append(item)
+            random.shuffle(items)
+            return items
+
+    # Get open items for junior review and return them
+    result = session.query(Item) \
+        .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
+        .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        .limit(num_items).all()
+
+    for item in result:
         items.append(item)
-
-    # shuffle list order
     random.shuffle(items)
-
     return items
 
 
@@ -728,6 +732,14 @@ def accept_item_db(user, item, is_test, session):
     item: Item
         The case to be assigned to the user
     """
+    # If a ReviewInProgress exists for the user, return
+    try:
+        session.query(ReviewInProgress).filter(
+            ReviewInProgress.user_id == user.id).one()
+        return item
+    except:
+        pass
+
     # If the amount of reviews in progress equals the amount of reviews needed, raise an error
     if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
         if user.level > 1:
