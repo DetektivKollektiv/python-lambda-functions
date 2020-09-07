@@ -522,6 +522,7 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
             .filter(~Item.reviews.any(Review.user_id == user.id)) \
+            .order_by(Item.open_timestamp.asc()) \
             .limit(num_items).all()
 
         # If open items are available, return them
@@ -535,6 +536,7 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
     result = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
         .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
 
     for item in result:
