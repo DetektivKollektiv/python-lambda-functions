@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 from datetime import datetime, timedelta
-from . import helper
+from . import helper, notifications
 import json
 import random
 import statistics
@@ -191,6 +191,10 @@ def create_submission_db(submission, is_test, session):
 
     submission.id = str(uuid4())
     submission.submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # SQLite test DB expects date to be of type datetime
+    if is_test:
+        submission.submission_date = datetime.now()
 
     session.add(submission)
     session.commit()
@@ -895,6 +899,9 @@ def build_review_pairs(item, is_test, session):
         item.status = "closed"
         item.result_score = compute_item_result_score(
             item.id, is_test, session)
+        
+        # Notify email and telegram users
+        notifications.notify_telegram_users(is_test, session, item)
 
     else:
         item.open_reviews_level_1 = item.open_reviews
