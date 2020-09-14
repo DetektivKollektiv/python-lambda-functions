@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
 from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 from datetime import datetime, timedelta
-from . import helper
+from . import helper, notifications
 import json
 import random
 import statistics
@@ -143,6 +143,10 @@ def get_item_by_id(id, is_test, session):
     """
     session = get_db_session(is_test, session)
     item = session.query(Item).get(id)
+
+    # Uncomment to test telegram user notification
+    # notifications.notify_telegram_users(is_test, session, item)
+
     return item
 
 
@@ -190,7 +194,7 @@ def create_submission_db(submission, is_test, session):
     session = get_db_session(is_test, session)
 
     submission.id = str(uuid4())
-    submission.submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    submission.submission_date = helper.get_date_time_now(is_test)
 
     session.add(submission)
     session.commit()
@@ -895,6 +899,9 @@ def build_review_pairs(item, is_test, session):
         item.status = "closed"
         item.result_score = compute_item_result_score(
             item.id, is_test, session)
+        
+        # Notify email and telegram users
+        notifications.notify_telegram_users(is_test, session, item)
 
     else:
         item.open_reviews_level_1 = item.open_reviews
@@ -903,3 +910,10 @@ def build_review_pairs(item, is_test, session):
     session.merge(item)
     session.commit()
     return item
+
+
+def get_submissions_by_item_id(item_id, is_test, session):
+
+    session = get_db_session(is_test, session)
+    submissions = session.query(Submission).filter(Submission.item_id == item_id).all()
+    return submissions

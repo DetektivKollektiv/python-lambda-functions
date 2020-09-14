@@ -46,6 +46,7 @@ class Submission(Base):
     id = Column(String, primary_key=True)
     submission_date = Column(DateTime)
     mail = Column(String)
+    telegram_id = Column(String)
     phone = Column(String)
     source = Column(String)
     frequency = Column(String)
@@ -54,7 +55,7 @@ class Submission(Base):
     item = relationship("Item", back_populates="submissions")
 
     def to_dict(self):
-        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "phone": self.phone,
+        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "telegram_id": self.telegram_id, "phone": self.phone,
                 "source": self.source, "frequency": self.frequency, "received_date": self.received_date,
                 "item_id": self.item_id}
 

@@ -3,9 +3,9 @@ import json
 import os
 import boto3
 from datetime import datetime
+import requests
 
-
-from crud import operations, helper
+from crud import operations, helper, notifications
 from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 
 logger = logging.getLogger()
@@ -116,6 +116,7 @@ def get_item_by_id(event, context, is_test=False, session=None):
 
         try:
             item = operations.get_item_by_id(id, is_test, session)
+
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
