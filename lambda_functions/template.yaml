@@ -766,6 +766,34 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
 
+  ClosedItemFeedbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'detektivkollektiv-api-closed_item_feedback-${STAGE}'
+      CodeUri: .
+      Handler: app.closed_item_feedback
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /closed_item_feedback/{item_id}
+            Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:

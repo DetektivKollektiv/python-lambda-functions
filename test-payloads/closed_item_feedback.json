@@ -1,0 +1,10 @@
+{
+    "pathParameters": {
+        "item_id": "a5b7e95b-d29e-478c-a909-78f9df5d3b2f"
+    },
+    "requestContext": {
+        "identity": {
+            "cognitoAuthenticationProvider": "...CognitoSignIn:8b8fe3ad-1aba-420a-bb9a-3b13d524f726"
+        }
+    }
+}

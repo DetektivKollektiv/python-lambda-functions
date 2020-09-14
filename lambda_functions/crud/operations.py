@@ -903,3 +903,10 @@ def build_review_pairs(item, is_test, session):
     session.merge(item)
     session.commit()
     return item
+
+
+def get_submissions_by_item_id(item_id, is_test, session):
+
+    session = get_db_session(is_test, session)
+    submissions = session.query(Submission).filter(Submission.item_id == item_id)
+    return submissions

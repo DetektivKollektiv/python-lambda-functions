@@ -3,7 +3,7 @@ import json
 import os
 import boto3
 from datetime import datetime
-
+import requests
 
 from crud import operations, helper
 from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
@@ -116,6 +116,25 @@ def get_item_by_id(event, context, is_test=False, session=None):
 
         try:
             item = operations.get_item_by_id(id, is_test, session)
+
+            # write to event bus
+            # TODO: remove and add to close item
+            client = boto3.client('events')
+
+            message = client.put_events(
+                Entries=[
+                    {
+                        'Source': 'submit_review',
+                        'Resources': [],
+                        'DetailType': 'the closed item',
+                        'Detail': json.dumps({'id': item.id}),
+                        'EventBusName': 'closed-items'
+                    }
+                ]
+            )
+
+            print(str(message))
+
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
@@ -536,6 +555,8 @@ def submit_review(event, context, is_test=False, session=None):
         if item.open_reviews_level_1 == 0 and item.open_reviews_level_2 == 0:
             item = operations.build_review_pairs(item, is_test, session)
 
+        # TODO: Notify email and telegram users
+
         response = {
             "statusCode": 201,
             "body": json.dumps(item.to_dict())
@@ -756,6 +777,82 @@ def get_all_closed_items(event, context, is_test=False, session=None):
         response = {
             "statusCode": 400,
             "body": "Could not get closed items. Exception: {}".format(e)
+        }
+
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
+
+
+def closed_item_feedback(event, context, is_test=False, session=None):
+    """
+    This function is called by an EventBridge rule when a new closed item is pushed to the event bus 'closed-items'
+    """
+
+    helper.log_method_initiated("Notify user(s) about closed item.", event, logger)
+
+    if session == None:
+        session = operations.get_db_session(False, None)
+
+    try:
+
+        # get id (str) from path
+        item_id = event['pathParameters']['item_id']
+
+        # Get the item
+        try:
+            item = operations.get_item_by_id(item_id, is_test, session)
+        except Exception as e: 
+            response = {
+                "statusCode": 404,
+                "body": "Closed item pushed to EventBridge not found. Exception: {}".format(e)
+            }
+        
+        # get all submissions for this item
+        submissions = operations.get_submissions_by_item_id(item_id, is_test, session)
+
+        mail_users = []
+        telegram_users = []
+
+        for submission in submissions:
+            if submission.mail:
+                mail_users.append(submission.mail)
+            if submission.telegram_id:
+                telegram_users.append(submission.telegram_id)
+
+                # Notify telegram user
+
+                bot_token = '1344994044:AAFjEb6OrJV_EmpR_DBhFPSsNvNexnSEmXk'
+
+                rating = round(item.result_score, 1) # TODO: This implementation is not perfect: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
+                rating_text = "nicht vertrauenswürdig"
+                if 1.5 <= rating < 2.5:
+                    rating_text = "eher nicht vertrauenswürdig"
+                if 2.5 <= rating < 3.5:
+                    rating_text = "eher vertrauenswürdig"
+                if rating >= 3.5: 
+                    rating_text = "vertrauenswürdig"
+
+                message_1 = "Hi, ich bins. Ich habe Neuigkeiten zu deinem eingereichten Fall!"
+                message_2 = "Unsere Detektiv\\*innen haben dem Fall einen Vertrauensindex von *{}/4 ({})* gegeben. Mehr Details findest du im [Archiv](https://qa.detective-collective.org/archive).".format(rating, rating_text)
+                message_3 = "Dein Fall lautete: \n{}".format(item.content)
+
+                messages = [message_1, message_2, message_3]
+
+                for message in messages:
+                    request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(bot_token, submission.telegram_id, message)
+                    notify_user = requests.get(request_url)
+                    print(notify_user.json())
+
+        response = {
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": "Item: {}; Mail users to notify: {}; Telegram users notified: {}".format(json.dumps(item.to_dict()), json.dumps(mail_users), json.dumps(telegram_users))
+        }
+
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get closed item id from URL path. Exception: {}".format(e)
         }
 
     response_cors = helper.set_cors(response, event, is_test)
