@@ -7,6 +7,8 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 from datetime import datetime
 
+# Set the user's chat id here, you can find out your chat id by texting @chatid_echo_bot
+TELEGRAM_CHAT_ID = "XXXXXXXXX"
 
 def test_closed_item_notification(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
@@ -75,16 +77,16 @@ def test_closed_item_notification(monkeypatch):
 
     # Creating an item
     item = Item()
-    item.id = "123456"
     item.content = "This item needs to be checked"
-    item.result_score = 1.8
     item = operations.create_item_db(item, True, session)
+
+    assert item.id is not None
 
     # Creating a second submission for this item
     submission = Submission()
-    submission.item_id = "123456"
-    submission.mail = "example-mail@gmail.com"
-    submission.telegram_id = "512571126"
+    submission.item_id = item.id
+    submission.telegram_id = TELEGRAM_CHAT_ID
+
     submission = operations.create_submission_db(submission, True, session)
 
     items = operations.get_all_items_db(True, session)

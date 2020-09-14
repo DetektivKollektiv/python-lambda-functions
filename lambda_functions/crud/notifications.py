@@ -55,18 +55,18 @@ def notify_telegram_users(is_test, session, item):
                 if rating >= 3.5: 
                     rating_text = "vertrauenswürdig"
 
-                message_1 = "Hi, Derrick hier. Ich habe Neuigkeiten zu deinem eingereichten Fall!"
-                message_2 = "Unsere Detektiv\\*innen haben dem Fall einen Vertrauensindex von *{} von 4 ({})* gegeben. Mehr Details findest du im [Archiv](https://qa.detective-collective.org/archive).".format(rating, rating_text)
-                message_3 = "Dein Fall lautete: \n{}".format(item.content)
+                message_part_1 = "Hi, Derrick hier. Ich habe Neuigkeiten zu deinem eingereichten Fall!\n\n"
+                message_part_2 = "Unsere Detektiv\\*innen haben dem Fall einen Vertrauensindex von *{} von 4 ({})* gegeben. ".format(rating, rating_text)
+                message_part_3 = "Mehr Details findest du im [Archiv](https://qa.detective-collective.org/archive).\n\n"
+                message_part_4 = "Dein Fall lautete: \n{}".format(item.content)
 
-                messages = [message_1, message_2, message_3]
-
-                for message in messages:
-                    request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(TELEGRAM_BOT_TOKEN, submission.telegram_id, message)
-                    notify_user = requests.get(request_url)
-                    logger.info("Telegram user notification request sent. Response: {}".format(notify_user.json()))
-                    if notify_user.ok == False:
-                        raise TelegramNotificationError
+                message = message_part_1 + message_part_2 + message_part_3 + message_part_4
+                                
+                request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(TELEGRAM_BOT_TOKEN, submission.telegram_id, message)
+                notify_user = requests.get(request_url, timeout=5)
+                logger.info("Telegram user notification request sent. Response: {}".format(notify_user.json()))
+                if notify_user.ok == False:
+                    raise TelegramNotificationError
                 
                 logger.info("Item: {}; Mail users to notify: {}; Telegram users notified: {}".format(json.dumps(item.to_dict()), json.dumps(mail_users), json.dumps(telegram_users)))
             

@@ -117,9 +117,6 @@ def get_item_by_id(event, context, is_test=False, session=None):
         try:
             item = operations.get_item_by_id(id, is_test, session)
 
-            # Uncomment to test telegram user notification
-            # notifications.notify_telegram_users(is_test, session, item)
-
             return {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},

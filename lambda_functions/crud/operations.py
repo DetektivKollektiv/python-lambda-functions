@@ -143,6 +143,10 @@ def get_item_by_id(id, is_test, session):
     """
     session = get_db_session(is_test, session)
     item = session.query(Item).get(id)
+
+    # Uncomment to test telegram user notification
+    # notifications.notify_telegram_users(is_test, session, item)
+
     return item
 
 
@@ -190,11 +194,7 @@ def create_submission_db(submission, is_test, session):
     session = get_db_session(is_test, session)
 
     submission.id = str(uuid4())
-    submission.submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # SQLite test DB expects date to be of type datetime
-    if is_test:
-        submission.submission_date = datetime.now()
+    submission.submission_date = helper.get_date_time_now(is_test)
 
     session.add(submission)
     session.commit()
@@ -915,5 +915,5 @@ def build_review_pairs(item, is_test, session):
 def get_submissions_by_item_id(item_id, is_test, session):
 
     session = get_db_session(is_test, session)
-    submissions = session.query(Submission).filter(Submission.item_id == item_id)
+    submissions = session.query(Submission).filter(Submission.item_id == item_id).all()
     return submissions
