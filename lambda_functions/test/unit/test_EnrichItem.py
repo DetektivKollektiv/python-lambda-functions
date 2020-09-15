@@ -147,7 +147,7 @@ class TestGetFactChecks:
 
         event = {
             "pathParameters": {
-                "id": item.id
+                "item_id": item.id
             }
         }
         context = {}
@@ -184,6 +184,5 @@ class TestGetFactChecks:
             ]
         }
         context = ""
-        with pytest.raises(Exception) as excinfo:
-            EnrichItem.store_factchecks(event, context, True, session)
-        assert "No claimReview found in factchecks!" in str(excinfo.value)
+        ret = EnrichItem.store_factchecks(event, context, True, session)
+        assert ret is None
