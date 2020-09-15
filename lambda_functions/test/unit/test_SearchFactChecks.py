@@ -1,5 +1,5 @@
 import SearchFactChecks
-import json
+import time
 
 
 class TestSearchFactChecks:
@@ -36,7 +36,10 @@ class TestSearchFactChecks:
             "Sentiment": "NEUTRAL"
         }
         context = ""
+        s = time.perf_counter()
         ret = SearchFactChecks.get_FactChecks(event, context)
+        elapsed = time.perf_counter() - s
         assert 'claimReview' in ret[0]
         assert ret[0]['claimReview'][0]['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
                                                     'von 0,01 Prozent in Deutschland'
+        assert elapsed < 1.5
