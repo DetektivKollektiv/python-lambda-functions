@@ -36,7 +36,7 @@ def get_entities(event, context):
         text = str(event['Text'])
     if len(text) == 0:
         logger.error("There is no Text!")
-        raise Exception('Please provide Text!')
+        return []
 
     # Check if LanguageCode is supported
     if 'LanguageCode' in event:
