@@ -1,6 +1,8 @@
+import aiohttp
+import asyncio
 import logging
 import json
-import requests
+import time
 import boto3
 import base64
 import re
@@ -63,13 +65,45 @@ def get_secret():
 
 
 # Call Google API for Fact Check search
-def call_googleapi(search_terms, language_code):
-    pageSize = 5  # Count of returned results
+async def call_googleapi(session, search_terms, language_code):
+    pageSize = 10  # Count of returned results
     query = ""
     for term in search_terms:
         query += "\"" + term + "\" "
     parameters = {"query": query, "languageCode": language_code, "pageSize": pageSize, "key": get_secret()}
-    return requests.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
+    response = await session.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
+
+    return await response.json(), search_terms
+
+
+# Get best fitting fact check article
+async def get_article(search_terms, LanguageCode):
+    article_bestfit = ""
+    count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
+
+    # combine Google API calls in one session
+    # TODO consider to do that not for one lambda call, but for as much API calls as possible
+    async with aiohttp.ClientSession() as session:
+        # for or with would “break” the nature of await in the coroutine
+        for f in asyncio.as_completed([call_googleapi(session, terms, LanguageCode) for terms in search_terms]):
+            response_json, used_terms = await f
+
+            # Check if the search was successful
+            if 'claims' in response_json:
+                # verify if the fact check articles fit to search terms
+                # consider that there could be multiple equal entries in terms
+                for article in response_json['claims']:
+                    unique_terms = []
+                    if 'text' in article:
+                        for term in used_terms:
+                            if term not in unique_terms:
+                                if re.search(term, article['text']):
+                                    unique_terms.append(term)
+                        if len(unique_terms) > count_bestfit:
+                            article_bestfit = article
+                            count_bestfit = len(unique_terms)
+
+    return article_bestfit
 
 
 # Search Fact Checks
@@ -98,27 +132,8 @@ def get_FactChecks(event, context):
     if 'Entities' in event:
         search_terms.append(event['Entities'])
 
-    article_bestfit = ""
-    count_bestfit = 1 # minimum fit should be at least 2 search terms in the claim
-    for terms in search_terms:
-        response = call_googleapi(terms, LanguageCode)
-        # Check if the search was successful
-        # Get the response data as a python object. Verify that it's a dictionary.
-        response_json = response.json()
-        if 'claims' in response_json:
-            # verify if the fact check articles fit to search terms
-            # consider that there could be multiple equal entries in terms
-            for article in response_json['claims']:
-                unique_terms = []
-                if 'text' in article:
-                    for term in terms:
-                        if term not in unique_terms:
-                            if re.search(term, article['text']):
-                                unique_terms.append(term)
-                    if len(unique_terms) > count_bestfit:
-                        article_bestfit = article
-                        count_bestfit = len(unique_terms)
-
-    claims.append(article_bestfit)
+    loop = asyncio.get_event_loop()
+    factcheck = loop.run_until_complete(get_article(search_terms, LanguageCode))
+    claims.append(factcheck)
 
     return claims

@@ -100,11 +100,20 @@ class ItemEntity(Base):
     entity = relationship("Entity", back_populates="items")
 
 
+class Claimant(Base):
+    __tablename__ = 'claimants'
+    id = Column(String, primary_key=True)
+    claimant = Column(String)
+    url = relationship("URL")
+
+
 class URL(Base):
     __tablename__ = 'urls'
     id = Column(String, primary_key=True)
     url = Column(String)
     items = relationship("ItemURL")
+    claimant_id = Column(String, ForeignKey('claimants.id'))
+    claimant = relationship("Claimant", back_populates="url")
 
 
 class ItemURL(Base):

@@ -144,7 +144,7 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
 
     try:
         # get id (str) from path
-        id = event['pathParameters']['id']
+        id = event['pathParameters']['item_id']
 
         try:
             factcheck = operations.get_factcheck_by_itemid_db(id, is_test, session)
