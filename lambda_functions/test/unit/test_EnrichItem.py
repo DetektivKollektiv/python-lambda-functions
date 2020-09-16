@@ -186,3 +186,37 @@ class TestGetFactChecks:
         context = ""
         ret = EnrichItem.store_factchecks(event, context, True, session)
         assert ret is None
+
+    def test_store_itemurl(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        import EnrichItem
+        from urllib.parse import urlparse
+
+        session = operations.get_db_session(True, None)
+
+        str_url = "https://smopo.ch/zehntausende-als-falsche-coronatote-deklariert/"
+        # creating items
+        item = Item()
+        item.content = str_url
+        item = operations.create_item_db(item, True, session)
+
+        # store a url
+        event = {
+            "item": item.to_dict(),
+            "Claim": {
+                "urls": [
+                    str_url
+                ]
+            }
+        }
+        context = ""
+        EnrichItem.store_itemurl(event, context, True, session)
+
+        url = operations.get_url_by_content_db(str_url, True, session)
+        itemurl = operations.get_itemurl_by_url_and_item_db(url.id, item.id, True, session)
+        domain = urlparse(str_url).hostname
+        claimant = operations.get_claimant_by_name_db(domain, True, session)
+
+        assert url.url == str_url
+        assert itemurl.id is not None
+        assert claimant.claimant == domain

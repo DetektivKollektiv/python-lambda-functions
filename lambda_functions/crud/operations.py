@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy import create_engine
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck, Claimant
 from datetime import datetime, timedelta
 
 import json
@@ -572,6 +572,21 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
 
     return items
 
+
+def get_claimant_by_name_db(claimant_name, is_test, session):
+    """Returns a claimant with the specified name
+
+        Returns
+        ------
+        claimant: Claimant
+            An url referenced in an item
+        Null, if no claimant was found
+        """
+    session = get_db_session(is_test, session)
+    claimant = session.query(Claimant).filter(Claimant.claimant == claimant_name).first()
+    if claimant is None:
+        raise Exception("No claimant found.")
+    return claimant
 
 def get_url_by_content_db(content, is_test, session):
     """Returns an url with the specified content from the database
