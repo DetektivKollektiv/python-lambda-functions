@@ -12,7 +12,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['Toulouse', 'four very critical', 'France']
+        assert ret == ['Toulouse, France', 'four very critical cases']
 
     def test_get_entities_2(self):
         event = {
@@ -31,9 +31,8 @@ class TestGetEntities:
             "LanguageCode": "en"
         }
         context = ""
-        with pytest.raises(Exception) as excinfo:
-            GetEntities.get_entities(event, context)
-        assert "Please provide Text!" in str(excinfo.value)
+        ret = GetEntities.get_entities(event, context)
+        assert ret == []
 
     def test_get_entities_4(self):
         event = {
@@ -54,7 +53,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['2.000', 'Spanien', 'über 26.000', 'Corona', 'CH']
+        assert ret == ['über 26.000', 'Spanien', '2.000', 'D', 'CH']
 
     def test_get_entities_6(self):
         event = {
@@ -65,4 +64,4 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['NTV', 'SICHERHEITSABSTAND']
+        assert ret == ['NTV', 'BAYERN']

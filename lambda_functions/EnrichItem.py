@@ -1,7 +1,9 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, ItemSentiment, Keyphrase, ItemKeyphrase
+from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, \
+    ItemSentiment, Keyphrase, ItemKeyphrase, Claimant
 from crud import operations
 from uuid import uuid4
+from urllib.parse import urlparse
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -63,9 +65,7 @@ def store_factchecks(event, context, is_test=False, session=None):
 
     Returns
     ------
-    API Gateway Lambda Proxy Output Format: application/json
 
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
     if session is None:
@@ -73,6 +73,9 @@ def store_factchecks(event, context, is_test=False, session=None):
 
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
+        if 'claimReview' not in json_event:
+            # raise Exception('No claimReview found in factchecks!')
+            return
         organization = FactChecking_Organization()
         factcheck = ExternalFactCheck()
         # What is the publishing organization?
@@ -99,6 +102,7 @@ def store_factchecks(event, context, is_test=False, session=None):
                 logger.error("Could not store Organization. Exception: %s", e, exc_info=True)
 
         factcheck_url = json_event['claimReview'][0]['url']
+        factcheck_title = json_event['claimReview'][0]['title']
         item_id = event['item']['id']
         try:
             # Does the factcheck already exist?
@@ -108,6 +112,7 @@ def store_factchecks(event, context, is_test=False, session=None):
             factcheck.id = str(uuid4())
         # store factcheck in database
         factcheck.url = factcheck_url
+        factcheck.title = factcheck_title
         factcheck.item_id = item_id
         factcheck.factchecking_organization_id = organization.id
         try:
@@ -174,6 +179,21 @@ def store_itemurl(event, context, is_test=False, session=None):
                 operations.update_object_db(itemurl, is_test, session)
             except Exception as e:
                 logger.error("Could not store itemurls. Exception: %s", e, exc_info=True)
+                raise
+        # store claimant derived from url
+        domain = urlparse(str_url).hostname
+        claimant = Claimant()
+        # claimant already exists?
+        try:
+            claimant = operations.get_claimant_by_name_db(domain, is_test, session)
+        except Exception:
+            # store claimant in database
+            claimant.id = str(uuid4())
+            claimant.claimant = domain
+            try:
+                operations.update_object_db(claimant, is_test, session)
+            except Exception as e:
+                logger.error("Could not store claimant. Exception: %s", e, exc_info=True)
                 raise
 
 
