@@ -22,40 +22,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-
-def set_cors(response, event):
-    """Adds a CORS header to a response according to the headers found in the event.
-
-    Parameters
-    ----------
-    response: dict
-        The response to be modified
-    event: dict
-        The Lambda event
-
-    Returns
-    ------
-    response: dict
-        The modified response
-    """
-    source_origin = None
-    allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
-
-    if 'headers' in event:
-        if 'Origin' in event['headers']:
-            source_origin = event['headers']['Origin']
-        if 'origin' in event['headers']:
-            source_origin = event['headers']['origin']
-
-        if source_origin and source_origin in allowed_origins:
-            if 'headers' not in response:
-                response['headers'] = {}
-
-            response['headers']['Access-Control-Allow-Origin'] = source_origin
-
-    return response
-
-
 def cognito_id_from_event(event):
     """Extracts the cognito user id (=sub) from the event.
 

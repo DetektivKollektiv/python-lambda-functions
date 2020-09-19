@@ -1,4 +1,4 @@
-from crud import operations
+from crud import operations, helper
 
 def delete_user(event, context, is_test=False, session=None):
     """Deletes a user from DB and Cognito.
@@ -37,5 +37,5 @@ def delete_user(event, context, is_test=False, session=None):
             "body": "User could not be deleted. Exception: {}".format(exception)
         }
     
-    response_cors = operations.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, is_test)
     return response_cors
