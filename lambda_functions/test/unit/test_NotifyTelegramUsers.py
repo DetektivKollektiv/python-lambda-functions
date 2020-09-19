@@ -8,7 +8,7 @@ import test.unit.event_creator as event_creator
 from datetime import datetime
 
 # Set the user's chat id here, you can find out your chat id by texting @chatid_echo_bot
-TELEGRAM_CHAT_ID = "XXXXXXXXX"
+TELEGRAM_CHAT_ID = "512571126"
 
 def test_closed_item_notification(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")

@@ -55,12 +55,14 @@ def notify_telegram_users(is_test, session, item):
                 if rating >= 3.5: 
                     rating_text = "vertrauenswürdig"
 
-                message_part_1 = "Hi, Derrick hier. Ich habe Neuigkeiten zu deinem eingereichten Fall!\n\n"
-                message_part_2 = "Unsere Detektiv\\*innen haben dem Fall einen Vertrauensindex von *{} von 4 ({})* gegeben. ".format(rating, rating_text)
-                message_part_3 = "Mehr Details findest du im [Archiv](https://qa.detective-collective.org/archive).\n\n"
-                message_part_4 = "Dein Fall lautete: \n{}".format(item.content)
+                text_solved = "Dein Fall wurde gelöst! "
+                text_rating = "Der Vertrauensindex beträgt {} von 4. Damit ist dein Fall *{}*. Was bedeutet das?\n\n".format(rating, rating_text)
+                text_legend = "1: nicht vertrauenswürdig\n2: eher nicht vertrauenswürdig\n3: eher vertrauenswürdig\n4: vertrauenswürdig\n\n"
+                text_archive = "Mehr Details zu deinem Fall findest du in unserem [Archiv](https://qa.detective-collective.org/archive).\n\n"
+                text_thanks = "Wir danken dir für deine Unterstützung im Kampf gegen Falschinformationen!\n\n"
+                text_case = "Dein Fall lautete: \n{}".format(item.content)
 
-                message = message_part_1 + message_part_2 + message_part_3 + message_part_4
+                message = text_solved + text_rating + text_legend + text_archive + text_thanks + text_case
                                 
                 request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(TELEGRAM_BOT_TOKEN, submission.telegram_id, message)
                 notify_user = requests.get(request_url, timeout=5)
