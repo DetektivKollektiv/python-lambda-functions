@@ -1,7 +1,9 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, ItemSentiment, Keyphrase, ItemKeyphrase
+from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, \
+    ItemSentiment, Keyphrase, ItemKeyphrase, Claimant
 from crud import operations
 from uuid import uuid4
+from urllib.parse import urlparse
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -177,6 +179,21 @@ def store_itemurl(event, context, is_test=False, session=None):
                 operations.update_object_db(itemurl, is_test, session)
             except Exception as e:
                 logger.error("Could not store itemurls. Exception: %s", e, exc_info=True)
+                raise
+        # store claimant derived from url
+        domain = urlparse(str_url).hostname
+        claimant = Claimant()
+        # claimant already exists?
+        try:
+            claimant = operations.get_claimant_by_name_db(domain, is_test, session)
+        except Exception:
+            # store claimant in database
+            claimant.id = str(uuid4())
+            claimant.claimant = domain
+            try:
+                operations.update_object_db(claimant, is_test, session)
+            except Exception as e:
+                logger.error("Could not store claimant. Exception: %s", e, exc_info=True)
                 raise
 
 

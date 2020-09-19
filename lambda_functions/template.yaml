@@ -238,7 +238,7 @@ Resources:
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_item_by_id-${STAGE}'
+      FunctionName: !Sub 'detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}'
       CodeUri: .
       Handler: app.get_factcheck_by_itemid
       Runtime: python3.8
