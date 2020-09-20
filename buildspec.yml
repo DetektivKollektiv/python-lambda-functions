@@ -21,6 +21,9 @@ phases:
       # Install requirements
       - pip install -r lambda_functions/requirements.txt --target lambda_functions
 
+      # Install statelint to verify the validity of the state machine definition
+      - gem install statelint
+
   pre_build:
     commands:
       # verify the validity of the state machine definition
