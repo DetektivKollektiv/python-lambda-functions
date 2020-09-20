@@ -1,46 +1,26 @@
-import os
-import boto3
-from uuid import uuid4
-from sqlalchemy.orm import relationship, backref, sessionmaker
-from sqlalchemy import create_engine
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck, Claimant, ReviewInProgress   
-from datetime import datetime, timedelta
-from . import helper, notifications
 import json
-import random
-import statistics
-import sqlite3
-import sys
 import logging
-
-from uuid import uuid4
-from sqlalchemy.orm import relationship, backref, sessionmaker, Session
-from sqlalchemy import create_engine
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+import os
+import random
+import sqlite3
+import statistics
+import sys
 from datetime import datetime, timedelta
+from uuid import uuid4
 
+import boto3
+from crud.model import (
+    URL, Base, Claimant, Entity, ExternalFactCheck, FactChecking_Organization,
+    Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
+    ReviewAnswer, ReviewInProgress, ReviewQuestion, Sentiment, Submission,
+    User)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, backref, relationship, sessionmaker
 
+from . import helper, notifications
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-def cognito_id_from_event(event):
-    """Extracts the cognito user id (=sub) from the event.
-
-    Parameters
-    ----------
-    event: dict
-        The Lambda event
-
-    Returns
-    ------
-    user_id: str
-        The user id
-    """
-    user_id = str(event['requestContext']['identity']
-                  ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
-    return user_id
 
 
 def get_db_session(is_test, session):
@@ -308,7 +288,7 @@ def delete_user(event, is_test, session):
     if session is None:
         session = get_db_session(is_test, session)
 
-    user_id = cognito_id_from_event(event)
+    user_id = helper.cognito_id_from_event(event)
     user = session.query(User).get(user_id)
 
     if(user == None):
