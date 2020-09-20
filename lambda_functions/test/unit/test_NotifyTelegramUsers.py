@@ -7,8 +7,14 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 from datetime import datetime
 
-# Set the user's chat id here, you can find out your chat id by texting @chatid_echo_bot
-TELEGRAM_CHAT_ID = "512571126"
+# Set user chat id here, you can find out your chat id by texting @chatid_echo_bot
+TELEGRAM_CHAT_ID = "XXXXXXX"
+
+# Set mail address here.
+# Since the address detektivkollektiv@gmail.com is currently in sandbox mode, the recipient's
+# email address must be verified in the AWS SES console. 
+# More info: https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
+MAIL_ADDRESS = "XXXXXXX"
 
 def test_closed_item_notification(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
@@ -82,12 +88,19 @@ def test_closed_item_notification(monkeypatch):
 
     assert item.id is not None
 
-    # Creating a second submission for this item
+    # Creating more submissions for this item
+
     submission = Submission()
     submission.item_id = item.id
     submission.telegram_id = TELEGRAM_CHAT_ID
 
+    submission2 = Submission()
+    submission2.item_id = item.id
+    submission2.mail = MAIL_ADDRESS
+
     submission = operations.create_submission_db(submission, True, session)
+    submission2 = operations.create_submission_db(submission2, True, session)
+
 
     items = operations.get_all_items_db(True, session)
     assert len(items) == 1
