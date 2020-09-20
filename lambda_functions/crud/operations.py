@@ -916,7 +916,7 @@ def build_review_pairs(item, is_test, session):
             item.id, is_test, session)
         
         # Notify email and telegram users
-        notifications.notify_telegram_users(is_test, session, item)
+        notifications.notify_users(is_test, session, item)
 
     else:
         item.open_reviews_level_1 = item.open_reviews
