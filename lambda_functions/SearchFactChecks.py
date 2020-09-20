@@ -7,6 +7,8 @@ import boto3
 import base64
 import re
 from botocore.exceptions import ClientError
+import os
+import requests
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -60,7 +62,8 @@ def get_secret():
             secret = get_secret_value_response['SecretString']
             return json.loads(secret)['FactCheckSearch_API_KEY']
         else:
-            decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
+            decoded_binary_secret = base64.b64decode(
+                get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
 
 
@@ -70,7 +73,8 @@ async def call_googleapi(session, search_terms, language_code):
     query = ""
     for term in search_terms:
         query += "\"" + term + "\" "
-    parameters = {"query": query, "languageCode": language_code, "pageSize": pageSize, "key": get_secret()}
+    parameters = {"query": query, "languageCode": language_code,
+                  "pageSize": pageSize, "key": get_secret()}
     response = await session.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
 
     return await response.json(), search_terms
@@ -133,7 +137,8 @@ def get_FactChecks(event, context):
         search_terms.append(event['Entities'])
 
     loop = asyncio.get_event_loop()
-    factcheck = loop.run_until_complete(get_article(search_terms, LanguageCode))
+    factcheck = loop.run_until_complete(
+        get_article(search_terms, LanguageCode))
     claims.append(factcheck)
 
     return claims

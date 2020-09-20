@@ -147,7 +147,8 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
         id = event['pathParameters']['item_id']
 
         try:
-            factcheck = operations.get_factcheck_by_itemid_db(id, is_test, session)
+            factcheck = operations.get_factcheck_by_itemid_db(
+                id, is_test, session)
 
             factcheck_dict = factcheck.to_dict()
 
@@ -587,12 +588,6 @@ def item_submission(event, context, is_test=False, session=None):
                 new_item, is_test, session)
             new_item_created = True
             submission.item_id = created_item.id
-            stage = os.environ['STAGE']
-            client.start_execution(
-                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks-'+stage,
-                name='SFC_' + created_item.id,
-                input="{\"item\":" + json.dumps(created_item.to_dict()) + "}"
-            )
 
         # Create submission
         operations.create_submission_db(submission, is_test, session)

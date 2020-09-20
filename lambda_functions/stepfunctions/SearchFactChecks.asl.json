@@ -9,7 +9,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-ExtractClaim-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -21,7 +23,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemURL-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -37,7 +41,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetLanguage-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -50,7 +56,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-UpdateItem-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -65,13 +73,15 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetKeyPhrases-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
-              "Parameters": {
+                "Parameters": {
                   "Text.$": "$.Claim.concatenation.Text",
-                  "LanguageCode.$":"$.item.language"
+                  "LanguageCode.$": "$.item.language"
                 },
                 "ResultPath": "$.KeyPhrases",
                 "Next": "Store Item Keyphrases"
@@ -81,7 +91,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemKeyphrases-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -97,13 +109,15 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetEntities-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
                 "Parameters": {
                   "Text.$": "$.Claim.concatenation.Text",
-                  "LanguageCode.$":"$.item.language"
+                  "LanguageCode.$": "$.item.language"
                 },
                 "ResultPath": "$.Entities",
                 "Next": "Store Item Entities"
@@ -113,7 +127,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemEntities-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -129,13 +145,15 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetEntities-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
                 "Parameters": {
                   "Text.$": "$.Claim.title",
-                  "LanguageCode.$":"$.item.language"
+                  "LanguageCode.$": "$.item.language"
                 },
                 "ResultPath": "$.TitleEntities",
                 "Next": "Store Item Title Entities"
@@ -145,7 +163,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemEntities-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -161,13 +181,15 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetSentiment-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
                 "Parameters": {
                   "Text.$": "$.Claim.concatenation.Text",
-                  "LanguageCode.$":"$.item.language"
+                  "LanguageCode.$": "$.item.language"
                 },
                 "ResultPath": "$.Sentiment",
                 "Next": "Store Item Sentiment"
@@ -177,7 +199,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemSentiment-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -193,7 +217,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-SearchFactChecks-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],
@@ -211,7 +237,9 @@
                 "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreFactChecks-${STAGE}",
                 "Catch": [
                   {
-                    "ErrorEquals": [ "States.TaskFailed" ],
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
                     "Next": "EnrichmentFailed"
                   }
                 ],

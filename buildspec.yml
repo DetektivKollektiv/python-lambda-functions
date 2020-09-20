@@ -1,31 +1,25 @@
 version: 0.2
 
-env:
-  git-credential-helper: yes
 phases:
   install:
     runtime-versions:
       python: 3.8
       ruby: latest
     commands:
-      
       # Upgrade pip to the latest version
       - pip install --upgrade pip
-      
+
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
-      
+
       # Install linter for CloudFormation template
       - pip install cfn-lint
-      
+
       # Install cfn-nag
       - gem install cfn-nag
-      
+
       # Install requirements
       - pip install -r lambda_functions/requirements.txt --target lambda_functions
-
-      # Install statelint to verify the validity of the state machine definition
-      - gem install statelint
 
   pre_build:
     commands:
@@ -40,7 +34,6 @@ phases:
 
   build:
     commands:
-
       # Use AWS SAM to package the application by using AWS CloudFormation
       - aws cloudformation package --template-file ./lambda_functions/template.yaml --s3-bucket $S3_BUCKET --output-template-file ${STAGE}-template-export.yml
 

@@ -835,8 +835,7 @@ Resources:
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-        - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
-
+  
   ResetLockedItemsRule: 
     Type: AWS::Events::Rule
     Properties: 

@@ -42,7 +42,8 @@ def extract_claim(event, context):
 
     # extract all urls from item_content urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),
     # ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
-    urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    urls = re.findall(
+        'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
     title = ""
@@ -86,7 +87,7 @@ def extract_claim(event, context):
 
     return {
         "urls": urls,
-        "title": title,
+        "titles": titles,
         # "text": text,
         "concatenation": {
             "Text": allText
