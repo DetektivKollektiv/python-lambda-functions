@@ -16,6 +16,8 @@ class Item(Base):
     open_reviews = Column(Integer)
     open_reviews_level_1 = Column(Integer)
     open_reviews_level_2 = Column(Integer)
+    in_progress_reviews_level_1 = Column(Integer)
+    in_progress_reviews_level_2 = Column(Integer)
     locked_by_user = Column(String)
     lock_timestamp = Column(DateTime)
     open_timestamp = Column(DateTime)
@@ -35,7 +37,8 @@ class Item(Base):
                 "variance": self.variance, "result_score": self.result_score,
                 "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
                 "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp,
-                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp}
+                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,  #
+                "in_progress_reviews_level_2": self.in_progress_reviews_level_2}
 
 
 class Submission(Base):
@@ -43,6 +46,7 @@ class Submission(Base):
     id = Column(String, primary_key=True)
     submission_date = Column(DateTime)
     mail = Column(String)
+    telegram_id = Column(String)
     phone = Column(String)
     source = Column(String)
     frequency = Column(String)
@@ -51,7 +55,7 @@ class Submission(Base):
     item = relationship("Item", back_populates="submissions")
 
     def to_dict(self):
-        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "phone": self.phone,
+        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "telegram_id": self.telegram_id, "phone": self.phone,
                 "source": self.source, "frequency": self.frequency, "received_date": self.received_date,
                 "item_id": self.item_id}
 
@@ -60,10 +64,15 @@ class ExternalFactCheck(Base):
     __tablename__ = 'factchecks'
     id = Column(String, primary_key=True)
     url = Column(String)
-    factchecking_organization_id = Column(String, ForeignKey('factchecking_organizations.id'))
-    factchecking_organization = relationship("FactChecking_Organization", back_populates="factchecks")
+    factchecking_organization_id = Column(
+        String, ForeignKey('factchecking_organizations.id'))
+    factchecking_organization = relationship(
+        "FactChecking_Organization", back_populates="factchecks")
     item_id = Column(String, ForeignKey('items.id'))
     item = relationship("Item", back_populates="factchecks")
+
+    def to_dict(self):
+        return {"id": self.id, "url": self.url, "title": self.title}
 
 
 class FactChecking_Organization(Base):
@@ -91,11 +100,20 @@ class ItemEntity(Base):
     entity = relationship("Entity", back_populates="items")
 
 
+class Claimant(Base):
+    __tablename__ = 'claimants'
+    id = Column(String, primary_key=True)
+    claimant = Column(String)
+    url = relationship("URL")
+
+
 class URL(Base):
     __tablename__ = 'urls'
     id = Column(String, primary_key=True)
     url = Column(String)
     items = relationship("ItemURL")
+    claimant_id = Column(String, ForeignKey('claimants.id'))
+    claimant = relationship("Claimant", back_populates="url")
 
 
 class ItemURL(Base):
@@ -197,3 +215,14 @@ class Review(Base):
                 "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id,
                 "start_timestamp": self.start_timestamp, "finish_timestamp": self.finish_timestamp}
 
+
+class ReviewInProgress(Base):
+    __tablename__ = 'reviews_in_progress'
+    id = Column(String, primary_key=True)
+    item_id = Column(String, ForeignKey('items.id'))
+    user_id = Column(String, ForeignKey('users.id'))
+    start_timestamp = Column(DateTime)
+    is_peer_review = Column(Boolean)
+
+    def to_dict(self):
+        return {"id": self.id, "item_id": self.item_id, "user_id": self.user_id, "start_timestamp": self.start_timestamp}

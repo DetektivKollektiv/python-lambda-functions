@@ -31,11 +31,12 @@ def get_entities(event, context):
     logger.info(event)
 
     # Use UTF-8 encoding for comprehend
+    text = ""
     if 'Text' in event:
         text = str(event['Text'])
-    else:
+    if len(text) == 0:
         logger.error("There is no Text!")
-        raise Exception('Please provide Text!')
+        return []
 
     # Check if LanguageCode is supported
     if 'LanguageCode' in event:

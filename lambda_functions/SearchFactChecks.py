@@ -1,4 +1,12 @@
+import aiohttp
+import asyncio
 import logging
+import json
+import time
+import boto3
+import base64
+import re
+from botocore.exceptions import ClientError
 import os
 import requests
 
@@ -6,14 +14,100 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+# If you need more information about configurations or implementing the sample code, visit the AWS docs:
+# https://aws.amazon.com/developers/getting-started/python/
+def get_secret():
+    secret_name = "/factcheck/search/Google_API__KEY"
+    region_name = "eu-central-1"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    # We rethrow the exception by default.
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'DecryptionFailureException':
+            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
+            # An error occurred on the server side.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidParameterException':
+            # You provided an invalid value for a parameter.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidRequestException':
+            # You provided a parameter value that is not valid for the current state of the resource.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
+            # We can't find the resource that you asked for.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+    else:
+        # Decrypts secret using the associated KMS CMK.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        if 'SecretString' in get_secret_value_response:
+            secret = get_secret_value_response['SecretString']
+            return json.loads(secret)['FactCheckSearch_API_KEY']
+        else:
+            decoded_binary_secret = base64.b64decode(
+                get_secret_value_response['SecretBinary'])
+            return decoded_binary_secret
+
+
 # Call Google API for Fact Check search
-def call_googleapi(search_terms, language_code):
-    pageSize = 1  # Count of returned results
+async def call_googleapi(session, search_terms, language_code):
+    pageSize = 10  # Count of returned results
     query = ""
     for term in search_terms:
         query += "\"" + term + "\" "
-    parameters = {"query": query, "languageCode": language_code, "pageSize": pageSize, "key": os.environ.get('API_KEY')}
-    return requests.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
+    parameters = {"query": query, "languageCode": language_code,
+                  "pageSize": pageSize, "key": get_secret()}
+    response = await session.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
+
+    return await response.json(), search_terms
+
+
+# Get best fitting fact check article
+async def get_article(search_terms, LanguageCode):
+    article_bestfit = ""
+    count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
+
+    # combine Google API calls in one session
+    # TODO consider to do that not for one lambda call, but for as much API calls as possible
+    async with aiohttp.ClientSession() as session:
+        # for or with would “break” the nature of await in the coroutine
+        for f in asyncio.as_completed([call_googleapi(session, terms, LanguageCode) for terms in search_terms]):
+            response_json, used_terms = await f
+
+            # Check if the search was successful
+            if 'claims' in response_json:
+                # verify if the fact check articles fit to search terms
+                # consider that there could be multiple equal entries in terms
+                for article in response_json['claims']:
+                    unique_terms = []
+                    if 'text' in article:
+                        for term in used_terms:
+                            if term not in unique_terms:
+                                if re.search(term, article['text']):
+                                    unique_terms.append(term)
+                        if len(unique_terms) > count_bestfit:
+                            article_bestfit = article
+                            count_bestfit = len(unique_terms)
+
+    return article_bestfit
 
 
 # Search Fact Checks
@@ -42,12 +136,9 @@ def get_FactChecks(event, context):
     if 'Entities' in event:
         search_terms.append(event['Entities'])
 
-    for terms in search_terms:
-        response = call_googleapi(terms, LanguageCode)
-        # Check if the search was successful
-        # Get the response data as a python object. Verify that it's a dictionary.
-        response_json = response.json()
-        if 'claims' in response_json:
-            claims.append(response_json['claims'])
+    loop = asyncio.get_event_loop()
+    factcheck = loop.run_until_complete(
+        get_article(search_terms, LanguageCode))
+    claims.append(factcheck)
 
     return claims

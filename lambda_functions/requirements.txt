@@ -53,3 +53,5 @@ cython~=0.29.14
 contextlib2~=0.6.0.post1
 zipp~=0.6.0
 requests~=2.22.0
+aiohttp
+aiodns

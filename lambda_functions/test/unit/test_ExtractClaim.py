@@ -162,3 +162,42 @@ class TestExtractClaim:
                          "DER SPIEGEL"
         assert resp["text"][1] == text_1
         assert resp["concatenation"]["Text"] == text_0+text_1
+
+
+    def test_extract_claim_2(self):
+        event = {
+            "item": {
+                "content": "Stimmt das? "
+                           "www.compact-online.de/utes-moma-2-8-altmaier-will-haertere-strafen-bei-verstoessen-gegen-die"
+                           "-corona-regeln",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["urls"][0] == ""
+
+    def test_extract_claim_3(self):
+        event = {
+                "item": {
+                    "content": "http://LOCALHOST/utes-moma-127-8-altmaier-will-haertere-strafen-bei-verstoessen-gegen-die-corona-regeln/",
+                    "id": "123456",
+                    "language": ""
+                }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["urls"][0] == ""
+
+    def test_extract_claim_4(self):
+        event = {
+                "item": {
+                    "content": "http://127.0.0.1/utes-moma-127-8-altmaier-will-haertere-strafen-bei-verstoessen-gegen-die-corona-regeln/",
+                    "id": "123456",
+                    "language": ""
+                }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["urls"][0] == ""
