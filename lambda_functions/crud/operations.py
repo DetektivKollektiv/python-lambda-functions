@@ -1,16 +1,23 @@
-import os
-from uuid import uuid4
-from sqlalchemy.orm import relationship, backref, sessionmaker
-from sqlalchemy import create_engine
-from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck, Claimant, ReviewInProgress   
-from datetime import datetime, timedelta
-from . import helper, notifications
 import json
-import random
-import statistics
-import sqlite3
-import sys
 import logging
+import os
+import random
+import sqlite3
+import statistics
+import sys
+from datetime import datetime, timedelta
+from uuid import uuid4
+
+import boto3
+from crud.model import (
+    URL, Base, Claimant, Entity, ExternalFactCheck, FactChecking_Organization,
+    Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
+    ReviewAnswer, ReviewInProgress, ReviewQuestion, Sentiment, Submission,
+    User)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, backref, relationship, sessionmaker
+
+from . import helper, notifications
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -265,6 +272,38 @@ def get_user_by_id(id, is_test, session):
     session = get_db_session(is_test, session)
     user = session.query(User).get(id)
     return user
+
+def delete_user(event, is_test, session):
+    """Deletes a user from the database.
+
+    Parameters
+    ----------
+    user_id: str, required
+             The id of the user
+
+    Returns
+    ------
+    nothing
+    """
+    if session is None:
+        session = get_db_session(is_test, session)
+
+    user_id = helper.cognito_id_from_event(event)
+    user = session.query(User).get(user_id)
+
+    if(user == None):
+        raise Exception(f"User with id {user_id} could not be found in database.")
+
+    client = boto3.client('cognito-idp')
+    client.admin_delete_user(
+        UserPoolId=event['requestContext']['identity']['cognitoAuthenticationProvider'].split(',')[0].split('amazonaws.com/')[1],
+        Username=user.name
+    )
+
+    session.delete(user)
+    session.commit()
+
+    
 
 
 def create_review_db(review, is_test, session):
