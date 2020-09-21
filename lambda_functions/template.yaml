@@ -1,13 +1,13 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: 'SAM template for DetektivKollektiv API'
+Description: "SAM template for DetektivKollektiv API"
 
 Globals:
   Function:
     Timeout: 30
   Api:
     OpenApiVersion: 3.0.1
-    
+
 Parameters:
   STAGE:
     Type: String
@@ -16,12 +16,12 @@ Parameters:
   DBNAME:
     Type: String
     Default: development_db
-    
+
 Resources:
   Api:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: 
+      StageName:
         Ref: STAGE
       Cors:
         AllowMethods: "'OPTIONS, PUT, POST, GET'"
@@ -35,15 +35,15 @@ Resources:
   WhatsappForwardingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-whatsapp_forwarding-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-whatsapp_forwarding-${STAGE}"
       CodeUri: .
       Handler: whatsapp.whatsapp_forwarding
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         WhatsappForwarding:
           Type: Api
@@ -60,15 +60,15 @@ Resources:
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-create_item-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-create_item-${STAGE}"
       CodeUri: .
       Handler: app.create_item
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -85,15 +85,15 @@ Resources:
   GetAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_items-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_items-${STAGE}"
       CodeUri: .
       Handler: app.get_all_items
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Tracing: Active
       Events:
         Echo:
@@ -107,19 +107,19 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
-              
+
   CreateSubmissionFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-create_submission-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-create_submission-${STAGE}"
       CodeUri: .
       Handler: app.create_submission
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -136,21 +136,21 @@ Resources:
   GetAllSubmissionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_submissions-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_submissions-${STAGE}"
       CodeUri: .
       Handler: app.get_all_submissions
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /submissions
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -161,21 +161,21 @@ Resources:
   GetItemByIdFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_item_by_id-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_item_by_id-${STAGE}"
       CodeUri: .
       Handler: app.get_item_by_id
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /items/{id}
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -186,7 +186,7 @@ Resources:
   GetItemByContentFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_item_by_content-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_item_by_content-${STAGE}"
       CodeUri: .
       Handler: app.get_item_by_content
       Runtime: python3.8
@@ -211,7 +211,7 @@ Resources:
   GetOpenItemsForUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_open_items_for_user-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_open_items_for_user-${STAGE}"
       CodeUri: .
       Handler: app.get_open_items_for_user
       Runtime: python3.8
@@ -238,15 +238,15 @@ Resources:
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}"
       CodeUri: .
       Handler: app.get_factcheck_by_itemid
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -263,7 +263,7 @@ Resources:
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-SearchFactChecks-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-SearchFactChecks-${STAGE}"
       CodeUri: .
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.8
@@ -276,7 +276,7 @@ Resources:
   GetLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-GetLanguage-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-GetLanguage-${STAGE}"
       CodeUri: .
       Handler: GetLanguage.get_language
       Runtime: python3.8
@@ -289,7 +289,7 @@ Resources:
   GetKeyPhrasesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-GetKeyPhrases-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-GetKeyPhrases-${STAGE}"
       CodeUri: .
       Handler: GetKeyPhrases.get_phrases
       Runtime: python3.8
@@ -302,7 +302,7 @@ Resources:
   GetEntitiesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-GetEntities-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-GetEntities-${STAGE}"
       CodeUri: .
       Handler: GetEntities.get_entities
       Runtime: python3.8
@@ -315,7 +315,7 @@ Resources:
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-ExtractClaim-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-ExtractClaim-${STAGE}"
       CodeUri: .
       Handler: ExtractClaim.extract_claim
       Runtime: python3.8
@@ -328,7 +328,7 @@ Resources:
   GetSentimentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-GetSentiment-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-GetSentiment-${STAGE}"
       CodeUri: .
       Handler: GetSentiment.get_sentiment
       Runtime: python3.8
@@ -341,7 +341,7 @@ Resources:
   UpdateLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-UpdateItem-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-UpdateItem-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.update_item
       Runtime: python3.8
@@ -358,7 +358,7 @@ Resources:
   StoreFactChecksFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-StoreFactChecks-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-StoreFactChecks-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_factchecks
       Runtime: python3.8
@@ -375,7 +375,7 @@ Resources:
   StoreItemURL:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-StoreItemURL-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemURL-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemurl
       Runtime: python3.8
@@ -392,7 +392,7 @@ Resources:
   StoreItemEntityFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-StoreItemEntities-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemEntities-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itementities
       Runtime: python3.8
@@ -409,7 +409,7 @@ Resources:
   StoreItemSentimentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-StoreItemSentiment-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemSentiment-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemsentiment
       Runtime: python3.8
@@ -426,7 +426,7 @@ Resources:
   StoreItemKeyphraseFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-StoreItemKeyphrases-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemKeyphrases-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemphrases
       Runtime: python3.8
@@ -442,16 +442,16 @@ Resources:
 
   CreateUserFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-create_user-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-create_user-${STAGE}"
       CodeUri: .
       Handler: app.create_user
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -467,16 +467,16 @@ Resources:
 
   CreateUserFromCognitoFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-create_user_from_cognito-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-create_user_from_cognito-${STAGE}"
       CodeUri: .
       Handler: app.create_user_from_cognito
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn      
+          - LambdaExecutionRole
+          - Arn
       Environment:
         Variables:
           DBNAME:
@@ -485,21 +485,21 @@ Resources:
   GetAllUsersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_users-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_users-${STAGE}"
       CodeUri: .
       Handler: app.get_all_users
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -510,21 +510,21 @@ Resources:
   GetUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_user-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_user-${STAGE}"
       CodeUri: .
       Handler: app.get_user
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /user
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -533,25 +533,25 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
-            
+
   DeleteUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-delete_user-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-delete_user-${STAGE}"
       CodeUri: .
       Handler: user_handler.delete_user
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /user
-            Method: delete              
+            Method: delete
             RestApiId:
               Ref: Api
       Environment:
@@ -563,16 +563,16 @@ Resources:
 
   CreateReviewFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-create_review-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-create_review-${STAGE}"
       CodeUri: .
       Handler: app.create_review
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -589,21 +589,21 @@ Resources:
   GetAllReviewsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_reviews-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_reviews-${STAGE}"
       CodeUri: .
       Handler: app.get_all_reviews
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /reviews
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -613,16 +613,16 @@ Resources:
 
   CreateReviewAnswerFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-create_review_answer-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-create_review_answer-${STAGE}"
       CodeUri: .
       Handler: app.create_review_answer
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -639,21 +639,21 @@ Resources:
   GetAllReviewAnswersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_review_answers-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_review_answers-${STAGE}"
       CodeUri: .
       Handler: app.get_all_review_answers
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_answers
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -664,21 +664,21 @@ Resources:
   GetAllReviewQuestionsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_review_questions-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_review_questions-${STAGE}"
       CodeUri: .
       Handler: app.get_all_review_questions
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_questions
-            Method: get              
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -687,50 +687,50 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
-      
+
   ItemSubmissionFunction:
-      Type: AWS::Serverless::Function
-      Properties:      
-        FunctionName: !Sub 'detektivkollektiv-api-item_submission-${STAGE}'
-        CodeUri: .
-        Handler: app.item_submission
-        Runtime: python3.8
-        MemorySize: 832
-        Role:
-          Fn::GetAtt:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-item_submission-${STAGE}"
+      CodeUri: .
+      Handler: app.item_submission
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
-        Events:
-          Echo:
-            Type: Api
-            Properties:
-              Auth:
-                Authorizer: NONE
-              Path: /item_submission
-              Method: post
-              RestApiId:
-                Ref: Api
-        Environment:
-          Variables:
-            DBNAME:
-              Ref: DBNAME
-            CORS_ALLOW_ORIGIN:
-              Ref: CorsAllowOrigin
-            STAGE:
-              Ref: STAGE
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Auth:
+              Authorizer: NONE
+            Path: /item_submission
+            Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
 
   SubmitReviewFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-submit_review-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-submit_review-${STAGE}"
       CodeUri: .
       Handler: app.submit_review
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -745,19 +745,19 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
-            
+
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-reset_locked_items-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-reset_locked_items-${STAGE}"
       CodeUri: .
       Handler: app.reset_locked_items
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn      
+          - LambdaExecutionRole
+          - Arn
       Environment:
         Variables:
           DBNAME:
@@ -765,16 +765,16 @@ Resources:
 
   AcceptItemFunction:
     Type: AWS::Serverless::Function
-    Properties:      
-      FunctionName: !Sub 'detektivkollektiv-api-accept_item-${STAGE}'
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-accept_item-${STAGE}"
       CodeUri: .
       Handler: app.accept_item
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Events:
         Echo:
           Type: Api
@@ -793,15 +793,15 @@ Resources:
   GetAllClosedItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'detektivkollektiv-api-get_all_closed_items-${STAGE}'
+      FunctionName: !Sub "detektivkollektiv-api-get_all_closed_items-${STAGE}"
       CodeUri: .
       Handler: app.get_all_closed_items
       Runtime: python3.8
       MemorySize: 832
       Role:
         Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
+          - LambdaExecutionRole
+          - Arn
       Tracing: Active
       Events:
         Echo:
@@ -821,13 +821,13 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'detektivkollektiv-api-execution-${STAGE}'
+      RoleName: !Sub "detektivkollektiv-api-execution-${STAGE}"
       AssumeRolePolicyDocument:
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: [lambda.amazonaws.com]
-          Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
@@ -835,29 +835,29 @@ Resources:
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
-  
-  ResetLockedItemsRule: 
+        - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+
+  ResetLockedItemsRule:
     Type: AWS::Events::Rule
-    Properties: 
+    Properties:
       Description: Resets Locked items every 10 minutes.
       ScheduleExpression: rate(10 minutes)
       State: ENABLED
-      Targets: 
-        - 
-          Arn: 
-            Fn::GetAtt: 
+      Targets:
+        - Arn:
+            Fn::GetAtt:
               - ResetLockedItemsFunction
               - Arn
-          Id: !Sub 'reset_locked_items-${STAGE}'
-              
-  PermissionForEventsToInvokeLambda: 
+          Id: !Sub "reset_locked_items-${STAGE}"
+
+  PermissionForEventsToInvokeLambda:
     Type: AWS::Lambda::Permission
-    Properties: 
-      FunctionName: 
+    Properties:
+      FunctionName:
         Ref: ResetLockedItemsFunction
       Action: lambda:InvokeFunction
       Principal: events.amazonaws.com
-      SourceArn: 
-        Fn::GetAtt: 
+      SourceArn:
+        Fn::GetAtt:
           - ResetLockedItemsRule
           - Arn
