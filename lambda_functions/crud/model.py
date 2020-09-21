@@ -63,6 +63,7 @@ class Submission(Base):
 class ExternalFactCheck(Base):
     __tablename__ = 'factchecks'
     id = Column(String, primary_key=True)
+    title = Column(String)
     url = Column(String)
     factchecking_organization_id = Column(
         String, ForeignKey('factchecking_organizations.id'))
