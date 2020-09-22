@@ -87,7 +87,7 @@ def extract_claim(event, context):
 
     return {
         "urls": urls,
-        "titles": titles,
+        "title": title,
         # "text": text,
         "concatenation": {
             "Text": allText
