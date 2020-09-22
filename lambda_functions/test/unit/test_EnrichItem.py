@@ -220,3 +220,4 @@ class TestGetFactChecks:
         assert url.url == str_url
         assert itemurl.id is not None
         assert claimant.claimant == domain
+        assert url.claimant_id is not None
