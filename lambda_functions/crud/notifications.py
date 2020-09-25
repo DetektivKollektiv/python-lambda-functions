@@ -1,13 +1,13 @@
+import os 
 import requests
 import json
 import logging
 import boto3
+import base64
 from botocore.exceptions import ClientError
+from botocore.config import Config
 
 from . import operations, helper
-
-# Set telegram bot token of 'Derrick' here
-TELEGRAM_BOT_TOKEN = '1344994044:AAFjEb6OrJV_EmpR_DBhFPSsNvNexnSEmXk'
 
 # Set DetektivKollektiv email address here (displayed name <mail address>)
 SENDER = "DetektivKollektiv <detektivkollektiv@gmail.com>"
@@ -20,6 +20,46 @@ class EmailNotificationError(Exception):
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+
+def get_telegram_token():
+    """Gets the telegram bot token for the respective stage (dev/qa/prod) from the secrets manager.
+
+    Parameters
+    ----------
+    is_test: boolean
+        If this method is called from a test
+    secret_name: string
+        The name of the telegram bot token in the secrets manager
+    """
+    
+    secret_name = "telegram_bot_token_{}".format(os.environ['STAGE'])
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    config = Config(read_timeout=2, connect_timeout=2)
+    client = session.client(
+        service_name='secretsmanager',
+        region_name='eu-central-1',
+        config=config
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+
+        print(get_secret_value_response)
+
+        # Decrypts secret using the associated KMS CMK.
+        secret = get_secret_value_response['SecretString']
+        telegram_bot_token = json.loads(secret)[secret_name]
+        
+        return telegram_bot_token
+        
+    except ClientError as e:
+        logging.exception("Could not get telegram bot token from the secrets manager. Secrets manager error: {}".format(e.response['Error']['Code']))
+        raise TelegramNotificationError
 
 def notify_users(is_test, session, item):
     """Notify telegram user(s) about a closed item.
@@ -54,7 +94,7 @@ def notify_users(is_test, session, item):
     for submission in submissions:
         if submission.telegram_id:
             try:
-                notify_telegram_user(submission.telegram_id, item, rating, rating_text)
+                notify_telegram_user(is_test, submission.telegram_id, item, rating, rating_text)
             except Exception:
                 notifications_successful = False
 
@@ -70,7 +110,7 @@ def notify_users(is_test, session, item):
         logger.exception("An error occurred during closed item user notification. Please check logs.")
 
 
-def notify_telegram_user(telegram_id, item, rating, rating_text):
+def notify_telegram_user(is_test, telegram_id, item, rating, rating_text):
     """Notifies a telegram user via their telegram_id (= chat_id).
 
     Parameters
@@ -86,6 +126,8 @@ def notify_telegram_user(telegram_id, item, rating, rating_text):
     """
 
     try:
+
+        TELEGRAM_BOT_TOKEN = get_telegram_token()
 
         text_solved = "Dein Fall wurde gelöst! "
         text_rating = "Der Vertrauensindex beträgt *{} von 4*. Damit ist dein Fall *{}*. Was bedeutet das?\n\n".format(rating, rating_text)

@@ -6,18 +6,50 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 from datetime import datetime
+import json
+import boto3
+from botocore.config import Config
 
-# Set user chat id here, you can find out your chat id by texting @chatid_echo_bot
-TELEGRAM_CHAT_ID = "XXXXXXX"
+# This test uses the following secrets from the AWS secrets manager:
+# telegram_test_chat_id: telegram chat id of a user (uses an actual Telegram account)
+# mail: mail address of a user (uses detektivkollektic@gmail.com)
+# To override these values, uncomment the following lines and set the according strings: 
+# TELEGRAM_CHAT_ID = "XXXXXXX" # you can find out your chat id by texting @chatid_echo_bot
+# RECIPIENT_MAIL = "XXXXXXX" # make sure the email address is verified in AWS SES as long as we are in Sandbox mode
 
-# Set mail address here.
-# Since the address detektivkollektiv@gmail.com is currently in sandbox mode, the recipient's
-# email address must be verified in the AWS SES console. 
-# More info: https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
-MAIL_ADDRESS = "XXXXXXX"
+boto_session = boto3.session.Session()
+config = Config(read_timeout=2, connect_timeout=2)
+client = boto_session.client(
+    service_name='secretsmanager',
+    region_name='eu-central-1',
+    config=config
+)
+
+try:
+    TELEGRAM_CHAT_ID
+except NameError:
+    telegram_secret_name = 'telegram_test_chat_id'
+    get_telegram_secret = client.get_secret_value(
+        SecretId=telegram_secret_name
+    )
+    telegram_secret = get_telegram_secret['SecretString']
+    TELEGRAM_CHAT_ID = json.loads(telegram_secret)[telegram_secret_name]
+    assert(TELEGRAM_CHAT_ID is not None)
+    
+try:
+    RECIPIENT_MAIL
+except NameError:
+    mail_secret_name = 'mail_test_address'
+    get_mail_secret = client.get_secret_value(
+        SecretId=mail_secret_name
+    )
+    mail_secret = get_mail_secret['SecretString']
+    RECIPIENT_MAIL = json.loads(mail_secret)[mail_secret_name]
+    assert(RECIPIENT_MAIL is not None)
 
 def test_closed_item_notification(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
+    monkeypatch.setenv("STAGE", "dev")
     import app
 
     session = operations.get_db_session(True, None)
@@ -96,11 +128,10 @@ def test_closed_item_notification(monkeypatch):
 
     submission2 = Submission()
     submission2.item_id = item.id
-    submission2.mail = MAIL_ADDRESS
+    submission2.mail = RECIPIENT_MAIL
 
     submission = operations.create_submission_db(submission, True, session)
     submission2 = operations.create_submission_db(submission2, True, session)
-
 
     items = operations.get_all_items_db(True, session)
     assert len(items) == 1
