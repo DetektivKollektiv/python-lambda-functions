@@ -344,8 +344,7 @@ def get_user(event, context, is_test=False, session=None):
 
     try:
         # get cognito id
-        id = str(event['requestContext']['identity']
-                 ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
+        id = helper.cognito_id_from_event(event)
 
         try:
             user = operations.get_user_by_id(id, is_test, session)

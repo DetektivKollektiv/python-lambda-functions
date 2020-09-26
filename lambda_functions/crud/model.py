@@ -170,7 +170,7 @@ class User(Base):
     reviews = relationship("Review", backref="user")
 
     def to_dict(self):
-        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level,
+        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level_id, "level_description": self.level.description,
                 "experience_points": self.experience_points}
 
 
