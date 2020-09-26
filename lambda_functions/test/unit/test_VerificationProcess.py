@@ -1,9 +1,10 @@
 import crud.operations as operations
-from crud.model import User, Item
+from crud.model import User, Item, Level
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
+import test.unit.setup_scenarios as scenarios
 
 
 def test_verification_process_best_case(monkeypatch):
@@ -11,62 +12,17 @@ def test_verification_process_best_case(monkeypatch):
     import app
 
     session = operations.get_db_session(True, None)
+    session = scenarios.create_levels_junior_and_senior_detectives(session)
 
-    # Creating junior detectives
-    junior_detective1 = User()
-    junior_detective1.id = "1"
-    junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
+    junior_detective1 = operations.get_user_by_id("1", True, session)
+    junior_detective2 = operations.get_user_by_id("2", True, session)
+    junior_detective3 = operations.get_user_by_id("3", True, session)
+    junior_detective4 = operations.get_user_by_id("4", True, session)
 
-    junior_detective2 = User()
-    junior_detective2.id = "2"
-    junior_detective2.name = "Junior2"
-    operations.create_user_db(junior_detective2, True, session)
-
-    junior_detective3 = User()
-    junior_detective3.id = "3"
-    junior_detective3.name = "Junior3"
-    operations.create_user_db(junior_detective3, True, session)
-
-    junior_detective4 = User()
-    junior_detective4.id = "4"
-    junior_detective4.name = "Junior4"
-    operations.create_user_db(junior_detective4, True, session)
-
-    # Create senior detectives
-    senior_detective1 = User()
-    senior_detective1.id = "11"
-    senior_detective1.name = "Senior1"
-    senior_detective1 = operations.create_user_db(
-        senior_detective1, True, session)
-    senior_detective1.level = 2
-
-    senior_detective2 = User()
-    senior_detective2.id = "12"
-    senior_detective2.name = "Senior2"
-    senior_detective2 = operations.create_user_db(
-        senior_detective2, True, session)
-    senior_detective2.level = 2
-
-    senior_detective3 = User()
-    senior_detective3.id = "13"
-    senior_detective3.name = "Senior3"
-    senior_detective3 = operations.create_user_db(
-        senior_detective3, True, session)
-    senior_detective3.level = 2
-
-    senior_detective4 = User()
-    senior_detective4.id = "14"
-    senior_detective4.name = "Senior4"
-    senior_detective4 = operations.create_user_db(
-        senior_detective4, True, session)
-    senior_detective4.level = 2
-
-    session.merge(senior_detective1)
-    session.merge(senior_detective2)
-    session.merge(senior_detective3)
-    session.merge(senior_detective4)
-    session.commit()
+    senior_detective1 = operations.get_user_by_id("11", True, session)
+    senior_detective2 = operations.get_user_by_id("12", True, session)
+    senior_detective3 = operations.get_user_by_id("13", True, session)
+    senior_detective4 = operations.get_user_by_id("14", True, session)
 
     users = operations.get_all_users_db(True, session)
     assert len(users) == 8
@@ -183,61 +139,17 @@ def test_verification_process_worst_case(monkeypatch):
 
     session = operations.get_db_session(True, None)
 
-    # Creating junior detectives
-    junior_detective1 = User()
-    junior_detective1.id = "1"
-    junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
+    session = scenarios.create_levels_junior_and_senior_detectives(session)
 
-    junior_detective2 = User()
-    junior_detective2.id = "2"
-    junior_detective2.name = "Junior2"
-    operations.create_user_db(junior_detective2, True, session)
+    junior_detective1 = operations.get_user_by_id("1", True, session)
+    junior_detective2 = operations.get_user_by_id("2", True, session)
+    junior_detective3 = operations.get_user_by_id("3", True, session)
+    junior_detective4 = operations.get_user_by_id("4", True, session)
 
-    junior_detective3 = User()
-    junior_detective3.id = "3"
-    junior_detective3.name = "Junior3"
-    operations.create_user_db(junior_detective3, True, session)
-
-    junior_detective4 = User()
-    junior_detective4.id = "4"
-    junior_detective4.name = "Junior4"
-    operations.create_user_db(junior_detective4, True, session)
-
-    # Create senior detectives
-    senior_detective1 = User()
-    senior_detective1.id = "11"
-    senior_detective1.name = "Senior1"
-    senior_detective1 = operations.create_user_db(
-        senior_detective1, True, session)
-    senior_detective1.level = 2
-
-    senior_detective2 = User()
-    senior_detective2.id = "12"
-    senior_detective2.name = "Senior2"
-    senior_detective2 = operations.create_user_db(
-        senior_detective2, True, session)
-    senior_detective2.level = 2
-
-    senior_detective3 = User()
-    senior_detective3.id = "13"
-    senior_detective3.name = "Senior3"
-    senior_detective3 = operations.create_user_db(
-        senior_detective3, True, session)
-    senior_detective3.level = 2
-
-    senior_detective4 = User()
-    senior_detective4.id = "14"
-    senior_detective4.name = "Senior4"
-    senior_detective4 = operations.create_user_db(
-        senior_detective4, True, session)
-    senior_detective4.level = 2
-
-    session.merge(senior_detective1)
-    session.merge(senior_detective2)
-    session.merge(senior_detective3)
-    session.merge(senior_detective4)
-    session.commit()
+    senior_detective1 = operations.get_user_by_id("11", True, session)
+    senior_detective2 = operations.get_user_by_id("12", True, session)
+    senior_detective3 = operations.get_user_by_id("13", True, session)
+    senior_detective4 = operations.get_user_by_id("14", True, session)
 
     users = operations.get_all_users_db(True, session)
     assert len(users) == 8

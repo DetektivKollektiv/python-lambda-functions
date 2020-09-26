@@ -9,11 +9,13 @@ from datetime import datetime
 import json
 import boto3
 from botocore.config import Config
+import test.unit.setup_scenarios as scenarios
+
 
 # This test uses the following secrets from the AWS secrets manager:
 # telegram_test_chat_id: telegram chat id of a user (uses an actual Telegram account)
 # mail: mail address of a user (uses detektivkollektic@gmail.com)
-# To override these values, uncomment the following lines and set the according strings: 
+# To override these values, uncomment the following lines and set the according strings:
 # TELEGRAM_CHAT_ID = "XXXXXXX" # you can find out your chat id by texting @chatid_echo_bot
 # RECIPIENT_MAIL = "XXXXXXX" # make sure the email address is verified in AWS SES as long as we are in Sandbox mode
 
@@ -35,7 +37,7 @@ except NameError:
     telegram_secret = get_telegram_secret['SecretString']
     TELEGRAM_CHAT_ID = json.loads(telegram_secret)[telegram_secret_name]
     assert(TELEGRAM_CHAT_ID is not None)
-    
+
 try:
     RECIPIENT_MAIL
 except NameError:
@@ -47,6 +49,7 @@ except NameError:
     RECIPIENT_MAIL = json.loads(mail_secret)[mail_secret_name]
     assert(RECIPIENT_MAIL is not None)
 
+
 def test_closed_item_notification(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
     monkeypatch.setenv("STAGE", "dev")
@@ -54,61 +57,17 @@ def test_closed_item_notification(monkeypatch):
 
     session = operations.get_db_session(True, None)
 
-    # Creating junior detectives
-    junior_detective1 = User()
-    junior_detective1.id = "1"
-    junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
+    session = scenarios.create_levels_junior_and_senior_detectives(session)
 
-    junior_detective2 = User()
-    junior_detective2.id = "2"
-    junior_detective2.name = "Junior2"
-    operations.create_user_db(junior_detective2, True, session)
+    junior_detective1 = operations.get_user_by_id("1", True, session)
+    junior_detective2 = operations.get_user_by_id("2", True, session)
+    junior_detective3 = operations.get_user_by_id("3", True, session)
+    junior_detective4 = operations.get_user_by_id("4", True, session)
 
-    junior_detective3 = User()
-    junior_detective3.id = "3"
-    junior_detective3.name = "Junior3"
-    operations.create_user_db(junior_detective3, True, session)
-
-    junior_detective4 = User()
-    junior_detective4.id = "4"
-    junior_detective4.name = "Junior4"
-    operations.create_user_db(junior_detective4, True, session)
-
-    # Create senior detectives
-    senior_detective1 = User()
-    senior_detective1.id = "11"
-    senior_detective1.name = "Senior1"
-    senior_detective1 = operations.create_user_db(
-        senior_detective1, True, session)
-    senior_detective1.level = 2
-
-    senior_detective2 = User()
-    senior_detective2.id = "12"
-    senior_detective2.name = "Senior2"
-    senior_detective2 = operations.create_user_db(
-        senior_detective2, True, session)
-    senior_detective2.level = 2
-
-    senior_detective3 = User()
-    senior_detective3.id = "13"
-    senior_detective3.name = "Senior3"
-    senior_detective3 = operations.create_user_db(
-        senior_detective3, True, session)
-    senior_detective3.level = 2
-
-    senior_detective4 = User()
-    senior_detective4.id = "14"
-    senior_detective4.name = "Senior4"
-    senior_detective4 = operations.create_user_db(
-        senior_detective4, True, session)
-    senior_detective4.level = 2
-
-    session.merge(senior_detective1)
-    session.merge(senior_detective2)
-    session.merge(senior_detective3)
-    session.merge(senior_detective4)
-    session.commit()
+    senior_detective1 = operations.get_user_by_id("11", True, session)
+    senior_detective2 = operations.get_user_by_id("12", True, session)
+    senior_detective3 = operations.get_user_by_id("13", True, session)
+    senior_detective4 = operations.get_user_by_id("14", True, session)
 
     users = operations.get_all_users_db(True, session)
     assert len(users) == 8
