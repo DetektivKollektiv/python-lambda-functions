@@ -163,14 +163,24 @@ class User(Base):
     id = Column(String, primary_key=True)
     name = Column(String)
     score = Column(Integer)
-    level = Column(Integer)
     experience_points = Column(Integer)
+    level_id = Column(Integer, ForeignKey('levels.id'))
 
+    level = relationship("Level", back_populates="users")
     reviews = relationship("Review", backref="user")
 
     def to_dict(self):
-        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level,
+        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level_id, "level_description": self.level.description,
                 "experience_points": self.experience_points}
+
+
+class Level(Base):
+    __tablename__ = "levels"
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    required_experience_points = Column(Integer)
+
+    users = relationship("User", back_populates="level")
 
 
 class ReviewQuestion(Base):

@@ -42,4 +42,4 @@ class TestSearchFactChecks:
         assert 'claimReview' in ret[0]
         assert ret[0]['claimReview'][0]['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
                                                     'von 0,01 Prozent in Deutschland'
-        assert elapsed < 1.5
+        assert elapsed < 3
