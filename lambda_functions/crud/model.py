@@ -220,6 +220,7 @@ class Review(Base):
     review_answers = relationship("ReviewAnswer", backref="review")
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
+    status = Column(String)
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
