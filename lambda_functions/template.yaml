@@ -259,6 +259,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
