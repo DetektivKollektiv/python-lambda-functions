@@ -24,7 +24,7 @@ Resources:
       StageName:
         Ref: STAGE
       Cors:
-        AllowMethods: "'OPTIONS, PUT, POST, GET'"
+        AllowMethods: "'OPTIONS, PUT, POST, GET, DELETE'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
       Auth:
