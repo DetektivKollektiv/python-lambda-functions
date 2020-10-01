@@ -1,4 +1,4 @@
-import os 
+import os
 import requests
 import json
 import logging
@@ -12,11 +12,14 @@ from . import operations, helper
 # Set DetektivKollektiv email address here (displayed name <mail address>)
 SENDER = "DetektivKollektiv <detektivkollektiv@gmail.com>"
 
+
 class TelegramNotificationError(Exception):
     pass
 
+
 class EmailNotificationError(Exception):
     pass
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -32,16 +35,14 @@ def get_telegram_token():
     secret_name: string
         The name of the telegram bot token in the secrets manager
     """
-    
+
     secret_name = "telegram_bot_token_{}".format(os.environ['STAGE'])
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    config = Config(read_timeout=2, connect_timeout=2)
     client = session.client(
         service_name='secretsmanager',
-        region_name='eu-central-1',
-        config=config
+        region_name='eu-central-1'
     )
 
     try:
@@ -54,12 +55,14 @@ def get_telegram_token():
         # Decrypts secret using the associated KMS CMK.
         secret = get_secret_value_response['SecretString']
         telegram_bot_token = json.loads(secret)[secret_name]
-        
+
         return telegram_bot_token
-        
+
     except ClientError as e:
-        logging.exception("Could not get telegram bot token from the secrets manager. Secrets manager error: {}".format(e.response['Error']['Code']))
+        logging.exception("Could not get telegram bot token from the secrets manager. Secrets manager error: {}".format(
+            e.response['Error']['Code']))
         raise TelegramNotificationError
+
 
 def notify_users(is_test, session, item):
     """Notify telegram user(s) about a closed item.
@@ -76,25 +79,28 @@ def notify_users(is_test, session, item):
 
     if session == None:
         session = operations.get_db_session(False, None)
-    
-    rating = round(item.result_score, 1) # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
+
+    # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
+    rating = round(item.result_score, 1)
     rating_text = "nicht vertrauenswürdig"
     if 1.5 <= rating < 2.5:
         rating_text = "eher nicht vertrauenswürdig"
     if 2.5 <= rating < 3.5:
         rating_text = "eher vertrauenswürdig"
-    if rating >= 3.5: 
+    if rating >= 3.5:
         rating_text = "vertrauenswürdig"
 
     # get all submissions for the item
-    submissions = operations.get_submissions_by_item_id(item.id, is_test, session)
+    submissions = operations.get_submissions_by_item_id(
+        item.id, is_test, session)
 
     notifications_successful = True
 
     for submission in submissions:
         if submission.telegram_id:
             try:
-                notify_telegram_user(is_test, submission.telegram_id, item, rating, rating_text)
+                notify_telegram_user(
+                    is_test, submission.telegram_id, item, rating, rating_text)
             except Exception:
                 notifications_successful = False
 
@@ -105,9 +111,11 @@ def notify_users(is_test, session, item):
                 notifications_successful = False
 
     if notifications_successful:
-        logger.info("User(s) notified. Check logs to see if mail and/or telegram notifications were successful.")
+        logger.info(
+            "User(s) notified. Check logs to see if mail and/or telegram notifications were successful.")
     else:
-        logger.exception("An error occurred during closed item user notification. Please check logs.")
+        logger.exception(
+            "An error occurred during closed item user notification. Please check logs.")
 
 
 def notify_telegram_user(is_test, telegram_id, item, rating, rating_text):
@@ -130,23 +138,28 @@ def notify_telegram_user(is_test, telegram_id, item, rating, rating_text):
         TELEGRAM_BOT_TOKEN = get_telegram_token()
 
         text_solved = "Dein Fall wurde gelöst! "
-        text_rating = "Der Vertrauensindex beträgt *{} von 4*. Damit ist dein Fall *{}*. Was bedeutet das?\n\n".format(rating, rating_text)
+        text_rating = "Der Vertrauensindex beträgt *{} von 4*. Damit ist dein Fall *{}*. Was bedeutet das?\n\n".format(
+            rating, rating_text)
         text_legend = "1: nicht vertrauenswürdig\n2: eher nicht vertrauenswürdig\n3: eher vertrauenswürdig\n4: vertrauenswürdig\n\n"
         text_archive = "Mehr Details zu deinem Fall findest du in unserem [Archiv](https://qa.detective-collective.org/archive).\n\n"
         text_thanks = "Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!\n\n"
         text_case = "Dein Fall lautete: \n{}".format(item.content)
 
-        message = text_solved + text_rating + text_legend + text_archive + text_thanks + text_case
-                        
-        request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(TELEGRAM_BOT_TOKEN, telegram_id, message)
-        notify_user = requests.get(request_url, timeout=5)
+        message = text_solved + text_rating + text_legend + \
+            text_archive + text_thanks + text_case
+
+        request_url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(
+            TELEGRAM_BOT_TOKEN, telegram_id, message)
+        notify_user = requests.get(request_url)
         if notify_user.ok == True:
-            logger.info("Telegram user notification request sent. Response: {}".format(notify_user.json()))
+            logger.info("Telegram user notification request sent. Response: {}".format(
+                notify_user.json()))
         else:
             raise TelegramNotificationError
 
     except Exception:
-        logging.exception("Could not notify telegram user with chat id {} about closed item.".format(telegram_id))
+        logging.exception(
+            "Could not notify telegram user with chat id {} about closed item.".format(telegram_id))
         raise TelegramNotificationError
 
 
@@ -174,9 +187,10 @@ def notify_mail_user(mail, item, rating, rating_text):
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = ("Unsere Detektiv*innen haben deinen Fall gelöst.\r\n"
-                "Der Vertrauensindex beträgt {}. Damit ist dein Fall {}".format(rating, rating_text)
-                )
-                
+                 "Der Vertrauensindex beträgt {}. Damit ist dein Fall {}".format(
+                     rating, rating_text)
+                 )
+
     # The HTML body of the email
     BODY_HTML = """<html>
     <head><title>Dein Fall wurde gelöst!</title></head>
@@ -210,11 +224,11 @@ def notify_mail_user(mail, item, rating, rating_text):
     CHARSET = "UTF-8"
 
     # Create a new SES resource and specify a region.
-    client = boto3.client('ses',region_name=AWS_REGION)
+    client = boto3.client('ses', region_name=AWS_REGION)
 
     # Try to send the email.
     try:
-        #Provide the contents of the email.
+        # Provide the contents of the email.
         response = client.send_email(
             Destination={
                 'ToAddresses': [
@@ -239,7 +253,9 @@ def notify_mail_user(mail, item, rating, rating_text):
             },
             Source=SENDER,
         )
-        logger.info("Notification email sent to {}. SES Message ID: {}".format(mail, response['MessageId']))
+        logger.info("Notification email sent to {}. SES Message ID: {}".format(
+            mail, response['MessageId']))
     except ClientError as e:
-        logging.exception("Could not send mail notification to email address {}. SNS Error: {}".format(mail, e.response['Error']['Message']))
+        logging.exception("Could not send mail notification to email address {}. SNS Error: {}".format(
+            mail, e.response['Error']['Message']))
         raise EmailNotificationError
