@@ -11,9 +11,9 @@ phases:
       - pip install --upgrade pip
 
       # Install requirements
-      - pip install -r lambda_functions/requirements.txt --target lambda_functions
+      - pip install alembic sqlalchemy mysqlclient
 
   build:
     commands:
-      
-      - cd lambda_functions && alembic upgrade head
+      - cd lambda_functions
+      - alembic upgrade head
