@@ -34,8 +34,7 @@ class Item(Base):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
                 "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
-                "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp,
-                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,  #
+                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
                 "in_progress_reviews_level_2": self.in_progress_reviews_level_2}
 
 
