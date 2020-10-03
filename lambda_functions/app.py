@@ -168,7 +168,7 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
             "statusCode": 400,
             "body": "Could not get factchecks. Check HTTP POST payload. Exception: {}".format(e)
         }
-        
+
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
@@ -703,6 +703,14 @@ def accept_item(event, context, is_test=False, session=None):
         user = operations.get_user_by_id(user_id, is_test, session)
         item = operations.get_item_by_id(item_id, is_test, session)
 
+        # Load questions and answers into response dict
+        response_dict = item.to_dict()
+        response_dict['questions'] = []
+        review_questions = operations.get_all_review_questions_db(
+            is_test, session)
+        for question in review_questions:
+            response_dict['questions'].append(question.to_dict_with_answers())
+
         # Try to accept item
         try:
             operations.accept_item_db(user, item, is_test, session)
@@ -710,7 +718,7 @@ def accept_item(event, context, is_test=False, session=None):
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(item.to_dict())
+                "body": json.dumps(response_dict)
             }
 
         except Exception as e:
