@@ -13,7 +13,7 @@ from crud.model import (
     URL, Base, Claimant, Entity, ExternalFactCheck, FactChecking_Organization,
     Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
     ReviewAnswer, ReviewInProgress, ReviewQuestion, Sentiment, Submission,
-    User)
+    User, Level)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, backref, relationship, sessionmaker
 
@@ -163,7 +163,8 @@ def get_old_reviews_in_progress(is_test, session):
     rips = session.query(ReviewInProgress).filter(
         ReviewInProgress.start_timestamp < old_time)
     return rips
-  
+
+
 def get_factcheck_by_itemid_db(id, is_test, session):
     """Returns factchecks referenced by an item id
 
@@ -180,11 +181,11 @@ def get_factcheck_by_itemid_db(id, is_test, session):
     """
     session = get_db_session(is_test, session)
     factcheck = session.query(ExternalFactCheck).select_from(Item).\
-                join(Item.factchecks).\
-                filter(Item.id == id)
-    return factcheck.first()   
+        join(Item.factchecks).\
+        filter(Item.id == id)
+    return factcheck.first()
 
-  
+
 def create_submission_db(submission, is_test, session):
     """Inserts a new submission into the database
 
@@ -233,7 +234,7 @@ def create_user_db(user, is_test, session):
         session = get_db_session(is_test, session)
 
     user.score = 0
-    user.level = 1
+    user.level_id = 1
     user.experience_points = 0
     session.add(user)
     session.commit()
@@ -273,6 +274,7 @@ def get_user_by_id(id, is_test, session):
     user = session.query(User).get(id)
     return user
 
+
 def delete_user(event, is_test, session):
     """Deletes a user from the database.
 
@@ -292,18 +294,18 @@ def delete_user(event, is_test, session):
     user = session.query(User).get(user_id)
 
     if(user == None):
-        raise Exception(f"User with id {user_id} could not be found in database.")
+        raise Exception(
+            f"User with id {user_id} could not be found in database.")
 
     client = boto3.client('cognito-idp')
     client.admin_delete_user(
-        UserPoolId=event['requestContext']['identity']['cognitoAuthenticationProvider'].split(',')[0].split('amazonaws.com/')[1],
+        UserPoolId=event['requestContext']['identity']['cognitoAuthenticationProvider'].split(',')[
+            0].split('amazonaws.com/')[1],
         Username=user.name
     )
 
     session.delete(user)
     session.commit()
-
-    
 
 
 def create_review_db(review, is_test, session):
@@ -455,8 +457,13 @@ def get_all_review_questions_db(is_test, session):
 def give_experience_point(user_id, is_test, session):
     user = get_user_by_id(user_id, is_test, session)
     user.experience_points = user.experience_points + 1
-    if user.experience_points >= 5:
-        user.level = 2
+    new_level = session.query(Level) \
+        .filter(Level.required_experience_points <= user.experience_points) \
+        .order_by(Level.required_experience_points.desc()) \
+        .first()
+
+    if new_level != user.level_id:
+        user.level_id = new_level.id
     update_object_db(user, is_test, session)
 
 
@@ -580,7 +587,7 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         random.shuffle(items)
         return items
 
-    if user.level > 1:
+    if user.level_id > 1:
         # Get open items for senior review
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
@@ -618,10 +625,12 @@ def get_claimant_by_name_db(claimant_name, is_test, session):
         Null, if no claimant was found
         """
     session = get_db_session(is_test, session)
-    claimant = session.query(Claimant).filter(Claimant.claimant == claimant_name).first()
+    claimant = session.query(Claimant).filter(
+        Claimant.claimant == claimant_name).first()
     if claimant is None:
         raise Exception("No claimant found.")
     return claimant
+
 
 def get_url_by_content_db(content, is_test, session):
     """Returns an url with the specified content from the database
@@ -822,7 +831,7 @@ def accept_item_db(user, item, is_test, session):
 
     # If the amount of reviews in progress equals the amount of reviews needed, raise an error
     if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
-        if user.level > 1:
+        if user.level_id > 1:
             if item.in_progress_reviews_level_2 >= item.open_reviews_level_2:
                 raise Exception(
                     'Item cannot be accepted since enough other detecitves are already working on the case')
@@ -838,7 +847,7 @@ def accept_item_db(user, item, is_test, session):
 
     # If a user is a senior, the review will by default be a senior review,
     # except if no senior reviews are needed
-    if user.level > 1 and item.open_reviews_level_2 > 0:
+    if user.level_id > 1 and item.open_reviews_level_2 > 0:
         rip.is_peer_review = True
         item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
     else:
@@ -953,7 +962,7 @@ def build_review_pairs(item, is_test, session):
         item.status = "closed"
         item.result_score = compute_item_result_score(
             item.id, is_test, session)
-        
+
         # Notify email and telegram users
         notifications.notify_users(is_test, session, item)
 
@@ -969,5 +978,6 @@ def build_review_pairs(item, is_test, session):
 def get_submissions_by_item_id(item_id, is_test, session):
 
     session = get_db_session(is_test, session)
-    submissions = session.query(Submission).filter(Submission.item_id == item_id).all()
+    submissions = session.query(Submission).filter(
+        Submission.item_id == item_id).all()
     return submissions

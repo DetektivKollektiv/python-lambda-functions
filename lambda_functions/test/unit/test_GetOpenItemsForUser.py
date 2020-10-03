@@ -1,9 +1,10 @@
 import crud.operations as operations
-from crud.model import User, Item
+from crud.model import User, Item, Level
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
+import test.unit.setup_scenarios as scenarios
 
 
 def test_get_open_items_for_user(monkeypatch):
@@ -12,48 +13,17 @@ def test_get_open_items_for_user(monkeypatch):
 
     session = operations.get_db_session(True, None)
 
-    # Creating junior detective
-    junior_detective1 = User()
-    junior_detective1.id = "1"
-    junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
+    session = scenarios.create_levels_junior_and_senior_detectives(session)
 
-    junior_detective2 = User()
-    junior_detective2.id = "2"
-    junior_detective2.name = "Junior2"
-    operations.create_user_db(junior_detective2, True, session)
+    junior_detective1 = operations.get_user_by_id("1", True, session)
+    junior_detective2 = operations.get_user_by_id("2", True, session)
+    junior_detective3 = operations.get_user_by_id("3", True, session)
+    junior_detective4 = operations.get_user_by_id("4", True, session)
 
-    junior_detective3 = User()
-    junior_detective3.id = "3"
-    junior_detective3.name = "Junior3"
-    operations.create_user_db(junior_detective3, True, session)
-
-    junior_detective4 = User()
-    junior_detective4.id = "4"
-    junior_detective4.name = "Junior4"
-    operations.create_user_db(junior_detective4, True, session)
-
-    # Create senior detectives
-    senior_detective1 = User()
-    senior_detective1.id = "11"
-    senior_detective1.name = "Senior1"
-    senior_detective1 = operations.create_user_db(
-        senior_detective1, True, session)
-    senior_detective1.level = 2
-
-    senior_detective2 = User()
-    senior_detective2.id = "12"
-    senior_detective2.name = "Senior2"
-    senior_detective2 = operations.create_user_db(
-        senior_detective2, True, session)
-    senior_detective2.level = 2
-
-    session.merge(senior_detective1)
-    session.merge(senior_detective2)
-    session.commit()
+    senior_detective1 = operations.get_user_by_id("11", True, session)
 
     users = operations.get_all_users_db(True, session)
-    assert len(users) == 6
+    assert len(users) == 8
 
     # Creating 5 items
 
@@ -160,6 +130,7 @@ def test_get_open_items_for_user(monkeypatch):
     accept_event = event_creator.get_accept_event(
         senior_detective1.id, item1.id)
     app.accept_item(accept_event, None, True, session)
+
     open_item_after_accept = operations.get_open_items_for_user_db(
         senior_detective1, 5, True, session)
     assert len(open_item_after_accept) == 1
@@ -168,7 +139,7 @@ def test_get_open_items_for_user(monkeypatch):
         item1.id, senior_detective1.id, 1)
     app.submit_review(review_event, None, True, session)
 
-    # For JuniorDetective1 only 4 cases should be available
+    # For SeniorDetective1 only 4 cases should be available
     open_items_after_submission = operations.get_open_items_for_user_db(
         senior_detective1, 5, True, session)
     assert len(open_items_after_submission) == 4

@@ -152,22 +152,25 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
 
             factcheck_dict = factcheck.to_dict()
 
-            return {
+            response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(factcheck_dict)
             }
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
                 "body": "No item found with the specified id."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get factchecks. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
 
 
 def create_submission(event, context, is_test=False, session=None):
@@ -344,8 +347,7 @@ def get_user(event, context, is_test=False, session=None):
 
     try:
         # get cognito id
-        id = str(event['requestContext']['identity']
-                 ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
+        id = helper.cognito_id_from_event(event)
 
         try:
             user = operations.get_user_by_id(id, is_test, session)

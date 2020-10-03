@@ -11,5 +11,5 @@ def test_get_item_by_id(monkeypatch):
     import app
     session = operations.get_db_session(True, None)
 
-    item = operations.get_item_by_id("123456", True, session)
+    operations.get_item_by_id("123456", True, session)
     assert 1 == 1
