@@ -40,10 +40,13 @@ def extract_claim(event, context):
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
-    # extract all urls from item_content urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),
-    # ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # extract all urls from item_content
     urls = re.findall(
         'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # remove urls from item_content
+    for url in urls:
+        item_content = item_content.replace(url, '')
+
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
     title = ""
