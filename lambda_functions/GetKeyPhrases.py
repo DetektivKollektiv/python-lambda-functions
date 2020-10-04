@@ -58,7 +58,7 @@ def get_phrases(event, context):
     keyPhrases_sorted = sorted(response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
 
     # respond at most 5 key phrases
-    keyPhrases_sorted = keyPhrases_sorted[:min(5, len(keyPhrases_sorted))]
+    keyPhrases_sorted = keyPhrases_sorted[:min(3, len(keyPhrases_sorted))]
 
     # extract the strings
     keyPhrases_strings = []
