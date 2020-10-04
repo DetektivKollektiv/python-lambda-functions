@@ -102,6 +102,42 @@
                   "KeyPhrases.$": "$.KeyPhrases"
                 },
                 "ResultPath": null,
+                "Next": "Detect Title Key Phrases"
+              },
+              "Detect Title Key Phrases": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-GetKeyPhrases-${STAGE}",
+                "Catch": [
+                  {
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
+                    "Next": "EnrichmentFailed"
+                  }
+                ],
+                "Parameters": {
+                  "Text.$": "$.Claim.title",
+                  "LanguageCode.$": "$.item.language"
+                },
+                "ResultPath": "$.TitleKeyPhrases",
+                "Next": "Store Item Title Keyphrases"
+              },
+              "Store Item Title Keyphrases": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-api-StoreItemKeyphrases-${STAGE}",
+                "Catch": [
+                  {
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
+                    "Next": "EnrichmentFailed"
+                  }
+                ],
+                "Parameters": {
+                  "item.$": "$.item",
+                  "KeyPhrases.$": "$.TitleKeyPhrases"
+                },
+                "ResultPath": null,
                 "Next": "Detect Entities"
               },
               "Detect Entities": {
