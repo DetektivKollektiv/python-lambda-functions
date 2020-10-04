@@ -728,6 +728,23 @@ def get_itementity_by_entity_and_item_db(entity_id, item_id, is_test, session):
     return itementity
 
 
+def get_entities_by_itemid_db(item_id, is_test, session):
+    """Returns the entities for an item
+
+        Returns
+        ------
+        entities: Entity[]
+        Null, if no entity was found
+    """
+    session = get_db_session(is_test, session)
+    entities = session.query(Entity).\
+        join(ItemEntity).\
+        filter(ItemEntity.item_id == item_id).\
+        filter(ItemEntity.entity_id == Entity.id).\
+        all()
+    return entities
+
+
 def get_sentiment_by_content_db(content, is_test, session):
     """Returns the sentiment with the specified content from the database
 
@@ -792,6 +809,23 @@ def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id, is_test, session):
     if itemphrase is None:
         raise Exception("No ItemKeyphrase found.")
     return itemphrase
+
+
+def get_phrases_by_itemid_db(item_id, is_test, session):
+    """Returns the key phrases for an item
+
+        Returns
+        ------
+        phrases: Keyphrase[]
+        Null, if no entity was found
+    """
+    session = get_db_session(is_test, session)
+    phrases = session.query(Keyphrase).\
+        join(ItemKeyphrase).\
+        filter(ItemKeyphrase.item_id == item_id).\
+        filter(ItemKeyphrase.keyphrase_id == Keyphrase.id).\
+        all()
+    return phrases
 
 
 def delete_old_reviews_in_progress(rips, is_test, session):

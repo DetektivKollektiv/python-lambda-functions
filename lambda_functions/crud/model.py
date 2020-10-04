@@ -91,6 +91,9 @@ class Entity(Base):
     entity = Column(String)
     items = relationship("ItemEntity")
 
+    def to_dict(self):
+        return {"id": self.id, "entity": self.entity}
+
 
 class ItemEntity(Base):
     __tablename__ = 'item_entities'
@@ -147,6 +150,9 @@ class Keyphrase(Base):
     id = Column(String, primary_key=True)
     phrase = Column(String)
     items = relationship("ItemKeyphrase")
+
+    def to_dict(self):
+        return {"id": self.id, "phrase": self.phrase}
 
 
 class ItemKeyphrase(Base):
