@@ -160,22 +160,25 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
 
             factcheck_dict = factcheck.to_dict()
 
-            return {
+            response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(factcheck_dict)
             }
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
                 "body": "Item or factcheck not found."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get factchecks. Check HTTP POST payload. Exception: {}".format(e)
         }
+        
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
 
 
 def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):

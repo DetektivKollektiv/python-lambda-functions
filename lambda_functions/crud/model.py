@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -7,10 +7,10 @@ Base = declarative_base()
 
 class Item(Base):
     __tablename__ = 'items'
-    id = Column(String, primary_key=True)
-    content = Column(String)
-    language = Column(String)
-    status = Column(String)
+    id = Column(String(36), primary_key=True)
+    content = Column(Text)
+    language = Column(String(2))
+    status = Column(String(36))
     variance = Column(Float)
     result_score = Column(Float)
     open_reviews = Column(Integer)
@@ -18,8 +18,6 @@ class Item(Base):
     open_reviews_level_2 = Column(Integer)
     in_progress_reviews_level_1 = Column(Integer)
     in_progress_reviews_level_2 = Column(Integer)
-    locked_by_user = Column(String)
-    lock_timestamp = Column(DateTime)
     open_timestamp = Column(DateTime)
     close_timestamp = Column(DateTime)
 
@@ -36,22 +34,21 @@ class Item(Base):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
                 "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
-                "locked_by_user": self.locked_by_user, "lock_timestamp": self.lock_timestamp,
-                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,  #
+                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
                 "in_progress_reviews_level_2": self.in_progress_reviews_level_2}
 
 
 class Submission(Base):
     __tablename__ = 'submissions'
-    id = Column(String, primary_key=True)
+    id = Column(String(36), primary_key=True)
     submission_date = Column(DateTime)
-    mail = Column(String)
-    telegram_id = Column(String)
-    phone = Column(String)
-    source = Column(String)
-    frequency = Column(String)
+    mail = Column(String(100))
+    telegram_id = Column(String(100))
+    phone = Column(String(36))
+    source = Column(String(100))
+    frequency = Column(String(100))
     received_date = Column(DateTime)
-    item_id = Column(String, ForeignKey('items.id'))
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")
 
     def to_dict(self):
@@ -62,14 +59,14 @@ class Submission(Base):
 
 class ExternalFactCheck(Base):
     __tablename__ = 'factchecks'
-    id = Column(String, primary_key=True)
-    title = Column(String)
-    url = Column(String)
+    id = Column(String(36), primary_key=True)
+    title = Column(String(1000))
+    url = Column(String(1000))
     factchecking_organization_id = Column(
-        String, ForeignKey('factchecking_organizations.id'))
+        String(36), ForeignKey('factchecking_organizations.id'))
     factchecking_organization = relationship(
         "FactChecking_Organization", back_populates="factchecks")
-    item_id = Column(String, ForeignKey('items.id'))
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="factchecks")
 
     def to_dict(self):
@@ -78,8 +75,8 @@ class ExternalFactCheck(Base):
 
 class FactChecking_Organization(Base):
     __tablename__ = 'factchecking_organizations'
-    id = Column(String, primary_key=True)
-    name = Column(String)
+    id = Column(String(36), primary_key=True)
+    name = Column(String(100))
     counter_trustworthy = Column(Integer)
     counter_not_trustworthy = Column(Integer)
     factchecks = relationship("ExternalFactCheck")
@@ -87,8 +84,8 @@ class FactChecking_Organization(Base):
 
 class Entity(Base):
     __tablename__ = 'entities'
-    id = Column(String, primary_key=True)
-    entity = Column(String)
+    id = Column(String(36), primary_key=True)
+    entity = Column(String(200))
     items = relationship("ItemEntity")
 
     def to_dict(self):
@@ -97,58 +94,58 @@ class Entity(Base):
 
 class ItemEntity(Base):
     __tablename__ = 'item_entities'
-    id = Column(String, primary_key=True)
-    item_id = Column(String, ForeignKey('items.id'))
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="entities")
-    entity_id = Column(String, ForeignKey('entities.id'))
+    entity_id = Column(String(36), ForeignKey('entities.id'))
     entity = relationship("Entity", back_populates="items")
 
 
 class Claimant(Base):
     __tablename__ = 'claimants'
-    id = Column(String, primary_key=True)
-    claimant = Column(String)
+    id = Column(String(36), primary_key=True)
+    claimant = Column(String(200))
     url = relationship("URL")
 
 
 class URL(Base):
     __tablename__ = 'urls'
-    id = Column(String, primary_key=True)
-    url = Column(String)
+    id = Column(String(36), primary_key=True)
+    url = Column(String(200))
     items = relationship("ItemURL")
-    claimant_id = Column(String, ForeignKey('claimants.id'))
+    claimant_id = Column(String(36), ForeignKey('claimants.id'))
     claimant = relationship("Claimant", back_populates="url")
 
 
 class ItemURL(Base):
     __tablename__ = 'item_urls'
-    id = Column(String, primary_key=True)
-    item_id = Column(String, ForeignKey('items.id'))
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="urls")
-    url_id = Column(String, ForeignKey('urls.id'))
+    url_id = Column(String(36), ForeignKey('urls.id'))
     url = relationship("URL", back_populates="items")
 
 
 class Sentiment(Base):
     __tablename__ = 'sentiments'
-    id = Column(String, primary_key=True)
-    sentiment = Column(String)
+    id = Column(String(36), primary_key=True)
+    sentiment = Column(String(200))
     items = relationship("ItemSentiment")
 
 
 class ItemSentiment(Base):
     __tablename__ = 'item_sentiments'
-    id = Column(String, primary_key=True)
-    item_id = Column(String, ForeignKey('items.id'))
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="sentiments")
-    sentiment_id = Column(String, ForeignKey('sentiments.id'))
+    sentiment_id = Column(String(36), ForeignKey('sentiments.id'))
     sentiment = relationship("Sentiment", back_populates="items")
 
 
 class Keyphrase(Base):
     __tablename__ = 'keyphrases'
-    id = Column(String, primary_key=True)
-    phrase = Column(String)
+    id = Column(String(36), primary_key=True)
+    phrase = Column(String(100))
     items = relationship("ItemKeyphrase")
 
     def to_dict(self):
@@ -157,17 +154,17 @@ class Keyphrase(Base):
 
 class ItemKeyphrase(Base):
     __tablename__ = 'item_keyphrases'
-    id = Column(String, primary_key=True)
-    item_id = Column(String, ForeignKey('items.id'))
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="keyphrases")
-    keyphrase_id = Column(String, ForeignKey('keyphrases.id'))
+    keyphrase_id = Column(String(36), ForeignKey('keyphrases.id'))
     keyphrase = relationship("Keyphrase", back_populates="items")
 
 
 class User(Base):
     __tablename__ = 'users'
-    id = Column(String, primary_key=True)
-    name = Column(String)
+    id = Column(String(36), primary_key=True)
+    name = Column(String(100))
     score = Column(Integer)
     experience_points = Column(Integer)
     level_id = Column(Integer, ForeignKey('levels.id'))
@@ -183,7 +180,7 @@ class User(Base):
 class Level(Base):
     __tablename__ = "levels"
     id = Column(Integer, primary_key=True)
-    description = Column(String)
+    description = Column(String(100))
     required_experience_points = Column(Integer)
 
     users = relationship("User", back_populates="level")
@@ -191,10 +188,10 @@ class Level(Base):
 
 class ReviewQuestion(Base):
     __tablename__ = 'review_questions'
-    id = Column(String, primary_key=True)
-    content = Column(String)
+    id = Column(String(36), primary_key=True)
+    content = Column(Text)
     mandatory = Column(Boolean)
-    info = Column(String)
+    info = Column(Text)
 
     review_answers = relationship("ReviewAnswer", backref="review_question")
 
@@ -204,11 +201,11 @@ class ReviewQuestion(Base):
 
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
-    id = Column(String, primary_key=True)
-    review_id = Column(String, ForeignKey('reviews.id'))
-    review_question_id = Column(String, ForeignKey('review_questions.id'))
+    id = Column(String(36), primary_key=True)
+    review_id = Column(String(36), ForeignKey('reviews.id'))
+    review_question_id = Column(String(36), ForeignKey('review_questions.id'))
     answer = Column(Integer)
-    comment = Column(String)
+    comment = Column(Text)
 
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
@@ -217,15 +214,16 @@ class ReviewAnswer(Base):
 
 class Review(Base):
     __tablename__ = 'reviews'
-    id = Column(String, primary_key=True)
+    id = Column(String(36), primary_key=True)
     is_peer_review = Column(Boolean)
-    peer_review_id = Column(String)
+    peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
-    item_id = Column(String, ForeignKey('items.id'))
-    user_id = Column(String, ForeignKey('users.id'))
+    item_id = Column(String(36), ForeignKey('items.id'))
+    user_id = Column(String(36), ForeignKey('users.id'))
     review_answers = relationship("ReviewAnswer", backref="review")
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
+    status = Column(String(100))
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
@@ -235,9 +233,9 @@ class Review(Base):
 
 class ReviewInProgress(Base):
     __tablename__ = 'reviews_in_progress'
-    id = Column(String, primary_key=True)
-    item_id = Column(String, ForeignKey('items.id'))
-    user_id = Column(String, ForeignKey('users.id'))
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
+    user_id = Column(String(36), ForeignKey('users.id'))
     start_timestamp = Column(DateTime)
     is_peer_review = Column(Boolean)
 

@@ -1,5 +1,5 @@
 sqlalchemy
-sqlalchemy-aurora-data-api
+sqlalchemy-aurora-data-api==0.2.0
 aws-xray-sdk==2.4.3
 
 psycopg2-binary
