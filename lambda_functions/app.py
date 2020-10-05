@@ -154,7 +154,7 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
 
             if factcheck is None:
                 return {
-                    "statusCode": 405,
+                    "statusCode": 404,
                     "body": "Item or factcheck not found."
                 }
 
@@ -216,27 +216,31 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
             factcheck = SearchFactChecks.get_FactChecks(event, context)
             if 'claimReview' in factcheck[0]:
                 factcheck_dict = {"id": "0", "url": factcheck[0]['claimReview'][0]['url'], "title": factcheck[0]['claimReview'][0]['title']}
-                return {
+                response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},
                     "body": json.dumps(factcheck_dict)
                 }
-            return {
-                "statusCode": 404,
-                "body": "No factcheck found."
-            }
+            else:
+                response = {
+                    "statusCode": 404,
+                    "body": "No factcheck found."
+                }
 
         except Exception:
-            return {
+            response = {
                 "statusCode": 404,
                 "body": "No factcheck found."
             }
 
     except Exception as e:
-        return {
+        response = {
             "statusCode": 400,
             "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
         }
+
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
 
 
 def create_submission(event, context, is_test=False, session=None):
