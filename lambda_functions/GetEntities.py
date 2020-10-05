@@ -61,7 +61,7 @@ def get_entities(event, context):
     entities_sorted = sorted(response["Entities"], key=itemgetter('Score'), reverse=True)
 
     # respond at most 5 entities
-    entities_sorted = entities_sorted[:min(5, len(entities_sorted))]
+    entities_sorted = entities_sorted[:min(3, len(entities_sorted))]
 
     # extract the strings
     entities_strings = []

@@ -16,11 +16,11 @@ class TestExtractClaim:
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
 
-        text_0 = "Wollen wir auch einen Channel für solche Themen anlegen?" \
-                 "https://www.spiegel.de/wissenschaft/mensch/corona-krise-und-klimawandel-fuenf" \
-                 "-desinformations-tricks-die-jeder-kennen-sollte-a-6892ff9b-fb28-43ae-8438-55b49d607e57" \
-                 "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ"
-        text_1 = '\n \n \n\n US-Präsident Donald Trump, Fachmann für Falschinformation Haben Sie auch solche ' \
+        text_0 = "Wollen wir auch einen Channel für solche Themen anlegen?"
+        text_url = "https://www.spiegel.de/wissenschaft/mensch/corona-krise-und-klimawandel-fuenf" \
+                   "-desinformations-tricks-die-jeder-kennen-sollte-a-6892ff9b-fb28-43ae-8438-55b49d607e57" \
+                   "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ"
+        text_1 = 'US-Präsident Donald Trump, Fachmann für Falschinformation Haben Sie auch solche ' \
                  "Nachrichten über soziale Medien bekommen: Covid-19 ist nicht schlimmer als die " \
                  "normale Grippe? Und wird in Wahrheit durch Bakterien, nicht Viren verursacht? " \
                  "Bill Gates hat die Coronakrise erfunden, um die Menschheit zwangsweise zu impfen? " \
@@ -34,8 +34,8 @@ class TestExtractClaim:
                  "den Klimawandel oder jetzt um Corona geht: die Leugner wissenschaftlicher " \
                  "Erkenntnisse " \
                  "verwenden immer wieder dieselben fünf Tricks, um ihr Laienpublikum zu verführen. " \
-                 "Stefan Rahmstorf  schreibt regelmäßig für den SPIEGEL über die Klimakrise. Er ist " \
-                 "Klima- und Meeresforscher und leitet die Abteilung Erdsystemanalyse am " \
+                 "Stefan Rahmstorf schreibt regelmäßig für den SPIEGEL über die Klimakrise. Er " \
+                 "ist Klima- und Meeresforscher und leitet die Abteilung Erdsystemanalyse am " \
                  "Potsdam-Institut " \
                  "für Klimafolgenforschung (PIK). Seit 2000 ist er zudem Professor für Physik " \
                  "der " \
@@ -78,7 +78,7 @@ class TestExtractClaim:
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["concatenation"]["Text"] == event["item"]["content"] + ' '
+        assert resp["concatenation"]["Text"] == ' '
 
     def test_extract_claim_4(self):
         event = {
@@ -91,4 +91,4 @@ class TestExtractClaim:
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["concatenation"]["Text"] == event["item"]["content"] + ' '
+        assert resp["concatenation"]["Text"] == ' '
