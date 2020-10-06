@@ -53,7 +53,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['über 26.000', 'Spanien', '2.000', 'D', 'CH']
+        assert ret == ['über 26.000', 'Spanien', '2.000']
 
     def test_get_entities_6(self):
         event = {
@@ -94,7 +94,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['Bill Gates', 'Donald Trump', 'Wuhan', 'Wuhan Institute of Virology', '2015']
+        assert ret == ['Bill Gates', 'Donald Trump', 'Wuhan']
 
     def test_get_entities_9(self):
         event = {
@@ -124,7 +124,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['Natalie Bechthold', '1,50 Meter', 'https://www.der-postillon.com/2020/09/baby-maske.html', 'Corona-Pandemie', 'München']
+        assert ret == ['Natalie Bechthold', '1,50 Meter', 'https://www.der-postillon.com/2020/09/baby-maske.html']
 
     def test_get_entities_11(self):
         event = {
@@ -133,7 +133,7 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['RKI', '0,01 Prozent', 'Covid', '19', 'Corona Transition']
+        assert ret == ['RKI', '0,01 Prozent', 'Covid']
 
     def test_get_entities_12(self):
         event = {
@@ -153,4 +153,4 @@ class TestGetEntities:
         }
         context = ""
         ret = GetEntities.get_entities(event, context)
-        assert ret == ['26. Juni 2020', 'Deutschland', '0,01 Prozent', '83 Millionen Einwohnern', '136 Kreisen']
+        assert ret == ['26. Juni 2020', 'Deutschland', '0,01 Prozent']

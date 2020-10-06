@@ -240,7 +240,7 @@ Resources:
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}"
       CodeUri: .
-      Handler: app.get_factcheck_by_itemid
+      Handler: app.get_online_factcheck_by_itemid
       Runtime: python3.8
       MemorySize: 832
       Role:

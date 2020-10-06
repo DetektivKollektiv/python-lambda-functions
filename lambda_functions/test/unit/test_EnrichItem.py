@@ -165,7 +165,6 @@ class TestGetFactChecks:
     def test_get_factcheck_by_itemid_2(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
         import app
-        import EnrichItem
 
         session = operations.get_db_session(True, None)
 
@@ -182,12 +181,11 @@ class TestGetFactChecks:
         context = {}
         response = app.get_factcheck_by_itemid(event, context, True, session)
         statusCode = response['statusCode']
-        assert statusCode == 405
+        assert statusCode == 404
 
     def test_get_factcheck_by_itemid_3(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
         import app
-        import EnrichItem
 
         session = operations.get_db_session(True, None)
 
@@ -204,7 +202,7 @@ class TestGetFactChecks:
         context = {}
         response = app.get_factcheck_by_itemid(event, context, True, session)
         statusCode = response['statusCode']
-        assert statusCode == 405
+        assert statusCode == 404
 
     def test_get_online_factcheck_by_itemid(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")

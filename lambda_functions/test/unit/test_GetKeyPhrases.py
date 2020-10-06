@@ -14,9 +14,7 @@ class TestGetKeyPhrases:
         ret = GetKeyPhrases.get_phrases(event, context)
         assert ret == ['coronavirus',
                        'the university hospital',
-                       'Their problem',
-                       'symptoms',
-                       'Toulouse, France']
+                       'Their problem']
 
     def test_get_phrases_2(self):
         event = {
@@ -58,7 +56,7 @@ class TestGetKeyPhrases:
         }
         context = ""
         ret = GetKeyPhrases.get_phrases(event, context)
-        assert ret == ['Spanien', 'Anzahl der  Corona-Toten', 'den FAKE-Zahlen', 'über 26.000', 'Bin']
+        assert ret == ['Spanien', 'Anzahl der  Corona-Toten', 'den FAKE-Zahlen']
 
     def test_get_phrases_6(self):
         event = {
@@ -71,9 +69,7 @@ class TestGetKeyPhrases:
         ret = GetKeyPhrases.get_phrases(event, context)
         assert ret == ['BAYERN VOR EINER PK',
                        'DA KOMMT DER DANN MIT MASKE REIN.WAS',
-                       '??? SELBST SÖDER TRÄGT KEINE',
-                       'WO',
-                       'ABER WEHE DER STEHT']
+                       '??? SELBST SÖDER TRÄGT KEINE']
 
     def test_get_phrases_7(self):
         event = {
