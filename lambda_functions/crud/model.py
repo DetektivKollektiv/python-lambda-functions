@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
+from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -186,6 +186,14 @@ class Level(Base):
     users = relationship("User", back_populates="level")
 
 
+question_option_pairs = Table('question_option_pairs', Base.metadata,
+                              Column('question_id', String(36),
+                                     ForeignKey('review_questions.id')),
+                              Column('option_id', Integer,
+                                     ForeignKey('answer_options.id'))
+                              )
+
+
 class ReviewQuestion(Base):
     __tablename__ = 'review_questions'
     id = Column(String(36), primary_key=True)
@@ -194,16 +202,39 @@ class ReviewQuestion(Base):
     info = Column(Text)
 
     review_answers = relationship("ReviewAnswer", backref="review_question")
+    options = relationship("AnswerOption",
+                           secondary=question_option_pairs,
+                           back_populates="questions")
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "mandatory": self.mandatory, "info": self.info}
+
+    def to_dict_with_answers(self):
+        question = {"id": self.id, "content": self.content,
+                    "mandatory": self.mandatory, "info": self.info, "options": []}
+        for option in self.options:
+            question["options"].append(option.to_dict())
+        return question
+
+
+class AnswerOption(Base):
+    __tablename__ = 'answer_options'
+    id = Column(String(36), primary_key=True)
+    text = Column(Text)
+    value = Column(Integer)
+    questions = relationship(
+        "ReviewQuestion", secondary=question_option_pairs, back_populates="options")
+
+    def to_dict(self):
+        return {"id": self.id, "text": self.text}
 
 
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
     id = Column(String(36), primary_key=True)
     review_id = Column(String(36), ForeignKey('reviews.id'))
-    review_question_id = Column(String(36), ForeignKey('review_questions.id'))
+    review_question_id = Column(String(36), ForeignKey(
+        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
     answer = Column(Integer)
     comment = Column(Text)
 
