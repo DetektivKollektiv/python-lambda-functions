@@ -28,8 +28,8 @@ def upgrade():
     pairs = op.create_table('question_option_pairs',
                             sa.Column('question_id', sa.String(
                                 length=36), nullable=True),
-                            sa.Column('option_id', sa.Integer(),
-                                      nullable=True),
+                            sa.Column('option_id', sa.String(
+                                length=36), nullable=True),
                             sa.ForeignKeyConstraint(
                                 ['option_id'], ['answer_options.id'], ),
                             sa.ForeignKeyConstraint(
