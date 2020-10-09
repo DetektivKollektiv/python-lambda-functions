@@ -189,7 +189,7 @@ class Level(Base):
 question_option_pairs = Table('question_option_pairs', Base.metadata,
                               Column('question_id', String(36),
                                      ForeignKey('review_questions.id')),
-                              Column('option_id', Integer,
+                              Column('option_id', String(36),
                                      ForeignKey('answer_options.id'))
                               )
 
