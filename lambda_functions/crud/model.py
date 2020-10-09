@@ -8,6 +8,7 @@ Base = declarative_base()
 class Item(Base):
     __tablename__ = 'items'
     id = Column(String(36), primary_key=True)
+    type = Column(String(36))
     content = Column(Text)
     language = Column(String(2))
     status = Column(String(36))
