@@ -3,6 +3,7 @@ import os
 import json
 import base64
 import boto3
+from botocore.config import Config  # remove later
 from botocore.exceptions import ClientError
 
 
@@ -114,9 +115,11 @@ def get_secret(secret_name, region_name="eu-central-1"):
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
+    config = Config(read_timeout=2, connect_timeout=2)  # remove later
     client = session.client(
         service_name='secretsmanager',
-        region_name=region_name
+        region_name=region_name,  # remove comma later
+        config=config  # remove later
     )
 
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
