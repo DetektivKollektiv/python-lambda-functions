@@ -8,7 +8,7 @@ from datetime import datetime
 import requests
 
 from crud import operations, helper, notifications
-from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -183,7 +183,8 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
 
 def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
 
-    helper.log_method_initiated("Get online factchecks by item id", event, logger)
+    helper.log_method_initiated(
+        "Get online factchecks by item id", event, logger)
 
     if session is None:
         session = operations.get_db_session(is_test, None)
@@ -194,8 +195,10 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
 
         try:
             item = operations.get_item_by_id(id, is_test, session)
-            entity_objects = operations.get_entities_by_itemid_db(id, is_test, session)
-            phrase_objects = operations.get_phrases_by_itemid_db(id, is_test, session)
+            entity_objects = operations.get_entities_by_itemid_db(
+                id, is_test, session)
+            phrase_objects = operations.get_phrases_by_itemid_db(
+                id, is_test, session)
             title_entities = []  # entities from the claim title are stored as entities in the database
 
             entities = []
@@ -215,7 +218,8 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
 
             factcheck = SearchFactChecks.get_FactChecks(event, context)
             if 'claimReview' in factcheck[0]:
-                factcheck_dict = {"id": "0", "url": factcheck[0]['claimReview'][0]['url'], "title": factcheck[0]['claimReview'][0]['title']}
+                factcheck_dict = {
+                    "id": "0", "url": factcheck[0]['claimReview'][0]['url'], "title": factcheck[0]['claimReview'][0]['title']}
                 response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},
@@ -440,30 +444,6 @@ def get_user(event, context, is_test=False, session=None):
 
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors
-
-
-def create_review(event, context, is_test=False, session=None):
-
-    helper.log_method_initiated("Create review", event, logger)
-
-    if session == None:
-        session = operations.get_db_session(False, None)
-
-    review = Review()
-    body = event['body']
-    helper.body_to_object(body, review)
-
-    try:
-        review = operations.create_review_db(review, is_test, session)
-        return {
-            "statusCode": 201,
-            "body": json.dumps(review.to_dict())
-        }
-    except Exception as e:
-        return {
-            "statusCode": 400,
-            "body": "Could not create review. Check HTTP POST payload. Exception: {}".format(e)
-        }
 
 
 def get_all_reviews(event, context, is_test=False, session=None):
