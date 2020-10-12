@@ -12,7 +12,7 @@ import boto3
 from crud.model import (
     URL, Base, Claimant, Entity, ExternalFactCheck, FactChecking_Organization,
     Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
-    ReviewAnswer, ReviewInProgress, ReviewQuestion, Sentiment, Submission,
+    ReviewAnswer, ReviewQuestion, Sentiment, Submission,
     User, Level)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, backref, relationship, sessionmaker
@@ -160,8 +160,8 @@ def get_item_by_id(id, is_test, session):
 def get_old_reviews_in_progress(is_test, session):
     old_time = helper.get_date_time_one_hour_ago(is_test)
     session = get_db_session(is_test, session)
-    rips = session.query(ReviewInProgress).filter(
-        ReviewInProgress.start_timestamp < old_time)
+    rips = session.query(Review).filter(
+        Review.start_timestamp < old_time, Review.status == "in_progress").all()
     return rips
 
 
@@ -306,29 +306,6 @@ def delete_user(event, is_test, session):
 
     session.delete(user)
     session.commit()
-
-
-def create_review_db(review, is_test, session):
-    """Inserts a new review into the database
-
-    Parameters
-    ----------
-    review: Review, required
-        The review to be inserted
-
-    Returns
-    ------
-    review: Review
-        The inserted review
-    """
-
-    session = get_db_session(is_test, session)
-
-    review.id = str(uuid4())
-    session.add(review)
-    session.commit()
-
-    return review
 
 
 def get_all_reviews_db(is_test, session):
@@ -576,8 +553,8 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
     items = []
 
     # If review in progress exists for user, return the corresponding item(s)
-    result = session.query(ReviewInProgress).filter(
-        ReviewInProgress.user_id == user.id).limit(num_items)
+    result = session.query(Review).filter(
+        Review.user_id == user.id, Review.status == "in_progress").limit(num_items)
     if result.count() > 0:
         for rip in result:
             item_id = rip.item_id
@@ -857,8 +834,8 @@ def accept_item_db(user, item, is_test, session):
     """
     # If a ReviewInProgress exists for the user, return
     try:
-        session.query(ReviewInProgress).filter(
-            ReviewInProgress.user_id == user.id).one()
+        session.query(Review).filter(
+            Review.user_id == user.id, Review.status == "in_progress", Review.item_id == item.id).one()
         return item
     except:
         pass
@@ -873,11 +850,12 @@ def accept_item_db(user, item, is_test, session):
             raise Exception(
                 'Item cannot be accepted since enough other detecitves are already working on the case')
     # Create a new ReviewInProgress
-    rip = ReviewInProgress()
+    rip = Review()
     rip.id = str(uuid4())
     rip.item_id = item.id
     rip.user_id = user.id
     rip.start_timestamp = helper.get_date_time_now(is_test)
+    rip.status = "in_progress"
 
     # If a user is a senior, the review will by default be a senior review,
     # except if no senior reviews are needed
@@ -912,9 +890,9 @@ def get_all_closed_items_db(is_test, session):
 def get_review_in_progress(user_id, item_id, is_test, session):
     session = get_db_session(is_test, session)
     try:
-        review_in_progress = session.query(ReviewInProgress).filter(
-            ReviewInProgress.item_id == item_id,
-            ReviewInProgress.user_id == user_id).one()
+        review_in_progress = session.query(Review).filter(
+            Review.item_id == item_id,
+            Review.user_id == user_id, Review.status == "in_progress").one()
         return review_in_progress
 
     except Exception as e:
@@ -923,23 +901,21 @@ def get_review_in_progress(user_id, item_id, is_test, session):
 
 
 def review_submission_db(review, review_answers, is_test, session):
-    rip = ReviewInProgress()
 
-    # Gets review_in_progress. If none exists, exception is intercepted
+    # Gets review_in_progress. If none exists, raise an exception
     try:
-        rip = get_review_in_progress(
+        review = get_review_in_progress(
             review.user_id, review.item_id, is_test, session)
     except Exception as e:
         raise Exception("Could not get review_in_progress" + e)
 
-    review.is_peer_review = rip.is_peer_review
-    review.start_timestamp = rip.start_timestamp
     review.finish_timestamp = helper.get_date_time_now(is_test)
+    review.status = "closed"
 
-    review = create_review_db(review, is_test, session)
+    session.merge(review)
+    # review = create_review_db(review, is_test, session)
     create_review_answer_set_db(
         review_answers, review.id, is_test, session)
-    session.delete(rip)
     session.commit()
 
     item = Item()

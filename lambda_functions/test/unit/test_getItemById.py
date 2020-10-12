@@ -1,5 +1,5 @@
 import crud.operations as operations
-from crud.model import ReviewInProgress, Item
+from crud.model import Item
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
