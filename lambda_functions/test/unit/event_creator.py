@@ -1,8 +1,8 @@
 
-def get_accept_event(user_id, item_id):
+def get_create_review_event(user_id, item_id):
 
     accept_event = {
-        "pathParameters": {
+        "queryStringParameters": {
             "item_id": item_id
         },
         "requestContext": {

@@ -740,12 +740,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  AcceptItemFunction:
+  CreateReviewFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-accept_item-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-api-create_review-${STAGE}"
       CodeUri: .
-      Handler: app.accept_item
+      Handler: app.create_review
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -756,10 +756,15 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /accept_item/{item_id}
+            Path: /reviews/{item_id}
             Method: post
             RestApiId:
               Ref: Api
+            RequestParameters:
+              - method.request.querystring.item_id:
+                  Required: true
+                  Caching: true
+
       Environment:
         Variables:
           DBNAME:

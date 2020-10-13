@@ -1,5 +1,5 @@
 import crud.operations as operations
-from crud.model import User, Item, Level
+from crud.model import User, Item, Level, Review, ReviewPair
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
@@ -258,3 +258,73 @@ def test_verification_process_worst_case(monkeypatch):
     assert item.open_reviews_level_2 == 3
     assert item.open_reviews == 3
     assert item.result_score == None
+
+
+def test_create_review(monkeypatch):
+    monkeypatch.setenv("DBNAME", "Test")
+    import app
+
+    session = operations.get_db_session(True, None)
+    session = scenarios.create_levels_junior_and_senior_detectives(session)
+
+    junior_detective1 = operations.get_user_by_id("1", True, session)
+    junior_detective2 = operations.get_user_by_id("2", True, session)
+    junior_detective3 = operations.get_user_by_id("3", True, session)
+    junior_detective4 = operations.get_user_by_id("4", True, session)
+
+    senior_detective1 = operations.get_user_by_id("11", True, session)
+    senior_detective2 = operations.get_user_by_id("12", True, session)
+    senior_detective3 = operations.get_user_by_id("13", True, session)
+    senior_detective4 = operations.get_user_by_id("14", True, session)
+
+    users = operations.get_all_users_db(True, session)
+    assert len(users) == 8
+
+    # Creating an item
+    item = Item()
+    item.content = "This item needs to be checked"
+    item = operations.create_item_db(item, True, session)
+
+    items = operations.get_all_items_db(True, session)
+    assert len(items) == 1
+
+    reviews = session.query(Review).all()
+    review_pairs = session.query(ReviewPair).all()
+    assert len(reviews) == 0
+    assert len(review_pairs) == 0
+
+    # Junior detectives accepting item
+    event = event_creator.get_create_review_event(
+        junior_detective1.id, item.id)
+    response = app.create_review(event, None, True, session)
+    assert response['statusCode'] == 201
+    item = operations.get_item_by_id(item.id, True, session)
+    assert item.open_reviews_level_1 == 3
+    assert item.in_progress_reviews_level_1 == 1
+    reviews = session.query(Review).all()
+    review_pairs = session.query(ReviewPair).all()
+    assert len(reviews) == 1
+    assert len(review_pairs) == 1
+
+    event = event_creator.get_create_review_event(
+        junior_detective2.id, item.id)
+    app.create_review(event, None, True, session)
+    item = operations.get_item_by_id(item.id, True, session)
+    assert item.open_reviews_level_1 == 3
+    assert item.in_progress_reviews_level_1 == 2
+    reviews = session.query(Review).all()
+    review_pairs = session.query(ReviewPair).all()
+    assert len(reviews) == 2
+    assert len(review_pairs) == 2
+
+    # Senior detective accepting item
+    event = event_creator.get_create_review_event(
+        senior_detective1.id, item.id)
+    app.create_review(event, None, True, session)
+    item = operations.get_item_by_id(item.id, True, session)
+    assert item.open_reviews_level_1 == 3
+    assert item.in_progress_reviews_level_2 == 1
+    reviews = session.query(Review).all()
+    review_pairs = session.query(ReviewPair).all()
+    assert len(reviews) == 3
+    assert len(review_pairs) == 2

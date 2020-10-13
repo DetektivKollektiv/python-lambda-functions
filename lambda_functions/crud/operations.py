@@ -13,7 +13,7 @@ from crud.model import (
     URL, Base, Claimant, Entity, ExternalFactCheck, FactChecking_Organization,
     Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
     ReviewAnswer, ReviewQuestion, Sentiment, Submission,
-    User, Level)
+    User, Level, ReviewPair)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, backref, relationship, sessionmaker
 
@@ -862,14 +862,48 @@ def accept_item_db(user, item, is_test, session):
     if user.level_id > 1 and item.open_reviews_level_2 > 0:
         rip.is_peer_review = True
         item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
+
+        # Check if a pair with open senior review exists
+        pair_found = False
+        for pair in item.review_pairs:
+            if pair.senior_review_id == None:
+                pair.senior_review_id = rip.id
+                pair_found = True
+                session.merge(pair)
+
+        # Create new pair, if review cannot be attached to existing pair
+        if pair_found == False:
+            pair = ReviewPair()
+            pair.id = str(uuid4())
+            pair.senior_review_id = rip.id
+            item.review_pairs.append(pair)
+            session.merge(pair)
+
+    # If review is junior review
     else:
         rip.is_peer_review = False
         item.in_progress_reviews_level_1 = item.in_progress_reviews_level_1 + 1
 
+        # Check if a pair with open junior review exists
+        pair_found = False
+        for pair in item.review_pairs:
+            if pair.junior_review_id == None:
+                pair.junior_review_id = rip.id
+                pair_found = True
+                session.merge(pair)
+
+        # Create new pair, if review cannot be attached to existing pair
+        if pair_found == False:
+            pair = ReviewPair()
+            pair.id = str(uuid4())
+            pair.junior_review_id = rip.id
+            item.review_pairs.append(pair)
+            session.merge(pair)
+
     session.add(rip)
     session.merge(item)
     session.commit()
-    return item
+    return rip
 
 
 def get_all_closed_items_db(is_test, session):
