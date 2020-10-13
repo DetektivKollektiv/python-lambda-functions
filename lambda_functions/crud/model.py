@@ -30,8 +30,6 @@ class Item(Base):
     keyphrases = relationship("ItemKeyphrase")
     review_pairs = relationship("ReviewPair", back_populates="item")
 
-    reviews = relationship("Review", backref="item")
-
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
                 "variance": self.variance, "result_score": self.result_score,
@@ -251,12 +249,12 @@ class Review(Base):
     is_peer_review = Column(Boolean)
     peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
-    item_id = Column(String(36), ForeignKey('items.id'))
     user_id = Column(String(36), ForeignKey('users.id'))
-    review_answers = relationship("ReviewAnswer", backref="review")
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
+
+    review_answers = relationship("ReviewAnswer", backref="review")
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
@@ -274,3 +272,7 @@ class ReviewPair(Base):
     variance = Column(Float)
 
     item = relationship("Item", back_populates="review_pairs")
+    junior_review = relationship(
+        "Review", foreign_keys=[junior_review_id])
+    senior_review = relationship(
+        "Review", foreign_keys=[senior_review_id])
