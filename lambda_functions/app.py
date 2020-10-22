@@ -24,7 +24,8 @@ def create_item(event, context, is_test=False, session=None):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+        # api-gateway-simple-proxy-for-lambda-input-format
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
 
     context: object, required
         Lambda Context runtime methods and attributes
@@ -67,7 +68,8 @@ def get_all_items(event, context, is_test=False, session=None):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+        # api-gateway-simple-proxy-for-lambda-input-format
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
 
     context: object, required
         Lambda Context runtime methods and attributes
@@ -735,16 +737,27 @@ def reset_locked_items(event, context, is_test=False, session=None):
         }
 
 
-def accept_item(event, context, is_test=False, session=None):
+def create_review(event, context, is_test=False, session=None):
+    """Creates a new review.
 
-    helper.log_method_initiated("Accept item", event, logger)
+    Parameters
+    ----------
+    - user_id is retrieved from the event
+    - item_id is retrieved from query parameters
+
+    Returns
+    ------
+    - Status code 201 (Created)
+    - The newly created review
+    """
+    helper.log_method_initiated("Create Review", event, logger)
 
     if session == None:
         session = operations.get_db_session(False, None)
 
     try:
         # get item id from url path
-        item_id = event['pathParameters']['item_id']
+        item_id = event['queryStringParameters']['item_id']
 
         # get cognito id
         user_id = helper.cognito_id_from_event(event)
@@ -753,22 +766,14 @@ def accept_item(event, context, is_test=False, session=None):
         user = operations.get_user_by_id(user_id, is_test, session)
         item = operations.get_item_by_id(item_id, is_test, session)
 
-        # Load questions and answers into response dict
-        response_dict = item.to_dict()
-        response_dict['questions'] = []
-        review_questions = operations.get_all_review_questions_db(
-            is_test, session)
-        for question in review_questions:
-            response_dict['questions'].append(question.to_dict_with_answers())
-
         # Try to accept item
         try:
-            operations.accept_item_db(user, item, is_test, session)
+            review = operations.accept_item_db(user, item, is_test, session)
 
             response = {
-                "statusCode": 200,
+                "statusCode": 201,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(response_dict)
+                "body": json.dumps(review.to_dict())
             }
 
         except Exception as e:
