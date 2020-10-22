@@ -756,7 +756,7 @@ def create_review(event, context, is_test=False, session=None):
         session = operations.get_db_session(False, None)
 
     try:
-        # get item id from url path
+        # get item id from url query params
         item_id = event['queryStringParameters']['item_id']
 
         # get cognito id
@@ -785,7 +785,73 @@ def create_review(event, context, is_test=False, session=None):
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
+            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+        }
+
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
+
+
+def get_review_question(event, context, is_test=False, session=None):
+    """Returns a viable review question.
+
+    Parameters
+    ----------
+    - user_id is retrieved from the event
+    - review_id is retrieved from query parameters
+    - previous_question_id is retrieved from query parameters
+
+    Returns
+    ------
+    - Status code 201 (Created)
+    - The newly created review
+    """
+
+    helper.log_method_initiated("Get Review Question", event, logger)
+
+    if session == None:
+        session = operations.get_db_session(False, None)
+
+    try:
+        # get review and user id from event
+        review_id = event['queryStringParameters']['review_id']
+        review = operations.get_review_by_id(review_id, is_test, session)
+
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+        }
+
+    # Try getting previous question id from query params. If none is set, set previous_question as None
+    try:
+        previous_question_id = event['queryStringParameters']['previous_question_id']
+        previous_question = operations.get_review_question_by_id(
+            previous_question_id, is_test, session)
+
+    except Exception:
+        previous_question = None
+
+    try:
+        question = operations.get_next_question_db(
+            review, previous_question, is_test, session)
+
+        if question == None:
+            response = {
+                "statusCode": 204,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": "Cannot return new question, because enough answers are alredy available"
+            }
+        else:
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(question.to_dict())
+            }
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get next question. Exception: {}".format(e)
         }
 
     response_cors = helper.set_cors(response, event, is_test)

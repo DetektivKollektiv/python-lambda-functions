@@ -198,20 +198,31 @@ class ReviewQuestion(Base):
     __tablename__ = 'review_questions'
     id = Column(String(36), primary_key=True)
     content = Column(Text)
-    mandatory = Column(Boolean)
     info = Column(Text)
 
-    review_answers = relationship("ReviewAnswer", backref="review_question")
+    parent_question_id = Column(String(36), ForeignKey(
+        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
+    lower_bound = Column(Integer)
+    upper_bound = Column(Integer)
+    max_children = Column(Integer)
+
+    review_answers = relationship(
+        "ReviewAnswer", back_populates="review_question")
     options = relationship("AnswerOption",
                            secondary=question_option_pairs,
                            back_populates="questions")
 
+    parent_question = relationship("ReviewQuestion", remote_side=[
+                                   id], back_populates="child_questions")
+    child_questions = relationship(
+        "ReviewQuestion", back_populates="parent_question")
+
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "mandatory": self.mandatory, "info": self.info}
+        return {"id": self.id, "content": self.content, "info": self.info}
 
     def to_dict_with_answers(self):
         question = {"id": self.id, "content": self.content,
-                    "mandatory": self.mandatory, "info": self.info, "options": []}
+                    "info": self.info, "options": []}
         for option in self.options:
             question["options"].append(option.to_dict())
         return question
@@ -238,6 +249,11 @@ class ReviewAnswer(Base):
     answer = Column(Integer)
     comment = Column(Text)
 
+    review_question = relationship(
+        "ReviewQuestion", back_populates="review_answers")
+
+    review = relationship("Review", back_populates="review_answers")
+
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
                 "answer": self.answer, "comment": self.comment}
@@ -254,11 +270,11 @@ class Review(Base):
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
 
-    review_answers = relationship("ReviewAnswer", backref="review")
+    review_answers = relationship("ReviewAnswer", back_populates="review")
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
-                "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id,
+                "belongs_to_good_pair": self.belongs_to_good_pair, "user_id": self.user_id,
                 "start_timestamp": str(self.start_timestamp), "finish_timestamp": str(self.finish_timestamp)}
 
 

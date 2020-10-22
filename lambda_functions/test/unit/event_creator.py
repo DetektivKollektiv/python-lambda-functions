@@ -14,6 +14,24 @@ def get_create_review_event(user_id, item_id):
     return accept_event
 
 
+def get_next_question_event(review_id, previous_question_id=None):
+    if previous_question_id == None:
+        event = {
+            "queryStringParameters": {
+                "review_id": review_id
+            }
+        }
+    else:
+        event = {
+            "queryStringParameters": {
+                "review_id": review_id,
+                "previous_question_id": previous_question_id
+            }
+        }
+
+    return event
+
+
 def get_review_event(item_id, user_id, score):
     review_event = {
         "body": {
