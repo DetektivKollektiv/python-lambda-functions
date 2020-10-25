@@ -47,6 +47,7 @@ class Submission(Base):
     telegram_id = Column(String(100))
     phone = Column(String(36))
     source = Column(String(100))
+    channel = Column(String(100))
     frequency = Column(String(100))
     received_date = Column(DateTime)
     item_id = Column(String(36), ForeignKey('items.id'))
