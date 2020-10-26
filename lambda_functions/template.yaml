@@ -638,33 +638,6 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  GetAllReviewQuestionsFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get_all_review_questions-${STAGE}"
-      CodeUri: .
-      Handler: app.get_all_review_questions
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Events:
-        Echo:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /review_questions
-            Method: get
-            RestApiId:
-              Ref: Api
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
-
   ItemSubmissionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -756,7 +729,7 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /reviews/{item_id}
+            Path: /reviews
             Method: post
             RestApiId:
               Ref: Api
@@ -765,6 +738,40 @@ Resources:
                   Required: true
                   Caching: true
 
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+
+  GetReviewQuestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-review_question-${STAGE}"
+      CodeUri: .
+      Handler: app.get_review_question
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /review_questions
+            Method: get
+            RestApiId:
+              Ref: Api
+            RequestParameters:
+              - method.request.querystring.review_id:
+                  Required: true
+                  Caching: true
+              - method.request.querystring.previous_question_id:
+                  Required: true
+                  Caching: true
       Environment:
         Variables:
           DBNAME:

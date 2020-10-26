@@ -17,7 +17,7 @@ def test_get_user(monkeypatch):
     session = scenarios.create_levels_junior_and_senior_detectives(session)
     junior_detective1 = operations.get_user_by_id("1", True, session)
 
-    event = event_creator.get_accept_event(junior_detective1.id, "abc")
+    event = event_creator.get_create_review_event(junior_detective1.id, "abc")
     resp = app.get_user(event, None, True, session)
     body = json.loads(resp["body"])
 

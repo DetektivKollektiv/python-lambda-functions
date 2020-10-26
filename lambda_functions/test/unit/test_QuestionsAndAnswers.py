@@ -41,18 +41,3 @@ def test_questions_and_answers(monkeypatch):
     session.add(o1)
     options = session.query(AnswerOption).all()
     assert len(options) == 1
-
-    item = Item()
-    item.content = "This item needs to be checked"
-    item = operations.create_item_db(item, True, session)
-
-    junior_detective1 = User()
-    junior_detective1.id = "1"
-    junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
-
-    accept_event = event_creator.get_accept_event(
-        junior_detective1.id, item.id)
-    response = app.accept_item(accept_event, None, True, session)
-    response_body = json.loads(response['body'])
-    assert len(response_body['questions']) == 2
