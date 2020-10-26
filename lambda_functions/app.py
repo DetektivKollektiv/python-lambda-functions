@@ -620,6 +620,8 @@ def item_submission(event, context, is_test=False, session=None):
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
+        type = body_dict["type"]
+        del body_dict["type"]
 
         submission = Submission()
         helper.body_to_object(body_dict, submission)
@@ -636,6 +638,7 @@ def item_submission(event, context, is_test=False, session=None):
             new_item = Item()
             new_item.open_timestamp = helper.get_date_time_now(is_test)
             new_item.content = content
+            new_item.type = type
             created_item = operations.create_item_db(
                 new_item, is_test, session)
             new_item_created = True
