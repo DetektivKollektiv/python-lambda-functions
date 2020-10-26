@@ -14,7 +14,7 @@ import test.unit.setup_scenarios as scenarios
 
 # This test uses the following secrets from the AWS secrets manager:
 # telegram_test_chat_id: telegram chat id of a user (uses an actual Telegram account)
-# mail: mail address of a user (uses detektivkollektic@gmail.com)
+# mail: mail address of a user (uses testing.detektivkollektic@gmail.com)
 # To override these values, uncomment the following lines and set the according strings:
 # TELEGRAM_CHAT_ID = "XXXXXXX" # you can find out your chat id by texting @chatid_echo_bot
 # RECIPIENT_MAIL = "XXXXXXX" # make sure the email address is verified in AWS SES as long as we are in Sandbox mode
