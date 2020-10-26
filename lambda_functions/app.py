@@ -208,7 +208,7 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
             for obj in phrase_objects:
                 phrases.append(obj.to_dict()['phrase'])
 
-            event = {
+            sfc_event = {
                 "item": item.to_dict(),
                 "KeyPhrases": phrases,
                 "Entities": entities,
@@ -216,7 +216,7 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
             }
             context = ""
 
-            factcheck = SearchFactChecks.get_FactChecks(event, context)
+            factcheck = SearchFactChecks.get_FactChecks(sfc_event, context)
             if 'claimReview' in factcheck[0]:
                 factcheck_dict = {
                     "id": "0", "url": factcheck[0]['claimReview'][0]['url'], "title": factcheck[0]['claimReview'][0]['title']}
