@@ -43,19 +43,19 @@ def get_entities(event, context):
         LanguageCode = event['LanguageCode']
     else:
         logger.error("There is no Language Code!")
-        raise Exception('Please provide a Language Code!')
+        return []
     if not (LanguageCode in supportedLanguageCodes):
         logger.error("Language Code not supported!")
-        raise Exception('Language Code not supported!')
+        return []
 
     try:
         response = comprehend.detect_entities(Text=text, LanguageCode=LanguageCode)
     except ClientError as e:
         logger.error("Received error: %s", e, exc_info=True)
-        raise
+        return []
     except ParamValidationError as e:
         logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
-        raise
+        return []
 
     # sort list of key phrases according the score
     entities_sorted = sorted(response["Entities"], key=itemgetter('Score'), reverse=True)

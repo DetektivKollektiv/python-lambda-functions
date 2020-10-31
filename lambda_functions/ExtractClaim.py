@@ -80,8 +80,9 @@ def extract_claim(event, context):
             # main article
             if len(paragraphs) > 1000:
                 break
-        # text.append(paragraphs)
-        allText += paragraphs
+        # use only title as claim, maybe this enhances the quality of entities and phrases
+        allText += title
+        # allText += paragraphs
 
     if len(allText) >= 4800:
         allText = allText[:4799]
