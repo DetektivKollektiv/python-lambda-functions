@@ -231,10 +231,10 @@ def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
                     "body": "No factcheck found."
                 }
 
-        except Exception:
+        except Exception as e:
             response = {
                 "statusCode": 404,
-                "body": "No factcheck found."
+                "body": "No factcheck found. Exception: {}".format(e)
             }
 
     except Exception as e:

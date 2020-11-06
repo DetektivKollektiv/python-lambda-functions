@@ -43,3 +43,12 @@ class TestSearchFactChecks:
         assert ret[0]['claimReview'][0]['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
                                                     'von 0,01 Prozent in Deutschland'
         assert elapsed < 3
+
+class TestUpdateModels:
+    def test_update_factchecker_1(self):
+        event = ""
+        context = ""
+        s = time.perf_counter()
+        SearchFactChecks.update_factcheck_models(event, context)
+        elapsed = time.perf_counter() - s
+        assert elapsed < 3

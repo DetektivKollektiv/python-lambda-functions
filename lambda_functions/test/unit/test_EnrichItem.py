@@ -260,17 +260,15 @@ class TestGetFactChecks:
         s = time.perf_counter()
         response = app.get_online_factcheck_by_itemid(event, context, True, session)
         elapsed = time.perf_counter() - s
-        body = response['body']
+        body = response['body']        
         # Deserialize if body is string
         if isinstance(body, str):
             factcheck = json.loads(body)
         else:
             factcheck = body
-        assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/07/09/nein-rki-bestaetigt-nicht-eine-covid' \
-                                   '-19-sterblichkeitsrate-von-001-prozent-in-deutschland/'
+        assert factcheck['url'] == 'https://dpa-factchecking.com/germany/200924-99-688034'
 
-        assert factcheck['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
-                                     'von 0,01 Prozent in Deutschland'
+        assert factcheck['title'] == 'Gericht erklärte Wahlgesetz, nicht aber alle Wahlen seit 1956 für nichtig'
         assert elapsed < 3
 
 
