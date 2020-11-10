@@ -568,21 +568,33 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         # Get open items for senior review
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
-            .filter(~Item.reviews.any(Review.user_id == user.id)) \
-            .order_by(Item.open_timestamp.asc()) \
-            .limit(num_items).all()
+            .order_by(Item.open_timestamp.asc())
+        reviews = session.query(Review) \
+            .filter(user.id == Review.user_id)
+
+        # result = session.query(Item) \
+        #     .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
+        #     .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        #     .order_by(Item.open_timestamp.asc()) \
+        #     .limit(num_items).all()
 
         # If open items are available, return them
-        if len(result) > 0:
-            for item in result:
+        for item in result:
+            user_didnt_review = True
+            for review in reviews:
+                if review.item_id == item.id:
+                    user_didnt_review = False
+            if user_didnt_review:
                 items.append(item)
-            random.shuffle(items)
-            return items
+        random.shuffle(items)
+        if len(items)>num_items:
+            items=items[:num_items]
+        return items
 
     # Get open items for junior review and return them
     result = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
-        .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        .filter(~Item.review_pairs.any(Review.user_id == user.id)) \
         .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
 

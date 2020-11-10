@@ -266,6 +266,7 @@ class Review(Base):
     peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
     user_id = Column(String(36), ForeignKey('users.id'))
+    item_id = Column(String(36), ForeignKey('items.id'))
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
