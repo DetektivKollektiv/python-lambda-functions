@@ -48,7 +48,10 @@ class TestUpdateModels:
     def test_update_factchecker_1(self):
         event = ""
         context = ""
-        s = time.perf_counter()
         SearchFactChecks.update_factcheck_models(event, context)
-        elapsed = time.perf_counter() - s
-        assert elapsed < 3
+        df_factchecks = SearchFactChecks.read_df(SearchFactChecks.factchecks_prefix+"de.csv")
+        assert "correctiv.org" in df_factchecks.values
+        model_name = SearchFactChecks.doc2vec_models_prefix+"de"
+        model = SearchFactChecks.read_model(model_name)
+        vocab_len = len(model.wv.vocab)
+        assert vocab_len > 0

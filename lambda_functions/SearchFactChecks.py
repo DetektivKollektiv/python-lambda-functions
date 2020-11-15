@@ -17,6 +17,7 @@ from nltk.corpus import stopwords
 import string
 import gensim
 from gensim.similarities.index import AnnoyIndexer
+import pickle
 
 
 logger = logging.getLogger()
@@ -24,21 +25,20 @@ logger.setLevel(logging.INFO)
 
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3') 
-bucket = "factchecks"
-bucket_resource = s3_resource.Bucket(bucket)
+bucket_prefix = "factchecks-"
 newfactchecks_folder = "new/"
 factchecker_filename = "factchecker.csv"
-factchecks_prefix = "factchecks_.csv"
+factchecks_prefix = "factchecks_"
 doc2vec_models_prefix = "model_sim_"
 model_languages = ["de"] # defines for which languages should be supported with machine learnig models
 stopword_languages = {"de": "german"}
-hyper_parameter = [ {"vector_size": 50, "min_count": 2, "epochs": 100},
-                    {"vector_size": 25, "min_count": 2, "epochs": 100},
-                    {"vector_size": 100, "min_count": 2, "epochs": 100},
-                    {"vector_size": 50, "min_count": 1, "epochs": 100},
-                    {"vector_size": 50, "min_count": 3, "epochs": 100},
-                    {"vector_size": 50, "min_count": 2, "epochs": 50},
-                    {"vector_size": 50, "min_count": 2, "epochs": 20}]
+hyper_parameter = [ {"vector_size": 40, "min_count": 2, "epochs": 100},
+                    {"vector_size": 20, "min_count": 2, "epochs": 100},
+                    {"vector_size": 80, "min_count": 2, "epochs": 100},
+                    {"vector_size": 40, "min_count": 1, "epochs": 100},
+                    {"vector_size": 40, "min_count": 3, "epochs": 100},
+                    {"vector_size": 40, "min_count": 2, "epochs": 50},
+                    {"vector_size": 40, "min_count": 2, "epochs": 20}]
 
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
@@ -110,6 +110,7 @@ async def call_googleapi(session, search_terms, language_code):
 async def get_article(search_terms, LanguageCode):
     article_bestfit = ""
     count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
+    bucket = bucket_prefix+os.environ['STAGE']
 
     # combine Google API calls in one session
     # TODO consider to do that not for one lambda call, but for as much API calls as possible
@@ -179,12 +180,14 @@ def get_FactChecks(event, context):
 
 # store a csv in S3
 def store_df(csv_df, csv_name):
+    bucket = bucket_prefix+os.environ['STAGE']
     csv_buffer = StringIO() 
-    csv_df.to_csv(csv_buffer) 
+    csv_df.to_csv(csv_buffer, index=False) 
     s3_resource.Object(bucket, csv_name).put(Body=csv_buffer.getvalue())
 
 # read a csv from S3 and return a dataframe
 def read_df(csv_name):
+    bucket = bucket_prefix+os.environ['STAGE']
     try:
         obj = s3_client.get_object(Bucket=bucket, Key=csv_name)
         csv_df = pd.read_csv(obj['Body'])
@@ -196,15 +199,19 @@ def read_df(csv_name):
 
 # read model from S3
 def read_model(model_name):
-    obj = s3_client.get_object(Bucket=bucket, Key=model_name)
-    model = gensim.models.doc2vec.Doc2Vec.load(BytesIO(obj['Body'].read()))
+    bucket = bucket_prefix+os.environ['STAGE']
+    object = s3_resource.Object(bucket,model_name).get()
+    serializedObject = object['Body'].read()
+
+    #Deserialize the retrieved object
+    model = pickle.loads(serializedObject)
     return model
 
 # store model in S3
 def save_model(model, model_name):
-    obj_model = BytesIO()
-    model.save(obj_model)
-    s3_client.put_object(Body=obj_model, Bucket=bucket, Key=model_name)
+    bucket = bucket_prefix+os.environ['STAGE']
+    pickle_byte_obj = pickle.dumps(model) 
+    s3_resource.Object(bucket, model_name).put(Body=pickle_byte_obj)
 
 # convert a factcheck from json to df
 def json2df(factcheck_json):
@@ -242,7 +249,7 @@ def json2df(factcheck_json):
                     if 'title' in article['claimReview'][0]:
                         title=article['claimReview'][0]['title']
                     if 'reviewDate' in article['claimReview'][0]:
-                        reviewDate=article['claimReview'][0]['reviewDate']
+                        reviewDate = article['claimReview'][0]['reviewDate']
                     if 'textualRating' in article['claimReview'][0]:
                         textualRating=article['claimReview'][0]['textualRating']
                     if 'languageCode' in article['claimReview'][0]:
@@ -265,9 +272,9 @@ def json2df(factcheck_json):
 
 
 # Call Google API for updating Fact Checks
-def get_googleapi_sync(language_code="de", maxAgeDays=0, reviewPublisherSiteFilter=""):
+def get_googleapi_sync(language_code="de", maxAgeDays=0, reviewPublisherSiteFilter="", pageToken=""):
     pageSize = 10  # Count of returned results
-    parameters = {"languageCode": language_code, "pageSize": pageSize, "key": get_secret()}
+    parameters = {"languageCode": language_code, "pageSize": pageSize, "pageToken": pageToken, "key": get_secret()}
     if maxAgeDays>0:
         parameters['maxAgeDays'] = maxAgeDays
     if reviewPublisherSiteFilter != "":
@@ -280,10 +287,10 @@ def get_googleapi_sync(language_code="de", maxAgeDays=0, reviewPublisherSiteFilt
 
 # lambda for updating lists of factchecks, factchecker and models
 def update_factcheck_models(event, context):
-    maxAgeDays = event['pathParameters']['maxAgeDays']
     # read current list of factcheckers
     df_factchecker = read_df(factchecker_filename)
     # read new factchecks, extract the factchecker and include them in the factchecker-list
+    bucket_resource = s3_resource.Bucket(bucket_prefix+os.environ['STAGE'])
     files = list(bucket_resource.objects.filter(Prefix=newfactchecks_folder))
     new_factchecker = False
     for f in files:
@@ -302,36 +309,51 @@ def update_factcheck_models(event, context):
 
     # update list of factchecks
     for LC in model_languages:
-        df_factchecks = pd.DataFrame()
+        df_factchecks = read_df(factchecks_prefix+LC+".csv")
+        # determine the count of days until the last update
+        if len(df_factchecks.index)==0:
+            days=0 # 0 means all available fatchecks will be downloaded
+        if new_factchecker:
+            days=0 # 0 means all available fatchecks will be downloaded
+        else:
+            recent_date = pd.to_datetime(df_factchecks['review_reviewDate']).max()
+            today = pd.Timestamp.today(tz=recent_date.tzinfo)
+            days = int((today - recent_date).days)+1
         # get factchecks from all Fact Checker
         for i, row in df_factchecker.iterrows():
             pageToken=""
             logger.info("Get reviews from "+row['Factchecker'])
             while True:
                 response_json = get_googleapi_sync( language_code=LC, 
-                                                    maxAgeDays=maxAgeDays, 
-                                                    reviewPublisherSiteFilter=row['Factchecker'])
+                                                    maxAgeDays=days, 
+                                                    reviewPublisherSiteFilter=row['Factchecker'],
+                                                    pageToken=pageToken)
                 df_page = json2df(response_json)
-                df_factchecks = df_factchecks.append(df_page, ignore_index=True)
+                if len(df_page.index)>0:
+                    df_factchecks = df_factchecks.append(df_page, ignore_index=True)
                 if 'nextPageToken' in response_json:
                     pageToken = response_json['nextPageToken']
+                else:
+                    pageToken=""
                 if pageToken=="":
                     break
                 time.sleep(1)
-        store_df(df_factchecks, factchecks_prefix+LC)
-        # prepare data for training
-        stoplist = list(string.punctuation)
-        stoplist += stopwords.words(stopword_languages[LC])
-        documents_train = []
-        for i, row in df_factchecks.iterrows():
-            tokens = gensim.utils.simple_preprocess(row["claim_text"])
-            # Remove stop words
-            words = [w for w in tokens if not w in stoplist]
-            # For training data, add tags
-            documents_train.append(gensim.models.doc2vec.TaggedDocument(words, [i]))
-        model = gensim.models.doc2vec.Doc2Vec(  vector_size=hyper_parameter[0]["vector_size"], 
-                                                min_count=hyper_parameter[0]["min_count"], 
-                                                epochs=hyper_parameter[0]["epochs"])
-        model.build_vocab(documents_train)
-        model.train(documents_train, total_examples=model.corpus_count, epochs=model.epochs)
-        save_model(model, doc2vec_models_prefix+LC)
+        df_factchecks = df_factchecks.drop_duplicates(subset=['review_url'], keep='last')
+        if len(df_factchecks.index)>0:
+            store_df(df_factchecks, factchecks_prefix+LC+".csv")
+            # prepare data for training
+            stoplist = list(string.punctuation)
+            # stoplist += stopwords.words(stopword_languages[LC]) # TODO Download german stopwords
+            documents_train = []
+            for i, row in df_factchecks.iterrows():
+                tokens = gensim.utils.simple_preprocess(row["claim_text"])
+                # Remove stop words
+                words = [w for w in tokens if not w in stoplist]
+                # For training data, add tags
+                documents_train.append(gensim.models.doc2vec.TaggedDocument(words, [i]))
+            model = gensim.models.doc2vec.Doc2Vec(  vector_size=hyper_parameter[0]["vector_size"], 
+                                                    min_count=hyper_parameter[0]["min_count"], 
+                                                    epochs=hyper_parameter[0]["epochs"])
+            model.build_vocab(documents_train)
+            model.train(documents_train, total_examples=model.corpus_count, epochs=model.epochs)
+            save_model(model, doc2vec_models_prefix+LC)
