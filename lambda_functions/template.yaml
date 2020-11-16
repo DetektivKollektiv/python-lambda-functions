@@ -275,7 +275,7 @@ Resources:
           - LambdaExecutionRole
           - Arn
 
-  UpdateFactcheckModelsFunction:
+  UpdateFactCheckModelsFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
@@ -287,6 +287,11 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
+
 
   GetLanguageFunction:
     Type: AWS::Serverless::Function
@@ -843,7 +848,7 @@ Resources:
   UpdateFactCheckModelsRule:
     Type: AWS::Events::Rule
     Properties: 
-      Description: Calls UpdateFactCheckModelsFunction every day
+      Description: updates fact checks and models every day
       ScheduleExpression: rate(1 day)
       State: ENABLED
       Targets: 
