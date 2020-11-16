@@ -851,7 +851,7 @@ Resources:
             Fn::GetAtt:
               - UpdateFactCheckModelsFunction
               - Arn
-          Id: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
+          Id: !Sub "update_factcheck_models-${STAGE}"
 
   PermissionForEventsToInvokeLambda:
     Type: AWS::Lambda::Permission
@@ -880,5 +880,6 @@ Resources:
   BucketForFactchecks:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties: 
       BucketName: factchecks-dev
