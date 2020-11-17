@@ -70,7 +70,7 @@ class TestGetOpenItems:
         item1 = operations.get_item_by_id(item1.id, True, session)
         assert item1.in_progress_reviews_level_1 == 1
 
-        # Accepting event again
+        # Accepting event again should not create a new review
         app.create_review(accept_event, None, True, session)
         item1 = operations.get_item_by_id(item1.id, True, session)
         assert item1.in_progress_reviews_level_1 == 1
@@ -156,7 +156,7 @@ class TestGetOpenItems:
         item3 = operations.get_item_by_id(item3.id, True, session)
         assert item3.in_progress_reviews_level_2 == 1
 
-        # Accepting event again
+        # Accepting event again should not create a new review
         app.create_review(accept_event, None, True, session)
         item3 = operations.get_item_by_id(item3.id, True, session)
         assert item3.in_progress_reviews_level_2 == 1
@@ -183,8 +183,8 @@ class TestGetOpenItems:
             item3.id, junior_detective1.id, 1)
         app.submit_review(review_event, None, True, session)
 
-        # For JuniorDetective1 only 3 cases should be available
+        # For JuniorDetective1 only 2 cases should be available,
+        # because Item 1,2 and 3 were reviewed
         open_items_after_submission = operations.get_open_items_for_user_db(
             junior_detective1, 5, True, session)
         assert len(open_items_after_submission) == 2
-

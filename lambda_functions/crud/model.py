@@ -28,6 +28,7 @@ class Item(Base):
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
+    reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
 
     def to_dict(self):
@@ -272,6 +273,7 @@ class Review(Base):
     status = Column(String(100))
 
     review_answers = relationship("ReviewAnswer", back_populates="review")
+    item = relationship("Item", back_populates="reviews")
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,

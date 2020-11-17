@@ -568,10 +568,10 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         # Get open items for senior review
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
-            .filter(~Item.review_pairs.any(and_(Review.item_id == Item.id, Review.user_id == user.id))) \
+            .filter(~Item.reviews.any(Review.user_id == user.id)) \
             .order_by(Item.open_timestamp.asc()) \
             .limit(num_items).all()
- 
+
         for item in result:
             items.append(item)
         random.shuffle(items)
@@ -580,9 +580,10 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
     # Get open items for junior review and return them
     result = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
-        .filter(~Item.review_pairs.any(and_(Review.item_id == Item.id, Review.user_id == user.id))) \
+        .filter(~Item.reviews.any(Review.user_id == user.id)) \
         .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
+#        .filter(~Item.review_pairs.any(and_(Review.item_id == Item.id, Review.user_id == user.id))) \
 
     for item in result:
         items.append(item)
