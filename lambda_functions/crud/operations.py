@@ -14,7 +14,7 @@ from crud.model import (
     Item, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Keyphrase, Review,
     ReviewAnswer, ReviewQuestion, Sentiment, Submission,
     User, Level, ReviewPair)
-from sqlalchemy import create_engine, or_, and_
+from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import Session, backref, relationship, sessionmaker
 
 from . import helper, notifications
@@ -572,10 +572,11 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
             .order_by(Item.open_timestamp.asc()) \
             .limit(num_items).all()
 
-        for item in result:
-            items.append(item)
-        random.shuffle(items)
-        return items
+        if len(result) > 0:
+            for item in result:
+                items.append(item)
+            random.shuffle(items)
+            return items
 
     # Get open items for junior review and return them
     result = session.query(Item) \
