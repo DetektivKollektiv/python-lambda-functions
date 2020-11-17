@@ -24,18 +24,20 @@ class TestGetKeyPhrases:
             "LanguageCode": "tr"
         }
         context = ""
-        with pytest.raises(Exception) as excinfo:
-            GetKeyPhrases.get_phrases(event, context)
-        assert "Language Code not supported!" in str(excinfo.value)
+        # with pytest.raises(Exception) as excinfo:
+        ret = GetKeyPhrases.get_phrases(event, context)
+        # assert "Language Code not supported!" in str(excinfo.value)
+        assert ret == []
 
     def test_get_phrases_3(self):
         event = {
             "LanguageCode": "en"
         }
         context = ""
-        with pytest.raises(Exception) as excinfo:
-            GetKeyPhrases.get_phrases(event, context)
-        assert "Please provide Text!" in str(excinfo.value)
+        # with pytest.raises(Exception) as excinfo:
+        ret = GetKeyPhrases.get_phrases(event, context)
+        # assert "Please provide Text!" in str(excinfo.value)
+        assert ret == []
 
     def test_get_phrases_4(self):
         event = {
@@ -44,9 +46,10 @@ class TestGetKeyPhrases:
                     "they all appeared to have symptoms, they all took painkillers like ibuprofen"
         }
         context = ""
-        with pytest.raises(Exception) as excinfo:
-            GetKeyPhrases.get_phrases(event, context)
-        assert "Please provide a Language Code!" in str(excinfo.value)
+        # with pytest.raises(Exception) as excinfo:
+        ret = GetKeyPhrases.get_phrases(event, context)
+        # assert "Please provide a Language Code!" in str(excinfo.value)
+        assert ret == []
 
     def test_get_phrases_5(self):
         event = {
@@ -128,7 +131,7 @@ class TestGetKeyPhrases:
         }
         context = ""
         ret = GetKeyPhrases.get_phrases(event, context)
-        assert ret == ['das Zahlenmaterial', 'den letzten 7 Tagen', 'es']
+        assert ret == ['den letzten 7 Tagen', 'das Zahlenmaterial', 'es']
 
     def test_get_phrases_11(self):
         event = {
@@ -159,4 +162,13 @@ class TestGetKeyPhrases:
         context = ""
         ret = GetKeyPhrases.get_phrases(event, context)
         assert ret == ['einer kürzlich ausgestrahlten Pressekonferenz', 'der Obama-Administration', 'dies']
+
+    def test_get_phrases_13(self):
+        event = {
+            "Text": " Sebastian Karpf - Schweden als Vorbild, wie man es hätte... | Facebook ",
+            "LanguageCode": "de"
+        }
+        context = ""
+        ret = GetKeyPhrases.get_phrases(event, context)
+        assert ret == ['Obama', 'Labor', 'jeden']
 
