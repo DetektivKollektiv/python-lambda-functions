@@ -583,7 +583,6 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         .filter(~Item.reviews.any(Review.user_id == user.id)) \
         .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
-#        .filter(~Item.review_pairs.any(and_(Review.item_id == Item.id, Review.user_id == user.id))) \
 
     for item in result:
         items.append(item)
