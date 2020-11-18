@@ -55,6 +55,5 @@ zipp~=0.6.0
 requests~=2.22.0
 aiohttp
 aiodns
-pandas
 nltk
 gensim
