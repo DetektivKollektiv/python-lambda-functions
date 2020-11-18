@@ -589,11 +589,11 @@ Resources:
             Ref: DBNAME
 
   CreateReviewAnswerFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-create_review_answer-${STAGE}"
       CodeUri: .
-      Handler: app.create_review_answer
+      Handler: review_answer_handler.create_review_answer
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -602,7 +602,7 @@ Resources:
           - Arn
       Events:
         Echo:
-          Type: Api
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_answers
             Method: post
@@ -612,6 +612,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   GetAllReviewAnswersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
