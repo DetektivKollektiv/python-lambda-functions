@@ -75,9 +75,9 @@ def create_item_db(item, is_test, session):
     session = get_db_session(is_test, session)
 
     item.id = str(uuid4())
-    item.open_reviews = 3
-    item.open_reviews_level_1 = 3
-    item.open_reviews_level_2 = 3
+    item.open_reviews = 4
+    item.open_reviews_level_1 = 4
+    item.open_reviews_level_2 = 4
     item.in_progress_reviews_level_1 = 0
     item.in_progress_reviews_level_2 = 0
     item.status = "open"
