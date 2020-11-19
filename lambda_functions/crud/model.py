@@ -28,6 +28,7 @@ class Item(Base):
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
+    reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
 
     def to_dict(self):
@@ -267,11 +268,13 @@ class Review(Base):
     peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
     user_id = Column(String(36), ForeignKey('users.id'))
+    item_id = Column(String(36), ForeignKey('items.id'))
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
 
     review_answers = relationship("ReviewAnswer", back_populates="review")
+    item = relationship("Item", back_populates="reviews")
 
     def to_dict(self):
         return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
