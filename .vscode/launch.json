@@ -103,7 +103,7 @@
                 "lambdaHandler": "app.get_user"
             },
             "sam": {
-                "containerBuild": true,
+                "containerBuild": true
             },
             "lambda": {
                 "runtime": "python3.8",
@@ -127,7 +127,7 @@
                 "lambdaHandler": "app.get_open_items_for_user"
             },
             "sam": {
-                "containerBuild": true,
+                "containerBuild": true
             },
             "lambda": {
                 "runtime": "python3.8",
@@ -152,7 +152,7 @@
             },
             "sam": {
                 "containerBuild": true,
-                "skipNewImageCheck": true,
+                "skipNewImageCheck": true
             },
             "lambda": {
                 "runtime": "python3.8",
@@ -177,7 +177,7 @@
             },
             "sam": {
                 "containerBuild": true,
-                "skipNewImageCheck": true,
+                "skipNewImageCheck": true
             },
             "lambda": {
                 "runtime": "python3.8",
@@ -186,6 +186,54 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Update Factchecks and models",
+            "invokeTarget": {
+                "target": "code",
+                "lambdaHandler": "SearchFactChecks.update_factcheck_models",
+                "projectRoot": "lambda_functions",
+            },
+            "sam": {
+                "containerBuild": true,
+                "skipNewImageCheck": false
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {},
+                "environmentVariables": {
+                    "STAGE": "dev",
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Search for Factchecks",
+            "invokeTarget": {
+                "target": "code",
+                "lambdaHandler": "SearchFactChecks.get_FactChecks",
+                "projectRoot": "lambda_functions",
+            },
+            "sam": {
+                "containerBuild": true,
+                "skipNewImageCheck": false
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {
+                    "path": "test-payloads/get_FactChecks.json"
+                },
+                "environmentVariables": {
+                    "STAGE": "dev",
                     "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
                 },
                 "timeoutSec": 120

@@ -43,3 +43,15 @@ class TestSearchFactChecks:
         assert ret[0]['claimReview'][0]['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
                                                     'von 0,01 Prozent in Deutschland'
         assert elapsed < 3
+
+class TestUpdateModels:
+    def test_update_factchecker_1(self):
+        event = ""
+        context = ""
+        SearchFactChecks.update_factcheck_models(event, context)
+        df_factchecks = SearchFactChecks.read_df(SearchFactChecks.factchecks_prefix+"de.csv")
+        assert "correctiv.org" in df_factchecks.values
+        model_name = SearchFactChecks.doc2vec_models_prefix+"de"
+        model = SearchFactChecks.read_model(model_name)
+        vocab_len = len(model.wv.vocab)
+        assert vocab_len > 0

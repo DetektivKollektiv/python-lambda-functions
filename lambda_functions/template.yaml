@@ -275,6 +275,26 @@ Resources:
           - LambdaExecutionRole
           - Arn
 
+  UpdateFactCheckModelsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
+      CodeUri: .
+      Handler: SearchFactChecks.update_factcheck_models
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+      - arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-python38-pandas:21      
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
+
+
   GetLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -839,6 +859,19 @@ Resources:
               - Arn
           Id: !Sub "reset_locked_items-${STAGE}"
 
+  UpdateFactCheckModelsRule:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: updates fact checks and models every day
+      ScheduleExpression: rate(1 day)
+      State: ENABLED
+      Targets: 
+        - Arn:
+            Fn::GetAtt:
+              - UpdateFactCheckModelsFunction
+              - Arn
+          Id: !Sub "update_factcheck_models-${STAGE}"
+
   PermissionForEventsToInvokeLambda:
     Type: AWS::Lambda::Permission
     Properties:
@@ -850,3 +883,22 @@ Resources:
         Fn::GetAtt:
           - ResetLockedItemsRule
           - Arn
+
+  PermissionForUpdateFactCheckModelsRule:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: UpdateFactCheckModelsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - UpdateFactCheckModelsRule
+          - Arn
+
+  BucketForFactchecks:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties: 
+      BucketName: factchecks-dev
