@@ -5,6 +5,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 
+# TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
+
+def create_level(id: int, desc: str, req_exp: int) -> Level:
+    """
+    Creates a level object
+    """
+    level = Level()
+    level.id = id
+    level.description = desc
+    level.required_experience_points = req_exp
+    
+    return level
 
 def create_levels_junior_and_senior_detectives(session):
     """
@@ -16,20 +28,9 @@ def create_levels_junior_and_senior_detectives(session):
     """
 
     # Create three levels
-    level1 = Level()
-    level1.id = 1
-    level1.description = "Junior"
-    level1.required_experience_points = 0
-
-    level2 = Level()
-    level2.id = 2
-    level2.description = "Senior"
-    level2.required_experience_points = 5
-
-    level3 = Level()
-    level3.id = 3
-    level3.description = "master"
-    level3.required_experience_points = 10
+    level1 = create_level(1, "Junior", 0)
+    level2 = create_level(2, "Senior", 5)
+    level3 = create_level(3, "master", 10)
 
     session.add(level1)
     session.add(level2)

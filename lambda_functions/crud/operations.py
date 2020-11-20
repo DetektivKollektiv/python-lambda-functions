@@ -23,7 +23,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def get_db_session(is_test, session):
+def get_db_session(is_test, session) -> Session:
     """Returns a DB session
 
     Returns
@@ -455,22 +455,14 @@ def get_pair_difference(junior_review, peer_review, is_test, session):
 
 
 def compute_item_result_score(item_id, is_test, session):
-    reviews = get_good_reviews_by_item_id(item_id, is_test, session)
+    pairs = get_review_pairs_by_item(item_id, is_test, session)
+
     average_scores = []
-    for review in reviews:
-        answers = get_review_answers_by_review_id_db(
-            review.id, is_test, session)
-        counter = 0
-        answer_sum = 0
-        for answer in answers:
-            if answer.answer > 0:
-                counter = counter + 1
-                answer_sum = answer_sum + answer.answer
-        answer_average = answer_sum / counter
-        average_scores.append(answer_average)
+    for pair in list(filter(lambda p: p.is_good, pairs)):
+        average_scores.append(pair.variance)
+
     result = statistics.median(average_scores)
     return result
-
 
 def get_open_items_for_user_db(user, num_items, is_test, session):
     """Retreives a list of open items (in random order) to be reviewed by a user.
@@ -906,6 +898,11 @@ def get_next_question_db(review, previous_question, is_test, session):
 
     raise Exception("No question could be returned")
 
+def get_review_pair(review, is_test, session) -> ReviewPair:
+    session = get_db_session(is_test, session)
+
+    return session.query(ReviewPair).filter(or_(ReviewPair.junior_review_id == review.id, ReviewPair.senior_review_id == review.id)).first()
+
 
 def get_partner_review(review, is_test, session):
     session = get_db_session(is_test, session)
@@ -1045,7 +1042,7 @@ def get_submissions_by_item_id(item_id, is_test, session):
     return submissions
 
 
-def get_review_by_id(review_id, is_test, session):
+def get_review_by_id(review_id, is_test, session) -> Review:
     session = get_db_session(is_test, session)
 
     review = session.query(Review).filter(
@@ -1063,3 +1060,40 @@ def get_review_question_by_id(question_id, is_test, session):
     ).one()
 
     return question
+
+def get_partner_answer(partner_review: Review, question_id, is_test, session) -> ReviewAnswer:
+    session = get_db_session(is_test, session)
+
+    review_answer = session.query(ReviewAnswer).filter(
+        ReviewAnswer.review_id == partner_review.id,
+        ReviewAnswer.review_question_id == question_id).one()
+
+    return review_answer
+
+
+def compute_variance(pair: ReviewPair) -> float:
+    junior_review_average = compute_review_result(pair.junior_review.review_answers)
+    senior_review_average = compute_review_result(pair.senior_review.review_answers)
+
+    return abs(junior_review_average - senior_review_average)
+
+def compute_review_result(review_answers):
+    if(review_answers == None):
+        raise TypeError('ReviewAnswers is None!') 
+
+    if not isinstance(review_answers, list):
+       raise TypeError('ReviewAnswers is not a list')
+
+    if(len(review_answers) <= 0):
+        raise ValueError('ReviewAnswers is an empty list')
+
+    answers = (review_answer.answer for review_answer in review_answers)
+
+    return sum(answers) / len(review_answers)
+
+def get_review_pairs_by_item(item_id, is_test, session):
+    session = get_db_session(is_test, session)
+
+    pairs = session.query(ReviewPair).filter(ReviewPair.item_id)
+
+    return pairs

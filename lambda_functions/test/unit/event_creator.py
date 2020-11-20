@@ -1,3 +1,18 @@
+import json
+
+def get_create_review_answer_event(review_answer):
+
+    event = {
+        "body": {
+            "id": review_answer.id,
+            "review_id": review_answer.review_id,
+            "review_question_id": review_answer.review_question_id,
+            "answer": review_answer.answer,
+            "comment": review_answer.comment
+        }
+    }
+
+    return event
 
 def get_create_review_event(user_id, item_id):
 
