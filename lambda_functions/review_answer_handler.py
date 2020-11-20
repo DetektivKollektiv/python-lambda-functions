@@ -49,11 +49,9 @@ def create_review_answer(event, context, is_test=False, session=None):
             
             if(partner_answer == None):
                 pair.is_good = False
-                operations.update_object_db(pair, is_test, session)
             else:
                 if((review_answer.answer == 0 and partner_answer.answer != 0) or (review_answer.answer != 0 and partner_answer.answer == 0)):
                     pair.is_good = False
-                    operations.update_object_db(pair, is_test, session)
 
         # Check if review is closed (i.e. 7 questions were answered)
         if(len(review.review_answers) == 7):
@@ -61,7 +59,7 @@ def create_review_answer(event, context, is_test=False, session=None):
             operations.update_object_db(review, is_test, session)
             if(partner_review != None):
                 if(pair.is_good):
-                    variance = operations.compute_variance(pair, is_test, session)
+                    variance = operations.compute_variance(pair)
                     pair.variance = variance
                     if(variance <= 1):
                         pair.is_good = True

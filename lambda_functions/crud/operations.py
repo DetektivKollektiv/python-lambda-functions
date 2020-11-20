@@ -1132,16 +1132,25 @@ def get_partner_answer(partner_review: Review, question_id, is_test, session) ->
     return review_answer
 
 
-def compute_variance(pair: ReviewPair, is_test, session) -> float:
-    junior_median = compute_review_result(pair.junior_review.review_answers)
-    senior_median = compute_review_result(pair.senior_review.review_answers)
+def compute_variance(pair: ReviewPair) -> float:
+    junior_review_average = compute_review_result(pair.junior_review.review_answers)
+    senior_review_average = compute_review_result(pair.senior_review.review_answers)
 
-    return abs(junior_median - senior_median)
+    return abs(junior_review_average - senior_review_average)
 
 def compute_review_result(review_answers):
+    if(review_answers == None):
+        raise TypeError('ReviewAnswers is None!') 
+
+    if not isinstance(review_answers, list):
+       raise TypeError('ReviewAnswers is not a list')
+
+    if(len(review_answers) <= 0):
+        raise ValueError('ReviewAnswers is an empty list')
+
     answers = (review_answer.answer for review_answer in review_answers)
 
-    return statistics.median(answers)
+    return sum(answers) / len(review_answers)
 
 def get_review_pairs_by_item(item_id, is_test, session):
     session = get_db_session(is_test, session)
