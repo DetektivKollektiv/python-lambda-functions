@@ -1,12 +1,6 @@
 {
+    "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Debug Tests",
-            "type": "python",
-            "request": "test",
-            "console": "internalConsole",
-            "justMyCode": false
-        },
         {
             "type": "aws-sam",
             "request": "direct-invoke",

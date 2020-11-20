@@ -1,4 +1,5 @@
 import logging
+import json
 from uuid import uuid4
 from crud import operations, helper, notifications
 from crud.model import ReviewAnswer
@@ -40,7 +41,7 @@ def create_review_answer(event, context, is_test=False, session=None):
 
         # Get partner review
         review = operations.get_review_by_id(review_answer.review_id, is_test, session)
-        pair = operations.get_review_pair(review.review_id, is_test, session)
+        pair = operations.get_review_pair(review, is_test, session)
         partner_review = operations.get_partner_review(review, is_test, session)
 
         # Check if answer cause review to be bad (e.g. answer is 0 but partner answer is any other value)
@@ -80,7 +81,7 @@ def create_review_answer(event, context, is_test=False, session=None):
 
         response = {
             "statusCode": 200,
-            "body": review_answer
+            "body": json.dumps(review_answer.to_dict())
         }
 
     except Exception as exception:

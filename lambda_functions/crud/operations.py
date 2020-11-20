@@ -23,7 +23,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def get_db_session(is_test, session):
+def get_db_session(is_test, session) -> Session:
     """Returns a DB session
 
     Returns
