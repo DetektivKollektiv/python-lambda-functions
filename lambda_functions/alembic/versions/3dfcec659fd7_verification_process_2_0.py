@@ -66,9 +66,9 @@ def upgrade():
         'UPDATE items SET verification_process_version = 1 WHERE status = "closed"')
     # reset open items and delete reviews
     op.execute(
-        'UPDATE items SET open_reviews = 4, open_reviews_level_1 = 4, open_reviews_level_2 = 4, in_progress_reviews_level_1 = 0, in_progress_reviews_level_2 = 0')
+        'UPDATE items SET open_reviews = 4, open_reviews_level_1 = 4, open_reviews_level_2 = 4, in_progress_reviews_level_1 = 0, in_progress_reviews_level_2 = 0 WHERE status = "open"')
     op.execute(
-        'DELETE reviews FROM reviews INNER JOIN items on reviews.item_id = item.id WHERE item.status = "open"')
+        'DELETE reviews FROM reviews INNER JOIN items on reviews.item_id = items.id WHERE items.status = "open"')
 
     # Update/Insert review questions with parent ids, bounds and children columns
     op.execute('INSERT INTO review_questions (id, content, info, parent_question_id, lower_bound, upper_bound, max_children) \
