@@ -75,9 +75,9 @@ def create_item_db(item, is_test, session):
     session = get_db_session(is_test, session)
 
     item.id = str(uuid4())
-    item.open_reviews = 3
-    item.open_reviews_level_1 = 3
-    item.open_reviews_level_2 = 3
+    item.open_reviews = 4
+    item.open_reviews_level_1 = 4
+    item.open_reviews_level_2 = 4
     item.in_progress_reviews_level_1 = 0
     item.in_progress_reviews_level_2 = 0
     item.status = "open"
@@ -336,26 +336,6 @@ def get_good_reviews_by_item_id(item_id, is_test, session):
     return reviews
 
 
-def get_review_by_peer_review_id_db(peer_review_id, is_test, session):
-    """Returns a review from the database with the specified peer review id
-
-    Parameters
-    ----------
-    peer_review_id: Str, required
-        The peer review id to query for
-
-    Returns
-    ------
-    review: Review
-        The review
-    """
-
-    session = get_db_session(is_test, session)
-    review = session.query(Review).filter(
-        Review.peer_review_id == peer_review_id).first()
-    return review
-
-
 def create_review_answer_db(review_answer, is_test, session):
     """Inserts a new review answer into the database
 
@@ -444,30 +424,6 @@ def give_experience_point(user_id, is_test, session):
     update_object_db(user, is_test, session)
 
 
-def close_open_junior_review(item_id, peer_review_id, is_test, session):
-    """Returns all reviews from the database that belong to the item with the specified id
-
-    Parameters
-    ----------
-    item_id: Str, required
-        The item id to query for
-
-    Returns
-    ------
-    review: Review
-        The open junior review
-    """
-    session = get_db_session(is_test, session)
-    query_result = session.query(Review).filter(
-        Review.item_id == item_id,
-        Review.is_peer_review == False,
-        Review.peer_review_id == None
-    )
-    open_junior_review = query_result.one()
-    open_junior_review.peer_review_id = peer_review_id
-    update_object_db(open_junior_review, is_test, session)
-
-
 def get_pair_difference(junior_review, peer_review, is_test, session):
 
     peer_review_answers = get_review_answers_by_review_id_db(
@@ -496,23 +452,6 @@ def get_pair_difference(junior_review, peer_review, is_test, session):
 
     difference = abs(junior_review_average - peer_review_average)
     return difference
-
-
-def set_belongs_to_good_pair_db(review, belongs_to_good_pair, is_test, session):
-    peer_review = review
-    junior_review = get_review_by_peer_review_id_db(
-        peer_review.id, is_test, session)
-
-    if belongs_to_good_pair == True:
-        peer_review.belongs_to_good_pair = True
-        junior_review.belongs_to_good_pair = True
-    if belongs_to_good_pair == False:
-        peer_review.belongs_to_good_pair = False
-        junior_review.belongs_to_good_pair = False
-    session = get_db_session(is_test, session)
-    session.merge(peer_review)
-    session.merge(junior_review)
-    session.commit()
 
 
 def compute_item_result_score(item_id, is_test, session):

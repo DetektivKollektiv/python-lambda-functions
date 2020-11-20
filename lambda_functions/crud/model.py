@@ -21,6 +21,7 @@ class Item(Base):
     in_progress_reviews_level_2 = Column(Integer)
     open_timestamp = Column(DateTime)
     close_timestamp = Column(DateTime)
+    verification_process_version = Column(Integer)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -245,7 +246,8 @@ class AnswerOption(Base):
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
     id = Column(String(36), primary_key=True)
-    review_id = Column(String(36), ForeignKey('reviews.id'))
+    review_id = Column(String(36), ForeignKey(
+        'reviews.id', ondelete='CASCADE', onupdate='CASCADE'))
     review_question_id = Column(String(36), ForeignKey(
         'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
     answer = Column(Integer)
@@ -265,10 +267,10 @@ class Review(Base):
     __tablename__ = 'reviews'
     id = Column(String(36), primary_key=True)
     is_peer_review = Column(Boolean)
-    peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
     user_id = Column(String(36), ForeignKey('users.id'))
-    item_id = Column(String(36), ForeignKey('items.id'))
+    item_id = Column(String(36), ForeignKey('items.id',
+                                            ondelete='CASCADE', onupdate='CASCADE'))
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
@@ -277,7 +279,7 @@ class Review(Base):
     item = relationship("Item", back_populates="reviews")
 
     def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
+        return {"id": self.id, "is_peer_review": self.is_peer_review,
                 "belongs_to_good_pair": self.belongs_to_good_pair, "user_id": self.user_id,
                 "start_timestamp": str(self.start_timestamp), "finish_timestamp": str(self.finish_timestamp)}
 
