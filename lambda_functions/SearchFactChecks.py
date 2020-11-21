@@ -110,7 +110,7 @@ async def call_googleapi(session, search_terms, language_code):
 async def get_article(search_terms, LanguageCode):
     article_bestfit = ""
     count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
-    bucket = bucket_prefix+os.environ['STAGE']
+    bucket = get_factcheckBucketName()
 
     # combine Google API calls in one session
     # TODO consider to do that not for one lambda call, but for as much API calls as possible
@@ -178,16 +178,25 @@ def get_FactChecks(event, context):
 
     return claims
 
+# return bucket name for storing factchecks and models
+def get_factcheckBucketName():
+    bucket_name = bucket_prefix+os.environ['STAGE']
+    try:
+        s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+    except ClientError:
+        s3_client.create_bucket(Bucket=bucket_name)
+    return bucket_name
+
 # store a csv in S3
 def store_df(csv_df, csv_name):
-    bucket = bucket_prefix+os.environ['STAGE']
+    bucket = get_factcheckBucketName()
     csv_buffer = StringIO() 
     csv_df.to_csv(csv_buffer, index=False) 
     s3_resource.Object(bucket, csv_name).put(Body=csv_buffer.getvalue())
 
 # read a csv from S3 and return a dataframe
 def read_df(csv_name):
-    bucket = bucket_prefix+os.environ['STAGE']
+    bucket = get_factcheckBucketName()
     try:
         obj = s3_client.get_object(Bucket=bucket, Key=csv_name)
         csv_df = pd.read_csv(obj['Body'])
@@ -199,7 +208,7 @@ def read_df(csv_name):
 
 # read model from S3
 def read_model(model_name):
-    bucket = bucket_prefix+os.environ['STAGE']
+    bucket = get_factcheckBucketName()
     object = s3_resource.Object(bucket,model_name).get()
     serializedObject = object['Body'].read()
 
@@ -209,7 +218,7 @@ def read_model(model_name):
 
 # store model in S3
 def save_model(model, model_name):
-    bucket = bucket_prefix+os.environ['STAGE']
+    bucket = get_factcheckBucketName()
     pickle_byte_obj = pickle.dumps(model) 
     s3_resource.Object(bucket, model_name).put(Body=pickle_byte_obj)
 
@@ -290,7 +299,7 @@ def update_factcheck_models(event, context):
     # read current list of factcheckers
     df_factchecker = read_df(factchecker_filename)
     # read new factchecks, extract the factchecker and include them in the factchecker-list
-    bucket_resource = s3_resource.Bucket(bucket_prefix+os.environ['STAGE'])
+    bucket_resource = s3_resource.Bucket(get_factcheckBucketName())
     files = list(bucket_resource.objects.filter(Prefix=newfactchecks_folder))
     new_factchecker = False
     for f in files:
