@@ -13,10 +13,10 @@ import requests
 import pandas as pd 
 from io import StringIO 
 from io import BytesIO
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 import string
-import gensim
-from gensim.similarities.index import AnnoyIndexer
+# import gensim
+# from gensim.similarities.index import AnnoyIndexer
 import pickle
 
 
@@ -351,18 +351,18 @@ def update_factcheck_models(event, context):
         if len(df_factchecks.index)>0:
             store_df(df_factchecks, factchecks_prefix+LC+".csv")
             # prepare data for training
-            stoplist = list(string.punctuation)
+            # stoplist = list(string.punctuation)
             # stoplist += stopwords.words(stopword_languages[LC]) # TODO Download german stopwords
-            documents_train = []
-            for i, row in df_factchecks.iterrows():
-                tokens = gensim.utils.simple_preprocess(row["claim_text"])
+            # documents_train = []
+            # for i, row in df_factchecks.iterrows():
+            #     tokens = gensim.utils.simple_preprocess(row["claim_text"])
                 # Remove stop words
-                words = [w for w in tokens if not w in stoplist]
+            #     words = [w for w in tokens if not w in stoplist]
                 # For training data, add tags
-                documents_train.append(gensim.models.doc2vec.TaggedDocument(words, [i]))
-            model = gensim.models.doc2vec.Doc2Vec(  vector_size=hyper_parameter[0]["vector_size"], 
-                                                    min_count=hyper_parameter[0]["min_count"], 
-                                                    epochs=hyper_parameter[0]["epochs"])
-            model.build_vocab(documents_train)
-            model.train(documents_train, total_examples=model.corpus_count, epochs=model.epochs)
-            save_model(model, doc2vec_models_prefix+LC)
+            #     documents_train.append(gensim.models.doc2vec.TaggedDocument(words, [i]))
+            # model = gensim.models.doc2vec.Doc2Vec(  vector_size=hyper_parameter[0]["vector_size"], 
+            #                                         min_count=hyper_parameter[0]["min_count"], 
+            #                                         epochs=hyper_parameter[0]["epochs"])
+            # model.build_vocab(documents_train)
+            # model.train(documents_train, total_examples=model.corpus_count, epochs=model.epochs)
+            # save_model(model, doc2vec_models_prefix+LC)
