@@ -7,6 +7,7 @@ import test.unit.event_creator as event_creator
 
 # TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
 
+
 def create_level(id: int, desc: str, req_exp: int) -> Level:
     """
     Creates a level object
@@ -15,8 +16,9 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
     level.id = id
     level.description = desc
     level.required_experience_points = req_exp
-    
+
     return level
+
 
 def create_levels_junior_and_senior_detectives(session):
     """
@@ -57,6 +59,11 @@ def create_levels_junior_and_senior_detectives(session):
     junior_detective4.name = "Junior4"
     operations.create_user_db(junior_detective4, True, session)
 
+    junior_detective5 = User()
+    junior_detective5.id = "5"
+    junior_detective5.name = "Junior5"
+    operations.create_user_db(junior_detective5, True, session)
+
     # Create 4 level-2-detectives
     senior_detective1 = User()
     senior_detective1.id = "11"
@@ -90,10 +97,19 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective4.level_id = 2
     senior_detective4.experience_points = 5
 
+    senior_detective5 = User()
+    senior_detective5.id = "15"
+    senior_detective5.name = "Senior5"
+    senior_detective5 = operations.create_user_db(
+        senior_detective5, True, session)
+    senior_detective5.level_id = 2
+    senior_detective5.experience_points = 5
+
     session.merge(senior_detective1)
     session.merge(senior_detective2)
     session.merge(senior_detective3)
     session.merge(senior_detective4)
+    session.merge(senior_detective5)
     session.commit()
 
     return session

@@ -355,6 +355,7 @@ def create_review_answer_db(review_answer, is_test, session):
     review_answer.id = str(uuid4())
     session.add(review_answer)
     session.commit()
+    session.expire_all()
 
     return review_answer
 
@@ -463,6 +464,7 @@ def compute_item_result_score(item_id, is_test, session):
 
     result = statistics.median(average_scores)
     return result
+
 
 def get_open_items_for_user_db(user, num_items, is_test, session):
     """Retreives a list of open items (in random order) to be reviewed by a user.
@@ -790,7 +792,7 @@ def accept_item_db(user, item, is_test, session):
 
     # If a user is a senior, the review will by default be a senior review,
     # except if no senior reviews are needed
-    if user.level_id > 1 and item.open_reviews_level_2 > 0:
+    if user.level_id > 1 and item.open_reviews_level_2 > item.in_progress_reviews_level_2:
         rip.is_peer_review = True
         item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
 
@@ -801,6 +803,7 @@ def accept_item_db(user, item, is_test, session):
                 pair.senior_review_id = rip.id
                 pair_found = True
                 session.merge(pair)
+                break
 
         # Create new pair, if review cannot be attached to existing pair
         if pair_found == False:
@@ -822,6 +825,7 @@ def accept_item_db(user, item, is_test, session):
                 pair.junior_review_id = rip.id
                 pair_found = True
                 session.merge(pair)
+                break
 
         # Create new pair, if review cannot be attached to existing pair
         if pair_found == False:
@@ -849,23 +853,27 @@ def get_next_question_db(review, previous_question, is_test, session):
 
     # Check for conditional question
     if previous_question != None:
+        parent_question_found = False
         # Determine relevant parent question
         if len(previous_question.child_questions) > 0:
+            parent_question_found = True
             parent_question = previous_question
         if previous_question.parent_question != None:
+            parent_question_found = True
             parent_question = previous_question.parent_question
 
-        parent_answer = session.query(ReviewAnswer).filter(
-            ReviewAnswer.review_id == review.id, ReviewAnswer.review_question_id == parent_question.id).one()
+        if parent_question_found:
+            parent_answer = session.query(ReviewAnswer).filter(
+                ReviewAnswer.review_id == review.id, ReviewAnswer.review_question_id == parent_question.id).one()
 
-        child_questions = parent_question.child_questions
+            child_questions = parent_question.child_questions
 
-        for child_question in child_questions:
-            # Check if question has already been answered
-            if child_question.id not in previous_question_ids:
-                # Check answer triggers child question
-                if parent_answer.answer <= child_question.upper_bound and parent_answer.answer >= child_question.lower_bound:
-                    return child_question
+            for child_question in child_questions:
+                # Check if question has already been answered
+                if child_question.id not in previous_question_ids:
+                    # Check answer triggers child question
+                    if parent_answer.answer <= child_question.upper_bound and parent_answer.answer >= child_question.lower_bound:
+                        return child_question
 
     partner_review = get_partner_review(review, is_test, session)
 
@@ -897,6 +905,7 @@ def get_next_question_db(review, previous_question, is_test, session):
                     return question
 
     raise Exception("No question could be returned")
+
 
 def get_review_pair(review, is_test, session) -> ReviewPair:
     session = get_db_session(is_test, session)
@@ -1061,28 +1070,32 @@ def get_review_question_by_id(question_id, is_test, session):
 
     return question
 
+
 def get_partner_answer(partner_review: Review, question_id, is_test, session) -> ReviewAnswer:
     session = get_db_session(is_test, session)
 
     review_answer = session.query(ReviewAnswer).filter(
         ReviewAnswer.review_id == partner_review.id,
-        ReviewAnswer.review_question_id == question_id).one()
+        ReviewAnswer.review_question_id == question_id).first()
 
     return review_answer
 
 
 def compute_variance(pair: ReviewPair) -> float:
-    junior_review_average = compute_review_result(pair.junior_review.review_answers)
-    senior_review_average = compute_review_result(pair.senior_review.review_answers)
+    junior_review_average = compute_review_result(
+        pair.junior_review.review_answers)
+    senior_review_average = compute_review_result(
+        pair.senior_review.review_answers)
 
     return abs(junior_review_average - senior_review_average)
 
+
 def compute_review_result(review_answers):
     if(review_answers == None):
-        raise TypeError('ReviewAnswers is None!') 
+        raise TypeError('ReviewAnswers is None!')
 
     if not isinstance(review_answers, list):
-       raise TypeError('ReviewAnswers is not a list')
+        raise TypeError('ReviewAnswers is not a list')
 
     if(len(review_answers) <= 0):
         raise ValueError('ReviewAnswers is an empty list')
@@ -1091,9 +1104,11 @@ def compute_review_result(review_answers):
 
     return sum(answers) / len(review_answers)
 
+
 def get_review_pairs_by_item(item_id, is_test, session):
     session = get_db_session(is_test, session)
 
-    pairs = session.query(ReviewPair).filter(ReviewPair.item_id)
+    pairs = session.query(ReviewPair).filter(
+        ReviewPair.item_id == item_id).all()
 
     return pairs

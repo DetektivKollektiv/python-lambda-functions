@@ -5,27 +5,34 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 import test.unit.setup_scenarios as scenarios
+import json
+import app
+import review_answer_handler
+from uuid import uuid4
+import test.unit.helper_functions as helper
 
 
 def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
-    import app
 
     session = operations.get_db_session(True, None)
     session = scenarios.create_levels_junior_and_senior_detectives(session)
+    session = scenarios.create_questions(session)
 
     junior_detective1 = operations.get_user_by_id("1", True, session)
     junior_detective2 = operations.get_user_by_id("2", True, session)
     junior_detective3 = operations.get_user_by_id("3", True, session)
     junior_detective4 = operations.get_user_by_id("4", True, session)
+    junior_detective5 = operations.get_user_by_id("5", True, session)
 
     senior_detective1 = operations.get_user_by_id("11", True, session)
     senior_detective2 = operations.get_user_by_id("12", True, session)
     senior_detective3 = operations.get_user_by_id("13", True, session)
     senior_detective4 = operations.get_user_by_id("14", True, session)
+    senior_detective5 = operations.get_user_by_id("15", True, session)
 
     users = operations.get_all_users_db(True, session)
-    assert len(users) == 8
+    assert len(users) == 10
 
     # Creating an item
     item = Item()
@@ -36,123 +43,84 @@ def test_verification_process_best_case(monkeypatch):
     assert len(items) == 1
 
     # Junior detectives accepting item
-    operations.accept_item_db(junior_detective1, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr1 = operations.accept_item_db(junior_detective1, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    operations.accept_item_db(junior_detective2, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr2 = operations.accept_item_db(junior_detective2, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    operations.accept_item_db(junior_detective3, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr3 = operations.accept_item_db(junior_detective3, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
+    jr4 = operations.accept_item_db(junior_detective4, item, True, session)
+    assert item.open_reviews_level_1 == 4
+    assert item.in_progress_reviews_level_1 == 4
+
     with pytest.raises(Exception):
-        operations.accept_item_db(junior_detective4, item, True, session)
+        operations.accept_item_db(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    operations.accept_item_db(senior_detective1, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr1 = operations.accept_item_db(senior_detective1, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    operations.accept_item_db(senior_detective2, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr2 = operations.accept_item_db(senior_detective2, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    operations.accept_item_db(senior_detective3, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr3 = operations.accept_item_db(senior_detective3, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
+    sr4 = operations.accept_item_db(senior_detective4, item, True, session)
+    assert item.open_reviews_level_2 == 4
+    assert item.in_progress_reviews_level_2 == 4
+
     with pytest.raises(Exception):
-        operations.accept_item_db(senior_detective4, item, True, session)
+        operations.accept_item_db(senior_detective5, item, True, session)
 
-    # Junior detectives reviewing item
+    pairs = operations.get_review_pairs_by_item(item.id, True, session)
+    assert len(pairs) == 4
 
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective4.id, 1)
-    response = app.submit_review(review_event, None, True, session)
-    assert response['statusCode'] == 400
+    # Detectives reviewing item
+    reviews = [jr1, jr2, jr3, jr4, sr1, sr2, sr3, sr4]
+    for review in reviews:
+        helper.create_answers_for_review(review, 1, session)
 
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective1.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 2
-    assert item.in_progress_reviews_level_1 == 2
-
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective2.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 1
-    assert item.in_progress_reviews_level_1 == 1
-
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective3.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 0
+    answers = session.query(ReviewAnswer).all()
+    assert len(answers) == 56
+    assert item.status == 'closed'
     assert item.in_progress_reviews_level_1 == 0
-
-    # Senior detectives reviewing item
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective4.id, 1)
-    response = app.submit_review(review_event, None, True, session)
-    assert response['statusCode'] == 400
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective1.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 2
-    assert item.in_progress_reviews_level_2 == 2
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective2.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 1
-    assert item.in_progress_reviews_level_2 == 1
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective3.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 0
     assert item.in_progress_reviews_level_2 == 0
-
-    assert item.status == "closed"
-    assert item.result_score == 1
+    assert item.open_reviews_level_1 == 0
+    assert item.open_reviews_level_2 == 0
+    assert item.open_reviews == 0
 
 
 def test_verification_process_worst_case(monkeypatch):
+
     monkeypatch.setenv("DBNAME", "Test")
-    import app
-
     session = operations.get_db_session(True, None)
-
     session = scenarios.create_levels_junior_and_senior_detectives(session)
+    session = scenarios.create_questions(session)
 
     junior_detective1 = operations.get_user_by_id("1", True, session)
     junior_detective2 = operations.get_user_by_id("2", True, session)
     junior_detective3 = operations.get_user_by_id("3", True, session)
     junior_detective4 = operations.get_user_by_id("4", True, session)
+    junior_detective5 = operations.get_user_by_id("5", True, session)
 
     senior_detective1 = operations.get_user_by_id("11", True, session)
     senior_detective2 = operations.get_user_by_id("12", True, session)
     senior_detective3 = operations.get_user_by_id("13", True, session)
     senior_detective4 = operations.get_user_by_id("14", True, session)
+    senior_detective5 = operations.get_user_by_id("15", True, session)
 
     users = operations.get_all_users_db(True, session)
-    assert len(users) == 8
+    assert len(users) == 10
 
     # Creating an item
     item = Item()
@@ -163,101 +131,65 @@ def test_verification_process_worst_case(monkeypatch):
     assert len(items) == 1
 
     # Junior detectives accepting item
-    operations.accept_item_db(junior_detective1, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr1 = operations.accept_item_db(junior_detective1, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    operations.accept_item_db(junior_detective2, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr2 = operations.accept_item_db(junior_detective2, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    operations.accept_item_db(junior_detective3, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    jr3 = operations.accept_item_db(junior_detective3, item, True, session)
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
+    jr4 = operations.accept_item_db(junior_detective4, item, True, session)
+    assert item.open_reviews_level_1 == 4
+    assert item.in_progress_reviews_level_1 == 4
+
     with pytest.raises(Exception):
-        operations.accept_item_db(junior_detective4, item, True, session)
+        operations.accept_item_db(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    operations.accept_item_db(senior_detective1, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr1 = operations.accept_item_db(senior_detective1, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    operations.accept_item_db(senior_detective2, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr2 = operations.accept_item_db(senior_detective2, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    operations.accept_item_db(senior_detective3, item, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 3
+    sr3 = operations.accept_item_db(senior_detective3, item, True, session)
+    assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
+    sr4 = operations.accept_item_db(senior_detective4, item, True, session)
+    assert item.open_reviews_level_2 == 4
+    assert item.in_progress_reviews_level_2 == 4
+
     with pytest.raises(Exception):
-        operations.accept_item_db(senior_detective4, item, True, session)
+        operations.accept_item_db(senior_detective5, item, True, session)
 
-    # Junior detectives reviewing item
+    pairs = operations.get_review_pairs_by_item(item.id, True, session)
+    assert len(pairs) == 4
 
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective4.id, 4)
-    response = app.submit_review(review_event, None, True, session)
-    assert response['statusCode'] == 400
+    # Detective without review in progress trying to get question
+    junior_reviews = [jr1, jr2, jr3, jr4]
+    senior_reviews = [sr1, sr2, sr3, sr4]
+    for review in junior_reviews:
+        helper.create_answers_for_review(review, 1, session)
 
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective1.id, 4)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 2
-    assert item.in_progress_reviews_level_1 == 2
+    for review in senior_reviews:
+        helper.create_answers_for_review(review, 4, session)
 
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective2.id, 4)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 1
-    assert item.in_progress_reviews_level_1 == 1
-
-    review_event = event_creator.get_review_event(
-        item.id, junior_detective3.id, 4)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 0
+    answers = session.query(ReviewAnswer).all()
+    assert len(answers) == 56
+    assert item.status == 'open'
     assert item.in_progress_reviews_level_1 == 0
-
-    # Senior detectives reviewing item
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective4.id, 1)
-    response = app.submit_review(review_event, None, True, session)
-    assert response['statusCode'] == 400
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective1.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 2
-    assert item.in_progress_reviews_level_2 == 2
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective2.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_2 == 1
-    assert item.in_progress_reviews_level_2 == 1
-
-    review_event = event_creator.get_review_event(
-        item.id, senior_detective3.id, 1)
-    app.submit_review(review_event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
-
     assert item.in_progress_reviews_level_2 == 0
-    assert item.open_reviews_level_2 == 3
-    assert item.open_reviews == 3
-    assert item.result_score == None
+    assert item.open_reviews_level_1 == 4
+    assert item.open_reviews_level_2 == 4
+    assert item.open_reviews == 4
 
 
 def test_create_review(monkeypatch):
@@ -278,7 +210,7 @@ def test_create_review(monkeypatch):
     senior_detective4 = operations.get_user_by_id("14", True, session)
 
     users = operations.get_all_users_db(True, session)
-    assert len(users) == 8
+    assert len(users) == 10
 
     # Creating an item
     item = Item()
@@ -299,7 +231,7 @@ def test_create_review(monkeypatch):
     response = app.create_review(event, None, True, session)
     assert response['statusCode'] == 201
     item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
     reviews = session.query(Review).all()
     review_pairs = session.query(ReviewPair).all()
@@ -310,7 +242,7 @@ def test_create_review(monkeypatch):
         junior_detective2.id, item.id)
     app.create_review(event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
     reviews = session.query(Review).all()
     review_pairs = session.query(ReviewPair).all()
@@ -322,7 +254,7 @@ def test_create_review(monkeypatch):
         senior_detective1.id, item.id)
     app.create_review(event, None, True, session)
     item = operations.get_item_by_id(item.id, True, session)
-    assert item.open_reviews_level_1 == 3
+    assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_2 == 1
     reviews = session.query(Review).all()
     review_pairs = session.query(ReviewPair).all()
