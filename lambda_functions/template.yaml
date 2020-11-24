@@ -272,6 +272,8 @@ Resources:
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+      - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -282,12 +284,11 @@ Resources:
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
       CodeUri: .
-      Handler: SearchFactChecks.update_factcheck_models
+      Handler: UpdateFactChecks.update_factcheck_models
       Runtime: python3.8
       MemorySize: 832
       Layers:
       - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
-      - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
