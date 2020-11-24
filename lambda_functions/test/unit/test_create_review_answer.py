@@ -43,9 +43,11 @@ def session(item_id, junior_review_id, senior_review_id, review_pair_id, review_
 
     junior_review = Review()
     junior_review.id = junior_review_id
+    junior_review.item_id = item.id
 
     senior_review = Review()
     senior_review.id = senior_review_id
+    senior_review.item_id = item.id
 
     review_pair = ReviewPair()
     review_pair.id = review_pair_id
