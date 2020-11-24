@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
 import test.unit.event_creator as event_creator
 import test.unit.setup_scenarios as scenarios
+import test.unit.helper_functions as helper
 
 
 class TestGetOpenItems:
@@ -15,16 +16,15 @@ class TestGetOpenItems:
         session = operations.get_db_session(True, None)
 
         session = scenarios.create_levels_junior_and_senior_detectives(session)
+        session = scenarios.create_questions(session)
 
         junior_detective1 = operations.get_user_by_id("1", True, session)
         junior_detective2 = operations.get_user_by_id("2", True, session)
         junior_detective3 = operations.get_user_by_id("3", True, session)
         junior_detective4 = operations.get_user_by_id("4", True, session)
+        junior_detective5 = operations.get_user_by_id("5", True, session)
 
         senior_detective1 = operations.get_user_by_id("11", True, session)
-
-        users = operations.get_all_users_db(True, session)
-        assert len(users) == 8
 
         # Creating 5 items
 
@@ -60,9 +60,8 @@ class TestGetOpenItems:
         assert len(open_items_for_junior) == 5
 
         # JuniorDetective 1 accepting item 1
-        accept_event = event_creator.get_create_review_event(
-            junior_detective1.id, item1.id)
-        app.create_review(accept_event, None, True, session)
+        jr1 = operations.accept_item_db(
+            junior_detective1, item1, True, session)
         open_item_after_accept = operations.get_open_items_for_user_db(
             junior_detective1, 5, True, session)
         assert len(open_item_after_accept) == 1
@@ -71,14 +70,17 @@ class TestGetOpenItems:
         assert item1.in_progress_reviews_level_1 == 1
 
         # Accepting event again should not create a new review
-        app.create_review(accept_event, None, True, session)
+        operations.accept_item_db(
+            junior_detective1, item1, True, session)
+        # app.create_review(accept_event, None, True, session)
         item1 = operations.get_item_by_id(item1.id, True, session)
         assert item1.in_progress_reviews_level_1 == 1
 
         # JuniorDetective 1 finishing review
-        review_event = event_creator.get_review_event(
-            item1.id, junior_detective1.id, 1)
-        app.submit_review(review_event, None, True, session)
+        helper.create_answers_for_review(jr1, 1, session)
+        # review_event = event_creator.get_review_event(
+        #    item1.id, junior_detective1.id, 1)
+        # app.submit_review(review_event, None, True, session)
 
         # For JuniorDetective1 only 4 cases should be available
         open_items_after_submission = operations.get_open_items_for_user_db(
@@ -93,52 +95,42 @@ class TestGetOpenItems:
             junior_detective4, 5, True, session)
         assert len(open_items_after_other_review) == 5
 
-        # 3 Junior Detectives reviewing Item 2
-        accept_event = event_creator.get_create_review_event(
-            junior_detective1.id, item2.id)
-        app.create_review(accept_event, None, True, session)
+        # 4 Junior Detectives reviewing Item 2
+        jr1 = operations.accept_item_db(
+            junior_detective1, item2, True, session)
+        jr2 = operations.accept_item_db(
+            junior_detective2, item2, True, session)
+        jr3 = operations.accept_item_db(
+            junior_detective3, item2, True, session)
+        jr4 = operations.accept_item_db(
+            junior_detective4, item2, True, session)
 
-        accept_event = event_creator.get_create_review_event(
-            junior_detective2.id, item2.id)
-        app.create_review(accept_event, None, True, session)
+        helper.create_answers_for_review(jr1, 1, session)
+        helper.create_answers_for_review(jr2, 1, session)
+        helper.create_answers_for_review(jr3, 1, session)
+        helper.create_answers_for_review(jr4, 1, session)
 
-        accept_event = event_creator.get_create_review_event(
-            junior_detective3.id, item2.id)
-        app.create_review(accept_event, None, True, session)
-
-        review_event = event_creator.get_review_event(
-            item2.id, junior_detective1.id, 1)
-        app.submit_review(review_event, None, True, session)
-
-        review_event = event_creator.get_review_event(
-            item2.id, junior_detective2.id, 1)
-        app.submit_review(review_event, None, True, session)
-
-        review_event = event_creator.get_review_event(
-            item2.id, junior_detective3.id, 1)
-        app.submit_review(review_event, None, True, session)
-
-        # 4 Cases should be available for Detective 4
+        # 4 Cases should be available for Detective 5
 
         open_items_after_other_review = operations.get_open_items_for_user_db(
-            junior_detective4, 5, True, session)
+            junior_detective5, 5, True, session)
         assert len(open_items_after_other_review) == 4
 
+        # 5 cases should be available for senior
         open_items_for_senior = operations.get_open_items_for_user_db(
             senior_detective1, 5, True, session)
         assert len(open_items_for_senior) == 5
 
-        accept_event = event_creator.get_create_review_event(
-            senior_detective1.id, item1.id)
-        app.create_review(accept_event, None, True, session)
+        # Senior detective accepting item 1
+        sr1 = operations.accept_item_db(
+            senior_detective1, item1, True, session)
 
         open_item_after_accept = operations.get_open_items_for_user_db(
             senior_detective1, 5, True, session)
         assert len(open_item_after_accept) == 1
 
-        review_event = event_creator.get_review_event(
-            item1.id, senior_detective1.id, 1)
-        app.submit_review(review_event, None, True, session)
+        # Senior detective finishing review
+        helper.create_answers_for_review(sr1, 1, session)
 
         # For SeniorDetective1 only 4 cases should be available
         open_items_after_submission = operations.get_open_items_for_user_db(
@@ -146,9 +138,8 @@ class TestGetOpenItems:
         assert len(open_items_after_submission) == 4
 
         # SeniorDetective 1 accepting item 3
-        accept_event = event_creator.get_create_review_event(
-            senior_detective1.id, item3.id)
-        app.create_review(accept_event, None, True, session)
+        sr1 = operations.accept_item_db(
+            senior_detective1, item3, True, session)
         open_item_after_accept = operations.get_open_items_for_user_db(
             senior_detective1, 5, True, session)
         assert len(open_item_after_accept) == 1
@@ -157,34 +148,14 @@ class TestGetOpenItems:
         assert item3.in_progress_reviews_level_2 == 1
 
         # Accepting event again should not create a new review
-        app.create_review(accept_event, None, True, session)
+        operations.accept_item_db(
+            senior_detective1, item3, True, session)
         item3 = operations.get_item_by_id(item3.id, True, session)
         assert item3.in_progress_reviews_level_2 == 1
 
         # SeniorDetective 1 finishing review
-        review_event = event_creator.get_review_event(
-            item3.id, senior_detective1.id, 1)
-        app.submit_review(review_event, None, True, session)
+        helper.create_answers_for_review(sr1, 1, session)
 
         open_items_for_senior = operations.get_open_items_for_user_db(
             senior_detective1, 5, True, session)
         assert len(open_items_for_senior) == 3
-
-        # JuniorDetective 1 reviewing item 3
-        accept_event = event_creator.get_create_review_event(
-            junior_detective1.id, item3.id)
-        app.create_review(accept_event, None, True, session)
-
-        open_item_after_accept = operations.get_open_items_for_user_db(
-            junior_detective1, 5, True, session)
-        assert len(open_item_after_accept) == 1
-
-        review_event = event_creator.get_review_event(
-            item3.id, junior_detective1.id, 1)
-        app.submit_review(review_event, None, True, session)
-
-        # For JuniorDetective1 only 2 cases should be available,
-        # because Item 1,2 and 3 were reviewed
-        open_items_after_submission = operations.get_open_items_for_user_db(
-            junior_detective1, 5, True, session)
-        assert len(open_items_after_submission) == 2

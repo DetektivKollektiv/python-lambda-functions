@@ -275,7 +275,8 @@ class Review(Base):
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
 
-    review_answers = relationship("ReviewAnswer", back_populates="review")
+    review_answers = relationship(
+        "ReviewAnswer", back_populates="review")
     item = relationship("Item", back_populates="reviews")
 
     def to_dict(self):

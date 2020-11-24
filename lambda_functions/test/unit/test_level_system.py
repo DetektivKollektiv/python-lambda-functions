@@ -17,9 +17,6 @@ def test_level_system(monkeypatch):
 
     junior_detective1 = operations.get_user_by_id("1", True, session)
 
-    users = operations.get_all_users_db(True, session)
-    assert len(users) == 8
-
     assert junior_detective1.level_id == 1
     assert junior_detective1.experience_points == 0
 
