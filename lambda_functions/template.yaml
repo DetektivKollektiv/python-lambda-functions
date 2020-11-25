@@ -40,6 +40,8 @@ Resources:
       Handler: whatsapp.whatsapp_forwarding
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -270,6 +272,8 @@ Resources:
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+      - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -280,11 +284,11 @@ Resources:
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
       CodeUri: .
-      Handler: SearchFactChecks.update_factcheck_models
+      Handler: UpdateFactChecks.update_factcheck_models
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-python38-pandas:21      
+      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -293,7 +297,6 @@ Resources:
         Variables:
           STAGE:
             Ref: STAGE
-
 
   GetLanguageFunction:
     Type: AWS::Serverless::Function
@@ -847,6 +850,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
         - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
 
   ResetLockedItemsRule:
     Type: AWS::Events::Rule
@@ -898,9 +902,12 @@ Resources:
           - UpdateFactCheckModelsRule
           - Arn
 
-  BucketForFactchecks:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties: 
-      BucketName: factchecks-dev
+  libs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: detektivkollektiv-lib
+      Description: Dependencies for the DetektivKollektiv app.
+      ContentUri: ../package/.
+      CompatibleRuntimes:
+        - python3.8
+        

@@ -1,9 +1,12 @@
-import SearchFactChecks
 import time
+import os
+import SearchFactChecks
+import UpdateFactChecks
 
 
 class TestSearchFactChecks:
     def test_search_checks_1(self):
+        os.environ["STAGE"] = "dev"
         event = {
             "item": {
                 "id": "3fb83912-7a97-423a-b820-36718d51b1a6",
@@ -48,10 +51,14 @@ class TestUpdateModels:
     def test_update_factchecker_1(self):
         event = ""
         context = ""
-        SearchFactChecks.update_factcheck_models(event, context)
-        df_factchecks = SearchFactChecks.read_df(SearchFactChecks.factchecks_prefix+"de.csv")
+        os.environ["STAGE"] = "dev"
+        UpdateFactChecks.update_factcheck_models(event, context)
+        df_factchecks = UpdateFactChecks.read_df(UpdateFactChecks.factchecks_prefix+"de.csv")
         assert "correctiv.org" in df_factchecks.values
-        model_name = SearchFactChecks.doc2vec_models_prefix+"de"
-        model = SearchFactChecks.read_model(model_name)
+        model_name = UpdateFactChecks.doc2vec_models_prefix+"de"
+        s = time.perf_counter()
+        model = UpdateFactChecks.read_model(model_name)
+        elapsed = time.perf_counter() - s
         vocab_len = len(model.wv.vocab)
         assert vocab_len > 0
+        assert elapsed < 3

@@ -9,11 +9,12 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 PyJWT==1.7.1
-pytz==2020.1
-twilio==6.40.0
+# is not used:
+# pytz==2020.1
+# included via layers:
+# twilio==6.40.0
 Werkzeug==1.0.1
 
-numpy
 pytest~=5.3.2
 jmespath~=0.9.4
 docutils~=0.15.2
@@ -52,7 +53,8 @@ cython~=0.29.14
 contextlib2~=0.6.0.post1
 zipp~=0.6.0
 requests~=2.22.0
-aiohttp
-aiodns
-nltk
-gensim
+
+# included via layers:
+# pandas
+# aiohttp
+# aiodns
