@@ -21,6 +21,7 @@ class Item(Base):
     in_progress_reviews_level_2 = Column(Integer)
     open_timestamp = Column(DateTime)
     close_timestamp = Column(DateTime)
+    verification_process_version = Column(Integer)
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
@@ -28,8 +29,8 @@ class Item(Base):
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
-
-    reviews = relationship("Review", backref="item")
+    reviews = relationship("Review", back_populates="item")
+    review_pairs = relationship("ReviewPair", back_populates="item")
 
     def to_dict(self):
         return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
@@ -200,20 +201,31 @@ class ReviewQuestion(Base):
     __tablename__ = 'review_questions'
     id = Column(String(36), primary_key=True)
     content = Column(Text)
-    mandatory = Column(Boolean)
     info = Column(Text)
 
-    review_answers = relationship("ReviewAnswer", backref="review_question")
+    parent_question_id = Column(String(36), ForeignKey(
+        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
+    lower_bound = Column(Integer)
+    upper_bound = Column(Integer)
+    max_children = Column(Integer)
+
+    review_answers = relationship(
+        "ReviewAnswer", back_populates="review_question")
     options = relationship("AnswerOption",
                            secondary=question_option_pairs,
                            back_populates="questions")
 
+    parent_question = relationship("ReviewQuestion", remote_side=[
+                                   id], back_populates="child_questions")
+    child_questions = relationship(
+        "ReviewQuestion", back_populates="parent_question")
+
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "mandatory": self.mandatory, "info": self.info}
+        return {"id": self.id, "content": self.content, "info": self.info}
 
     def to_dict_with_answers(self):
         question = {"id": self.id, "content": self.content,
-                    "mandatory": self.mandatory, "info": self.info, "options": []}
+                    "info": self.info, "options": []}
         for option in self.options:
             question["options"].append(option.to_dict())
         return question
@@ -234,11 +246,17 @@ class AnswerOption(Base):
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
     id = Column(String(36), primary_key=True)
-    review_id = Column(String(36), ForeignKey('reviews.id'))
+    review_id = Column(String(36), ForeignKey(
+        'reviews.id', ondelete='CASCADE', onupdate='CASCADE'))
     review_question_id = Column(String(36), ForeignKey(
         'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
     answer = Column(Integer)
     comment = Column(Text)
+
+    review_question = relationship(
+        "ReviewQuestion", back_populates="review_answers")
+
+    review = relationship("Review", back_populates="review_answers")
 
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
@@ -249,16 +267,35 @@ class Review(Base):
     __tablename__ = 'reviews'
     id = Column(String(36), primary_key=True)
     is_peer_review = Column(Boolean)
-    peer_review_id = Column(String(36))
     belongs_to_good_pair = Column(Boolean)
-    item_id = Column(String(36), ForeignKey('items.id'))
     user_id = Column(String(36), ForeignKey('users.id'))
-    review_answers = relationship("ReviewAnswer", backref="review")
+    item_id = Column(String(36), ForeignKey('items.id',
+                                            ondelete='CASCADE', onupdate='CASCADE'))
     start_timestamp = Column(DateTime)
     finish_timestamp = Column(DateTime)
     status = Column(String(100))
 
+    review_answers = relationship(
+        "ReviewAnswer", back_populates="review")
+    item = relationship("Item", back_populates="reviews")
+
     def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review, "peer_review_id": self.peer_review_id,
-                "belongs_to_good_pair": self.belongs_to_good_pair, "item_id": self.item_id, "user_id": self.user_id,
-                "start_timestamp": self.start_timestamp, "finish_timestamp": self.finish_timestamp}
+        return {"id": self.id, "is_peer_review": self.is_peer_review,
+                "belongs_to_good_pair": self.belongs_to_good_pair, "user_id": self.user_id,
+                "start_timestamp": str(self.start_timestamp), "finish_timestamp": str(self.finish_timestamp)}
+
+
+class ReviewPair(Base):
+    __tablename__ = 'review_pairs'
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey('items.id'))
+    junior_review_id = Column(String(36), ForeignKey('reviews.id'))
+    senior_review_id = Column(String(36), ForeignKey('reviews.id'))
+    is_good = Column(Boolean)
+    variance = Column(Float)
+
+    item = relationship("Item", back_populates="review_pairs")
+    junior_review = relationship(
+        "Review", foreign_keys=[junior_review_id])
+    senior_review = relationship(
+        "Review", foreign_keys=[senior_review_id])

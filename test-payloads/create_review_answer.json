@@ -1,0 +1,14 @@
+{
+    "body": {
+        "id": "4dab523e-998f-4435-8365-9cecbe90c82b",
+        "review_id": "155a3c72-aeab-4fd3-bf9b-1c6869d1cb4a",
+        "review_question_id": "7c8cad61-a80c-4aae-98d3-66102f990be0",
+        "answer": 1,
+        "comment": ""
+    },
+    "requestContext": {
+        "identity": {
+            "cognitoAuthenticationProvider": "...CognitoSignIn:dc02f744-99fa-49e3-8b62-3c3d4183aa3d"
+        }
+    }
+}
