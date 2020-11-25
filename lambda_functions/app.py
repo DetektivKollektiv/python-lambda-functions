@@ -800,14 +800,13 @@ def get_review_question(event, context, is_test=False, session=None):
 
     Parameters
     ----------
-    - user_id is retrieved from the event
     - review_id is retrieved from query parameters
     - previous_question_id is retrieved from query parameters
 
     Returns
     ------
-    - Status code 201 (Created)
-    - The newly created review
+    - Status code 200 (OK) --> Returns next question
+    - Status code 204 (No Content) --> Review finished
     """
 
     helper.log_method_initiated("Get Review Question", event, logger)
