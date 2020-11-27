@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the DetektivKollektiv archive API"
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+
+Parameters:
+  STAGE:
+    Type: String
+  CorsAllowOrigin:
+    Type: String
+  DBNAME:
+    Type: String
+    Default: development_db
+  HOSTEDZONEID:
+    Type: String
+  CERTARN:
+    Type: String
+
+Conditions:
+  IsProdEnvironment: !Equals [!Sub "${STAGE}", prod]
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: STAGE
+      Cors:
+        AllowMethods: "'OPTIONS, PUT, POST, GET, DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+        AddDefaultAuthorizerToCorsPreflight: false
+        InvokeRole: NONE
+      Domain:
+        DomainName:
+          !If [
+            IsProdEnvironment,
+            api.detektivkollektiv.org,
+            !Sub "${STAGE}.api.detektivkollektiv.org",
+          ]
+        CertificateArn: !Sub "${CERTARN}"
+        Basepath:
+          - /archive
+        Route53:
+          HostedZoneId: !Sub "${HOSTEDZONEID}"
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "detektivkollektiv-api-execution-archive-service-${STAGE}"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+
+  GetAllClosedItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-get_all_closed_items-${STAGE}"
+      CodeUri: .
+      Handler: get_closed_items.get_closed_items
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /items
+            Method: get
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"

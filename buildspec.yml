@@ -22,7 +22,7 @@ phases:
 
       # Install requirements
       - pip install -r lambda_functions/requirements.txt --target lambda_functions
-      - pip install -r lambda_functions/requirements_layers.txt --target package/python 
+      - pip install -r lambda_functions/requirements_layers.txt --target package/python
 
       # Install statelint to verify the validity of the state machine definition
       - gem install statelint
@@ -45,7 +45,7 @@ phases:
 
       # Do not remove this statement. This command is required for AWS CodeStar projects.
       # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-      # - sed -i.bak 's/\$PARTITION\$/'${PARTITION}'/g;s/\$AWS_REGION\$/'${AWS_REGION}'/g;s/\$ACCOUNT_ID\$/'${ACCOUNT_ID}'/g;s/\$PROJECT_ID\$/'${PROJECT_ID}'/g' template-configuration.json
+      - sed -i 's/$HOSTEDZONEID/${HOSTEDZONEID}/g;s/$CERTARN/${CERTARN}/g' ${STAGE}-config.json
 
 artifacts:
   files:
