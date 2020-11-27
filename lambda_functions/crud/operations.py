@@ -789,6 +789,8 @@ def accept_item_db(user, item, is_test, session):
     rip.user_id = user.id
     rip.start_timestamp = helper.get_date_time_now(is_test)
     rip.status = "in_progress"
+    session.add(rip)
+    session.commit()
 
     # If a user is a senior, the review will by default be a senior review,
     # except if no senior reviews are needed
@@ -835,7 +837,7 @@ def accept_item_db(user, item, is_test, session):
             item.review_pairs.append(pair)
             session.merge(pair)
 
-    session.add(rip)
+    session.merge(rip)
     session.merge(item)
     session.commit()
     return rip
