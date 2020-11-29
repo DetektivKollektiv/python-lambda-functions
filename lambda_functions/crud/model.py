@@ -240,7 +240,7 @@ class AnswerOption(Base):
         "ReviewQuestion", secondary=question_option_pairs, back_populates="options")
 
     def to_dict(self):
-        return {"id": self.id, "text": self.text}
+        return {"id": self.id, "text": self.text, "value": self.value}
 
 
 class ReviewAnswer(Base):
