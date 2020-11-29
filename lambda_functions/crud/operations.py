@@ -750,7 +750,7 @@ def delete_old_reviews_in_progress(rips, is_test, session):
     session.commit()
 
 
-def accept_item_db(user, item, is_test, session):
+def accept_item_db(user, item, is_test, session) -> Review:
     """Accepts an item for review
 
     Parameters
@@ -767,9 +767,9 @@ def accept_item_db(user, item, is_test, session):
     """
     # If a ReviewInProgress exists for the user, return
     try:
-        session.query(Review).filter(
+        review = session.query(Review).filter(
             Review.user_id == user.id, Review.status == "in_progress", Review.item_id == item.id).one()
-        return item
+        return review
     except:
         pass
 
