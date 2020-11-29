@@ -848,7 +848,7 @@ def get_review_question(event, context, is_test=False, session=None):
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(question.to_dict())
+                "body": json.dumps(question.to_dict_with_answers())
             }
     except Exception as e:
         response = {
