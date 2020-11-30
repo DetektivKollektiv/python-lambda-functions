@@ -1,11 +1,15 @@
+# External imports
 import logging
 import json
 from uuid import uuid4
-from crud import operations, helper, notifications
-from crud.model import ReviewAnswer
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+# Helper imports
+from core_layer import helper
+from core_layer.connection_handler import get_db_session
+# Model imports
+from core_layer.model.review_answer_model import ReviewAnswer
+# Handler imports
+from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler
+import notifications
 
 
 def create_review_answer(event, context, is_test=False, session=None):
@@ -30,22 +34,28 @@ def create_review_answer(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
     try:
         helper.log_method_initiated("Get item by id", event, logger)
 
         if session == None:
-            session = operations.get_db_session(is_test, session)
+            session = get_db_session(is_test, session)
 
         # Create actual review answer object
         review_answer = ReviewAnswer()
         helper.body_to_object(event['body'], review_answer)
-        operations.create_review_answer_db(review_answer, is_test, session)
+        review_answer_handler.create_review_answer(
+            review_answer, is_test, session)
 
         # Get partner review
-        review = operations.get_review_by_id(
+        review = review_handler.get_review_by_id(
             review_answer.review_id, is_test, session)
-        pair = operations.get_review_pair(review, is_test, session)
-        partner_review = operations.get_partner_review(
+        pair = review_pair_handler.get_review_pair_from_review(
+            review, is_test, session)
+        partner_review = review_handler.get_partner_review(
             review, is_test, session)
 
         # Check if review is closed (i.e. 7 questions were answered)
@@ -59,7 +69,7 @@ def create_review_answer(event, context, is_test=False, session=None):
                     # Check if answers cause review to be bad (e.g. answer is 0 but partner answer is any other value)
                     pair.is_good = True
                     for answer in review.review_answers:
-                        partner_answer = operations.get_partner_answer(
+                        partner_answer = review_answer_handler.get_partner_answer(
                             partner_review, answer.review_question_id, is_test, session)
                         if partner_answer == None:
                             pair.is_good = False
@@ -68,7 +78,7 @@ def create_review_answer(event, context, is_test=False, session=None):
                                 pair.is_good = False
 
                     if (pair.is_good):
-                        variance = operations.compute_variance(pair)
+                        variance = review_pair_handler.compute_variance(pair)
                         pair.variance = variance
                         if(variance <= 1):
                             pair.is_good = True
@@ -83,20 +93,20 @@ def create_review_answer(event, context, is_test=False, session=None):
                         review.item.open_reviews_level_2 -= 1
 
         # Check if item is closed (i.e. four "good" pairs)
-        pairs = operations.get_review_pairs_by_item(
+        pairs = review_pair_handler.get_review_pairs_by_item(
             pair.item_id, is_test, session)
 
         if(len(list(filter(lambda p: p.is_good, pairs))) >= 4):
             review.item.status = "closed"
-            review.item.result_score = operations.compute_item_result_score(
+            review.item.result_score = item_handler.compute_item_result_score(
                 review.item_id, is_test, session)
 
             # Notify email and telegram users
             notifications.notify_users(is_test, session, review.item)
 
-        operations.update_object_db(review, is_test, session)
-        operations.update_object_db(pair, is_test, session)
-        operations.update_object_db(review.item, is_test, session)
+        helper.update_object(review, is_test, session)
+        helper.update_object(pair, is_test, session)
+        helper.update_object(review.item, is_test, session)
 
         response = {
             "statusCode": 201,

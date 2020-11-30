@@ -1,5 +1,6 @@
 import random
-from core_layer.model import Item, Review
+from core_layer.model.item_model import Item
+from core_layer.model.review_model import Review
 from sqlalchemy.orm import Session
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
@@ -145,3 +146,14 @@ def get_open_items_for_user_db(user, num_items, is_test, session):
         items.append(item)
     random.shuffle(items)
     return items
+
+
+def compute_item_result_score(item_id, is_test, session):
+    pairs = get_review_pairs_by_item(item_id, is_test, session)
+
+    average_scores = []
+    for pair in list(filter(lambda p: p.is_good, pairs)):
+        average_scores.append(pair.variance)
+
+    result = statistics.median(average_scores)
+    return result

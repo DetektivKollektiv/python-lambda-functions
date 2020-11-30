@@ -23,25 +23,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def update_object_db(obj, is_test, session):
-    """Updates an existing item in the database
-
-    Parameters
-    ----------
-    obj: object to be merged in the DB, required
-        The item to be updates
-
-    Returns
-    ------
-    obj: The merged object
-    """
-    session = get_db_session(is_test, session)
-
-    session.merge(obj)
-    session.commit()
-    return obj
-
-
 def get_all_items_db(is_test, session):
     """Returns all items from the database
 
@@ -53,14 +34,6 @@ def get_all_items_db(is_test, session):
     session = get_db_session(is_test, session)
     items = session.query(Item).all()
     return items
-
-
-def get_old_reviews_in_progress(is_test, session):
-    old_time = helper.get_date_time_one_hour_ago(is_test)
-    session = get_db_session(is_test, session)
-    rips = session.query(Review).filter(
-        Review.start_timestamp < old_time, Review.status == "in_progress").all()
-    return rips
 
 
 def get_factcheck_by_itemid_db(id, is_test, session):
@@ -91,31 +64,6 @@ def get_all_submissions_db(is_test, session):
     return submissions
 
 
-def create_user_db(user, is_test, session):
-    """Inserts a new user into the database
-
-    Parameters
-    ----------
-    user: User, required
-        The user to be inserted
-
-    Returns
-    ------
-    user: User
-        The inserted user
-    """
-    if session == None:
-        session = get_db_session(is_test, session)
-
-    user.score = 0
-    user.level_id = 1
-    user.experience_points = 0
-    session.add(user)
-    session.commit()
-
-    return user
-
-
 def get_all_users_db(is_test, session):
     """Returns all users from the database
 
@@ -128,39 +76,6 @@ def get_all_users_db(is_test, session):
         session = get_db_session(is_test, session)
     users = session.query(User).all()
     return users
-
-
-def delete_user(event, is_test, session):
-    """Deletes a user from the database.
-
-    Parameters
-    ----------
-    user_id: str, required
-             The id of the user
-
-    Returns
-    ------
-    nothing
-    """
-    if session is None:
-        session = get_db_session(is_test, session)
-
-    user_id = helper.cognito_id_from_event(event)
-    user = session.query(User).get(user_id)
-
-    if(user == None):
-        raise Exception(
-            f"User with id {user_id} could not be found in database.")
-
-    client = boto3.client('cognito-idp')
-    client.admin_delete_user(
-        UserPoolId=event['requestContext']['identity']['cognitoAuthenticationProvider'].split(',')[
-            0].split('amazonaws.com/')[1],
-        Username=user.name
-    )
-
-    session.delete(user)
-    session.commit()
 
 
 def get_all_reviews_db(is_test, session):
@@ -189,30 +104,6 @@ def get_good_reviews_by_item_id(item_id, is_test, session):
     reviews = session.query(Review).filter(Review.item_id == item_id).filter(
         Review.belongs_to_good_pair == True)
     return reviews
-
-
-def create_review_answer_db(review_answer, is_test, session):
-    """Inserts a new review answer into the database
-
-    Parameters
-    ----------
-    review_answer: ReviewAnswer, required
-        The review answer to be inserted
-
-    Returns
-    ------
-    review_answer: reviewAnswer
-        The inserted review answer
-    """
-
-    session = get_db_session(is_test, session)
-
-    review_answer.id = str(uuid4())
-    session.add(review_answer)
-    session.commit()
-    session.expire_all()
-
-    return review_answer
 
 
 def create_review_answer_set_db(review_answers, review_id, is_test, session):
@@ -251,20 +142,6 @@ def get_review_answers_by_review_id_db(review_id, is_test, session):
     review_answers = session.query(ReviewAnswer).filter(
         ReviewAnswer.review_id == review_id)
     return review_answers
-
-
-def get_all_review_questions_db(is_test, session):
-    """Returns all review answers from the database
-
-    Returns
-    ------
-    review_questions: ReviewQuestion[]
-        The review questions
-    """
-
-    session = get_db_session(is_test, session)
-    review_questions = session.query(ReviewQuestion).all()
-    return review_questions
 
 
 def give_experience_point(user_id, is_test, session):
@@ -308,17 +185,6 @@ def get_pair_difference(junior_review, peer_review, is_test, session):
 
     difference = abs(junior_review_average - peer_review_average)
     return difference
-
-
-def compute_item_result_score(item_id, is_test, session):
-    pairs = get_review_pairs_by_item(item_id, is_test, session)
-
-    average_scores = []
-    for pair in list(filter(lambda p: p.is_good, pairs)):
-        average_scores.append(pair.variance)
-
-    result = statistics.median(average_scores)
-    return result
 
 
 def get_claimant_by_name_db(claimant_name, is_test, session):
@@ -534,107 +400,6 @@ def get_phrases_by_itemid_db(item_id, is_test, session):
     return phrases
 
 
-def delete_old_reviews_in_progress(rips, is_test, session):
-    for rip in rips:
-        item = get_item_by_id(rip.item_id, is_test, session)
-        if rip.is_peer_review == True:
-            item.in_progress_reviews_level_2 -= 1
-        else:
-            item.in_progress_reviews_level_1 -= 1
-        session.merge(item)
-        session.delete(rip)
-    session.commit()
-
-
-def get_next_question_db(review, previous_question, is_test, session):
-    session = get_db_session(is_test, session)
-
-    if len(review.review_answers) == 7:
-        return None
-
-    previous_question_ids = []
-    for answer in review.review_answers:
-        previous_question_ids.append(answer.review_question_id)
-
-    # Check for conditional question
-    if previous_question != None:
-        parent_question_found = False
-        # Determine relevant parent question
-        if len(previous_question.child_questions) > 0:
-            parent_question_found = True
-            parent_question = previous_question
-        if previous_question.parent_question != None:
-            parent_question_found = True
-            parent_question = previous_question.parent_question
-
-        if parent_question_found:
-            parent_answer = session.query(ReviewAnswer).filter(
-                ReviewAnswer.review_id == review.id, ReviewAnswer.review_question_id == parent_question.id).one()
-
-            child_questions = parent_question.child_questions
-
-            for child_question in child_questions:
-                # Check if question has already been answered
-                if child_question.id not in previous_question_ids:
-                    # Check answer triggers child question
-                    if parent_answer.answer <= child_question.upper_bound and parent_answer.answer >= child_question.lower_bound:
-                        return child_question
-
-    partner_review = get_partner_review(review, is_test, session)
-
-    if partner_review != None:
-        partner_review_question_ids = []
-        # Get all parent question ids from partner review
-        for answer in partner_review.review_answers:
-            if answer.review_question.parent_question_id == None:
-                partner_review_question_ids.append(answer.review_question_id)
-        # Find question
-        for question_id in partner_review_question_ids:
-            if question_id not in previous_question_ids:
-                return get_review_question_by_id(question_id, is_test, session)
-
-    # Check how many questions are still needed
-    remaining_questions = 7 - len(review.review_answers)
-
-    # Get all questions
-    all_questions = get_all_review_questions_db(is_test, session)
-    random.shuffle(all_questions)
-
-    for question in all_questions:
-        # Check if question has already been answered
-        if question.id not in previous_question_ids:
-            # Check if question is a parent question
-            if question.parent_question == None:
-                # Check if question does not exceed limit with child question
-                if remaining_questions > question.max_children:
-                    return question
-
-    raise Exception("No question could be returned")
-
-
-def get_review_pair(review, is_test, session) -> ReviewPair:
-    session = get_db_session(is_test, session)
-
-    return session.query(ReviewPair).filter(or_(ReviewPair.junior_review_id == review.id, ReviewPair.senior_review_id == review.id)).first()
-
-
-def get_partner_review(review, is_test, session):
-    session = get_db_session(is_test, session)
-
-    pair = session.query(ReviewPair).filter(or_(ReviewPair.junior_review_id ==
-                                                review.id, ReviewPair.senior_review_id == review.id)) \
-        .first()
-
-    try:
-        if review.id == pair.junior_review_id:
-            return get_review_by_id(pair.senior_review_id, is_test, session)
-
-        if review.id == pair.senior_review_id:
-            return get_review_by_id(pair.junior_review_id, is_test, session)
-    except:
-        return None
-
-
 def get_all_closed_items_db(is_test, session):
     """Gets all closed items
 
@@ -746,74 +511,3 @@ def build_review_pairs(item, is_test, session):
     session.merge(item)
     session.commit()
     return item
-
-
-def get_submissions_by_item_id(item_id, is_test, session):
-
-    session = get_db_session(is_test, session)
-    submissions = session.query(Submission).filter(
-        Submission.item_id == item_id).all()
-    return submissions
-
-
-def get_review_by_id(review_id, is_test, session) -> Review:
-    session = get_db_session(is_test, session)
-
-    review = session.query(Review).filter(
-        Review.id == review_id
-    ).one()
-
-    return review
-
-
-def get_review_question_by_id(question_id, is_test, session):
-    session = get_db_session(is_test, session)
-
-    question = session.query(ReviewQuestion).filter(
-        ReviewQuestion.id == question_id
-    ).one()
-
-    return question
-
-
-def get_partner_answer(partner_review: Review, question_id, is_test, session) -> ReviewAnswer:
-    session = get_db_session(is_test, session)
-
-    review_answer = session.query(ReviewAnswer).filter(
-        ReviewAnswer.review_id == partner_review.id,
-        ReviewAnswer.review_question_id == question_id).first()
-
-    return review_answer
-
-
-def compute_variance(pair: ReviewPair) -> float:
-    junior_review_average = compute_review_result(
-        pair.junior_review.review_answers)
-    senior_review_average = compute_review_result(
-        pair.senior_review.review_answers)
-
-    return abs(junior_review_average - senior_review_average)
-
-
-def compute_review_result(review_answers):
-    if(review_answers == None):
-        raise TypeError('ReviewAnswers is None!')
-
-    if not isinstance(review_answers, list):
-        raise TypeError('ReviewAnswers is not a list')
-
-    if(len(review_answers) <= 0):
-        raise ValueError('ReviewAnswers is an empty list')
-
-    answers = (review_answer.answer for review_answer in review_answers)
-
-    return sum(answers) / len(review_answers)
-
-
-def get_review_pairs_by_item(item_id, is_test, session):
-    session = get_db_session(is_test, session)
-
-    pairs = session.query(ReviewPair).filter(
-        ReviewPair.item_id == item_id).all()
-
-    return pairs

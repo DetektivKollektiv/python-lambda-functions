@@ -1,3 +1,4 @@
+# External imports
 import os
 import requests
 import json
@@ -6,8 +7,12 @@ import boto3
 import base64
 from botocore.exceptions import ClientError
 from botocore.config import Config
+# Helper imports
+from core_layer import helper
+from core_layer.connection_handler import get_db_session
+# Handler imports
+from core_layer.handler import submission_handler
 
-from . import operations, helper
 
 # Set DetektivKollektiv email address here (displayed name <mail address>)
 SENDER = "DetektivKollektiv <info@detektivkollektiv.org>"
@@ -78,7 +83,7 @@ def notify_users(is_test, session, item):
     """
 
     if session == None:
-        session = operations.get_db_session(False, None)
+        session = get_db_session(False, None)
 
     # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
     rating = round(item.result_score, 1)
@@ -91,7 +96,7 @@ def notify_users(is_test, session, item):
         rating_text = "vertrauenswürdig"
 
     # get all submissions for the item
-    submissions = operations.get_submissions_by_item_id(
+    submissions = submission_handler.get_submissions_by_item_id(
         item.id, is_test, session)
 
     notifications_successful = True

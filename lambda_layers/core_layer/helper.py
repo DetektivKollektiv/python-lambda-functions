@@ -159,3 +159,22 @@ def get_secret(secret_name, region_name="eu-central-1"):
             decoded_binary_secret = base64.b64decode(
                 get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
+
+
+def update_object(obj, is_test, session):
+    """Updates an existing item in the database
+
+    Parameters
+    ----------
+    obj: object to be merged in the DB, required
+        The item to be updates
+
+    Returns
+    ------
+    obj: The merged object
+    """
+    session = get_db_session(is_test, session)
+
+    session.merge(obj)
+    session.commit()
+    return obj

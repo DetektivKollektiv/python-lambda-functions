@@ -126,40 +126,6 @@ question_option_pairs = Table('question_option_pairs', Base.metadata,
                               )
 
 
-class ReviewQuestion(Base):
-    __tablename__ = 'review_questions'
-    id = Column(String(36), primary_key=True)
-    content = Column(Text)
-    info = Column(Text)
-
-    parent_question_id = Column(String(36), ForeignKey(
-        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
-    lower_bound = Column(Integer)
-    upper_bound = Column(Integer)
-    max_children = Column(Integer)
-
-    review_answers = relationship(
-        "ReviewAnswer", back_populates="review_question")
-    options = relationship("AnswerOption",
-                           secondary=question_option_pairs,
-                           back_populates="questions")
-
-    parent_question = relationship("ReviewQuestion", remote_side=[
-                                   id], back_populates="child_questions")
-    child_questions = relationship(
-        "ReviewQuestion", back_populates="parent_question")
-
-    def to_dict(self):
-        return {"id": self.id, "content": self.content, "info": self.info}
-
-    def to_dict_with_answers(self):
-        question = {"id": self.id, "content": self.content,
-                    "info": self.info, "options": []}
-        for option in self.options:
-            question["options"].append(option.to_dict())
-        return question
-
-
 class AnswerOption(Base):
     __tablename__ = 'answer_options'
     id = Column(String(36), primary_key=True)
@@ -170,23 +136,3 @@ class AnswerOption(Base):
 
     def to_dict(self):
         return {"id": self.id, "text": self.text, "value": self.value}
-
-
-class ReviewAnswer(Base):
-    __tablename__ = 'review_answers'
-    id = Column(String(36), primary_key=True)
-    review_id = Column(String(36), ForeignKey(
-        'reviews.id', ondelete='CASCADE', onupdate='CASCADE'))
-    review_question_id = Column(String(36), ForeignKey(
-        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
-    answer = Column(Integer)
-    comment = Column(Text)
-
-    review_question = relationship(
-        "ReviewQuestion", back_populates="review_answers")
-
-    review = relationship("Review", back_populates="review_answers")
-
-    def to_dict(self):
-        return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
-                "answer": self.answer, "comment": self.comment}

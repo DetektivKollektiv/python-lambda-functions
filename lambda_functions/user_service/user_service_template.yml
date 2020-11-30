@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: "SAM template for the DetektivKollektiv review API" # Change for each template
+Description: "SAM template for the DetektivKollektiv user API" # Change for each template
 
 Globals:
   Function:
@@ -47,14 +47,14 @@ Resources:
           ]
         CertificateArn: !Sub "${CERTARN}"
         Basepath:
-          - /review # Change for each API
+          - /users # Change for each API
         Route53:
           HostedZoneId: !Sub "${HOSTEDZONEID}"
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-api-execution-review-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "detektivkollektiv-api-execution-user-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -66,13 +66,14 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
 
-  GetOpenItemsFunction: # Change for each lambda
+  CreatUserFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get-open-items-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-api-create-user-${STAGE}" # Change for each lambda
       CodeUri: .
-      Handler: get_open_items.get_open_items # Change for each lambda
+      Handler: create_user.create_user # Change for each lambda
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -80,14 +81,6 @@ Resources:
           - LambdaExecutionRole
           - Arn
       Tracing: Active
-      Events:
-        Echo:
-          Type: Api
-          Properties:
-            Path: /items # Change for each lambda
-            Method: get # Change for each lambda
-            RestApiId:
-              Ref: Api
       Environment:
         Variables:
           DBNAME:
@@ -96,47 +89,12 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
-
-  CreateReviewFunction: # Change for each lambda
+  DeleteUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create-review-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-api-delete_user-${STAGE}"
       CodeUri: .
-      Handler: create_review.create_review # Change for each lambda
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Tracing: Active
-      Events:
-        Echo:
-          Type: Api
-          Properties:
-            Path: /reviews # Change for each lambda
-            Method: post # Change for each lambda
-            RestApiId:
-              Ref: Api
-            RequestParameters:
-              - method.request.querystring.item_id:
-                  Required: true
-                  Caching: true
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
-      Layers:
-        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
-
-  GetReviewQuestionFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-api-review_question-${STAGE}"
-      CodeUri: .
-      Handler: get_review_question.get_review_question
+      Handler: delete_user.delete_user
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -147,17 +105,10 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /review_questions
-            Method: get
+            Path: /
+            Method: delete
             RestApiId:
               Ref: Api
-            RequestParameters:
-              - method.request.querystring.review_id:
-                  Required: true
-                  Caching: true
-              - method.request.querystring.previous_question_id:
-                  Required: true
-                  Caching: true
       Environment:
         Variables:
           DBNAME:
@@ -167,12 +118,12 @@ Resources:
       Layers:
         - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
 
-  CreateReviewAnswerFunction:
+  GetUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create_review_answer-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-api-get_user-${STAGE}"
       CodeUri: .
-      Handler: create_review_answer.create_review_answer
+      Handler: get_user.get_user
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -183,8 +134,8 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /review_answers
-            Method: post
+            Path: /
+            Method: get
             RestApiId:
               Ref: Api
       Environment:
@@ -195,35 +146,3 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
-
-  ResetLockedItemsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-api-reset_locked_items-${STAGE}"
-      CodeUri: .
-      Handler: reset_locked_items.reset_locked_items
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-      Layers:
-        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
-
-  ResetLockedItemsRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Description: Resets Locked items every 10 minutes.
-      ScheduleExpression: rate(10 minutes)
-      State: ENABLED
-      Targets:
-        - Arn:
-            Fn::GetAtt:
-              - ResetLockedItemsFunction
-              - Arn
-          Id: !Sub "reset_locked_items-${STAGE}"

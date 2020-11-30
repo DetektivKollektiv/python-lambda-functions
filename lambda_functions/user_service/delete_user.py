@@ -1,4 +1,8 @@
-from crud import operations, helper
+import logging
+from core_layer import helper
+from core_layer.connection_handler import get_db_session
+from core_layer.handler import user_handler
+
 
 def delete_user(event, context, is_test=False, session=None):
     """Deletes a user from DB and Cognito.
@@ -21,11 +25,14 @@ def delete_user(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    helper.log_method_initiated("Delete user", event, logger)
     try:
         if session == None:
-            session = operations.get_db_session(is_test, session)
+            session = get_db_session(is_test, session)
 
-        operations.delete_user(event, is_test, session)
+        user_handler.delete_user(event, is_test, session)
 
         response = {
             "statusCode": 200
@@ -36,6 +43,6 @@ def delete_user(event, context, is_test=False, session=None):
             "statusCode": 500,
             "body": "User could not be deleted. Exception: {}".format(exception)
         }
-    
+
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors

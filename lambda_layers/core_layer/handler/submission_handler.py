@@ -1,8 +1,11 @@
-from core_layer.model import Submission
+# External imports
+from uuid import uuid4
 from sqlalchemy.orm import Session
+# Helper imports
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
-from uuid import uuid4
+# Model imports
+from core_layer.model.submission_model import Submission
 
 
 def create_submission_db(submission, is_test, session):
@@ -27,3 +30,11 @@ def create_submission_db(submission, is_test, session):
     session.commit()
 
     return submission
+
+
+def get_submissions_by_item_id(item_id, is_test, session):
+
+    session = get_db_session(is_test, session)
+    submissions = session.query(Submission).filter(
+        Submission.item_id == item_id).all()
+    return submissions
