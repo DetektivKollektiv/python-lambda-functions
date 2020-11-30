@@ -52,6 +52,7 @@ def create_review_answer(event, context, is_test=False, session=None):
         if(len(review.review_answers) == 7):
 
             review.status = "closed"
+            operations.give_experience_point(review.user_id, is_test, session)
 
             if(partner_review != None):
                 # Check if partner review is complete
