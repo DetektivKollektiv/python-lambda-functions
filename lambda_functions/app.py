@@ -13,8 +13,6 @@ from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, E
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-client = boto3.client('stepfunctions')
-
 
 def create_item(event, context, is_test=False, session=None):
     """Creates a new item.
@@ -606,116 +604,6 @@ def submit_review(event, context, is_test=False, session=None):
     return response_cors
 
 
-def item_submission(event, context, is_test=False, session=None):
-
-    helper.log_method_initiated("Item submission", event, logger)
-
-    if session == None:
-        session = operations.get_db_session(False, None)
-
-    try:
-        body = event['body']
-
-        if isinstance(body, str):
-            body_dict = json.loads(body)
-        else:
-            body_dict = body
-        content = body_dict["content"]
-        del body_dict["content"]
-        type = body_dict["type"]
-        del body_dict["type"]
-
-        submission = Submission()
-        helper.body_to_object(body_dict, submission)
-
-        try:
-            # Item already exists, item_id in submission is the id of the found item
-            found_item = operations.get_item_by_content_db(
-                content, is_test, session)
-            submission.item_id = found_item.id
-            new_item_created = False
-
-        except Exception:
-            # Item does not exist yet, item_id in submission is the id of the newly created item
-            new_item = Item()
-            new_item.open_timestamp = helper.get_date_time_now(is_test)
-            new_item.content = content
-            new_item.type = type
-            created_item = operations.create_item_db(
-                new_item, is_test, session)
-            new_item_created = True
-            submission.item_id = created_item.id
-            stage = os.environ['STAGE']
-            client.start_execution(
-                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks-'+stage,
-                name='SFC_' + created_item.id,
-                input="{\"item\":" + json.dumps(created_item.to_dict()) + "}"
-            )
-
-        # Create submission
-        operations.create_submission_db(submission, is_test, session)
-
-        response = {
-            "statusCode": 201,
-            'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
-            "body": json.dumps(submission.to_dict())
-        }
-
-    except Exception as e:
-        response = {
-            "statusCode": 400,
-            "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
-        }
-
-    response_cors = helper.set_cors(response, event, is_test)
-    return response_cors
-
-
-def get_open_items_for_user(event, context, is_test=False, session=None):
-
-    helper.log_method_initiated("Get open items for user", event, logger)
-
-    if session == None:
-        session = operations.get_db_session(False, None)
-
-    try:
-        # get cognito user id
-        id = helper.cognito_id_from_event(event)
-
-        # get number of items from url path
-        num_items = int(event['pathParameters']['num_items'])
-
-        user = operations.get_user_by_id(id, is_test, session)
-        items = operations.get_open_items_for_user_db(
-            user, num_items, is_test, session)
-
-        if len(items) < 1:
-            response = {
-                "statusCode": 404,
-                "body": "There are currently no open items for this user."
-            }
-        else:
-            # Transform each item into dict
-            items_dict = []
-            for item in items:
-                items_dict.append(item.to_dict())
-
-            response = {
-                "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(items_dict)
-            }
-
-    except Exception as e:
-        response = {
-            "statusCode": 400,
-            "body": "Could not get user and/or num_items. Check URL path parameters. Exception: {}".format(e)
-        }
-
-    response_cors = helper.set_cors(response, event, is_test)
-    return response_cors
-
-
 def reset_locked_items(event, context, is_test=False, session=None):
 
     helper.log_method_initiated("Reset locked items", event, logger)
@@ -738,61 +626,6 @@ def reset_locked_items(event, context, is_test=False, session=None):
             "statusCode": 400,
             "body": "Something went wrong. Check HTTP POST payload. Exception: {}".format(e)
         }
-
-
-def create_review(event, context, is_test=False, session=None):
-    """Creates a new review.
-
-    Parameters
-    ----------
-    - user_id is retrieved from the event
-    - item_id is retrieved from query parameters
-
-    Returns
-    ------
-    - Status code 201 (Created)
-    - The newly created review
-    """
-    helper.log_method_initiated("Create Review", event, logger)
-
-    if session == None:
-        session = operations.get_db_session(False, None)
-
-    try:
-        # get item id from url query params
-        item_id = event['queryStringParameters']['item_id']
-
-        # get cognito id
-        user_id = helper.cognito_id_from_event(event)
-
-        # get user and item from the db
-        user = operations.get_user_by_id(user_id, is_test, session)
-        item = operations.get_item_by_id(item_id, is_test, session)
-
-        # Try to accept item
-        try:
-            review = operations.accept_item_db(user, item, is_test, session)
-
-            response = {
-                "statusCode": 201,
-                'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(review.to_dict())
-            }
-
-        except Exception as e:
-            response = {
-                "statusCode": 400,
-                "body": "Cannot accept item. Exception: {}".format(e)
-            }
-
-    except Exception as e:
-        response = {
-            "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
-        }
-
-    response_cors = helper.set_cors(response, event, is_test)
-    return response_cors
 
 
 def get_review_question(event, context, is_test=False, session=None):

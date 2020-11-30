@@ -5,61 +5,6 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
-class Item(Base):
-    __tablename__ = 'items'
-    id = Column(String(36), primary_key=True)
-    type = Column(String(36))
-    content = Column(Text)
-    language = Column(String(2))
-    status = Column(String(36))
-    variance = Column(Float)
-    result_score = Column(Float)
-    open_reviews = Column(Integer)
-    open_reviews_level_1 = Column(Integer)
-    open_reviews_level_2 = Column(Integer)
-    in_progress_reviews_level_1 = Column(Integer)
-    in_progress_reviews_level_2 = Column(Integer)
-    open_timestamp = Column(DateTime)
-    close_timestamp = Column(DateTime)
-    verification_process_version = Column(Integer)
-
-    submissions = relationship("Submission")
-    factchecks = relationship("ExternalFactCheck")
-    entities = relationship("ItemEntity")
-    urls = relationship("ItemURL")
-    sentiments = relationship("ItemSentiment")
-    keyphrases = relationship("ItemKeyphrase")
-    reviews = relationship("Review", back_populates="item")
-    review_pairs = relationship("ReviewPair", back_populates="item")
-
-    def to_dict(self):
-        return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
-                "variance": self.variance, "result_score": self.result_score,
-                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
-                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
-                "in_progress_reviews_level_2": self.in_progress_reviews_level_2}
-
-
-class Submission(Base):
-    __tablename__ = 'submissions'
-    id = Column(String(36), primary_key=True)
-    submission_date = Column(DateTime)
-    mail = Column(String(100))
-    telegram_id = Column(String(100))
-    phone = Column(String(36))
-    source = Column(String(100))
-    channel = Column(String(100))
-    frequency = Column(String(100))
-    received_date = Column(DateTime)
-    item_id = Column(String(36), ForeignKey('items.id'))
-    item = relationship("Item", back_populates="submissions")
-
-    def to_dict(self):
-        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "telegram_id": self.telegram_id, "phone": self.phone,
-                "source": self.source, "frequency": self.frequency, "received_date": self.received_date,
-                "item_id": self.item_id}
-
-
 class ExternalFactCheck(Base):
     __tablename__ = 'factchecks'
     id = Column(String(36), primary_key=True)
@@ -164,22 +109,6 @@ class ItemKeyphrase(Base):
     keyphrase = relationship("Keyphrase", back_populates="items")
 
 
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(String(36), primary_key=True)
-    name = Column(String(100))
-    score = Column(Integer)
-    experience_points = Column(Integer)
-    level_id = Column(Integer, ForeignKey('levels.id'))
-
-    level = relationship("Level", back_populates="users")
-    reviews = relationship("Review", backref="user")
-
-    def to_dict(self):
-        return {"id": self.id, "name": self.name, "score": self.score, "level": self.level_id, "level_description": self.level.description,
-                "experience_points": self.experience_points}
-
-
 class Level(Base):
     __tablename__ = "levels"
     id = Column(Integer, primary_key=True)
@@ -261,41 +190,3 @@ class ReviewAnswer(Base):
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
                 "answer": self.answer, "comment": self.comment}
-
-
-class Review(Base):
-    __tablename__ = 'reviews'
-    id = Column(String(36), primary_key=True)
-    is_peer_review = Column(Boolean)
-    belongs_to_good_pair = Column(Boolean)
-    user_id = Column(String(36), ForeignKey('users.id'))
-    item_id = Column(String(36), ForeignKey('items.id',
-                                            ondelete='CASCADE', onupdate='CASCADE'))
-    start_timestamp = Column(DateTime)
-    finish_timestamp = Column(DateTime)
-    status = Column(String(100))
-
-    review_answers = relationship(
-        "ReviewAnswer", back_populates="review")
-    item = relationship("Item", back_populates="reviews")
-
-    def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review,
-                "belongs_to_good_pair": self.belongs_to_good_pair, "user_id": self.user_id,
-                "start_timestamp": str(self.start_timestamp), "finish_timestamp": str(self.finish_timestamp)}
-
-
-class ReviewPair(Base):
-    __tablename__ = 'review_pairs'
-    id = Column(String(36), primary_key=True)
-    item_id = Column(String(36), ForeignKey('items.id'))
-    junior_review_id = Column(String(36), ForeignKey('reviews.id'))
-    senior_review_id = Column(String(36), ForeignKey('reviews.id'))
-    is_good = Column(Boolean)
-    variance = Column(Float)
-
-    item = relationship("Item", back_populates="review_pairs")
-    junior_review = relationship(
-        "Review", foreign_keys=[junior_review_id])
-    senior_review = relationship(
-        "Review", foreign_keys=[senior_review_id])

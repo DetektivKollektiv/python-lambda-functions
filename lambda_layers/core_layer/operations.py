@@ -23,34 +23,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def create_item_db(item, is_test, session):
-    """Inserts a new item into the database
-
-    Parameters
-    ----------
-    item: Item, required
-        The item to be inserted
-
-    Returns
-    ------
-    item: Item
-        The inserted item
-    """
-    session = get_db_session(is_test, session)
-
-    item.id = str(uuid4())
-    item.open_reviews = 4
-    item.open_reviews_level_1 = 4
-    item.open_reviews_level_2 = 4
-    item.in_progress_reviews_level_1 = 0
-    item.in_progress_reviews_level_2 = 0
-    item.status = "open"
-    session.add(item)
-    session.commit()
-
-    return item
-
-
 def update_object_db(obj, is_test, session):
     """Updates an existing item in the database
 
@@ -83,44 +55,6 @@ def get_all_items_db(is_test, session):
     return items
 
 
-def get_item_by_content_db(content, is_test, session):
-    """Returns an item with the specified content from the database
-
-        Returns
-        ------
-        item: Item
-            The item
-        Null, if no item was found
-        """
-    session = get_db_session(is_test, session)
-    item = session.query(Item).filter(Item.content == content).first()
-    if item is None:
-        raise Exception("No item found.")
-    return item
-
-
-def get_item_by_id(id, is_test, session):
-    """Returns an item by its id
-
-    Parameters
-    ----------
-    id: str, required
-        The id of the item
-
-    Returns
-    ------
-    item: Item
-        The item
-    """
-    session = get_db_session(is_test, session)
-    item = session.query(Item).get(id)
-
-    # Uncomment to test telegram user notification
-    # notifications.notify_telegram_users(is_test, session, item)
-
-    return item
-
-
 def get_old_reviews_in_progress(is_test, session):
     old_time = helper.get_date_time_one_hour_ago(is_test)
     session = get_db_session(is_test, session)
@@ -148,30 +82,6 @@ def get_factcheck_by_itemid_db(id, is_test, session):
         join(Item.factchecks).\
         filter(Item.id == id)
     return factcheck.first()
-
-
-def create_submission_db(submission, is_test, session):
-    """Inserts a new submission into the database
-
-    Parameters
-    ----------
-    submission: Submission, required
-        The submission to be inserted
-
-    Returns
-    ------
-    submission: Submission
-        The inserted submission
-    """
-    session = get_db_session(is_test, session)
-
-    submission.id = str(uuid4())
-    submission.submission_date = helper.get_date_time_now(is_test)
-
-    session.add(submission)
-    session.commit()
-
-    return submission
 
 
 def get_all_submissions_db(is_test, session):
@@ -218,25 +128,6 @@ def get_all_users_db(is_test, session):
         session = get_db_session(is_test, session)
     users = session.query(User).all()
     return users
-
-
-def get_user_by_id(id, is_test, session):
-    """Returns a user by their id
-
-    Parameters
-    ----------
-    id: str, required
-        The id of the user
-
-    Returns
-    ------
-    user: User
-        The user
-    """
-
-    session = get_db_session(is_test, session)
-    user = session.query(User).get(id)
-    return user
 
 
 def delete_user(event, is_test, session):
@@ -428,65 +319,6 @@ def compute_item_result_score(item_id, is_test, session):
 
     result = statistics.median(average_scores)
     return result
-
-
-def get_open_items_for_user_db(user, num_items, is_test, session):
-    """Retreives a list of open items (in random order) to be reviewed by a user.
-
-    Parameters
-    ----------
-    user: User
-        The user that should receive a case
-    num_items: int
-        The (maximum) number of open items to be retreived
-
-    Returns
-    ------
-    items: Item[]
-        The list of open items for the user
-    """
-
-    session = get_db_session(is_test, session)
-    items = []
-
-    # If review in progress exists for user, return the corresponding item(s)
-    result = session.query(Review).filter(
-        Review.user_id == user.id, Review.status == "in_progress").limit(num_items)
-    if result.count() > 0:
-        for rip in result:
-            item_id = rip.item_id
-            item = get_item_by_id(item_id, is_test, session)
-            items.append(item)
-        # shuffle list order
-        random.shuffle(items)
-        return items
-
-    if user.level_id > 1:
-        # Get open items for senior review
-        result = session.query(Item) \
-            .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
-            .filter(~Item.reviews.any(Review.user_id == user.id)) \
-            .order_by(Item.open_timestamp.asc()) \
-            .limit(num_items).all()
-
-        # If open items are available, return them
-        if len(result) > 0:
-            for item in result:
-                items.append(item)
-            random.shuffle(items)
-            return items
-
-    # Get open items for junior review and return them
-    result = session.query(Item) \
-        .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
-        .filter(~Item.reviews.any(Review.user_id == user.id)) \
-        .order_by(Item.open_timestamp.asc()) \
-        .limit(num_items).all()
-
-    for item in result:
-        items.append(item)
-    random.shuffle(items)
-    return items
 
 
 def get_claimant_by_name_db(claimant_name, is_test, session):
@@ -712,97 +544,6 @@ def delete_old_reviews_in_progress(rips, is_test, session):
         session.merge(item)
         session.delete(rip)
     session.commit()
-
-
-def accept_item_db(user, item, is_test, session):
-    """Accepts an item for review
-
-    Parameters
-    ----------
-    user: User
-        The user that reviews the item
-    item: Item
-        The item to be reviewed by the user
-
-    Returns
-    ------
-    item: Item
-        The case to be assigned to the user
-    """
-    # If a ReviewInProgress exists for the user, return
-    try:
-        session.query(Review).filter(
-            Review.user_id == user.id, Review.status == "in_progress", Review.item_id == item.id).one()
-        return item
-    except:
-        pass
-
-    # If the amount of reviews in progress equals the amount of reviews needed, raise an error
-    if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
-        if user.level_id > 1:
-            if item.in_progress_reviews_level_2 >= item.open_reviews_level_2:
-                raise Exception(
-                    'Item cannot be accepted since enough other detecitves are already working on the case')
-        else:
-            raise Exception(
-                'Item cannot be accepted since enough other detecitves are already working on the case')
-    # Create a new ReviewInProgress
-    rip = Review()
-    rip.id = str(uuid4())
-    rip.item_id = item.id
-    rip.user_id = user.id
-    rip.start_timestamp = helper.get_date_time_now(is_test)
-    rip.status = "in_progress"
-
-    # If a user is a senior, the review will by default be a senior review,
-    # except if no senior reviews are needed
-    if user.level_id > 1 and item.open_reviews_level_2 > item.in_progress_reviews_level_2:
-        rip.is_peer_review = True
-        item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
-
-        # Check if a pair with open senior review exists
-        pair_found = False
-        for pair in item.review_pairs:
-            if pair.senior_review_id == None:
-                pair.senior_review_id = rip.id
-                pair_found = True
-                session.merge(pair)
-                break
-
-        # Create new pair, if review cannot be attached to existing pair
-        if pair_found == False:
-            pair = ReviewPair()
-            pair.id = str(uuid4())
-            pair.senior_review_id = rip.id
-            item.review_pairs.append(pair)
-            session.merge(pair)
-
-    # If review is junior review
-    else:
-        rip.is_peer_review = False
-        item.in_progress_reviews_level_1 = item.in_progress_reviews_level_1 + 1
-
-        # Check if a pair with open junior review exists
-        pair_found = False
-        for pair in item.review_pairs:
-            if pair.junior_review_id == None:
-                pair.junior_review_id = rip.id
-                pair_found = True
-                session.merge(pair)
-                break
-
-        # Create new pair, if review cannot be attached to existing pair
-        if pair_found == False:
-            pair = ReviewPair()
-            pair.id = str(uuid4())
-            pair.junior_review_id = rip.id
-            item.review_pairs.append(pair)
-            session.merge(pair)
-
-    session.add(rip)
-    session.merge(item)
-    session.commit()
-    return rip
 
 
 def get_next_question_db(review, previous_question, is_test, session):

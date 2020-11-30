@@ -1,7 +1,8 @@
 import logging
 import json
 
-from core_layer import helper, connection_handler, item_handler
+from core_layer import helper, connection_handler
+from core_layer.handler import item_handler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
