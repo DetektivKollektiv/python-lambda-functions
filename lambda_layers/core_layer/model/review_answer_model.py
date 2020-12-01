@@ -21,3 +21,23 @@ class ReviewAnswer(Base):
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
                 "answer": self.answer, "comment": self.comment}
+
+
+question_option_pairs = Table('question_option_pairs', Base.metadata,
+                              Column('question_id', String(36),
+                                     ForeignKey('review_questions.id')),
+                              Column('option_id', String(36),
+                                     ForeignKey('answer_options.id'))
+                              )
+
+
+class AnswerOption(Base):
+    __tablename__ = 'answer_options'
+    id = Column(String(36), primary_key=True)
+    text = Column(Text)
+    value = Column(Integer)
+    questions = relationship(
+        "ReviewQuestion", secondary=question_option_pairs, back_populates="options")
+
+    def to_dict(self):
+        return {"id": self.id, "text": self.text, "value": self.value}

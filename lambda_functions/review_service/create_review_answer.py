@@ -8,7 +8,7 @@ from core_layer.connection_handler import get_db_session
 # Model imports
 from core_layer.model.review_answer_model import ReviewAnswer
 # Handler imports
-from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler
+from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler, user_handler
 import notifications
 
 
@@ -62,6 +62,8 @@ def create_review_answer(event, context, is_test=False, session=None):
         if(len(review.review_answers) == 7):
 
             review.status = "closed"
+            user_handler.give_experience_point(
+                review.user_id, is_test, session)
 
             if(partner_review != None):
                 # Check if partner review is complete

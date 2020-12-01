@@ -30,25 +30,6 @@ class FactChecking_Organization(Base):
     factchecks = relationship("ExternalFactCheck")
 
 
-class Entity(Base):
-    __tablename__ = 'entities'
-    id = Column(String(36), primary_key=True)
-    entity = Column(String(200))
-    items = relationship("ItemEntity")
-
-    def to_dict(self):
-        return {"id": self.id, "entity": self.entity}
-
-
-class ItemEntity(Base):
-    __tablename__ = 'item_entities'
-    id = Column(String(36), primary_key=True)
-    item_id = Column(String(36), ForeignKey('items.id'))
-    item = relationship("Item", back_populates="entities")
-    entity_id = Column(String(36), ForeignKey('entities.id'))
-    entity = relationship("Entity", back_populates="items")
-
-
 class Claimant(Base):
     __tablename__ = 'claimants'
     id = Column(String(36), primary_key=True)
@@ -88,51 +69,3 @@ class ItemSentiment(Base):
     item = relationship("Item", back_populates="sentiments")
     sentiment_id = Column(String(36), ForeignKey('sentiments.id'))
     sentiment = relationship("Sentiment", back_populates="items")
-
-
-class Keyphrase(Base):
-    __tablename__ = 'keyphrases'
-    id = Column(String(36), primary_key=True)
-    phrase = Column(String(100))
-    items = relationship("ItemKeyphrase")
-
-    def to_dict(self):
-        return {"id": self.id, "phrase": self.phrase}
-
-
-class ItemKeyphrase(Base):
-    __tablename__ = 'item_keyphrases'
-    id = Column(String(36), primary_key=True)
-    item_id = Column(String(36), ForeignKey('items.id'))
-    item = relationship("Item", back_populates="keyphrases")
-    keyphrase_id = Column(String(36), ForeignKey('keyphrases.id'))
-    keyphrase = relationship("Keyphrase", back_populates="items")
-
-
-class Level(Base):
-    __tablename__ = "levels"
-    id = Column(Integer, primary_key=True)
-    description = Column(String(100))
-    required_experience_points = Column(Integer)
-
-    users = relationship("User", back_populates="level")
-
-
-question_option_pairs = Table('question_option_pairs', Base.metadata,
-                              Column('question_id', String(36),
-                                     ForeignKey('review_questions.id')),
-                              Column('option_id', String(36),
-                                     ForeignKey('answer_options.id'))
-                              )
-
-
-class AnswerOption(Base):
-    __tablename__ = 'answer_options'
-    id = Column(String(36), primary_key=True)
-    text = Column(Text)
-    value = Column(Integer)
-    questions = relationship(
-        "ReviewQuestion", secondary=question_option_pairs, back_populates="options")
-
-    def to_dict(self):
-        return {"id": self.id, "text": self.text, "value": self.value}

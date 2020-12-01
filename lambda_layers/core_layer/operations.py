@@ -144,19 +144,6 @@ def get_review_answers_by_review_id_db(review_id, is_test, session):
     return review_answers
 
 
-def give_experience_point(user_id, is_test, session):
-    user = get_user_by_id(user_id, is_test, session)
-    user.experience_points = user.experience_points + 1
-    new_level = session.query(Level) \
-        .filter(Level.required_experience_points <= user.experience_points) \
-        .order_by(Level.required_experience_points.desc()) \
-        .first()
-
-    if new_level != user.level_id:
-        user.level_id = new_level.id
-    update_object_db(user, is_test, session)
-
-
 def get_pair_difference(junior_review, peer_review, is_test, session):
 
     peer_review_answers = get_review_answers_by_review_id_db(
@@ -220,7 +207,8 @@ def get_url_by_content_db(content, is_test, session):
     return url
 
 
-def get_entity_by_content_db(content, is_test, session):
+def
+ity_by_content_db(content, is_test, session):
     """Returns an entity with the specified content from the database
 
         Returns
@@ -300,23 +288,6 @@ def get_itementity_by_entity_and_item_db(entity_id, item_id, is_test, session):
     return itementity
 
 
-def get_entities_by_itemid_db(item_id, is_test, session):
-    """Returns the entities for an item
-
-        Returns
-        ------
-        entities: Entity[]
-        Null, if no entity was found
-    """
-    session = get_db_session(is_test, session)
-    entities = session.query(Entity).\
-        join(ItemEntity).\
-        filter(ItemEntity.item_id == item_id).\
-        filter(ItemEntity.entity_id == Entity.id).\
-        all()
-    return entities
-
-
 def get_sentiment_by_content_db(content, is_test, session):
     """Returns the sentiment with the specified content from the database
 
@@ -381,38 +352,6 @@ def get_itemphrase_by_phrase_and_item_db(phrase_id, item_id, is_test, session):
     if itemphrase is None:
         raise Exception("No ItemKeyphrase found.")
     return itemphrase
-
-
-def get_phrases_by_itemid_db(item_id, is_test, session):
-    """Returns the key phrases for an item
-
-        Returns
-        ------
-        phrases: Keyphrase[]
-        Null, if no entity was found
-    """
-    session = get_db_session(is_test, session)
-    phrases = session.query(Keyphrase).\
-        join(ItemKeyphrase).\
-        filter(ItemKeyphrase.item_id == item_id).\
-        filter(ItemKeyphrase.keyphrase_id == Keyphrase.id).\
-        all()
-    return phrases
-
-
-def get_all_closed_items_db(is_test, session):
-    """Gets all closed items
-
-    Returns
-    ------
-    items: Item[]
-        The closed items
-    """
-
-    session = get_db_session(is_test, session)
-
-    items = session.query(Item).filter(Item.status == 'closed').all()
-    return items
 
 
 def get_review_in_progress(user_id, item_id, is_test, session):

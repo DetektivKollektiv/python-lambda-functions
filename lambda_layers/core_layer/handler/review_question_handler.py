@@ -91,7 +91,7 @@ def get_next_question_db(review, previous_question, is_test, session):
             # Check if question is a parent question
             if question.parent_question == None:
                 # Check if question does not exceed limit with child question
-                if remaining_questions > question.max_children:
+                if question.max_children and remaining_questions > question.max_children:
                     return question
 
     raise Exception("No question could be returned")

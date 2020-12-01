@@ -5,6 +5,7 @@ from core_layer.connection_handler import get_db_session
 from core_layer import helper
 
 from core_layer.model.user_model import User
+from core_layer.model.level_model import Level
 
 
 def get_user_by_id(id, is_test, session):
@@ -82,3 +83,16 @@ def create_user(user, is_test, session):
     session.commit()
 
     return user
+
+
+def give_experience_point(user_id, is_test, session):
+    user = get_user_by_id(user_id, is_test, session)
+    user.experience_points = user.experience_points + 1
+    new_level = session.query(Level) \
+        .filter(Level.required_experience_points <= user.experience_points) \
+        .order_by(Level.required_experience_points.desc()) \
+        .first()
+
+    if new_level != user.level_id:
+        user.level_id = new_level.id
+    helper.update_object(user, is_test, session)

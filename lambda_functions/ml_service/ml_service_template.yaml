@@ -1,0 +1,302 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the DetektivKollektiv ml API" # Change for each template
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+
+Parameters:
+  STAGE:
+    Type: String
+  CorsAllowOrigin:
+    Type: String
+  DBNAME:
+    Type: String
+    Default: development_db
+  HOSTEDZONEID:
+    Type: String
+  CERTARN:
+    Type: String
+
+Conditions:
+  IsProdEnvironment: !Equals [!Sub "${STAGE}", prod]
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: STAGE
+      Cors:
+        AllowMethods: "'OPTIONS, PUT, POST, GET, DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+        AddDefaultAuthorizerToCorsPreflight: false
+        InvokeRole: NONE
+      Domain:
+        DomainName:
+          !If [
+            IsProdEnvironment,
+            api.detektivkollektiv.org,
+            !Sub "${STAGE}.api.detektivkollektiv.org",
+          ]
+        CertificateArn: !Sub "${CERTARN}"
+        Basepath:
+          - /ml # Change for each API
+        Route53:
+          HostedZoneId: !Sub "${HOSTEDZONEID}"
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "detektivkollektiv-api-execution-ml-service-${STAGE}" # Change for each Role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+
+  GetFactcheckByItemidFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}"
+      CodeUri: .
+      Handler: get_online_factcheck.get_online_factcheck
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api  # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /factchecks/{item_id}
+            Method: get
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
+
+  SearchFactChecksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-SearchFactChecks-${STAGE}"
+      CodeUri: .
+      Handler: SearchFactChecks.get_FactChecks
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+        - !Ref libs
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Layers:
+        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
+
+  UpdateFactCheckModelsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
+      CodeUri: .
+      Handler: UpdateFactChecks.update_factcheck_models
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
+
+  GetLanguageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-GetLanguage-${STAGE}"
+      CodeUri: .
+      Handler: GetLanguage.get_language
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  GetKeyPhrasesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-GetKeyPhrases-${STAGE}"
+      CodeUri: .
+      Handler: GetKeyPhrases.get_phrases
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  GetEntitiesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-GetEntities-${STAGE}"
+      CodeUri: .
+      Handler: GetEntities.get_entities
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  ExtractClaimFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-ExtractClaim-${STAGE}"
+      CodeUri: .
+      Handler: ExtractClaim.extract_claim
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  GetSentimentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-GetSentiment-${STAGE}"
+      CodeUri: .
+      Handler: GetSentiment.get_sentiment
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  UpdateLanguageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-UpdateItem-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.update_item
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreFactChecksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-StoreFactChecks-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_factchecks
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemURL:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemURL-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_itemurl
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemEntityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemEntities-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_itementities
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemSentimentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemSentiment-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_itemsentiment
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemKeyphraseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-StoreItemKeyphrases-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_itemphrases
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME

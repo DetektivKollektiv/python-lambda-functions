@@ -66,6 +66,8 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
 
   SubmitItemFunction: # Change for each lambda
     Type: AWS::Serverless::Function
