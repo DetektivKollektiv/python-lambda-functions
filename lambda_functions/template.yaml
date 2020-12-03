@@ -263,6 +263,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
       Layers:
         - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-aiohttp:20
 
