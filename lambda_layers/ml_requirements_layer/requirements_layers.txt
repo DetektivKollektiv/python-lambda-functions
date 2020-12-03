@@ -1,2 +1,6 @@
 aiohttp
 aiodns
+beautifulsoup4
+pandas
+io
+pickle

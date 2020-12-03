@@ -1,7 +1,18 @@
 import logging
-from crud.model import Item, ExternalFactCheck, ItemURL, URL, FactChecking_Organization, Entity, ItemEntity, Sentiment, \
-    ItemSentiment, Keyphrase, ItemKeyphrase, Claimant
-from crud import operations
+from core_layer.connection_handler import get_db_session, update_object
+from core_layer import helper
+
+from core_layer.model.item_model import Item
+from core_layer.model.external_factcheck_model import ExternalFactCheck
+from core_layer.model.factchecking_organization_model import FactChecking_Organization
+from core_layer.model.entity_model import Entity, ItemEntity
+from core_layer.model.sentiment_model import Sentiment, ItemSentiment
+from core_layer.model.keyphrase_model import Keyphrase, ItemKeyphrase
+from core_layer.model.claimant_model import Claimant
+from core_layer.model.url_model import URL, ItemURL
+
+from core_layer.handler import factchecking_organization_handler, external_factcheck_handler, claimant_handler, url_handler, entity_handler, sentiment_handler, keyphrase_handler
+
 from uuid import uuid4
 from urllib.parse import urlparse
 
@@ -32,7 +43,7 @@ def update_item(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Parse event dict to Item object
     item = Item()
@@ -41,7 +52,7 @@ def update_item(event, context, is_test=False, session=None):
         setattr(item, key, json_event[key])
 
     try:
-        operations.update_object_db(item, is_test, session)
+        update_object(item, is_test, session)
     except Exception as e:
         logger.error("Could not update item. Exception: %s", e, exc_info=True)
         raise
@@ -69,7 +80,7 @@ def store_factchecks(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Parse event dict to Item object
     for json_event in event['FactChecks']:
@@ -89,7 +100,7 @@ def store_factchecks(event, context, is_test=False, session=None):
             org_name = "Unknown"
         # Does the publishing organization already exist?
         try:
-            organization = operations.get_organization_by_content_db(
+            organization = factchecking_organization_handler.get_organization_by_name(
                 org_name, is_test, session)
         except Exception:
             # store organization in database
@@ -98,7 +109,7 @@ def store_factchecks(event, context, is_test=False, session=None):
             organization.counter_trustworthy = 0
             organization.counter_not_trustworthy = 0
             try:
-                operations.update_object_db(organization, is_test, session)
+                update_object(organization, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store Organization. Exception: %s", e, exc_info=True)
@@ -108,7 +119,7 @@ def store_factchecks(event, context, is_test=False, session=None):
         item_id = event['item']['id']
         try:
             # Does the factcheck already exist?
-            factcheck = operations.get_factcheck_by_url_and_item_db(
+            factcheck = external_factcheck_handler.get_factcheck_by_url_and_item_id(
                 factcheck_url, item_id, is_test, session)
         except Exception as e:
             # create new factcheck in database
@@ -119,7 +130,7 @@ def store_factchecks(event, context, is_test=False, session=None):
         factcheck.item_id = item_id
         factcheck.factchecking_organization_id = organization.id
         try:
-            operations.update_object_db(factcheck, is_test, session)
+            update_object(factcheck, is_test, session)
         except Exception as e:
             logger.error(
                 "Could not store factchecks. Exception: %s", e, exc_info=True)
@@ -150,7 +161,7 @@ def store_itemurl(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Store all urls referenced in the item
     for str_url in event['Claim']['urls']:
@@ -161,14 +172,14 @@ def store_itemurl(event, context, is_test=False, session=None):
         claimant = Claimant()
         # claimant already exists?
         try:
-            claimant = operations.get_claimant_by_name_db(
+            claimant = claimant_handler.get_claimant_by_name(
                 domain, is_test, session)
         except Exception:
             # store claimant in database
             claimant.id = str(uuid4())
             claimant.claimant = domain
             try:
-                operations.update_object_db(claimant, is_test, session)
+                update_object(claimant, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store claimant. Exception: %s", e, exc_info=True)
@@ -176,14 +187,14 @@ def store_itemurl(event, context, is_test=False, session=None):
         # search for url in database
         url = URL()
         try:
-            url = operations.get_url_by_content_db(str_url, is_test, session)
+            url = url_handler.get_url_by_content(str_url, is_test, session)
         except Exception:
             # store url in database
             url.id = str(uuid4())
             url.url = str_url
             url.claimant_id = claimant.id
             try:
-                operations.update_object_db(url, is_test, session)
+                update_object(url, is_test, session)
             except Exception as e:
                 logger.error("Could not store urls. Exception: %s",
                              e, exc_info=True)
@@ -192,7 +203,7 @@ def store_itemurl(event, context, is_test=False, session=None):
         # itemurl already exists?
         item_id = event['item']['id']
         try:
-            itemurl = operations.get_itemurl_by_url_and_item_db(
+            itemurl = url_handler.get_itemurl_by_url_and_item_id(
                 url.id, item_id, is_test, session)
         except Exception:
             # store itemurl in database
@@ -200,7 +211,7 @@ def store_itemurl(event, context, is_test=False, session=None):
             itemurl.item_id = item_id
             itemurl.url_id = url.id
             try:
-                operations.update_object_db(itemurl, is_test, session)
+                update_object(itemurl, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store itemurls. Exception: %s", e, exc_info=True)
@@ -231,21 +242,21 @@ def store_itementities(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Store all entities of the item
     for str_entity in event['Entities']:
         entity = Entity()
         # search for entity in database
         try:
-            entity = operations.get_entity_by_content_db(
+            entity = entity_handler.get_entity_by_content(
                 str_entity, is_test, session)
         except Exception:
             # store entity in database
             entity.id = str(uuid4())
             entity.entity = str_entity
             try:
-                operations.update_object_db(entity, is_test, session)
+                update_object(entity, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store entity. Exception: %s", e, exc_info=True)
@@ -255,14 +266,14 @@ def store_itementities(event, context, is_test=False, session=None):
         # item entity already exists?
         item_id = event['item']['id']
         try:
-            itementity = operations.get_itementity_by_entity_and_item_db(
+            itementity = entity_handler.get_itementity_by_entity_and_item_id(
                 entity.id, item_id, is_test, session)
         except Exception:
             itementity.id = str(uuid4())
             itementity.item_id = item_id
             itementity.entity_id = entity.id
             try:
-                operations.update_object_db(itementity, is_test, session)
+                update_object(itementity, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store item entity. Exception: %s", e, exc_info=True)
@@ -293,21 +304,21 @@ def store_itemsentiment(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Store the sentiment of the item
     sentiment = Sentiment()
     # search for sentiment in database
     str_sentiment = event['Sentiment']
     try:
-        sentiment = operations.get_sentiment_by_content_db(
+        sentiment = sentiment_handler.get_sentiment_by_content(
             str_sentiment, is_test, session)
     except Exception:
         # store sentiment in database
         sentiment.id = str(uuid4())
         sentiment.sentiment = str_sentiment
         try:
-            operations.update_object_db(sentiment, is_test, session)
+            update_object(sentiment, is_test, session)
         except Exception as e:
             logger.error(
                 "Could not store sentiment. Exception: %s", e, exc_info=True)
@@ -317,14 +328,14 @@ def store_itemsentiment(event, context, is_test=False, session=None):
     # item entity already exists?
     item_id = event['item']['id']
     try:
-        itemsentiment = operations.get_itemsentiment_by_sentiment_and_item_db(
+        itemsentiment = sentiment_handler.get_itemsentiment_by_sentiment_and_item_id(
             sentiment.id, item_id, is_test, session)
     except Exception:
         itemsentiment.id = str(uuid4())
         itemsentiment.item_id = item_id
         itemsentiment.sentiment_id = sentiment.id
         try:
-            operations.update_object_db(itemsentiment, is_test, session)
+            update_object(itemsentiment, is_test, session)
         except Exception as e:
             logger.error(
                 "Could not store item sentiment. Exception: %s", e, exc_info=True)
@@ -355,21 +366,21 @@ def store_itemphrases(event, context, is_test=False, session=None):
     """
 
     if session is None:
-        session = operations.get_db_session(is_test, session)
+        session = get_db_session(is_test, session)
 
     # Store all entities of the item
     for str_phrase in event['KeyPhrases']:
         phrase = Keyphrase()
         # search for entity in database
         try:
-            phrase = operations.get_phrase_by_content_db(
+            phrase = keyphrase_handler.get_phrase_by_content(
                 str_phrase, is_test, session)
         except Exception:
             # store phrase in database
             phrase.id = str(uuid4())
             phrase.phrase = str_phrase
             try:
-                operations.update_object_db(phrase, is_test, session)
+                update_object(phrase, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store key phrase. Exception: %s", e, exc_info=True)
@@ -379,14 +390,14 @@ def store_itemphrases(event, context, is_test=False, session=None):
         # item phrase already exists?
         item_id = event['item']['id']
         try:
-            itemphrase = operations.get_itemphrase_by_phrase_and_item_db(
+            itemphrase = keyphrase_handler.get_itemphrase_by_phrase_and_item_id(
                 phrase.id, item_id, is_test, session)
         except Exception:
             itemphrase.id = str(uuid4())
             itemphrase.item_id = item_id
             itemphrase.keyphrase_id = phrase.id
             try:
-                operations.update_object_db(itemphrase, is_test, session)
+                update_object(itemphrase, is_test, session)
             except Exception as e:
                 logger.error(
                     "Could not store item key phrase. Exception: %s", e, exc_info=True)

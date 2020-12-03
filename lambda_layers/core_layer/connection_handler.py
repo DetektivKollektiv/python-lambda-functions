@@ -44,3 +44,22 @@ def get_db_session(is_test, session) -> Session:
     session = Session()
 
     return session
+
+
+def update_object(obj, is_test, session):
+    """Updates an existing item in the database
+
+    Parameters
+    ----------
+    obj: object to be merged in the DB, required
+        The item to be updates
+
+    Returns
+    ------
+    obj: The merged object
+    """
+    session = get_db_session(is_test, session)
+
+    session.merge(obj)
+    session.commit()
+    return obj

@@ -208,22 +208,17 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-reset_locked_items-${STAGE}"
+            Description: Schdule for starting reset lambda every 10 minutes
+            Enabled: True
+            Schedule: rate(10 minutes)
       Environment:
         Variables:
           DBNAME:
             Ref: DBNAME
       Layers:
         - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
-
-  ResetLockedItemsRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Description: Resets Locked items every 10 minutes.
-      ScheduleExpression: rate(10 minutes)
-      State: ENABLED
-      Targets:
-        - Arn:
-            Fn::GetAtt:
-              - ResetLockedItemsFunction
-              - Arn
-          Id: !Sub "reset_locked_items-${STAGE}"

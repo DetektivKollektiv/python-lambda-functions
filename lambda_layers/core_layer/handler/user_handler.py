@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy.orm import Session
 import boto3
-from core_layer.connection_handler import get_db_session
+from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
 from core_layer.model.user_model import User
@@ -95,4 +95,4 @@ def give_experience_point(user_id, is_test, session):
 
     if new_level != user.level_id:
         user.level_id = new_level.id
-    helper.update_object(user, is_test, session)
+    update_object(user, is_test, session)

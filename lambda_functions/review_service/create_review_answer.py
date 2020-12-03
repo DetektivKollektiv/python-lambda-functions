@@ -4,7 +4,7 @@ import json
 from uuid import uuid4
 # Helper imports
 from core_layer import helper
-from core_layer.connection_handler import get_db_session
+from core_layer.connection_handler import get_db_session, update_object
 # Model imports
 from core_layer.model.review_answer_model import ReviewAnswer
 # Handler imports
@@ -106,9 +106,9 @@ def create_review_answer(event, context, is_test=False, session=None):
             # Notify email and telegram users
             notifications.notify_users(is_test, session, review.item)
 
-        helper.update_object(review, is_test, session)
-        helper.update_object(pair, is_test, session)
-        helper.update_object(review.item, is_test, session)
+        update_object(review, is_test, session)
+        update_object(pair, is_test, session)
+        update_object(review.item, is_test, session)
 
         response = {
             "statusCode": 201,

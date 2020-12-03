@@ -67,7 +67,7 @@ Resources:
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
         - arn:aws:iam::aws:policy/AWSLambdaExecute
-
+        - arn:aws:iam::aws:policy/ComprehendFullAccess
 
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -83,7 +83,7 @@ Resources:
           - Arn
       Events:
         Echo:
-          Type: Api  # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /factchecks/{item_id}
             Method: get
@@ -107,13 +107,12 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - !Ref libs
+        - Fn::ImportValue: !Sub "ml-requirements-layer-arn-${STAGE}"
+        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
-      Layers:
-        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
 
   UpdateFactCheckModelsFunction:
     Type: AWS::Serverless::Function
