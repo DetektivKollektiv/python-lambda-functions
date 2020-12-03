@@ -96,42 +96,42 @@ def test_closed_item_notification(monkeypatch):
     assert len(items) == 1
 
     # Junior detectives accepting item
-    operations.accept_item_db(junior_detective1, item, True, session)
+    operations.create_review(junior_detective1, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 3
     assert item.in_progress_reviews_level_1 == 1
 
-    operations.accept_item_db(junior_detective2, item, True, session)
+    operations.create_review(junior_detective2, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 3
     assert item.in_progress_reviews_level_1 == 2
 
-    operations.accept_item_db(junior_detective3, item, True, session)
+    operations.create_review(junior_detective3, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 3
     assert item.in_progress_reviews_level_1 == 3
 
     with pytest.raises(Exception):
-        operations.accept_item_db(junior_detective4, item, True, session)
+        operations.create_review(junior_detective4, item, True, session)
 
     # Senior detectives accepting item
-    operations.accept_item_db(senior_detective1, item, True, session)
+    operations.create_review(senior_detective1, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 3
     assert item.in_progress_reviews_level_2 == 1
 
-    operations.accept_item_db(senior_detective2, item, True, session)
+    operations.create_review(senior_detective2, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 3
     assert item.in_progress_reviews_level_2 == 2
 
-    operations.accept_item_db(senior_detective3, item, True, session)
+    operations.create_review(senior_detective3, item, True, session)
     item = operations.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_2 == 3
     assert item.in_progress_reviews_level_2 == 3
 
     with pytest.raises(Exception):
-        operations.accept_item_db(senior_detective4, item, True, session)
+        operations.create_review(senior_detective4, item, True, session)
 
     # Junior detectives reviewing item
 

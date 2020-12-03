@@ -1,4 +1,4 @@
-from core_layer import model_base
+from . import model_base
 from core_layer.model.claimant_model import Claimant
 from core_layer.model.entity_model import Entity, ItemEntity
 from core_layer.model.external_factcheck_model import ExternalFactCheck

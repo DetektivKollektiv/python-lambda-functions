@@ -13,7 +13,7 @@ from core_layer.model.item_model import Item
 from review_service.create_review_answer import create_review_answer
 from core_layer.handler import review_handler
 
-from lambda_functions.tests.helper import event_creator
+from ....tests.helper import event_creator
 
 from uuid import uuid4
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
-from core_layer.model_base import Base
+from .model_base import Base
 
 
 class ReviewAnswer(Base):

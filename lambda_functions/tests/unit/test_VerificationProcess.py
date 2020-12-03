@@ -43,44 +43,44 @@ def test_verification_process_best_case(monkeypatch):
     assert len(items) == 1
 
     # Junior detectives accepting item
-    jr1 = operations.accept_item_db(junior_detective1, item, True, session)
+    jr1 = operations.create_review(junior_detective1, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    jr2 = operations.accept_item_db(junior_detective2, item, True, session)
+    jr2 = operations.create_review(junior_detective2, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    jr3 = operations.accept_item_db(junior_detective3, item, True, session)
+    jr3 = operations.create_review(junior_detective3, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
-    jr4 = operations.accept_item_db(junior_detective4, item, True, session)
+    jr4 = operations.create_review(junior_detective4, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 4
 
     with pytest.raises(Exception):
-        operations.accept_item_db(junior_detective5, item, True, session)
+        operations.create_review(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    sr1 = operations.accept_item_db(senior_detective1, item, True, session)
+    sr1 = operations.create_review(senior_detective1, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    sr2 = operations.accept_item_db(senior_detective2, item, True, session)
+    sr2 = operations.create_review(senior_detective2, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    sr3 = operations.accept_item_db(senior_detective3, item, True, session)
+    sr3 = operations.create_review(senior_detective3, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
-    sr4 = operations.accept_item_db(senior_detective4, item, True, session)
+    sr4 = operations.create_review(senior_detective4, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 4
 
     with pytest.raises(Exception):
-        operations.accept_item_db(senior_detective5, item, True, session)
+        operations.create_review(senior_detective5, item, True, session)
 
     pairs = operations.get_review_pairs_by_item(item.id, True, session)
     assert len(pairs) == 4
@@ -131,44 +131,44 @@ def test_verification_process_worst_case(monkeypatch):
     assert len(items) == 1
 
     # Junior detectives accepting item
-    jr1 = operations.accept_item_db(junior_detective1, item, True, session)
+    jr1 = operations.create_review(junior_detective1, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    jr2 = operations.accept_item_db(junior_detective2, item, True, session)
+    jr2 = operations.create_review(junior_detective2, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    jr3 = operations.accept_item_db(junior_detective3, item, True, session)
+    jr3 = operations.create_review(junior_detective3, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
-    jr4 = operations.accept_item_db(junior_detective4, item, True, session)
+    jr4 = operations.create_review(junior_detective4, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 4
 
     with pytest.raises(Exception):
-        operations.accept_item_db(junior_detective5, item, True, session)
+        operations.create_review(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    sr1 = operations.accept_item_db(senior_detective1, item, True, session)
+    sr1 = operations.create_review(senior_detective1, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    sr2 = operations.accept_item_db(senior_detective2, item, True, session)
+    sr2 = operations.create_review(senior_detective2, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    sr3 = operations.accept_item_db(senior_detective3, item, True, session)
+    sr3 = operations.create_review(senior_detective3, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
-    sr4 = operations.accept_item_db(senior_detective4, item, True, session)
+    sr4 = operations.create_review(senior_detective4, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 4
 
     with pytest.raises(Exception):
-        operations.accept_item_db(senior_detective5, item, True, session)
+        operations.create_review(senior_detective5, item, True, session)
 
     pairs = operations.get_review_pairs_by_item(item.id, True, session)
     assert len(pairs) == 4

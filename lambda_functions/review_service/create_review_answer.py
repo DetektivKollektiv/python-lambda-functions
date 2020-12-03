@@ -9,7 +9,7 @@ from core_layer.connection_handler import get_db_session, update_object
 from core_layer.model.review_answer_model import ReviewAnswer
 # Handler imports
 from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler, user_handler
-import notifications
+from . import notifications
 
 
 def create_review_answer(event, context, is_test=False, session=None):

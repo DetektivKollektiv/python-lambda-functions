@@ -4,7 +4,7 @@ import os
 
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import Session, sessionmaker
-from model_base import Base
+from .model.model_base import Base
 
 
 def get_db_session(is_test, session) -> Session:

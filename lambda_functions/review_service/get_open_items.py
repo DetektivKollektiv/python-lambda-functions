@@ -23,7 +23,7 @@ def get_open_items(event, context, is_test=False, session=None):
         num_items = int(event['pathParameters']['num_items'])
 
         user = user_handler.get_user_by_id(id, is_test, session)
-        items = item_handler.get_open_items_for_user_db(
+        items = item_handler.get_open_items_for_user(
             user, num_items, is_test, session)
 
         if len(items) < 1:

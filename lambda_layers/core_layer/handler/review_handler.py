@@ -34,7 +34,7 @@ def get_partner_review(review, is_test, session):
         return None
 
 
-def accept_item_db(user, item, is_test, session) -> Review:
+def create_review(user, item, is_test, session) -> Review:
     """Accepts an item for review
 
     Parameters

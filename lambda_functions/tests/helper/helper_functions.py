@@ -1,9 +1,10 @@
 import json
 from uuid import uuid4
-import test.unit.event_creator as event_creator
-import app
-from crud.model import ReviewAnswer, Review
-import review_answer_handler
+from . import event_creator
+from core_layer.model.review_answer_model import ReviewAnswer
+from core_layer.model.review_model import Review
+from ...review_service.create_review_answer import create_review_answer
+from ...review_service.get_review_question import get_review_question
 
 
 def create_answers_for_review(review: Review, answer: int, session):
@@ -11,7 +12,7 @@ def create_answers_for_review(review: Review, answer: int, session):
     for i in range(7):
         next_question_event = event_creator.get_next_question_event(
             review.id, question_id)
-        response = app.get_review_question(
+        response = get_review_question(
             next_question_event, None, True, session)
         body = json.loads(response['body'])
         question_id = body['id']
@@ -26,6 +27,6 @@ def create_answers_for_review(review: Review, answer: int, session):
         review_answer_event = event_creator.get_create_review_answer_event(
             review_answer)
 
-        response = review_answer_handler.create_review_answer(
+        response = create_review_answer(
             review_answer_event, None, True, session)
         assert response['statusCode'] == 201

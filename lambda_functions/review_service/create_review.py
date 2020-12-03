@@ -40,7 +40,7 @@ def create_review(event, context, is_test=False, session=None):
 
         # Try to accept item
         try:
-            review = review_handler.accept_item_db(
+            review = review_handler.create_review(
                 user, item, is_test, session)
 
             response = {

@@ -1,9 +1,13 @@
-import crud.operations as operations
-from crud.model import User, Item, Level, ReviewQuestion
+from core_layer.model.user_model import User
+from core_layer.model.item_model import Item
+from core_layer.model.level_model import Level
+from core_layer.model.review_question_model import ReviewQuestion
+from core_layer.handler import user_handler
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
-import test.unit.event_creator as event_creator
+import event_creator
 
 # TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
 
@@ -42,33 +46,33 @@ def create_levels_junior_and_senior_detectives(session):
     junior_detective1 = User()
     junior_detective1.id = "1"
     junior_detective1.name = "Junior1"
-    operations.create_user_db(junior_detective1, True, session)
+    user_handler.create_user(junior_detective1, True, session)
 
     junior_detective2 = User()
     junior_detective2.id = "2"
     junior_detective2.name = "Junior2"
-    operations.create_user_db(junior_detective2, True, session)
+    user_handler.create_user(junior_detective2, True, session)
 
     junior_detective3 = User()
     junior_detective3.id = "3"
     junior_detective3.name = "Junior3"
-    operations.create_user_db(junior_detective3, True, session)
+    user_handler.create_user(junior_detective3, True, session)
 
     junior_detective4 = User()
     junior_detective4.id = "4"
     junior_detective4.name = "Junior4"
-    operations.create_user_db(junior_detective4, True, session)
+    user_handler.create_user(junior_detective4, True, session)
 
     junior_detective5 = User()
     junior_detective5.id = "5"
     junior_detective5.name = "Junior5"
-    operations.create_user_db(junior_detective5, True, session)
+    user_handler.create_user(junior_detective5, True, session)
 
     # Create 4 level-2-detectives
     senior_detective1 = User()
     senior_detective1.id = "11"
     senior_detective1.name = "Senior1"
-    senior_detective1 = operations.create_user_db(
+    senior_detective1 = user_handler.create_user(
         senior_detective1, True, session)
     senior_detective1.level_id = 2
     senior_detective1.experience_points = 5
@@ -76,7 +80,7 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective2 = User()
     senior_detective2.id = "12"
     senior_detective2.name = "Senior2"
-    senior_detective2 = operations.create_user_db(
+    senior_detective2 = user_handler.create_user(
         senior_detective2, True, session)
     senior_detective2.level_id = 2
     senior_detective2.experience_points = 5
@@ -84,7 +88,7 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective3 = User()
     senior_detective3.id = "13"
     senior_detective3.name = "Senior3"
-    senior_detective3 = operations.create_user_db(
+    senior_detective3 = user_handler.create_user(
         senior_detective3, True, session)
     senior_detective3.level_id = 2
     senior_detective3.experience_points = 5
@@ -92,7 +96,7 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective4 = User()
     senior_detective4.id = "14"
     senior_detective4.name = "Senior4"
-    senior_detective4 = operations.create_user_db(
+    senior_detective4 = user_handler.create_user(
         senior_detective4, True, session)
     senior_detective4.level_id = 2
     senior_detective4.experience_points = 5
@@ -100,7 +104,7 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective5 = User()
     senior_detective5.id = "15"
     senior_detective5.name = "Senior5"
-    senior_detective5 = operations.create_user_db(
+    senior_detective5 = user_handler.create_user(
         senior_detective5, True, session)
     senior_detective5.level_id = 2
     senior_detective5.experience_points = 5
