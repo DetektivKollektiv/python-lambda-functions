@@ -41,7 +41,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -263,6 +263,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+      Layers:
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-aiohttp:20
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -273,7 +275,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - !Ref libs
+        - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -288,7 +290,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -868,11 +870,11 @@ Resources:
 
   UpdateFactCheckModelsRule:
     Type: AWS::Events::Rule
-    Properties: 
+    Properties:
       Description: updates fact checks and models every day
       ScheduleExpression: rate(1 day)
       State: ENABLED
-      Targets: 
+      Targets:
         - Arn:
             Fn::GetAtt:
               - UpdateFactCheckModelsFunction
@@ -911,4 +913,3 @@ Resources:
       ContentUri: ../package/.
       CompatibleRuntimes:
         - python3.8
-        
