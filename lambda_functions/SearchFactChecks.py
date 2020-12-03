@@ -13,7 +13,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 s3_client = boto3.client('s3')
-s3_resource = boto3.resource('s3') 
+s3_resource = boto3.resource('s3')
 bucket_prefix = "factchecks-"
 newfactchecks_folder = "new/"
 
@@ -71,6 +71,8 @@ def get_secret():
             return decoded_binary_secret
 
 # return bucket name for storing factchecks and models
+
+
 def get_factcheckBucketName():
     bucket_name = bucket_prefix+os.environ['STAGE']
     try:
@@ -80,6 +82,8 @@ def get_factcheckBucketName():
     return bucket_name
 
 # Call Google API for Fact Check search
+
+
 async def call_googleapi(session, search_terms, language_code):
     pageSize = 10  # Count of returned results
     query = ""
@@ -127,10 +131,12 @@ async def get_article(search_terms, LanguageCode):
                 body = json.dumps(response_json)
                 key = newfactchecks_folder+str(uuid4())
                 try:
-                    s3_response = s3_client.put_object(Body=body, Bucket=bucket, Key=key)
+                    s3_response = s3_client.put_object(
+                        Body=body, Bucket=bucket, Key=key)
                     logger.info(s3_response)
                 except Exception as e:
-                    logger.error('Error {} putting object {} in bucket {}.'.format(e, key, bucket))
+                    logger.error(
+                        'Error {} putting object {} in bucket {}.'.format(e, key, bucket))
 
     return article_bestfit
 
