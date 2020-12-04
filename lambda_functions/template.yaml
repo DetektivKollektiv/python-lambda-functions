@@ -41,7 +41,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -245,6 +245,8 @@ Resources:
       Handler: app.get_online_factcheck_by_itemid
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Ref libs      
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -263,6 +265,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -273,7 +277,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - !Ref libs
+        - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -288,7 +292,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-      - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
