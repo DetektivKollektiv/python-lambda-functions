@@ -1,23 +1,29 @@
-import crud.operations as operations
-from crud.model import Item, Review
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, sessionmaker
+# import json
+from sqlalchemy.orm import Session
+from core_layer.connection_handler import get_db_session, update_object
+
+from core_layer.model.review_model import Review
+from core_layer.model.item_model import Item
+
+from core_layer.handler import user_handler, item_handler
+from core_layer import helper
+
 from datetime import datetime, timedelta
+from ...reset_locked_items import reset_locked_items
 
 
 def test_reset_locked_items(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
-    import app
-    session = operations.get_db_session(True, None)
+    session = get_db_session(True, None)
 
     item = Item()
     item.content = "This item needs to be checked"
-    item = operations.create_item_db(item, True, session)
+    item = item_handler.create_item(item, True, session)
     item.in_progress_reviews_level_2 = 2
-    operations.update_object_db(item, True, session)
+    update_object(item, True, session)
 
-    items = operations.get_all_items_db(True, session)
+    items = item_handler.get_all_items(True, session)
     assert len(items) == 1
 
     rip1 = Review()
@@ -41,9 +47,9 @@ def test_reset_locked_items(monkeypatch):
     rips = session.query(Review).all()
     assert len(rips) == 2
 
-    app.reset_locked_items(None, None, True, session)
+    reset_locked_items(None, None, True, session)
 
     rips = session.query(Review).all()
     assert len(rips) == 1
-    item = operations.get_item_by_id(item.id, True, session)
+    item = item_handler.get_item_by_id(item.id, True, session)
     assert item.in_progress_reviews_level_2 == 1

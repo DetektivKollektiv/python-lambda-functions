@@ -1,94 +1,103 @@
-import crud.operations as operations
-from crud.model import User, Item, Level, Review, ReviewPair, ReviewAnswer, ReviewQuestion
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, sessionmaker
-import test.unit.event_creator as event_creator
-import test.unit.setup_scenarios as scenarios
-import json
-import app
-import review_answer_handler
+from core_layer.connection_handler import get_db_session
+
+from core_layer.model.user_model import User
+from core_layer.model.item_model import Item
+from core_layer.model.level_model import Level
+from core_layer.model.review_model import Review
+from core_layer.model.review_pair_model import ReviewPair
+from core_layer.model.review_question_model import ReviewQuestion
+from core_layer.model.review_answer_model import ReviewAnswer
+
+from core_layer.handler import user_handler, item_handler, review_handler, review_pair_handler, review_question_handler
+
+from ..helper import event_creator, setup_scenarios
+
+from ...review_service.create_review import create_review
+from ...review_service.get_review_question import get_review_question
 from uuid import uuid4
-import test.unit.helper_functions as helper
+from ..helper import helper_functions
 
 
 def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
 
-    session = operations.get_db_session(True, None)
-    session = scenarios.create_levels_junior_and_senior_detectives(session)
-    session = scenarios.create_questions(session)
+    session = get_db_session(True, None)
+    session = setup_scenarios.create_levels_junior_and_senior_detectives(
+        session)
+    session = setup_scenarios.create_questions(session)
 
-    junior_detective1 = operations.get_user_by_id("1", True, session)
-    junior_detective2 = operations.get_user_by_id("2", True, session)
-    junior_detective3 = operations.get_user_by_id("3", True, session)
-    junior_detective4 = operations.get_user_by_id("4", True, session)
-    junior_detective5 = operations.get_user_by_id("5", True, session)
+    junior_detective1 = user_handler.get_user_by_id("1", True, session)
+    junior_detective2 = user_handler.get_user_by_id("2", True, session)
+    junior_detective3 = user_handler.get_user_by_id("3", True, session)
+    junior_detective4 = user_handler.get_user_by_id("4", True, session)
+    junior_detective5 = user_handler.get_user_by_id("5", True, session)
 
-    senior_detective1 = operations.get_user_by_id("11", True, session)
-    senior_detective2 = operations.get_user_by_id("12", True, session)
-    senior_detective3 = operations.get_user_by_id("13", True, session)
-    senior_detective4 = operations.get_user_by_id("14", True, session)
-    senior_detective5 = operations.get_user_by_id("15", True, session)
+    senior_detective1 = user_handler.get_user_by_id("11", True, session)
+    senior_detective2 = user_handler.get_user_by_id("12", True, session)
+    senior_detective3 = user_handler.get_user_by_id("13", True, session)
+    senior_detective4 = user_handler.get_user_by_id("14", True, session)
+    senior_detective5 = user_handler.get_user_by_id("15", True, session)
 
-    users = operations.get_all_users_db(True, session)
+    users = user_handler.get_all_users(True, session)
     assert len(users) == 10
 
     # Creating an item
     item = Item()
     item.content = "This item needs to be checked"
-    item = operations.create_item_db(item, True, session)
+    item = item_handler.create_item(item, True, session)
 
-    items = operations.get_all_items_db(True, session)
+    items = item_handler.get_all_items(True, session)
     assert len(items) == 1
 
     # Junior detectives accepting item
-    jr1 = operations.create_review(junior_detective1, item, True, session)
+    jr1 = review_handler.create_review(junior_detective1, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    jr2 = operations.create_review(junior_detective2, item, True, session)
+    jr2 = review_handler.create_review(junior_detective2, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    jr3 = operations.create_review(junior_detective3, item, True, session)
+    jr3 = review_handler.create_review(junior_detective3, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
-    jr4 = operations.create_review(junior_detective4, item, True, session)
+    jr4 = review_handler.create_review(junior_detective4, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 4
 
     with pytest.raises(Exception):
-        operations.create_review(junior_detective5, item, True, session)
+        review_handler.create_review(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    sr1 = operations.create_review(senior_detective1, item, True, session)
+    sr1 = review_handler.create_review(senior_detective1, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    sr2 = operations.create_review(senior_detective2, item, True, session)
+    sr2 = review_handler.create_review(senior_detective2, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    sr3 = operations.create_review(senior_detective3, item, True, session)
+    sr3 = review_handler.create_review(senior_detective3, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
-    sr4 = operations.create_review(senior_detective4, item, True, session)
+    sr4 = review_handler.create_review(senior_detective4, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 4
 
     with pytest.raises(Exception):
-        operations.create_review(senior_detective5, item, True, session)
+        review_handler.create_review(senior_detective5, item, True, session)
 
-    pairs = operations.get_review_pairs_by_item(item.id, True, session)
+    pairs = review_pair_handler.get_review_pairs_by_item(
+        item.id, True, session)
     assert len(pairs) == 4
 
     # Detectives reviewing item
     reviews = [jr1, jr2, jr3, jr4, sr1, sr2, sr3, sr4]
     for review in reviews:
-        helper.create_answers_for_review(review, 1, session)
+        helper_functions.create_answers_for_review(review, 1, session)
 
     answers = session.query(ReviewAnswer).all()
     assert len(answers) == 56
@@ -103,84 +112,86 @@ def test_verification_process_best_case(monkeypatch):
 def test_verification_process_worst_case(monkeypatch):
 
     monkeypatch.setenv("DBNAME", "Test")
-    session = operations.get_db_session(True, None)
-    session = scenarios.create_levels_junior_and_senior_detectives(session)
-    session = scenarios.create_questions(session)
+    session = get_db_session(True, None)
+    session = setup_scenarios.create_levels_junior_and_senior_detectives(
+        session)
+    session = setup_scenarios.create_questions(session)
 
-    junior_detective1 = operations.get_user_by_id("1", True, session)
-    junior_detective2 = operations.get_user_by_id("2", True, session)
-    junior_detective3 = operations.get_user_by_id("3", True, session)
-    junior_detective4 = operations.get_user_by_id("4", True, session)
-    junior_detective5 = operations.get_user_by_id("5", True, session)
+    junior_detective1 = user_handler.get_user_by_id("1", True, session)
+    junior_detective2 = user_handler.get_user_by_id("2", True, session)
+    junior_detective3 = user_handler.get_user_by_id("3", True, session)
+    junior_detective4 = user_handler.get_user_by_id("4", True, session)
+    junior_detective5 = user_handler.get_user_by_id("5", True, session)
 
-    senior_detective1 = operations.get_user_by_id("11", True, session)
-    senior_detective2 = operations.get_user_by_id("12", True, session)
-    senior_detective3 = operations.get_user_by_id("13", True, session)
-    senior_detective4 = operations.get_user_by_id("14", True, session)
-    senior_detective5 = operations.get_user_by_id("15", True, session)
+    senior_detective1 = user_handler.get_user_by_id("11", True, session)
+    senior_detective2 = user_handler.get_user_by_id("12", True, session)
+    senior_detective3 = user_handler.get_user_by_id("13", True, session)
+    senior_detective4 = user_handler.get_user_by_id("14", True, session)
+    senior_detective5 = user_handler.get_user_by_id("15", True, session)
 
-    users = operations.get_all_users_db(True, session)
+    users = user_handler.get_all_users(True, session)
     assert len(users) == 10
 
     # Creating an item
     item = Item()
     item.content = "This item needs to be checked"
-    item = operations.create_item_db(item, True, session)
+    item = item_handler.create_item(item, True, session)
 
-    items = operations.get_all_items_db(True, session)
+    items = item_handler.get_all_items(True, session)
     assert len(items) == 1
 
     # Junior detectives accepting item
-    jr1 = operations.create_review(junior_detective1, item, True, session)
+    jr1 = review_handler.create_review(junior_detective1, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
 
-    jr2 = operations.create_review(junior_detective2, item, True, session)
+    jr2 = review_handler.create_review(junior_detective2, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
 
-    jr3 = operations.create_review(junior_detective3, item, True, session)
+    jr3 = review_handler.create_review(junior_detective3, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 3
 
-    jr4 = operations.create_review(junior_detective4, item, True, session)
+    jr4 = review_handler.create_review(junior_detective4, item, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 4
 
     with pytest.raises(Exception):
-        operations.create_review(junior_detective5, item, True, session)
+        review_handler.create_review(junior_detective5, item, True, session)
 
     # Senior detectives accepting item
-    sr1 = operations.create_review(senior_detective1, item, True, session)
+    sr1 = review_handler.create_review(senior_detective1, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 1
 
-    sr2 = operations.create_review(senior_detective2, item, True, session)
+    sr2 = review_handler.create_review(senior_detective2, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 2
 
-    sr3 = operations.create_review(senior_detective3, item, True, session)
+    sr3 = review_handler.create_review(senior_detective3, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 3
 
-    sr4 = operations.create_review(senior_detective4, item, True, session)
+    sr4 = review_handler.create_review(senior_detective4, item, True, session)
     assert item.open_reviews_level_2 == 4
     assert item.in_progress_reviews_level_2 == 4
 
     with pytest.raises(Exception):
-        operations.create_review(senior_detective5, item, True, session)
+        review_handler.create_review(senior_detective5, item, True, session)
 
-    pairs = operations.get_review_pairs_by_item(item.id, True, session)
+    pairs = review_pair_handler.get_review_pairs_by_item(
+        item.id, True, session)
     assert len(pairs) == 4
 
     # Detective without review in progress trying to get question
     junior_reviews = [jr1, jr2, jr3, jr4]
     senior_reviews = [sr1, sr2, sr3, sr4]
     for review in junior_reviews:
-        helper.create_answers_for_review(review, 1, session)
+        helper_functions.create_answers_for_review(review, 1, session)
 
     for review in senior_reviews:
-        helper.create_answers_for_review(review, 4, session)
+        helper_functions.create_answers_for_review(review, 4, session)
 
     answers = session.query(ReviewAnswer).all()
     assert len(answers) == 56
@@ -194,30 +205,30 @@ def test_verification_process_worst_case(monkeypatch):
 
 def test_create_review(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
-    import app
 
-    session = operations.get_db_session(True, None)
-    session = scenarios.create_levels_junior_and_senior_detectives(session)
+    session = get_db_session(True, None)
+    session = setup_scenarios.create_levels_junior_and_senior_detectives(
+        session)
 
-    junior_detective1 = operations.get_user_by_id("1", True, session)
-    junior_detective2 = operations.get_user_by_id("2", True, session)
-    junior_detective3 = operations.get_user_by_id("3", True, session)
-    junior_detective4 = operations.get_user_by_id("4", True, session)
+    junior_detective1 = user_handler.get_user_by_id("1", True, session)
+    junior_detective2 = user_handler.get_user_by_id("2", True, session)
+    junior_detective3 = user_handler.get_user_by_id("3", True, session)
+    junior_detective4 = user_handler.get_user_by_id("4", True, session)
 
-    senior_detective1 = operations.get_user_by_id("11", True, session)
-    senior_detective2 = operations.get_user_by_id("12", True, session)
-    senior_detective3 = operations.get_user_by_id("13", True, session)
-    senior_detective4 = operations.get_user_by_id("14", True, session)
+    senior_detective1 = user_handler.get_user_by_id("11", True, session)
+    senior_detective2 = user_handler.get_user_by_id("12", True, session)
+    senior_detective3 = user_handler.get_user_by_id("13", True, session)
+    senior_detective4 = user_handler.get_user_by_id("14", True, session)
 
-    users = operations.get_all_users_db(True, session)
+    users = user_handler.get_all_users(True, session)
     assert len(users) == 10
 
     # Creating an item
     item = Item()
     item.content = "This item needs to be checked"
-    item = operations.create_item_db(item, True, session)
+    item = item_handler.create_item(item, True, session)
 
-    items = operations.get_all_items_db(True, session)
+    items = item_handler.get_all_items(True, session)
     assert len(items) == 1
 
     reviews = session.query(Review).all()
@@ -228,9 +239,9 @@ def test_create_review(monkeypatch):
     # Junior detectives accepting item
     event = event_creator.get_create_review_event(
         junior_detective1.id, item.id)
-    response = app.create_review(event, None, True, session)
+    response = create_review(event, None, True, session)
     assert response['statusCode'] == 201
-    item = operations.get_item_by_id(item.id, True, session)
+    item = item_handler.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 1
     reviews = session.query(Review).all()
@@ -240,8 +251,8 @@ def test_create_review(monkeypatch):
 
     event = event_creator.get_create_review_event(
         junior_detective2.id, item.id)
-    app.create_review(event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
+    create_review(event, None, True, session)
+    item = item_handler.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_1 == 2
     reviews = session.query(Review).all()
@@ -252,8 +263,8 @@ def test_create_review(monkeypatch):
     # Senior detective accepting item
     event = event_creator.get_create_review_event(
         senior_detective1.id, item.id)
-    app.create_review(event, None, True, session)
-    item = operations.get_item_by_id(item.id, True, session)
+    create_review(event, None, True, session)
+    item = item_handler.get_item_by_id(item.id, True, session)
     assert item.open_reviews_level_1 == 4
     assert item.in_progress_reviews_level_2 == 1
     reviews = session.query(Review).all()
@@ -264,10 +275,9 @@ def test_create_review(monkeypatch):
 
 def test_get_next_question(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
-    import app
 
-    session = operations.get_db_session(True, None)
-    session = scenarios.create_questions(session)
+    session = get_db_session(True, None)
+    session = setup_scenarios.create_questions(session)
 
     pair = ReviewPair()
     pair.id = "Pair_1"
@@ -281,7 +291,7 @@ def test_get_next_question(monkeypatch):
 
     # event = event_creator.get_next_question_event(review.id)
     # repsonse = app.get_review_question(event, None, True, session)
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review, None, True, session)
     assert next_question is not None
 
@@ -297,7 +307,7 @@ def test_get_next_question(monkeypatch):
     question2 = session.query(ReviewQuestion).filter(
         ReviewQuestion.id == "2").one()
 
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review, question2, True, session)
     assert next_question.id == "2b"
 
@@ -310,7 +320,7 @@ def test_get_next_question(monkeypatch):
 
     question1 = session.query(ReviewQuestion).filter(
         ReviewQuestion.id == "1").one()
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review, question1, True, session)
     assert next_question.id == "1a" or next_question.id == "1c"
 
@@ -323,7 +333,7 @@ def test_get_next_question(monkeypatch):
 
     prev_question = next_question
 
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review, prev_question, True, session)
     if prev_question.id == "1a":
         assert next_question.id == "1c"
@@ -358,7 +368,7 @@ def test_get_next_question(monkeypatch):
     session.add(answer7)
 
     assert len(review.review_answers) == 7
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review, prev_question, True, session)
 
     assert next_question == None
@@ -373,7 +383,7 @@ def test_get_next_question(monkeypatch):
     session.commit()
 
     # Assert that question is within the range of questions in review one
-    next_question = operations.get_next_question_db(
+    next_question = review_question_handler.get_next_question_db(
         review2, None, True, session)
     assert next_question.id in ["1", "2", "4", "5", "6", "7"]
 
@@ -387,9 +397,9 @@ def test_get_next_question(monkeypatch):
 
     # Check for HTTP responses
     event = event_creator.get_next_question_event(review.id, "1")
-    response = app.get_review_question(event, None, True, session)
+    response = get_review_question(event, None, True, session)
     assert response['statusCode'] == 204
 
     event = event_creator.get_next_question_event(review2.id, next_question.id)
-    response = app.get_review_question(event, None, True, session)
+    response = get_review_question(event, None, True, session)
     assert response['statusCode'] == 200

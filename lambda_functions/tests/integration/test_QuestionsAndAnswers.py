@@ -1,17 +1,21 @@
-import crud.operations as operations
-from crud.model import ReviewQuestion, AnswerOption, Item, User
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import session, relationship, backref, sessionmaker
-import test.unit.event_creator as event_creator
-import test.unit.setup_scenarios as scenarios
-import json
+# import json
+from sqlalchemy.orm import Session
+from core_layer.connection_handler import get_db_session
+
+from core_layer.model.user_model import User
+from core_layer.model.review_question_model import ReviewQuestion
+from core_layer.model.review_answer_model import AnswerOption
+from core_layer.model.item_model import Item
+
+from core_layer.handler import user_handler
+
+from ..helper import event_creator, setup_scenarios
 
 
 def test_questions_and_answers(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
-    import app
-    session = operations.get_db_session(True, None)
+    session = get_db_session(True, None)
 
     q1 = ReviewQuestion()
     q1.id = "1"

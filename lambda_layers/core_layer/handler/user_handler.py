@@ -96,3 +96,20 @@ def give_experience_point(user_id, is_test, session):
     if new_level != user.level_id:
         user.level_id = new_level.id
     update_object(user, is_test, session)
+
+
+def get_all_users(is_test, session) -> [User]:
+    """Returns a user by their id
+
+    Parameters
+    ----------
+
+    Returns
+    ------
+    users: [User]
+        A list including all user objects
+    """
+
+    session = get_db_session(is_test, session)
+    users = session.query(User).all()
+    return users
