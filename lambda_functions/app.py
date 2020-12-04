@@ -873,7 +873,7 @@ def get_all_closed_items(event, context, is_test=False, session=None):
 
         if len(items) == 0:
             response = {
-                "statusCode": 404,
+                "statusCode": 204,
                 "body": "No closed items found"
             }
         else:
@@ -882,18 +882,11 @@ def get_all_closed_items(event, context, is_test=False, session=None):
             for item in items:
                 items_dict.append(item.to_dict())
 
-            if len(items_dict) == 0:
-                response = {
-                    "statusCode": 204,
-                    'headers': {"content-type": "application/json; charset=utf-8"},
-                    "body": "The archive seems to be empty"
-                }
-            else:
-                response = {
-                    "statusCode": 200,
-                    'headers': {"content-type": "application/json; charset=utf-8"},
-                    "body": json.dumps(items_dict)
-                }
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(items_dict)
+            }
 
     except Exception as e:
         response = {
