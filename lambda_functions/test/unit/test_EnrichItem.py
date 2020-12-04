@@ -343,6 +343,98 @@ class TestGetFactChecks:
         assert elapsed < 3
 
 
+    def test_get_online_factcheck_by_itemid_3(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        import app
+        import EnrichItem
+
+        session = operations.get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "https://kopp-report.de/helios-kliniken-veroeffentlichen-corona-fakten-keine-pandemie-von-nationaler-tragweite/?fbclid=IwAR1fMRjkKXXYQUiNxYrgYczcffvNZbW-F3z8Q4f4Ar00caSNO1KjFtyJrG4"
+        item.language = "de"
+        item = operations.create_item_db(item, True, session)
+
+        # store a fact check
+        event = {
+            "item": {
+                "id": item.id,
+                "content": item.content,
+                "language": item.language,
+            },
+            "KeyPhrases": [],
+            "TitleEntities": [],
+            "Entities": [],
+            "Sentiment": "NEUTRAL"
+        }
+        context = ""
+        EnrichItem.store_itementities(event, context, True, session)
+        EnrichItem.store_itemphrases(event, context, True, session)
+
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            }
+        }
+        context = {}
+        s = time.perf_counter()
+        response = app.get_online_factcheck_by_itemid(event, context, True, session)
+        elapsed = time.perf_counter() - s
+        body = response['body']        
+        # Deserialize if body is string
+        assert body == 'No factcheck found.'
+        assert elapsed < 3
+
+
+    def test_get_online_factcheck_by_itemid_4(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        import app
+        import EnrichItem
+
+        session = operations.get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "https://kopp-report.de/helios-kliniken-veroeffentlichen-corona-fakten-keine-pandemie-von-nationaler-tragweite/?fbclid=IwAR1fMRjkKXXYQUiNxYrgYczcffvNZbW-F3z8Q4f4Ar00caSNO1KjFtyJrG4"
+        item.language = None
+        item = operations.create_item_db(item, True, session)
+
+        # store a fact check
+        event = {
+            "item": {
+                "id": item.id,
+                "content": item.content,
+                "language": item.language,
+            },
+            "KeyPhrases": [],
+            "TitleEntities": [],
+            "Entities": [],
+            "Sentiment": "NEUTRAL"
+        }
+        context = ""
+        EnrichItem.store_itementities(event, context, True, session)
+        EnrichItem.store_itemphrases(event, context, True, session)
+
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            }
+        }
+        context = {}
+        s = time.perf_counter()
+        response = app.get_online_factcheck_by_itemid(event, context, True, session)
+        elapsed = time.perf_counter() - s
+        body = response['body']        
+        # Deserialize if body is string
+        assert body == 'No factcheck found. Exception: Language of Claim not recognized.'
+        assert elapsed < 3
+
+
 class TestStoreFactChecks:
     def test_store_factcheck_empty(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
