@@ -245,6 +245,8 @@ Resources:
       Handler: app.get_online_factcheck_by_itemid
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Ref libs      
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -265,8 +267,6 @@ Resources:
             Ref: CorsAllowOrigin
           STAGE:
             Ref: STAGE
-      Layers:
-        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-aiohttp:20
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
