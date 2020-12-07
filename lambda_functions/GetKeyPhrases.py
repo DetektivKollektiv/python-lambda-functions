@@ -33,32 +33,32 @@ def get_phrases(event, context):
         text = str(event['Text'])
     else:
         logger.error("There is no Text!")
-        raise Exception('Please provide Text!')
+        return []
 
     # Check if LanguageCode is supported
     if 'LanguageCode' in event:
         LanguageCode = event['LanguageCode']
     else:
         logger.error("There is no Language Code!")
-        raise Exception('Please provide a Language Code!')
+        return []
     if not (LanguageCode in supportedLanguageCodes):
         logger.error("Language Code not supported!")
-        raise Exception('Language Code not supported!')
+        return []
 
     try:
         response = comprehend.detect_key_phrases(Text=text, LanguageCode=LanguageCode)
     except ClientError as e:
         logger.error("Received error: %s", e, exc_info=True)
-        raise
+        return []
     except ParamValidationError as e:
         logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
-        raise
+        return []
 
     # sort list of key phrases according the score
     keyPhrases_sorted = sorted(response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
 
     # respond at most 5 key phrases
-    keyPhrases_sorted = keyPhrases_sorted[:min(5, len(keyPhrases_sorted))]
+    keyPhrases_sorted = keyPhrases_sorted[:min(3, len(keyPhrases_sorted))]
 
     # extract the strings
     keyPhrases_strings = []

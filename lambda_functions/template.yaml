@@ -40,6 +40,8 @@ Resources:
       Handler: whatsapp.whatsapp_forwarding
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-twilio:28
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -240,9 +242,11 @@ Resources:
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}"
       CodeUri: .
-      Handler: app.get_factcheck_by_itemid
+      Handler: app.get_online_factcheck_by_itemid
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -261,6 +265,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -270,10 +276,35 @@ Resources:
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Ref libs
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
+
+  UpdateFactCheckModelsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
+      CodeUri: .
+      Handler: UpdateFactChecks.update_factcheck_models
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
 
   GetLanguageFunction:
     Type: AWS::Serverless::Function
@@ -563,31 +594,6 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
 
-  CreateReviewFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create_review-${STAGE}"
-      CodeUri: .
-      Handler: app.create_review
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Events:
-        Echo:
-          Type: Api
-          Properties:
-            Path: /reviews
-            Method: post
-            RestApiId:
-              Ref: Api
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-
   GetAllReviewsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -614,11 +620,11 @@ Resources:
             Ref: DBNAME
 
   CreateReviewAnswerFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: !Sub "detektivkollektiv-api-create_review_answer-${STAGE}"
       CodeUri: .
-      Handler: app.create_review_answer
+      Handler: review_answer_handler.create_review_answer
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -627,7 +633,7 @@ Resources:
           - Arn
       Events:
         Echo:
-          Type: Api
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /review_answers
             Method: post
@@ -637,6 +643,8 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
 
   GetAllReviewAnswersFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -662,33 +670,6 @@ Resources:
         Variables:
           DBNAME:
             Ref: DBNAME
-
-  GetAllReviewQuestionsFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get_all_review_questions-${STAGE}"
-      CodeUri: .
-      Handler: app.get_all_review_questions
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Events:
-        Echo:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /review_questions
-            Method: get
-            RestApiId:
-              Ref: Api
-      Environment:
-        Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
 
   ItemSubmissionFunction:
     Type: AWS::Serverless::Function
@@ -765,12 +746,12 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  AcceptItemFunction:
+  CreateReviewFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-accept_item-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-api-create_review-${STAGE}"
       CodeUri: .
-      Handler: app.accept_item
+      Handler: app.create_review
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -781,10 +762,49 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /accept_item/{item_id}
+            Path: /reviews
             Method: post
             RestApiId:
               Ref: Api
+            RequestParameters:
+              - method.request.querystring.item_id:
+                  Required: true
+                  Caching: true
+
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+
+  GetReviewQuestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-api-review_question-${STAGE}"
+      CodeUri: .
+      Handler: app.get_review_question
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /review_questions
+            Method: get
+            RestApiId:
+              Ref: Api
+            RequestParameters:
+              - method.request.querystring.review_id:
+                  Required: true
+                  Caching: true
+              - method.request.querystring.previous_question_id:
+                  Required: true
+                  Caching: true
       Environment:
         Variables:
           DBNAME:
@@ -838,6 +858,8 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
         - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
 
   ResetLockedItemsRule:
     Type: AWS::Events::Rule
@@ -852,6 +874,19 @@ Resources:
               - Arn
           Id: !Sub "reset_locked_items-${STAGE}"
 
+  UpdateFactCheckModelsRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: updates fact checks and models every day
+      ScheduleExpression: rate(1 day)
+      State: ENABLED
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - UpdateFactCheckModelsFunction
+              - Arn
+          Id: !Sub "update_factcheck_models-${STAGE}"
+
   PermissionForEventsToInvokeLambda:
     Type: AWS::Lambda::Permission
     Properties:
@@ -863,3 +898,24 @@ Resources:
         Fn::GetAtt:
           - ResetLockedItemsRule
           - Arn
+
+  PermissionForUpdateFactCheckModelsRule:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: UpdateFactCheckModelsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - UpdateFactCheckModelsRule
+          - Arn
+
+  libs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: detektivkollektiv-lib
+      Description: Dependencies for the DetektivKollektiv app.
+      ContentUri: ../package/.
+      CompatibleRuntimes:
+        - python3.8

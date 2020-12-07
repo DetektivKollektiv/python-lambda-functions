@@ -1,5 +1,3 @@
-import aiohttp
-import asyncio
 import logging
 import json
 import time
@@ -7,11 +5,17 @@ import boto3
 import base64
 import re
 from botocore.exceptions import ClientError
+from uuid import uuid4
 import os
 import requests
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+s3_client = boto3.client('s3')
+s3_resource = boto3.resource('s3')
+bucket_prefix = "factchecks-"
+newfactchecks_folder = "new/"
 
 
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
@@ -66,8 +70,20 @@ def get_secret():
                 get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
 
+# return bucket name for storing factchecks and models
+
+
+def get_factcheckBucketName():
+    bucket_name = bucket_prefix+os.environ['STAGE']
+    try:
+        s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+    except ClientError:
+        s3_client.create_bucket(Bucket=bucket_name)
+    return bucket_name
 
 # Call Google API for Fact Check search
+
+
 async def call_googleapi(session, search_terms, language_code):
     pageSize = 10  # Count of returned results
     query = ""
@@ -82,8 +98,13 @@ async def call_googleapi(session, search_terms, language_code):
 
 # Get best fitting fact check article
 async def get_article(search_terms, LanguageCode):
+    import aiohttp
+    import aiodns
+    import asyncio
+
     article_bestfit = ""
     count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
+    bucket = get_factcheckBucketName()
 
     # combine Google API calls in one session
     # TODO consider to do that not for one lambda call, but for as much API calls as possible
@@ -106,12 +127,24 @@ async def get_article(search_terms, LanguageCode):
                         if len(unique_terms) > count_bestfit:
                             article_bestfit = article
                             count_bestfit = len(unique_terms)
+                # Store received factchecks in a bucket to be used for training a model to assess similarity between claims and factchecks
+                body = json.dumps(response_json)
+                key = newfactchecks_folder+str(uuid4())
+                try:
+                    s3_response = s3_client.put_object(
+                        Body=body, Bucket=bucket, Key=key)
+                    logger.info(s3_response)
+                except Exception as e:
+                    logger.error(
+                        'Error {} putting object {} in bucket {}.'.format(e, key, bucket))
 
     return article_bestfit
 
 
 # Search Fact Checks
 def get_FactChecks(event, context):
+    import asyncio
+
     claims = []
     logger.info('Calling get_FactChecks with event')
     logger.info(event)

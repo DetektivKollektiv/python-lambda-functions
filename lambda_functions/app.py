@@ -2,11 +2,13 @@ import logging
 import json
 import os
 import boto3
+import SearchFactChecks
+
 from datetime import datetime
 import requests
 
 from crud import operations, helper, notifications
-from crud.model import Item, User, Review, ReviewInProgress, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
+from crud.model import Item, User, Review, ReviewAnswer, ReviewQuestion, User, Entity, Keyphrase, Sentiment, URL, ItemEntity, ItemKeyphrase, ItemSentiment, ItemURL, Base, Submission, FactChecking_Organization, ExternalFactCheck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,7 +24,8 @@ def create_item(event, context, is_test=False, session=None):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+        # api-gateway-simple-proxy-for-lambda-input-format
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
 
     context: object, required
         Lambda Context runtime methods and attributes
@@ -65,7 +68,8 @@ def get_all_items(event, context, is_test=False, session=None):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+        # api-gateway-simple-proxy-for-lambda-input-format
+        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
 
     context: object, required
         Lambda Context runtime methods and attributes
@@ -140,7 +144,7 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
     helper.log_method_initiated("Get factchecks by item id", event, logger)
 
     if session is None:
-        session = operations.get_db_session(False, None)
+        session = operations.get_db_session(is_test, None)
 
     try:
         # get id (str) from path
@@ -149,6 +153,12 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
         try:
             factcheck = operations.get_factcheck_by_itemid_db(
                 id, is_test, session)
+
+            if factcheck is None:
+                return {
+                    "statusCode": 404,
+                    "body": "Item or factcheck not found."
+                }
 
             factcheck_dict = factcheck.to_dict()
 
@@ -160,7 +170,7 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
         except Exception:
             response = {
                 "statusCode": 404,
-                "body": "No item found with the specified id."
+                "body": "Item or factcheck not found."
             }
 
     except Exception as e:
@@ -168,7 +178,79 @@ def get_factcheck_by_itemid(event, context, is_test=False, session=None):
             "statusCode": 400,
             "body": "Could not get factchecks. Check HTTP POST payload. Exception: {}".format(e)
         }
-        
+
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
+
+
+def get_online_factcheck_by_itemid(event, context, is_test=False, session=None):
+
+    helper.log_method_initiated(
+        "Get online factchecks by item id", event, logger)
+
+    if session is None:
+        session = operations.get_db_session(is_test, None)
+
+    try:
+        # get id (str) from path
+        id = event['pathParameters']['item_id']
+
+        try:
+            item = operations.get_item_by_id(id, is_test, session)
+            if item.language == None:
+                raise Exception("Language of Claim not recognized.") 
+            entity_objects = operations.get_entities_by_itemid_db(
+                id, is_test, session)
+            phrase_objects = operations.get_phrases_by_itemid_db(
+                id, is_test, session)
+            title_entities = []  # entities from the claim title are stored as entities in the database
+
+            entities = []
+            for obj in entity_objects:
+                entities.append(obj.to_dict()['entity'])
+            phrases = []
+            for obj in phrase_objects:
+                phrases.append(obj.to_dict()['phrase'])
+
+            sfc_event = {
+                "item": item.to_dict(),
+                "KeyPhrases": phrases,
+                "Entities": entities,
+                "TitleEntities": title_entities,
+            }
+            context = ""
+
+            factcheck = SearchFactChecks.get_FactChecks(sfc_event, context)
+            if 'claimReview' in factcheck[0]:
+                factcheck_dict = {
+                    "id": "0", "url": factcheck[0]['claimReview'][0]['url']}
+                if 'title' in factcheck[0]['claimReview'][0]:
+                    factcheck_dict["title"] = factcheck[0]['claimReview'][0]['title']
+                elif 'textualRating' in factcheck[0]['claimReview'][0]:
+                    factcheck_dict["title"] = factcheck[0]['claimReview'][0]['textualRating']
+                response = {
+                    "statusCode": 200,
+                    'headers': {"content-type": "application/json; charset=utf-8"},
+                    "body": json.dumps(factcheck_dict)
+                }
+            else:
+                response = {
+                    "statusCode": 404,
+                    "body": "No factcheck found."
+                }
+
+        except Exception as e:
+            response = {
+                "statusCode": 404,
+                "body": "No factcheck found. Exception: {}".format(e)
+            }
+
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
+        }
+
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors
 
@@ -372,30 +454,6 @@ def get_user(event, context, is_test=False, session=None):
     return response_cors
 
 
-def create_review(event, context, is_test=False, session=None):
-
-    helper.log_method_initiated("Create review", event, logger)
-
-    if session == None:
-        session = operations.get_db_session(False, None)
-
-    review = Review()
-    body = event['body']
-    helper.body_to_object(body, review)
-
-    try:
-        review = operations.create_review_db(review, is_test, session)
-        return {
-            "statusCode": 201,
-            "body": json.dumps(review.to_dict())
-        }
-    except Exception as e:
-        return {
-            "statusCode": 400,
-            "body": "Could not create review. Check HTTP POST payload. Exception: {}".format(e)
-        }
-
-
 def get_all_reviews(event, context, is_test=False, session=None):
 
     helper.log_method_initiated("Get all reviews", event, logger)
@@ -570,6 +628,8 @@ def item_submission(event, context, is_test=False, session=None):
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
+        type = body_dict["type"]
+        del body_dict["type"]
 
         submission = Submission()
         helper.body_to_object(body_dict, submission)
@@ -586,6 +646,7 @@ def item_submission(event, context, is_test=False, session=None):
             new_item = Item()
             new_item.open_timestamp = helper.get_date_time_now(is_test)
             new_item.content = content
+            new_item.type = type
             created_item = operations.create_item_db(
                 new_item, is_test, session)
             new_item_created = True
@@ -685,16 +746,27 @@ def reset_locked_items(event, context, is_test=False, session=None):
         }
 
 
-def accept_item(event, context, is_test=False, session=None):
+def create_review(event, context, is_test=False, session=None):
+    """Creates a new review.
 
-    helper.log_method_initiated("Accept item", event, logger)
+    Parameters
+    ----------
+    - user_id is retrieved from the event
+    - item_id is retrieved from query parameters
+
+    Returns
+    ------
+    - Status code 201 (Created)
+    - The newly created review
+    """
+    helper.log_method_initiated("Create Review", event, logger)
 
     if session == None:
         session = operations.get_db_session(False, None)
 
     try:
-        # get item id from url path
-        item_id = event['pathParameters']['item_id']
+        # get item id from url query params
+        item_id = event['queryStringParameters']['item_id']
 
         # get cognito id
         user_id = helper.cognito_id_from_event(event)
@@ -705,12 +777,12 @@ def accept_item(event, context, is_test=False, session=None):
 
         # Try to accept item
         try:
-            operations.accept_item_db(user, item, is_test, session)
+            review = operations.accept_item_db(user, item, is_test, session)
 
             response = {
-                "statusCode": 200,
+                "statusCode": 201,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(item.to_dict())
+                "body": json.dumps(review.to_dict())
             }
 
         except Exception as e:
@@ -722,7 +794,72 @@ def accept_item(event, context, is_test=False, session=None):
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL path parameters. Exception: {}".format(e)
+            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+        }
+
+    response_cors = helper.set_cors(response, event, is_test)
+    return response_cors
+
+
+def get_review_question(event, context, is_test=False, session=None):
+    """Returns a viable review question.
+
+    Parameters
+    ----------
+    - review_id is retrieved from query parameters
+    - previous_question_id is retrieved from query parameters
+
+    Returns
+    ------
+    - Status code 200 (OK) --> Returns next question
+    - Status code 204 (No Content) --> Review finished
+    """
+
+    helper.log_method_initiated("Get Review Question", event, logger)
+
+    if session == None:
+        session = operations.get_db_session(False, None)
+
+    try:
+        # get review and user id from event
+        review_id = event['queryStringParameters']['review_id']
+        review = operations.get_review_by_id(review_id, is_test, session)
+
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+        }
+
+    # Try getting previous question id from query params. If none is set, set previous_question as None
+    try:
+        previous_question_id = event['queryStringParameters']['previous_question_id']
+        previous_question = operations.get_review_question_by_id(
+            previous_question_id, is_test, session)
+
+    except Exception:
+        previous_question = None
+
+    try:
+        question = operations.get_next_question_db(
+            review, previous_question, is_test, session)
+
+        if question == None:
+            response = {
+                "statusCode": 204,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": "Cannot return new question, because enough answers are alredy available"
+            }
+        else:
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(question.to_dict_with_answers())
+            }
+    except Exception as e:
+        response = {
+            "statusCode": 400,
+            "body": "Could not get next question. Exception: {}".format(e)
         }
 
     response_cors = helper.set_cors(response, event, is_test)
@@ -742,7 +879,7 @@ def get_all_closed_items(event, context, is_test=False, session=None):
 
         if len(items) == 0:
             response = {
-                "statusCode": 404,
+                "statusCode": 204,
                 "body": "No closed items found"
             }
         else:
@@ -756,6 +893,7 @@ def get_all_closed_items(event, context, is_test=False, session=None):
                 'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(items_dict)
             }
+
     except Exception as e:
         response = {
             "statusCode": 400,

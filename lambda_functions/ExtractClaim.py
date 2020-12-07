@@ -1,6 +1,7 @@
 import re
 import logging
 import urllib.request
+import requests
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger()
@@ -40,10 +41,13 @@ def extract_claim(event, context):
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
-    # extract all urls from item_content urls = re.findall('(?:https?://|www.)(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),
-    # ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # extract all urls from item_content
     urls = re.findall(
         'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+    # remove urls from item_content
+    for url in urls:
+        item_content = item_content.replace(url, '')
+
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
     title = ""
@@ -59,8 +63,10 @@ def extract_claim(event, context):
                 continue
         except (AttributeError, TypeError):
             continue
-        content = urllib.request.urlopen(url)
-        read_content = content.read()
+#        content = urllib.request.urlopen(url)
+#        read_content = content.read()
+        resp = requests.get(url)
+        read_content = resp.content
         read_content_hidden = read_content.replace(b'<!--', b'')
         soup = BeautifulSoup(read_content_hidden, 'html.parser')
         titles = soup.find_all('title')  # get the title of the web page
@@ -77,8 +83,9 @@ def extract_claim(event, context):
             # main article
             if len(paragraphs) > 1000:
                 break
-        # text.append(paragraphs)
-        allText += paragraphs
+        # use only title as claim, maybe this enhances the quality of entities and phrases
+        allText += title
+        # allText += paragraphs
 
     if len(allText) >= 4800:
         allText = allText[:4799]

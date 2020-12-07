@@ -12,7 +12,6 @@ from os.path import abspath, dirname
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from crud import model, helper
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -25,7 +24,7 @@ if 'DBNAME' in os.environ:
     db = os.environ['DBNAME']
 else:
     db = "development_db"
-    host = "localhost"
+    host = "127.0.0.1"
     port = "3307"
 
 connection_string = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(

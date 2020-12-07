@@ -10,7 +10,7 @@ from botocore.config import Config
 from . import operations, helper
 
 # Set DetektivKollektiv email address here (displayed name <mail address>)
-SENDER = "DetektivKollektiv <detektivkollektiv@gmail.com>"
+SENDER = "DetektivKollektiv <info@detektivkollektiv.org>"
 
 
 class TelegramNotificationError(Exception):
