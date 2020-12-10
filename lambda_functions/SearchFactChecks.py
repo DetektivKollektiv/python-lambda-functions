@@ -71,8 +71,6 @@ def get_secret():
             return decoded_binary_secret
 
 # return bucket name for storing factchecks and models
-
-
 def get_factcheckBucketName():
     bucket_name = bucket_prefix+os.environ['STAGE']
     try:
@@ -82,8 +80,6 @@ def get_factcheckBucketName():
     return bucket_name
 
 # Call Google API for Fact Check search
-
-
 async def call_googleapi(session, search_terms, language_code):
     pageSize = 10  # Count of returned results
     query = ""
