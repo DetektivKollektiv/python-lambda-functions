@@ -15,5 +15,5 @@ phases:
 
   build:
     commands:
-      - cd lambda_functions
+      - cd lambda_layers/core_layer
       - alembic upgrade head

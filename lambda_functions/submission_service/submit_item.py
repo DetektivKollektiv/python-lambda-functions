@@ -4,11 +4,9 @@ import boto3
 import os
 
 from core_layer import helper, connection_handler
-from core_layer.item import item_handler
-from core_layer.item.item_model import Item
-
-from core_layer.submission.submission_model import Submission
-from core_layer.submission import submission_handler
+from core_layer.model.item_model import Item
+from core_layer.model.submission_model import Submission
+from core_layer.handler import item_handler, submission_handler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

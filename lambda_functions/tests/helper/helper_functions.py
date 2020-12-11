@@ -9,7 +9,7 @@ from ...review_service.get_review_question import get_review_question
 
 def create_answers_for_review(review: Review, answer: int, session):
     question_id = None
-    for i in range(7):
+    for _ in range(7):
         next_question_event = event_creator.get_next_question_event(
             review.id, question_id)
         response = get_review_question(

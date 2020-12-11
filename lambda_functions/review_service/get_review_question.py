@@ -47,7 +47,7 @@ def get_review_question(event, context, is_test=False, session=None):
         previous_question = None
 
     try:
-        question = operations.get_next_question_db(
+        question = review_question_handler.get_next_question_db(
             review, previous_question, is_test, session)
 
         if question == None:

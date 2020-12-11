@@ -10,6 +10,8 @@ from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.model.review_pair_model import ReviewPair
 from core_layer.model.review_model import Review
 from core_layer.model.item_model import Item
+from core_layer.model.user_model import User
+
 from review_service.create_review_answer import create_review_answer
 from core_layer.handler import review_handler
 
@@ -44,15 +46,25 @@ def review_question_id():
 
 
 @pytest.fixture
-def session(item_id, junior_review_id, senior_review_id, review_pair_id, review_question_id):
+def user_id():
+    return str(uuid4())
+
+
+@pytest.fixture
+def session(item_id, junior_review_id, senior_review_id, review_pair_id, review_question_id, user_id):
     session = get_db_session(True, None)
 
     item = Item()
     item.id = item_id
 
+    user = User()
+    user.id = user_id
+    user.experience_points = 0
+
     junior_review = Review()
     junior_review.id = junior_review_id
     junior_review.item_id = item.id
+    junior_review.user_id = user.id
 
     senior_review = Review()
     senior_review.id = senior_review_id
@@ -74,6 +86,7 @@ def session(item_id, junior_review_id, senior_review_id, review_pair_id, review_
     senior_answer.answer = 1
 
     session.add(item)
+    session.add(user)
     session.add(junior_review)
     session.add(senior_review)
     session.add(review_pair)
@@ -108,11 +121,12 @@ def test_create_review_answer(session, junior_review_id, review_question_id):
 
 
 def test_create_multiple_review_answers(session, junior_review_id, review_question_id):
+    # TODO:
     """
     Creates seven ReviewAnswers and checks if review is closed
     """
 
-    for x in range(7):
+    for _ in range(7):
         review_answer = generate_review_answer(
             2, junior_review_id, review_question_id)
 
