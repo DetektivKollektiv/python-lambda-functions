@@ -88,7 +88,7 @@ phases:
         --template-file ${STAGE}-template-export.yml
         --stack-name detektivkollektiv-api-dev-${STACK_NAME}
         --s3-bucket $S3_BUCKET
-        --parameters file://${STAGE}-params.json
+        --parameter-overrides file://${STAGE}-params.json
       #   - aws cloudformation create-change-set
       #   --stack-name detektivkollektiv-api-dev-${LOCATION}
       #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
