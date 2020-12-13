@@ -1,22 +1,27 @@
-[
-    {
+{
+    "STAGE": {
         "ParameterKey": "STAGE",
         "Type": "String",
         "ParameterValue": "dev"
     },
-    {
+    "DBNAME": {
         "ParameterKey": "DBNAME",
         "Type": "String",
         "ParameterValue": "development_db"
     },
-    {
+    "Cors": {
         "ParameterKey": "CorsAllowOrigin",
         "Type": "String",
         "ParameterValue": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
     },
-    {
+    "Cert": {
         "ParameterKey": "CERTARN",
         "Type": "String",
         "ParameterValue": "VAR_CERTARN"
+    },
+    "Zone": {
+        "ParameterKey": "HOSTEDZONEID",
+        "Type": "String",
+        "ParameterValue": "VAR_HOSTEDZONEID"
     }
-]
+}
