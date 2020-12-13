@@ -10,22 +10,27 @@ batch:
       env:
         variables:
           LOCATION: "archive_service"
+          STACK_NAME: "archive-service"
     - identifier: ml_service
       env:
         variables:
           LOCATION: "ml_service"
+          STACK_NAME: "ml-service"
     - identifier: review_service
       env:
         variables:
           LOCATION: "review_service"
+          STACK_NAME: "review-service"
     - identifier: submission_service
       env:
         variables:
           LOCATION: "submission_service"
+          STACK_NAME: "submission-service"
     - identifier: user_service
       env:
         variables:
           LOCATION: "user_service"
+          STACK_NAME: "user-service"
 
 phases:
   install:
@@ -81,7 +86,7 @@ phases:
         --output-template-file ${STAGE}-template-export.yml
       - aws cloudformation deploy
         --template-file ${STAGE}-template-export.yml
-        --stack-name detektivkollektiv-api-dev-${LOCATION}
+        --stack-name detektivkollektiv-api-dev-${STACK_NAME}
         --s3-bucket $S3_BUCKET
       #   - aws cloudformation create-change-set
       #   --stack-name detektivkollektiv-api-dev-${LOCATION}
