@@ -61,7 +61,7 @@ phases:
       # - statelint ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json
       # create template for stepfunction and add it to template.yaml
       # - python ./lambda_functions/submission_service/stepfunctions/template_statemachine_cf.py --smdef ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json --intemplate ./lambda_functions/submission_service/submission_service_template.yaml --outtemplate ./lambda_functions/submission_service/submission_service_template.yaml
-      - TEMPLATE_PATH="/lambda_functions${LOCATION}/template.yaml"
+      - TEMPLATE_PATH="lambda_functions${LOCATION}/template.yaml"
       - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
       - cfn-lint -t ${TEMPLATE_PATH}
       - cfn_nag_scan --input-path ${TEMPLATE_PATH}
