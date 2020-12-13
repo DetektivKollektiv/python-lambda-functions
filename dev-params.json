@@ -1,0 +1,18 @@
+[
+    {
+        "ParameterKey": "STAGE",
+        "ParameterValue": "dev"
+    },
+    {
+        "ParameterKey": "DBNAME",
+        "ParameterValue": "development_db"
+    },
+    {
+        "ParameterKey": "CorsAllowOrigin",
+        "ParameterValue": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+    },
+    {
+        "ParameterKey": "CERTARN",
+        "ParameterValue": "VAR_CERTARN"
+    }
+]
