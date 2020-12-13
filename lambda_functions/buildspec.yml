@@ -46,7 +46,7 @@ phases:
       - gem install cfn-nag
 
       # Install requirements
-      - pip install -r lambda_functions${LOCATION}/requirements.txt --target lambda_functions${LOCATION}
+      - pip install -r "lambda_functions${LOCATION}/requirements.txt" --target "lambda_functions${LOCATION}"
       # - pip install -r lambda_layers/core_layer/requirements.txt --target lambda_layers/core_layer
       # - pip install -r lambda_layers/ml_requirements_layer/requirements_layers.txt --target lambda_layers/ml_requirements_layer
 
@@ -56,9 +56,10 @@ phases:
   pre_build:
     commands:
       # verify the validity of the state machine definition
-      - statelint ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json
+      # TODO: Extra buildspec für stepfunction/submission service
+      # - statelint ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json
       # create template for stepfunction and add it to template.yaml
-      - python ./lambda_functions/submission_service/stepfunctions/template_statemachine_cf.py --smdef ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json --intemplate ./lambda_functions/submission_service/submission_service_template.yaml --outtemplate ./lambda_functions/submission_service/submission_service_template.yaml
+      # - python ./lambda_functions/submission_service/stepfunctions/template_statemachine_cf.py --smdef ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json --intemplate ./lambda_functions/submission_service/submission_service_template.yaml --outtemplate ./lambda_functions/submission_service/submission_service_template.yaml
       - TEMPLATE_PATH="${LOCATION}/template.yaml"
       - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
       - cfn-lint -t ${TEMPLATE_PATH}
