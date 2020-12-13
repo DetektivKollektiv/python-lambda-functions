@@ -9,23 +9,23 @@ batch:
     - identifier: archive_service
       env:
         variables:
-          - LOCATION: "/archive_service"
+          LOCATION: "/archive_service"
     - identifier: ml_service
       env:
         variables:
-          - LOCATION: "/ml_service"
+          LOCATION: "/ml_service"
     - identifier: review_service
       env:
         variables:
-          - LOCATION: "/review_service"
+          LOCATION: "/review_service"
     - identifier: submission_service
       env:
         variables:
-          - LOCATION: "/submission_service"
+          LOCATION: "/submission_service"
     - identifier: user_service
       env:
         variables:
-          - LOCATION: "/user_service"
+          LOCATION: "/user_service"
 
 phases:
   install:
