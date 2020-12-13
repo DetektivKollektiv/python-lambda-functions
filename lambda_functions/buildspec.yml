@@ -34,6 +34,7 @@ phases:
       ruby: latest
     commands:
       # Upgrade pip to the latest version
+      - echo $LOCATION
       - pip install --upgrade pip
 
       # Upgrade AWS CLI to the latest version
