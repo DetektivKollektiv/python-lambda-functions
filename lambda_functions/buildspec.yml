@@ -79,15 +79,19 @@ phases:
         --template-file ${TEMPLATE_PATH}
         --s3-bucket $S3_BUCKET
         --output-template-file ${STAGE}-template-export.yml
-      - aws cloudformation create-change-set
+      - aws cloudformation deploy
+        --template-file ${STAGE}-template-export.yml
         --stack-name detektivkollektiv-api-dev-${LOCATION}
-        --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-        --template-body file://${STAGE}-template-export.yml
-        --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
-        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-        # --parameters file://${STAGE}-config.json
-      - aws cloudformation execute-change-set
-        --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
+        --s3-bucket $S3_BUCKET
+      #   - aws cloudformation create-change-set
+      #   --stack-name detektivkollektiv-api-dev-${LOCATION}
+      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
+      #   --template-body file://${STAGE}-template-export.yml
+      #   --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
+      #   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+      #   # --parameters file://${STAGE}-config.json
+      # - aws cloudformation execute-change-set
+      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
       # Do not remove this statement. This command is required for AWS CodeStar projects.
       # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
 # artifacts:
