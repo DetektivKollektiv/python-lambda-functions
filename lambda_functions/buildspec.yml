@@ -1,32 +1,31 @@
 version: 0.2
 
 env:
-  git-credential-helper: yes  
+  git-credential-helper: yes
 
 batch:
   fast-fail: false
   build-list:
-    ignore-failure: true
-      - identifier: archive_service
-        env:
-          variables: 
-            - LOCATION: "/archive_service"
-      - identifier: ml_service
-        env:
-          variables: 
-            - LOCATION: "/ml_service"
-      - identifier: review_service
-        env:
-          variables: 
-            - LOCATION: "/review_service"
-      - identifier: submission_service
-        env:
-          variables: 
-            - LOCATION: "/submission_service"
-      - identifier: user_service
-        env:
-          variables: 
-            - LOCATION: "/user_service"
+    - identifier: archive_service
+      env:
+        variables:
+          - LOCATION: "/archive_service"
+    - identifier: ml_service
+      env:
+        variables:
+          - LOCATION: "/ml_service"
+    - identifier: review_service
+      env:
+        variables:
+          - LOCATION: "/review_service"
+    - identifier: submission_service
+      env:
+        variables:
+          - LOCATION: "/submission_service"
+    - identifier: user_service
+      env:
+        variables:
+          - LOCATION: "/user_service"
 
 phases:
   install:
@@ -64,7 +63,6 @@ phases:
       - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
       - cfn-lint -t ${TEMPLATE_PATH}
       - cfn_nag_scan --input-path ${TEMPLATE_PATH}
-      
 
       # - cfn-lint -t ./lambda_functions/template.yaml
       # - cfn_nag_scan -i ./lambda_functions -t template.yaml
@@ -76,26 +74,23 @@ phases:
       # Use AWS SAM to package the application by using AWS CloudFormation
       - sed -i 's/VAR_HOSTEDZONEID/$HOSTEDZONEID/g;s/VAR_CERTARN/$CERTARN/g' ${STAGE}-config.json
       - echo "Packaging CloudFormation template file ${TEMPLATE_PATH}"
-      - aws cloudformation package 
-        --template-file ${TEMPLATE_PATH} 
-        --s3-bucket $S3_BUCKET 
+      - aws cloudformation package
+        --template-file ${TEMPLATE_PATH}
+        --s3-bucket $S3_BUCKET
         --output-template-file ${STAGE}-template-export.yml
-      - aws cloudformation create-change-set 
-        --stack-name detektivkollektiv-api-dev 
-        --change-set-name detektivkollektiv-api-changeset-dev 
-        --template-body file://${STAGE}-template-export.yml 
-        --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev 
+      - aws cloudformation create-change-set
+        --stack-name detektivkollektiv-api-dev
+        --change-set-name detektivkollektiv-api-changeset-dev
+        --template-body file://${STAGE}-template-export.yml
+        --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
         --parameters file://${STAGE}-config.json
       - aws cloudformation execute-change-set
-        --change-set-name detektivkollektiv-api-changeset-dev 
-
-
+        --change-set-name detektivkollektiv-api-changeset-dev
       # Do not remove this statement. This command is required for AWS CodeStar projects.
       # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-
 # artifacts:
 #   files:
 #     - ${STAGE}-template-export.yml
 #     - ${STAGE}-config.json
-    # - template-configuration.json
+# - template-configuration.json
