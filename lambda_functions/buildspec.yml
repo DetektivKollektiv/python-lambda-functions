@@ -9,23 +9,23 @@ batch:
     - identifier: archive_service
       env:
         variables:
-          LOCATION: "/archive_service"
+          LOCATION: "archive_service"
     - identifier: ml_service
       env:
         variables:
-          LOCATION: "/ml_service"
+          LOCATION: "ml_service"
     - identifier: review_service
       env:
         variables:
-          LOCATION: "/review_service"
+          LOCATION: "review_service"
     - identifier: submission_service
       env:
         variables:
-          LOCATION: "/submission_service"
+          LOCATION: "submission_service"
     - identifier: user_service
       env:
         variables:
-          LOCATION: "/user_service"
+          LOCATION: "user_service"
 
 phases:
   install:
@@ -47,7 +47,7 @@ phases:
       - gem install cfn-nag
 
       # Install requirements
-      - pip install -r "lambda_functions${LOCATION}/requirements.txt" --target "lambda_functions${LOCATION}"
+      - pip install -r "lambda_functions/${LOCATION}/requirements.txt" --target "lambda_functions/${LOCATION}"
       # - pip install -r lambda_layers/core_layer/requirements.txt --target lambda_layers/core_layer
       # - pip install -r lambda_layers/ml_requirements_layer/requirements_layers.txt --target lambda_layers/ml_requirements_layer
 
@@ -61,7 +61,7 @@ phases:
       # - statelint ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json
       # create template for stepfunction and add it to template.yaml
       # - python ./lambda_functions/submission_service/stepfunctions/template_statemachine_cf.py --smdef ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json --intemplate ./lambda_functions/submission_service/submission_service_template.yaml --outtemplate ./lambda_functions/submission_service/submission_service_template.yaml
-      - TEMPLATE_PATH="lambda_functions${LOCATION}/template.yaml"
+      - TEMPLATE_PATH="lambda_functions/${LOCATION}/template.yaml"
       - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
       - cfn-lint -t ${TEMPLATE_PATH}
       - cfn_nag_scan --input-path ${TEMPLATE_PATH}
@@ -80,8 +80,8 @@ phases:
         --s3-bucket $S3_BUCKET
         --output-template-file ${STAGE}-template-export.yml
       - aws cloudformation create-change-set
-        --stack-name detektivkollektiv-api-dev
-        --change-set-name detektivkollektiv-api-changeset-dev
+        --stack-name detektivkollektiv-api-dev-${LOCATION}
+        --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
         --template-body file://${STAGE}-template-export.yml
         --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
