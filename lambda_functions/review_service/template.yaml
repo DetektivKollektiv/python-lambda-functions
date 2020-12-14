@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            review_api.detektivkollektiv.org,
-            !Sub "${STAGE}.review_api.detektivkollektiv.org",
+            review-api.detektivkollektiv.org,
+            !Sub "${STAGE}.review-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         Route53:
@@ -68,7 +68,7 @@ Resources:
   GetOpenItemsFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get-open-items-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-review_api-get-open-items-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: get_open_items.get_open_items # Change for each lambda
       Runtime: python3.8
@@ -98,7 +98,7 @@ Resources:
   CreateReviewFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create-review-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-review_api-create-review-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: create_review.create_review # Change for each lambda
       Runtime: python3.8
@@ -132,7 +132,7 @@ Resources:
   GetReviewQuestionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-review_question-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-review_api-get_review_question-${STAGE}"
       CodeUri: .
       Handler: get_review_question.get_review_question
       Runtime: python3.8
@@ -168,7 +168,7 @@ Resources:
   CreateReviewAnswerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create_review_answer-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-review_api-create_review_answer-${STAGE}"
       CodeUri: .
       Handler: create_review_answer.create_review_answer
       Runtime: python3.8
@@ -197,7 +197,7 @@ Resources:
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-reset_locked_items-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-review_api-reset_locked_items-${STAGE}"
       CodeUri: .
       Handler: reset_locked_items.reset_locked_items
       Runtime: python3.8

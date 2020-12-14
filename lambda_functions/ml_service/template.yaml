@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            ml_api.detektivkollektiv.org,
-            !Sub "${STAGE}.ml_api.detektivkollektiv.org",
+            ml-api.detektivkollektiv.org,
+            !Sub "${STAGE}.ml-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         Route53:
@@ -70,7 +70,7 @@ Resources:
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get_factcheck_by_itemid-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-get_factcheck_by_itemid-${STAGE}"
       CodeUri: .
       Handler: get_online_factcheck.get_online_factcheck
       Runtime: python3.8
@@ -99,7 +99,7 @@ Resources:
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-SearchFactChecks-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-SearchFactChecks-${STAGE}"
       CodeUri: .
       Handler: SearchFactChecks.get_FactChecks
       Runtime: python3.8
@@ -115,7 +115,7 @@ Resources:
   UpdateFactCheckModelsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-UpdateFactcheckModels-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-UpdateFactcheckModels-${STAGE}"
       CodeUri: .
       Handler: UpdateFactChecks.update_factcheck_models
       Runtime: python3.8
@@ -134,7 +134,7 @@ Resources:
   GetLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-GetLanguage-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-GetLanguage-${STAGE}"
       CodeUri: .
       Handler: GetLanguage.get_language
       Runtime: python3.8
@@ -147,7 +147,7 @@ Resources:
   GetKeyPhrasesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-GetKeyPhrases-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-GetKeyPhrases-${STAGE}"
       CodeUri: .
       Handler: GetKeyPhrases.get_phrases
       Runtime: python3.8
@@ -160,7 +160,7 @@ Resources:
   GetEntitiesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-GetEntities-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-GetEntities-${STAGE}"
       CodeUri: .
       Handler: GetEntities.get_entities
       Runtime: python3.8
@@ -173,7 +173,7 @@ Resources:
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-ExtractClaim-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-ExtractClaim-${STAGE}"
       CodeUri: .
       Handler: ExtractClaim.extract_claim
       Runtime: python3.8
@@ -186,7 +186,7 @@ Resources:
   GetSentimentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-GetSentiment-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-GetSentiment-${STAGE}"
       CodeUri: .
       Handler: GetSentiment.get_sentiment
       Runtime: python3.8
@@ -199,7 +199,7 @@ Resources:
   UpdateLanguageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-UpdateItem-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-UpdateItem-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.update_item
       Runtime: python3.8
@@ -216,7 +216,7 @@ Resources:
   StoreFactChecksFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-StoreFactChecks-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreFactChecks-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_factchecks
       Runtime: python3.8
@@ -233,7 +233,7 @@ Resources:
   StoreItemURL:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-StoreItemURL-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemURL-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemurl
       Runtime: python3.8
@@ -250,7 +250,7 @@ Resources:
   StoreItemEntityFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-StoreItemEntities-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemEntities-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itementities
       Runtime: python3.8
@@ -267,7 +267,7 @@ Resources:
   StoreItemSentimentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-StoreItemSentiment-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemSentiment-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemsentiment
       Runtime: python3.8
@@ -284,7 +284,7 @@ Resources:
   StoreItemKeyphraseFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-StoreItemKeyphrases-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemKeyphrases-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemphrases
       Runtime: python3.8

@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            submission_api.detektivkollektiv.org,
-            !Sub "${STAGE}.submission_api.detektivkollektiv.org",
+            submission-api.detektivkollektiv.org,
+            !Sub "${STAGE}.submission-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         Route53:
@@ -52,7 +52,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-api-execution-submission-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "detektivkollektiv-submission_api-execution-submission-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -70,7 +70,7 @@ Resources:
   SubmitItemFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-submit-item-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-submission_api-submit-item-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: submit_item.submit_item # Change for each lambda
       Runtime: python3.8

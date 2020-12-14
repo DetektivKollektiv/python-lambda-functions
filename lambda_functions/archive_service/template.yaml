@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            archive_api.detektivkollektiv.org,
-            !Sub "${STAGE}.archive_api.detektivkollektiv.org",
+            archive-api.detektivkollektiv.org,
+            !Sub "${STAGE}.archive-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
 
@@ -69,7 +69,7 @@ Resources:
   GetAllClosedItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get_all_closed_items-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-archive_api-get_all_closed_items-${STAGE}"
       CodeUri: .
       Handler: get_closed_items.get_closed_items
       Runtime: python3.8

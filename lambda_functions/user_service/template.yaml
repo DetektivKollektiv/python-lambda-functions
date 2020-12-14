@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            user_api.detektivkollektiv.org,
-            !Sub "${STAGE}.user_api.detektivkollektiv.org",
+            user-api.detektivkollektiv.org,
+            !Sub "${STAGE}.user-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         Basepath:
@@ -54,7 +54,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-api-execution-user-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "detektivkollektiv-user_api-execution-user-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -71,7 +71,7 @@ Resources:
   CreatUserFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-create-user-${STAGE}" # Change for each lambda
+      FunctionName: !Sub "detektivkollektiv-user_api-create-user-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: create_user.create_user # Change for each lambda
       Runtime: python3.8
@@ -92,7 +92,7 @@ Resources:
   DeleteUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-delete_user-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-user_api-delete_user-${STAGE}"
       CodeUri: .
       Handler: delete_user.delete_user
       Runtime: python3.8
@@ -121,7 +121,7 @@ Resources:
   GetUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "detektivkollektiv-api-get_user-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-user_api-get_user-${STAGE}"
       CodeUri: .
       Handler: get_user.get_user
       Runtime: python3.8
