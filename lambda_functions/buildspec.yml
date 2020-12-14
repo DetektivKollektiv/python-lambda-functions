@@ -40,6 +40,7 @@ phases:
     commands:
       # Upgrade pip to the latest version
       - echo $LOCATION
+      - printenv
       - pip install --upgrade pip
 
       - pip uninstall -y awscli
