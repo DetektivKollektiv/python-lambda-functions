@@ -46,6 +46,7 @@ Resources:
             !Sub "${STAGE}.review-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
+        EndpointConfiguration: EDGE
         Route53:
           HostedZoneId: !Sub "${HOSTEDZONEID}"
 

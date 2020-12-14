@@ -46,6 +46,7 @@ Resources:
             !Sub "${STAGE}.user-api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
+        EndpointConfiguration: EDGE
         Basepath:
           - /users # Change for each API
         Route53:
