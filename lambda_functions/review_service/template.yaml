@@ -38,17 +38,17 @@ Resources:
         DefaultAuthorizer: AWS_IAM
         AddDefaultAuthorizerToCorsPreflight: false
         InvokeRole: NONE
-      Domain:
-        DomainName:
-          !If [
-            IsProdEnvironment,
-            review-api.detektivkollektiv.org,
-            !Sub "review-api.${STAGE}.review-api.detektivkollektiv.org",
-          ]
-        CertificateArn: !Sub "${CERTARN}"
-        EndpointConfiguration: EDGE
-        Route53:
-          HostedZoneId: !Sub "${HOSTEDZONEID}"
+      # Domain:
+      #   DomainName:
+      #     !If [
+      #       IsProdEnvironment,
+      #       review-api.detektivkollektiv.org,
+      #       !Sub "review-api.${STAGE}.review-api.detektivkollektiv.org",
+      #     ]
+      #   CertificateArn: !Sub "${CERTARN}"
+      #   EndpointConfiguration: EDGE
+      #   Route53:
+      #     HostedZoneId: !Sub "${HOSTEDZONEID}"
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
