@@ -138,7 +138,8 @@ async def get_article(search_terms, LanguageCode):
                             article_bestfit = article
                             count_bestfit = len(unique_terms)
 
-                        sm_input.append(sm_input_search+",\""+article['text']+"\"")  # input for article
+                        article_text = article['text'].replace("\"", "")
+                        sm_input.append(sm_input_search+",\""+article_text+"\"")  # input for article
                 # call sagemaker endpoint for similarity prediction
                 try:
                     endpoint = endpoint_prefix+LanguageCode+'-'+os.environ['STAGE']
@@ -149,10 +150,13 @@ async def get_article(search_terms, LanguageCode):
                                 Accept="text/csv",
                                 Body=payload
                                 )
-                    result = response['Body'].read().decode()
+                    result = response['Body'].read()
+                    result = result.decode()
                     scores = result.split('\n')
                     ind = 0
                     for score in scores:
+                        if score=='':
+                            continue
                         sim = float(score)
                         if sim > bestsim:
                             article_bestsim = response_json['claims'][ind]
