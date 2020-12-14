@@ -47,7 +47,7 @@ phases:
       - unzip awscliv2.zip
       - ./aws/install
 
-      - pip install --upgrade awscli
+      # - pip install --upgrade awscli
 
       # Install linter for CloudFormation template
       - pip install cfn-lint
