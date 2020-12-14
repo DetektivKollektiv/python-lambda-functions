@@ -42,12 +42,11 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            api.detektivkollektiv.org,
-            !Sub "${STAGE}.api.detektivkollektiv.org",
+            archive_api.detektivkollektiv.org,
+            !Sub "${STAGE}.archive_api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
-        Basepath:
-          - /archive
+
         Route53:
           HostedZoneId: !Sub "${HOSTEDZONEID}"
 

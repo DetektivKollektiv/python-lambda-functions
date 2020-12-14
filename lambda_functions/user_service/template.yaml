@@ -42,8 +42,8 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            api.detektivkollektiv.org,
-            !Sub "${STAGE}.api.detektivkollektiv.org",
+            user_api.detektivkollektiv.org,
+            !Sub "${STAGE}.user_api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         Basepath:

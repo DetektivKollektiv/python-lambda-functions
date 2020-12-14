@@ -42,12 +42,10 @@ Resources:
         DomainName:
           !If [
             IsProdEnvironment,
-            api.detektivkollektiv.org,
-            !Sub "${STAGE}.api.detektivkollektiv.org",
+            submission_api.detektivkollektiv.org,
+            !Sub "${STAGE}.submission_api.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
-        Basepath:
-          - /submission # Change for each API
         Route53:
           HostedZoneId: !Sub "${HOSTEDZONEID}"
 
