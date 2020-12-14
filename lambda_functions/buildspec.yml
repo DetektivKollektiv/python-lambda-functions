@@ -85,7 +85,7 @@ phases:
   build:
     commands:
       # Use AWS SAM to package the application by using AWS CloudFormation
-      - sed -i 's/VAR_HOSTEDZONEID/'"$HOSTEDZONEID"'/g;s/VAR_CERTARN/'"$CERTARN"'/g' ${STAGE}-params.json
+      - sed -i 's@VAR_HOSTEDZONEID@'"$HOSTEDZONEID"'@g;s@VAR_CERTARN@'"$CERTARN"'@g' ${STAGE}-params.json
       - aws cloudformation package
         --template-file ${TEMPLATE_PATH}
         --s3-bucket $S3_BUCKET
