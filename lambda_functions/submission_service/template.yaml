@@ -16,13 +16,13 @@ Parameters:
   DBNAME:
     Type: String
     Default: development_db
-  HOSTEDZONEID:
-    Type: String
-  CERTARN:
-    Type: String
+#   HOSTEDZONEID:
+#     Type: String
+#   CERTARN:
+#     Type: String
 
-Conditions:
-  IsProdEnvironment: !Equals [!Sub "${STAGE}", prod]
+# Conditions:
+#   IsProdEnvironment: !Equals [!Sub "${STAGE}", prod]
 
 Resources:
   Api:
