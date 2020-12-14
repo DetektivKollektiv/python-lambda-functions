@@ -94,6 +94,7 @@ phases:
         --stack-name detektivkollektiv-api-dev-${STACK_NAME}
         --s3-bucket $S3_BUCKET
         --parameter-overrides file://${STAGE}-params.json
+        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
       #   - aws cloudformation create-change-set
       #   --stack-name detektivkollektiv-api-dev-${LOCATION}
       #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
