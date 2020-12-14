@@ -2,4 +2,3 @@ aiohttp
 aiodns
 beautifulsoup4
 pandas
-pickle
