@@ -43,7 +43,7 @@ Resources:
           !If [
             IsProdEnvironment,
             ml-api.detektivkollektiv.org,
-            !Sub "${STAGE}.ml-api.detektivkollektiv.org",
+            !Sub "ml-api.${STAGE}.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         EndpointConfiguration: EDGE

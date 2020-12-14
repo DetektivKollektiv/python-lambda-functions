@@ -43,7 +43,7 @@ Resources:
           !If [
             IsProdEnvironment,
             archive-api.detektivkollektiv.org,
-            !Sub "${STAGE}.archive-api.detektivkollektiv.org",
+            !Sub "archive-api.${STAGE}.detektivkollektiv.org",
           ]
         CertificateArn: !Sub "${CERTARN}"
         EndpointConfiguration: EDGE
