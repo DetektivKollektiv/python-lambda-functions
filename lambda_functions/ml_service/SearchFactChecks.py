@@ -12,6 +12,8 @@ import requests
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+sm_client = boto3.client('sagemaker-runtime')
+endpoint_prefix = "fc-sim-"
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3')
 bucket_prefix = "factchecks-"
@@ -78,8 +80,7 @@ def get_factcheckBucketName():
     try:
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
     except ClientError:
-        s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={
-                                'LocationConstraint': 'eu-central-1'})
+        s3_client.create_bucket(Bucket=bucket_name)
     return bucket_name
 
 # Call Google API for Fact Check search
@@ -106,6 +107,8 @@ async def get_article(search_terms, LanguageCode):
     article_bestfit = ""
     count_bestfit = 1  # minimum fit should be at least 2 search terms in the claim
     bucket = get_factcheckBucketName()
+    article_bestsim = ""
+    bestsim = 0.0
 
     # combine Google API calls in one session
     # TODO consider to do that not for one lambda call, but for as much API calls as possible
@@ -116,6 +119,12 @@ async def get_article(search_terms, LanguageCode):
 
             # Check if the search was successful
             if 'claims' in response_json:
+                sm_input = []
+                # build input from search_terms for sagemaker
+                sm_input_search = "\""
+                for term in used_terms:
+                    sm_input_search += term + " "
+                sm_input_search += "\""
                 # verify if the fact check articles fit to search terms
                 # consider that there could be multiple equal entries in terms
                 for article in response_json['claims']:
@@ -128,6 +137,37 @@ async def get_article(search_terms, LanguageCode):
                         if len(unique_terms) > count_bestfit:
                             article_bestfit = article
                             count_bestfit = len(unique_terms)
+
+                        article_text = article['text'].replace("\"", "")
+                        # input for article
+                        sm_input.append(sm_input_search +
+                                        ",\""+article_text+"\"")
+                # call sagemaker endpoint for similarity prediction
+                try:
+                    endpoint = endpoint_prefix + \
+                        LanguageCode+'-'+os.environ['STAGE']
+                    payload = '\n'.join(sm_input)
+                    response = sm_client.invoke_endpoint(
+                        EndpointName=endpoint,
+                        ContentType="text/csv",
+                        Accept="text/csv",
+                        Body=payload
+                    )
+                    result = response['Body'].read()
+                    result = result.decode()
+                    scores = result.split('\n')
+                    ind = 0
+                    for score in scores:
+                        if score == '':
+                            continue
+                        sim = float(score)
+                        if sim > bestsim:
+                            article_bestsim = response_json['claims'][ind]
+                            bestsim = sim
+                        ind = ind+1
+                except Exception as e:
+                    logger.error(
+                        'Error {} invoking sagemaker endpoint {}.'.format(e, endpoint))
                 # Store received factchecks in a bucket to be used for training a model to assess similarity between claims and factchecks
                 body = json.dumps(response_json)
                 key = newfactchecks_folder+str(uuid4())
@@ -139,7 +179,10 @@ async def get_article(search_terms, LanguageCode):
                     logger.error(
                         'Error {} putting object {} in bucket {}.'.format(e, key, bucket))
 
-    return article_bestfit
+    if article_bestsim != "":
+        return article_bestsim
+    else:
+        return article_bestfit
 
 
 # Search Fact Checks
