@@ -96,4 +96,4 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - Fn::ImportValue: !Sub "core-layer-arn-${STAGE}"
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:13

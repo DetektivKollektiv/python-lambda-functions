@@ -15,9 +15,8 @@ Resources:
       ContentUri: .
       CompatibleRuntimes:
         - python3.8
-
-Outputs:
-  LayerArn:
-    Value: !Ref CoreLayer
-    Export:
-      Name: !Sub "core-layer-arn-${STAGE}"
+# Outputs:
+#   LayerArn:
+#     Value: !Ref CoreLayer
+#     Export:
+#       Name: !Sub "core-layer-arn-${STAGE}"

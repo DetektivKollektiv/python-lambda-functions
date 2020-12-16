@@ -27,7 +27,7 @@ phases:
       - gem install cfn-nag
 
       # Install requirements
-      - pip install -r "lambda_layers/core_layer/requirements.txt" --target "lambda_functions/core_layer"
+      - pip install -r "lambda_layers/core_layer/requirements.txt" --target "lambda_functions/core_layer/python"
 
   pre_build:
     commands:
