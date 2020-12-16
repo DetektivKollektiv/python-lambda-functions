@@ -272,6 +272,7 @@ def update_factcheck_models(event, context):
                                                     pageToken=pageToken)
                 df_page = json2df(response_json)
                 for fc in df_page:
+                    fc['text'] = fc['text'].replace("\"", "")
                     if fc not in df_factchecks:
                         df_factchecks.append(fc)
                 if 'nextPageToken' in response_json:

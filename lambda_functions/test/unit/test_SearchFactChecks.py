@@ -52,7 +52,7 @@ class TestSearchFactChecks:
             "item": {
                 "id": "3fb83912-7a97-423a-b820-36718d51b1a6",
                 "content": "Manche Corona-Tests brauchen keine externe Qualitätskontrolle",
-                "language": "de",
+                "language": "de"
             },
             "KeyPhrases": [
                 "externe Qualitätskontrolle",
