@@ -17,4 +17,4 @@ phases:
 
   build:
     commands:
-      - python build/update_layers/update_lambdas.py
+      - python helper/pipeline/update_layers/update_lambdas.py
