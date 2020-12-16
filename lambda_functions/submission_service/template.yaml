@@ -53,7 +53,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-submission_api-execution-submission-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "detektivkollektiv-api-execution-submission-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -96,4 +96,4 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:13
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1

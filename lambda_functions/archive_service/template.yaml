@@ -94,4 +94,4 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:13
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
