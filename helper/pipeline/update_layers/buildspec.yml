@@ -1,0 +1,20 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      ruby: latest
+    commands:
+      # Upgrade pip to the latest version
+      - pip install --upgrade pip
+
+      # Install requirements
+      - pip install boto3
+
+  build:
+    commands:
+      - python build/update_layers/update_lambdas.py
