@@ -20,12 +20,12 @@ try:
                     lambda_layer['CleanArn'] = lambda_layer['Arn'].rsplit(':', 1)[
                         0]
                     # If the function uses the current layer
-                    if lambda_layer['CleanArn'] == layer['LayerArn']
-                    # If the function is not up to date
-                    if lambda_layer['Arn'] != layer['LatestMatchingVersion']['LayerVersionArn']:
-                        # Update Arn and add lambda to be updated
-                        lambda_layer['Arn'] = layer['LatestMatchingVersion']['LayerVersionArn']
-                        relevant_lambdas.append(l)
+                    if lambda_layer['CleanArn'] == layer['LayerArn']:
+                        # If the function is not up to date
+                        if lambda_layer['Arn'] != layer['LatestMatchingVersion']['LayerVersionArn']:
+                            # Update Arn and add lambda to be updated
+                            lambda_layer['Arn'] = layer['LatestMatchingVersion']['LayerVersionArn']
+                            relevant_lambdas.append(l)
 
         # Update config of all lambdas
         for lambda_function in relevant_lambdas:
