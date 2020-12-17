@@ -47,7 +47,7 @@ phases:
         --output-template-file ${STAGE}-template-export.yml
       - aws cloudformation deploy
         --template-file ${STAGE}-template-export.yml
-        --stack-name detektivkollektiv-api-dev-ml-requirements-layer
+        --stack-name detektivkollektiv-api-${STAGE}-ml-requirements-layer
         --s3-bucket $S3_BUCKET
         --parameter-overrides file://${STAGE}-params.json
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
