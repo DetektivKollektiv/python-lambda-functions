@@ -103,4 +103,16 @@ class TestExtractClaim:
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["concatenation"]["Text"] == ' '
+        assert resp["concatenation"]["Text"] == 'Was für ein Trottel ist das denn?  Facebook '
+
+    def test_extract_claim_6(self):
+        event = {
+            "item": {
+                "content": "https://kopp-report.de/helios-kliniken-veroeffentlichen-corona-fakten-keine-pandemie-von-nationaler-tragweite/?fbclid=IwAR1fMRjkKXXYQUiNxYrgYczcffvNZbW-F3z8Q4f4Ar00caSNO1KjFtyJrG4",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["title"] == 'Helios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '

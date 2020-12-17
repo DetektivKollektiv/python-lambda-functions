@@ -169,42 +169,42 @@ def create_questions(session):
     parentquestion3 = ReviewQuestion()
     parentquestion3.id = "3"
     parentquestion3.info = "3"
-    parentquestion3.max_children = 0
+    parentquestion3.max_children = None
 
     parentquestion4 = ReviewQuestion()
     parentquestion4.id = "4"
     parentquestion4.info = "4"
-    parentquestion4.max_children = 0
+    parentquestion4.max_children = None
 
     parentquestion5 = ReviewQuestion()
     parentquestion5.id = "5"
     parentquestion5.info = "5"
-    parentquestion5.max_children = 0
+    parentquestion5.max_children = None
 
     parentquestion6 = ReviewQuestion()
     parentquestion6.id = "6"
     parentquestion6.info = "6"
-    parentquestion6.max_children = 0
+    parentquestion6.max_children = None
 
     parentquestion7 = ReviewQuestion()
     parentquestion7.id = "7"
     parentquestion7.info = "7"
-    parentquestion7.max_children = 0
+    parentquestion7.max_children = None
 
     parentquestion8 = ReviewQuestion()
     parentquestion8.id = "8"
     parentquestion8.info = "8"
-    parentquestion8.max_children = 0
+    parentquestion8.max_children = None
 
     parentquestion9 = ReviewQuestion()
     parentquestion9.id = "9"
     parentquestion9.info = "9"
-    parentquestion9.max_children = 0
+    parentquestion9.max_children = None
 
     parentquestion10 = ReviewQuestion()
     parentquestion10.id = "10"
     parentquestion10.info = "10"
-    parentquestion10.max_children = 0
+    parentquestion10.max_children = None
 
     session.add(parentquestion1)
     session.add(parentquestion2)

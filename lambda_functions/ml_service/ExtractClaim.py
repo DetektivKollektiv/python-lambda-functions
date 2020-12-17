@@ -1,6 +1,7 @@
 import re
 import logging
 import urllib.request
+import requests
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger()
@@ -62,8 +63,10 @@ def extract_claim(event, context):
                 continue
         except (AttributeError, TypeError):
             continue
-        content = urllib.request.urlopen(url)
-        read_content = content.read()
+#        content = urllib.request.urlopen(url)
+#        read_content = content.read()
+        resp = requests.get(url)
+        read_content = resp.content
         read_content_hidden = read_content.replace(b'<!--', b'')
         soup = BeautifulSoup(read_content_hidden, 'html.parser')
         titles = soup.find_all('title')  # get the title of the web page

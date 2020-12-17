@@ -43,8 +43,7 @@ class TestSearchFactChecks:
         ret = SearchFactChecks.get_FactChecks(event, context)
         elapsed = time.perf_counter() - s
         assert 'claimReview' in ret[0]
-        assert ret[0]['claimReview'][0]['title'] == 'Nein, RKI bestätigt nicht eine Covid-19-Sterblichkeitsrate ' \
-                                                    'von 0,01 Prozent in Deutschland'
+        assert ret[0]['claimReview'][0]['textualRating'] == 'Falsch. Das Robert-Koch-Institut bestätigte nicht eine Covid-19- Sterblichkeitsrate von 0,01 Prozent in Deutschland.'
         assert elapsed < 3
 
 

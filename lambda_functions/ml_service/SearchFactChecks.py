@@ -80,7 +80,8 @@ def get_factcheckBucketName():
     try:
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
     except ClientError:
-        s3_client.create_bucket(Bucket=bucket_name)
+        s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={
+                                'LocationConstraint': 'eu-central-1'})
     return bucket_name
 
 # Call Google API for Fact Check search
