@@ -1,0 +1,4 @@
+sqlalchemy
+sqlalchemy-aurora-data-api==0.2.0
+boto3~=1.10.14
+botocore~=1.13.14

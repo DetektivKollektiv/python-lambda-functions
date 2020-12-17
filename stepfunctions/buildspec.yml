@@ -1,0 +1,48 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      ruby: latest
+    commands:
+      # Upgrade pip to the latest version
+      - pip install --upgrade pip
+
+      - pip uninstall -y awscli
+      # Upgrade AWS CLI to the latest version
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - ./aws/install
+
+      - pip install cfn-lint
+      - gem install cfn-nag
+      - gem install statelint
+
+  pre_build:
+    commands:
+      - statelint ./stepfunctions/search_factchecks/SearchFactChecks.asl.json
+      - python ./stepfunctions/search_factchecks/template_statemachine_cf.py
+        --smdef ./stepfunctions/search_factchecks/SearchFactChecks.asl.json
+        --intemplate ./stepfunctions/template.yaml
+        --outtemplate ./stepfunctions/template.yaml
+
+      - echo "Validating CloudFormation template file ./stepfunctions/template.yaml"
+      - cfn-lint -t ./stepfunctions/template.yaml
+      - cfn_nag_scan --input-path ./stepfunctions/template.yaml
+
+  build:
+    commands:
+      - aws cloudformation package
+        --template-file ./stepfunctions/template.yaml
+        --s3-bucket $S3_BUCKET
+        --output-template-file ${STAGE}-template-export.yml
+      - aws cloudformation deploy
+        --template-file ${STAGE}-template-export.yml
+        --stack-name detektivkollektiv-stepfunctions-${STAGE}
+        --s3-bucket $S3_BUCKET
+        --parameter-overrides file://${STAGE}-params.json
+        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND

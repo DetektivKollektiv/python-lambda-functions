@@ -1,0 +1,51 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      ruby: latest
+    commands:
+      # Upgrade pip to the latest version
+      - pip install --upgrade pip
+
+      - pip uninstall -y awscli
+      # Upgrade AWS CLI to the latest version
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip -q awscliv2.zip
+      - ./aws/install
+
+      # Install linter for CloudFormation template
+      - pip install cfn-lint
+
+      # Install cfn-nag
+      - gem install cfn-nag
+
+      # Install requirements
+      - pip install -r "lambda_layers/ml_requirements_layer/requirements.txt" --target lambda_layers/ml_requirements_layer/python/lib/python3.8/site-packages/
+
+  pre_build:
+    commands:
+      # verify the validity of the state machine definition
+      - cfn-lint -t lambda_layers/ml_requirements_layer/template.yaml
+      - cfn_nag_scan --input-path lambda_layers/ml_requirements_layer/template.yaml
+
+      # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
+      # - python -m unittest discover lambda_functions/tests
+
+  build:
+    commands:
+      # Use AWS SAM to package the application by using AWS CloudFormation
+      - aws cloudformation package
+        --template-file lambda_layers/ml_requirements_layer/template.yaml
+        --s3-bucket $S3_BUCKET
+        --output-template-file ${STAGE}-template-export.yml
+      - aws cloudformation deploy
+        --template-file ${STAGE}-template-export.yml
+        --stack-name detektivkollektiv-api-${STAGE}-ml-requirements-layer
+        --s3-bucket $S3_BUCKET
+        --parameter-overrides file://${STAGE}-params.json
+        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND

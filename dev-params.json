@@ -1,0 +1,7 @@
+{
+    "Parameters": {
+        "STAGE": "dev",
+        "DBNAME": "development_db",
+        "CorsAllowOrigin": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+    }
+}

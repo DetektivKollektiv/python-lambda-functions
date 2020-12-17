@@ -1,0 +1,7 @@
+{
+    "Parameters": {
+        "STAGE": "qa",
+        "DBNAME": "qa_db",
+        "CorsAllowOrigin": "https://qa.detective-collective.org,https://www.qa.detective-collective.org"
+    }
+}

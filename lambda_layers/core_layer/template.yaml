@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the core lambda layer of the DK backend"
+
+Parameters:
+  STAGE:
+    Type: String
+
+Resources:
+  CoreLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "detektivkollektiv-core-layer-${STAGE}"
+      Description: Core functionalities for the DetektivKollektiv backend.
+      ContentUri: .
+      CompatibleRuntimes:
+        - python3.8
+# Outputs:
+#   LayerArn:
+#     Value: !Ref CoreLayer
+#     Export:
+#       Name: !Sub "core-layer-arn-${STAGE}"
