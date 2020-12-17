@@ -85,3 +85,17 @@ class TestUpdateModels:
                 fc_exists = True
                 break
         assert fc_exists
+
+    # test if there are " in the text
+    def test_update_factchecker_2(self):
+        event = ""
+        context = ""
+        os.environ["STAGE"] = "qa"
+        UpdateFactChecks.update_factcheck_models(event, context)
+        df_factchecks = UpdateFactChecks.read_df(UpdateFactChecks.factchecks_prefix+"de.csv")
+        qm_exists = False
+        for fc in df_factchecks:
+            if fc['claim_text'].find("\"") > -1:
+                qm_exists = True
+                break
+        assert qm_exists == False

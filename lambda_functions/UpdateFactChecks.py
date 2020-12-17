@@ -153,6 +153,7 @@ def json2df(factcheck_json):
             text=" "
             if 'text' in article:
                 text=article['text']
+                text = text.replace("\"", "")
             claimant=" "
             if 'claimant' in article:
                 claimant=article['claimant']
@@ -272,7 +273,6 @@ def update_factcheck_models(event, context):
                                                     pageToken=pageToken)
                 df_page = json2df(response_json)
                 for fc in df_page:
-                    fc['text'] = fc['text'].replace("\"", "")
                     if fc not in df_factchecks:
                         df_factchecks.append(fc)
                 if 'nextPageToken' in response_json:
