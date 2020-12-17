@@ -1,0 +1,9 @@
+{
+    "Parameters": {
+        "STAGE": "prod",
+        "DBNAME": "prod_db",
+        "CorsAllowOrigin": "https://detective-collective.org,https://www.detective-collective.org",
+        "CERTARN": "VAR_CERTARN",
+        "HOSTEDZONEID": "VAR_HOSTEDZONEID"
+    }
+}

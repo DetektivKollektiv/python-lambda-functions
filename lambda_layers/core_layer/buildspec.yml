@@ -28,6 +28,7 @@ phases:
 
       # Install requirements
       - pip install -r "lambda_layers/core_layer/requirements.txt" --target lambda_layers/core_layer/python/lib/python3.8/site-packages/
+      - pip install alembic sqlalchemy mysqlclient
 
   pre_build:
     commands:
@@ -35,15 +36,12 @@ phases:
       - cfn-lint -t lambda_layers/core_layer/template.yaml
       - cfn_nag_scan --input-path lambda_layers/core_layer/template.yaml
 
-      # - cfn-lint -t ./lambda_functions/template.yaml
-      # - cfn_nag_scan -i ./lambda_functions -t template.yaml
       # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
       # - python -m unittest discover lambda_functions/tests
 
   build:
     commands:
-      # Use AWS SAM to package the application by using AWS CloudFormation
-      #- sed -i 's/VAR_HOSTEDZONEID/$HOSTEDZONEID/g;s/VAR_CERTARN/$CERTARN/g' ${STAGE}-params.json
+      # Update cloudformation stack
       - aws cloudformation package
         --template-file lambda_layers/core_layer/template.yaml
         --s3-bucket $S3_BUCKET
@@ -54,19 +52,6 @@ phases:
         --s3-bucket $S3_BUCKET
         --parameter-overrides file://${STAGE}-params.json
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   - aws cloudformation create-change-set
-      #   --stack-name detektivkollektiv-api-dev-${LOCATION}
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      #   --template-body file://${STAGE}-template-export.yml
-      #   --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
-      #   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   # --parameters file://${STAGE}-config.json
-      # - aws cloudformation execute-change-set
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      # Do not remove this statement. This command is required for AWS CodeStar projects.
-      # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-# artifacts:
-#   files:
-#     - ${STAGE}-template-export.yml
-#     - ${STAGE}-config.json
-# - template-configuration.json
+      # Run migrations
+      - cd lambda_layers/core_layer/python/core_layer
+      - alembic upgrade head
