@@ -54,7 +54,7 @@ def submit_item(event, context, is_test=False, session=None):
             submission.item_id = created_item.id
             stage = os.environ['STAGE']
             client.start_execution(
-                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks-'+stage,
+                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
                 name='SFC_' + created_item.id,
                 input="{\"item\":" + json.dumps(created_item.to_dict()) + "}"
             )

@@ -80,16 +80,20 @@ def template_state_machine(
                    "        Fn::GetAtt:\n" + \
                    "        - StateMachineLambdaRole\n" + \
                    "        - Arn\n" + \
-                   "      StateMachineName: !Sub 'SearchFactChecks-${STAGE}'\n"
+                   "      StateMachineName: !Sub 'SearchFactChecks_new-${STAGE}'\n"
 
     return template_out_str + templated_cf
 
 
 # Initiate the parser
-parser = argparse.ArgumentParser(description="This program appends a stepfunction definition to template.yaml")
-parser.add_argument('--smdef', help="State machine definition", default='sm_def.json')
-parser.add_argument('--intemplate', help="Input template.yaml", default='intemplate.yaml')
-parser.add_argument('--outtemplate', help="Output template.yaml", default=sys.stdin)
+parser = argparse.ArgumentParser(
+    description="This program appends a stepfunction definition to template.yaml")
+parser.add_argument(
+    '--smdef', help="State machine definition", default='sm_def.json')
+parser.add_argument('--intemplate', help="Input template.yaml",
+                    default='intemplate.yaml')
+parser.add_argument(
+    '--outtemplate', help="Output template.yaml", default=sys.stdin)
 # Read arguments from the command line
 args = parser.parse_args()
 
