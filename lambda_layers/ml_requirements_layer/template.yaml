@@ -15,8 +15,3 @@ Resources:
       ContentUri: .
       CompatibleRuntimes:
         - python3.8
-# Outputs:
-#   LayerArn:
-#     Value: !Ref MLRequirementsLayer
-#     Export:
-#       Name: !Sub "ml-requirements-layer-arn-${STAGE}"

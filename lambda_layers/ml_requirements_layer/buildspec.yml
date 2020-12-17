@@ -26,8 +26,6 @@ phases:
 
       # Install requirements
       - pip install -r "lambda_layers/ml_requirements_layer/requirements.txt" --target lambda_layers/ml_requirements_layer/python/lib/python3.8/site-packages/
-      # - pip install -r lambda_layers/core_layer/requirements.txt --target lambda_layers/core_layer
-      # - pip install -r lambda_layers/ml_requirements_layer/requirements_layers.txt --target lambda_layers/ml_requirements_layer
 
   pre_build:
     commands:
@@ -51,19 +49,3 @@ phases:
         --s3-bucket $S3_BUCKET
         --parameter-overrides file://${STAGE}-params.json
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   - aws cloudformation create-change-set
-      #   --stack-name detektivkollektiv-api-dev-${LOCATION}
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      #   --template-body file://${STAGE}-template-export.yml
-      #   --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
-      #   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   # --parameters file://${STAGE}-config.json
-      # - aws cloudformation execute-change-set
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      # Do not remove this statement. This command is required for AWS CodeStar projects.
-      # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-# artifacts:
-#   files:
-#     - ${STAGE}-template-export.yml
-#     - ${STAGE}-config.json
-# - template-configuration.json

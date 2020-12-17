@@ -59,8 +59,6 @@ phases:
 
       # Install requirements
       - pip install -r "lambda_functions/${LOCATION}/requirements.txt" --target "lambda_functions/${LOCATION}"
-      # - pip install -r lambda_layers/core_layer/requirements.txt --target lambda_layers/core_layer
-      # - pip install -r lambda_layers/ml_requirements_layer/requirements_layers.txt --target lambda_layers/ml_requirements_layer
 
       # Install statelint to verify the validity of the state machine definition
       - gem install statelint
@@ -68,17 +66,11 @@ phases:
   pre_build:
     commands:
       # verify the validity of the state machine definition
-      # TODO: Extra buildspec für stepfunction/submission service
-      # - statelint ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json
-      # create template for stepfunction and add it to template.yaml
-      # - python ./lambda_functions/submission_service/stepfunctions/template_statemachine_cf.py --smdef ./lambda_functions/submission_service/stepfunctions/SearchFactChecks.asl.json --intemplate ./lambda_functions/submission_service/submission_service_template.yaml --outtemplate ./lambda_functions/submission_service/submission_service_template.yaml
       - TEMPLATE_PATH="lambda_functions/${LOCATION}/template.yaml"
       - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
       - cfn-lint -t ${TEMPLATE_PATH}
       - cfn_nag_scan --input-path ${TEMPLATE_PATH}
 
-      # - cfn-lint -t ./lambda_functions/template.yaml
-      # - cfn_nag_scan -i ./lambda_functions -t template.yaml
       # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
       # - python -m unittest discover lambda_functions/tests
 
@@ -95,19 +87,3 @@ phases:
         --s3-bucket $S3_BUCKET
         --parameter-overrides file://${STAGE}-params.json
         --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   - aws cloudformation create-change-set
-      #   --stack-name detektivkollektiv-api-dev-${LOCATION}
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      #   --template-body file://${STAGE}-template-export.yml
-      #   --role-arn arn:aws:iam::891514678401:role/codepipeline-api-dev
-      #   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-      #   # --parameters file://${STAGE}-config.json
-      # - aws cloudformation execute-change-set
-      #   --change-set-name detektivkollektiv-api-changeset-dev-${LOCATION}
-      # Do not remove this statement. This command is required for AWS CodeStar projects.
-      # Update the AWS Partition, AWS Region, account ID and project ID in the project ARN on template-configuration.json file so AWS CloudFormation can tag project resources.
-# artifacts:
-#   files:
-#     - ${STAGE}-template-export.yml
-#     - ${STAGE}-config.json
-# - template-configuration.json
