@@ -2,8 +2,6 @@
     "Parameters": {
         "STAGE": "qa",
         "DBNAME": "qa_db",
-        "CorsAllowOrigin": "https://qa.detective-collective.org,https://www.qa.detective-collective.org",
-        "CERTARN": "VAR_CERTARN",
-        "HOSTEDZONEID": "VAR_HOSTEDZONEID"
+        "CorsAllowOrigin": "https://qa.detective-collective.org,https://www.qa.detective-collective.org"
     }
 }

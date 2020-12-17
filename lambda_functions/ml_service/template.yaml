@@ -16,13 +16,6 @@ Parameters:
   DBNAME:
     Type: String
     Default: development_db
-#   HOSTEDZONEID:
-#     Type: String
-#   CERTARN:
-#     Type: String
-
-# Conditions:
-#   IsProdEnvironment: !Equals [!Sub "${STAGE}", prod]
 
 Resources:
   Api:
@@ -38,17 +31,6 @@ Resources:
         DefaultAuthorizer: AWS_IAM
         AddDefaultAuthorizerToCorsPreflight: false
         InvokeRole: NONE
-      # Domain:
-      #   DomainName:
-      #     !If [
-      #       IsProdEnvironment,
-      #       ml-api.detektivkollektiv.org,
-      #       !Sub "ml-api.${STAGE}.detektivkollektiv.org",
-      #     ]
-      #   CertificateArn: !Sub "${CERTARN}"
-      #   EndpointConfiguration: EDGE
-      #   Route53:
-      #     HostedZoneId: !Sub "${HOSTEDZONEID}"
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
