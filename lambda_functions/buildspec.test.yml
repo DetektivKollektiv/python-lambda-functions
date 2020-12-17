@@ -1,0 +1,72 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+batch:
+  fast-fail: false
+  build-list:
+    - identifier: archive_service
+      env:
+        variables:
+          LOCATION: 'archive_service'
+          STACK_NAME: 'archive-service'
+    - identifier: ml_service
+      env:
+        variables:
+          LOCATION: 'ml_service'
+          STACK_NAME: 'ml-service'
+    - identifier: review_service
+      env:
+        variables:
+          LOCATION: 'review_service'
+          STACK_NAME: 'review-service'
+    - identifier: submission_service
+      env:
+        variables:
+          LOCATION: 'submission_service'
+          STACK_NAME: 'submission-service'
+    - identifier: user_service
+      env:
+        variables:
+          LOCATION: 'user_service'
+          STACK_NAME: 'user-service'
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      ruby: latest
+    commands:
+      # Upgrade pip to the latest version
+      - echo $LOCATION
+      - printenv
+      - pip install --upgrade pip
+
+      - pip uninstall -y awscli
+      # Upgrade AWS CLI to the latest version
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip -q awscliv2.zip
+      - ./aws/install
+
+      # - pip install --upgrade awscli
+
+      # Install linter for CloudFormation template
+      - pip install cfn-lint
+
+      # Install cfn-nag
+      - gem install cfn-nag
+
+      # Install requirements
+      - pip install -r "lambda_functions/${LOCATION}/requirements.txt" --target "lambda_functions/${LOCATION}"
+
+      # Install statelint to verify the validity of the state machine definition
+      - gem install statelint
+
+  build:
+    commands:
+      # verify the validity of the state machine definition
+      - TEMPLATE_PATH="lambda_functions/${LOCATION}/template.yaml"
+      - echo "Validating CloudFormation template file ${TEMPLATE_PATH}"
+      - cfn-lint -t ${TEMPLATE_PATH}
+      - cfn_nag_scan --input-path ${TEMPLATE_PATH}
