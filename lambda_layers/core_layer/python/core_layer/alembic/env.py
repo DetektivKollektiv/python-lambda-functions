@@ -9,7 +9,7 @@ import sys
 import os
 import json
 from os.path import abspath, dirname
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
+sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 from core_layer import helper
 from core_layer.model import model_base
 
