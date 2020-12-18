@@ -157,12 +157,3 @@ class TestGetEntities:
         context = ""
         ret = GetEntities.get_entities(event, context)
         assert ret == ['26. Juni 2020', 'Deutschland', '0,01 Prozent']
-
-    def test_get_entities_13(self):
-        event = {
-            "Text": "Schweden als Vorbild, wie man es hätte sinnvoll machen können! Doch von unseren Politikdarstellern und Massenmedien kommt schon lange nicht's sinnvolles mehr... Jetzt wird wieder alles dafür getan, die Menschen einzusperren und den zweiten Lockdown zu erzwingen. Mit Angst und Panik werden die Menschen gefügig gemacht und genügend werden wieder darauf reinfallen. Doch ebenso werden immer mehr Menschen wach und erkennen was wirklich los ist.  Der Tag wird kommen, an dem die Wahrheit ans Licht kommt und dann möchte ich nicht in der Haut der Verantwortlichen stecken. Bei unserem Volldrosten, geht es gerade los und er wird bald keinen Fuß mehr auf die Erde bekommen.  Um was es genau geht, erfährst du hier! 👇 Https://t.me/sebastiankarpf ",
-            "LanguageCode": "de"
-        }
-        context = ""
-        ret = GetEntities.get_entities(event, context)
-        assert ret == ['RKI', '0,01 Prozent', 'Covid']

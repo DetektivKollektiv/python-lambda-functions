@@ -63,8 +63,6 @@ def extract_claim(event, context):
                 continue
         except (AttributeError, TypeError):
             continue
-#        content = urllib.request.urlopen(url)
-#        read_content = content.read()
         resp = requests.get(url)
         read_content = resp.content
         read_content_hidden = read_content.replace(b'<!--', b'')

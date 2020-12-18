@@ -49,6 +49,8 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
         - arn:aws:iam::aws:policy/AWSLambdaExecute
         - arn:aws:iam::aws:policy/ComprehendFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess         
 
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -103,8 +105,6 @@ Resources:
       Handler: UpdateFactChecks.update_factcheck_models
       Runtime: python3.8
       MemorySize: 832
-      Layers:
-        - arn:aws:lambda:eu-central-1:770693421928:layer:Klayers-python38-pandas:21
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole

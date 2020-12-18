@@ -17,30 +17,6 @@ class TestExtractClaim:
         resp = ExtractClaim.extract_claim(event, context)
 
         text_0 = "Wollen wir auch einen Channel für solche Themen anlegen?"
-        text_url = "https://www.spiegel.de/wissenschaft/mensch/corona-krise-und-klimawandel-fuenf" \
-                   "-desinformations-tricks-die-jeder-kennen-sollte-a-6892ff9b-fb28-43ae-8438-55b49d607e57" \
-                   "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ"
-        text_1 = 'US-Präsident Donald Trump, Fachmann für Falschinformation Haben Sie auch solche ' \
-                 "Nachrichten über soziale Medien bekommen: Covid-19 ist nicht schlimmer als die " \
-                 "normale Grippe? Und wird in Wahrheit durch Bakterien, nicht Viren verursacht? " \
-                 "Bill Gates hat die Coronakrise erfunden, um die Menschheit zwangsweise zu impfen? " \
-                 "Atemmasken sind gefährlich, weil sich dahinter Kohlenmonoxid und Kohlendioxid " \
-                 "staut? " \
-                 "Ich verlinke die Quellen absichtlich nicht, denn es sind Falschmeldungen. Aber " \
-                 "womöglich haben Sie doch gezögert, ob vielleicht etwas dran sein könnte? Und sich " \
-                 "gefragt: Wie kann ich unwissenschaftliche Falschmeldungen erkennen? Das ist nicht " \
-                 "immer einfach. Aber es hilft zu wissen, mit welchen Tricks die Urheber von " \
-                 "Desinformation arbeiten. Egal ob es um die Ursache von Aids, die Evolutionstheorie, " \
-                 "den Klimawandel oder jetzt um Corona geht: die Leugner wissenschaftlicher " \
-                 "Erkenntnisse " \
-                 "verwenden immer wieder dieselben fünf Tricks, um ihr Laienpublikum zu verführen. " \
-                 "Stefan Rahmstorf schreibt regelmäßig für den SPIEGEL über die Klimakrise. Er " \
-                 "ist Klima- und Meeresforscher und leitet die Abteilung Erdsystemanalyse am " \
-                 "Potsdam-Institut " \
-                 "für Klimafolgenforschung (PIK). Seit 2000 ist er zudem Professor für Physik " \
-                 "der " \
-                 "Ozeane an der Universität Potsdam. Zu seinen Forschungsschwerpunkten gehören die " \
-                 "Paläoklimaforschung, Veränderungen von Meeresströmungen und Meeresspiegel sowie Wetterextreme. "
         titel = "Corona-Krise und Klimawandel: Fünf Desinformations-Tricks, die jeder kennen sollte " \
             "- DER SPIEGEL "
         # assert resp["urls"][0] == ""

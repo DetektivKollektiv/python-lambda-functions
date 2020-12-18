@@ -88,6 +88,7 @@ class TestGetFactChecks:
 
     def test_get_online_factcheck_by_itemid(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
 
         session = get_db_session(True, None)
 
@@ -113,13 +114,8 @@ class TestGetFactChecks:
                 "sich"
             ],
             "Entities": [
-                "26. Juni 2020",
-                "Deutschland",
                 "0,01 Prozent",
-                "83 Millionen Einwohnern",
-                "136 Kreisen",
                 "RKI",
-                "0,01 Prozent",
                 "Covid",
                 "19",
                 "Corona Transition"
@@ -138,8 +134,7 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(
-            event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -147,23 +142,22 @@ class TestGetFactChecks:
             factcheck = json.loads(body)
         else:
             factcheck = body
-        assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/11/19/covid-19-nein-die-infektionssterblichkeitsrate-in-deutschland-liegt-nicht-bei-0014-prozent/'
-
-        assert factcheck['title'] == 'Covid-19: Nein, die Infektionssterblichkeitsrate in Deutschland liegt nicht bei 0,014 Prozent'
+        assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/07/09/nein-rki-bestaetigt-nicht-eine-covid-19-sterblichkeitsrate-von-001-prozent-in-deutschland/'
+        assert factcheck['title'] == 'Falsch. Das Robert-Koch-Institut bestätigte nicht eine Covid-19- Sterblichkeitsrate von 0,01 Prozent in Deutschland.'
         assert elapsed < 3
 
     def test_get_online_factcheck_by_itemid_2(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
         os.environ["STAGE"] = "dev"
 
-        session = operations.get_db_session(True, None)
+        session = get_db_session(True, None)
 
         # creating items
         item = Item()
         item.content = "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
                        "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
         item.language = "de"
-        item = operations.create_item_db(item, True, session)
+        item = item_handler.create_item(item, True, session)
 
         # store a fact check
         event = {
@@ -206,8 +200,7 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = app.get_online_factcheck_by_itemid(
-            event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -223,13 +216,13 @@ class TestGetFactChecks:
         monkeypatch.setenv("DBNAME", "Test")
         os.environ["STAGE"] = "dev"
 
-        session = operations.get_db_session(True, None)
+        session = get_db_session(True, None)
 
         # creating items
         item = Item()
         item.content = "https://kopp-report.de/helios-kliniken-veroeffentlichen-corona-fakten-keine-pandemie-von-nationaler-tragweite/?fbclid=IwAR1fMRjkKXXYQUiNxYrgYczcffvNZbW-F3z8Q4f4Ar00caSNO1KjFtyJrG4"
         item.language = "de"
-        item = operations.create_item_db(item, True, session)
+        item = item_handler.create_item(item, True, session)
 
         # store a fact check
         event = {
@@ -254,8 +247,7 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = app.get_online_factcheck_by_itemid(
-            event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -266,13 +258,13 @@ class TestGetFactChecks:
         monkeypatch.setenv("DBNAME", "Test")
         os.environ["STAGE"] = "dev"
 
-        session = operations.get_db_session(True, None)
+        session = get_db_session(True, None)
 
         # creating items
         item = Item()
         item.content = "https://kopp-report.de/helios-kliniken-veroeffentlichen-corona-fakten-keine-pandemie-von-nationaler-tragweite/?fbclid=IwAR1fMRjkKXXYQUiNxYrgYczcffvNZbW-F3z8Q4f4Ar00caSNO1KjFtyJrG4"
         item.language = None
-        item = operations.create_item_db(item, True, session)
+        item = item_handler.create_item(item, True, session)
 
         # store a fact check
         event = {
@@ -297,8 +289,7 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = app.get_online_factcheck_by_itemid(
-            event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
