@@ -53,7 +53,7 @@ def update_item(event, context, is_test=False, session=None):
 
     try:
         update_object(item, is_test, session)
-    except Exception as e:
+    except Exception:
         logger.error("Could not update item. Exception: %s", e, exc_info=True)
         raise
 

@@ -1,6 +1,7 @@
 # External imports
 import logging
 import json
+import traceback
 from uuid import uuid4
 # Helper imports
 from core_layer import helper
@@ -115,10 +116,10 @@ def create_review_answer(event, context, is_test=False, session=None):
             "body": json.dumps(review_answer.to_dict())
         }
 
-    except Exception as exception:
+    except Exception:
         response = {
             "statusCode": 500,
-            "body": "Review answer could not be created. Exception: {}".format(exception)
+            "body": "Review answer could not be created. Exception: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

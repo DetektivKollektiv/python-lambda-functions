@@ -50,13 +50,13 @@ def create_review(event, context, is_test=False, session=None):
                 "body": json.dumps(review.to_dict())
             }
 
-        except Exception as e:
+        except Exception:
             response = {
                 "statusCode": 400,
                 "body": "Cannot accept item. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get user and/or item. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())

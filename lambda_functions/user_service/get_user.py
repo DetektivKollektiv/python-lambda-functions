@@ -32,7 +32,7 @@ def get_user(event, context, is_test=False, session=None):
                 "body": "No user found with the specified id."
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get user. Check Cognito authentication. Stacktrace: {}".format(traceback.format_exc())

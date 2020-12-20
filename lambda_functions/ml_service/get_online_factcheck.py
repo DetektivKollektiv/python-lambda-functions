@@ -62,13 +62,13 @@ def get_online_factcheck(event, context, is_test=False, session=None):
                     "body": "No factcheck found."
                 }
 
-        except Exception as e:
+        except Exception:
             response = {
                 "statusCode": 404,
                 "body": "No factcheck found. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get item ID. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())

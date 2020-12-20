@@ -44,7 +44,7 @@ def get_open_items(event, context, is_test=False, session=None):
                 "body": json.dumps(items_dict)
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get user and/or num_items. Check URL path parameters. Stacktrace: {}".format(traceback.format_exc())

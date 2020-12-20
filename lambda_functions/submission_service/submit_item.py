@@ -69,7 +69,7 @@ def submit_item(event, context, is_test=False, session=None):
             "body": json.dumps(submission.to_dict())
         }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not create item and/or submission. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())

@@ -32,7 +32,7 @@ def get_review_question(event, context, is_test=False, session=None):
         review_id = event['queryStringParameters']['review_id']
         review = review_handler.get_review_by_id(review_id, is_test, session)
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get user and/or item. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())
@@ -63,7 +63,7 @@ def get_review_question(event, context, is_test=False, session=None):
                 'headers': {"content-type": "application/json; charset=utf-8"},
                 "body": json.dumps(question.to_dict_with_answers())
             }
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get next question. Stacktrace: {}".format(traceback.format_exc())

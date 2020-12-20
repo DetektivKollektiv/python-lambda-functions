@@ -36,7 +36,7 @@ def get_closed_items(event, context, is_test=False, session=None):
                 "body": json.dumps(items_dict)
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
             "body": "Could not get closed items. Stacktrace: {}".format(traceback.format_exc())
