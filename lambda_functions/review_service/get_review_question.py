@@ -1,5 +1,6 @@
 import logging
 import json
+import traceback
 from core_layer import helper
 from core_layer import connection_handler
 from core_layer.handler import user_handler, item_handler, review_handler, review_question_handler
@@ -34,7 +35,7 @@ def get_review_question(event, context, is_test=False, session=None):
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+            "body": "Could not get user and/or item. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())
         }
 
     # Try getting previous question id from query params. If none is set, set previous_question as None
@@ -65,7 +66,7 @@ def get_review_question(event, context, is_test=False, session=None):
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get next question. Exception: {}".format(e)
+            "body": "Could not get next question. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

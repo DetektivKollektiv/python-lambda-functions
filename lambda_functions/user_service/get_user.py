@@ -1,5 +1,6 @@
 import logging
 import json
+import traceback
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import user_handler
@@ -34,7 +35,7 @@ def get_user(event, context, is_test=False, session=None):
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get user. Check Cognito authentication. Exception: {}".format(e)
+            "body": "Could not get user. Check Cognito authentication. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

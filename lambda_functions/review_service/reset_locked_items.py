@@ -1,4 +1,5 @@
 import logging
+import traceback
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import review_handler
@@ -26,5 +27,5 @@ def reset_locked_items(event, context, is_test=False, session=None):
     except Exception as e:
         return {
             "statusCode": 400,
-            "body": "Something went wrong. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Something went wrong. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
         }

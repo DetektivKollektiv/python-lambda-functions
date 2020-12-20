@@ -1,5 +1,6 @@
 import logging
 import json
+import traceback
 from core_layer import helper
 from core_layer import connection_handler
 from core_layer.handler import user_handler, item_handler, review_handler
@@ -52,13 +53,13 @@ def create_review(event, context, is_test=False, session=None):
         except Exception as e:
             response = {
                 "statusCode": 400,
-                "body": "Cannot accept item. Exception: {}".format(e)
+                "body": "Cannot accept item. Stacktrace: {}".format(traceback.format_exc())
             }
 
     except Exception as e:
         response = {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL query parameters. Exception: {}".format(e)
+            "body": "Could not get user and/or item. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)
