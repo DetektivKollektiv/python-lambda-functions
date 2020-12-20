@@ -1,6 +1,7 @@
 # External imports
 import logging
 import json
+import traceback
 from uuid import uuid4
 # Helper imports
 from core_layer import helper
@@ -61,16 +62,16 @@ def get_online_factcheck(event, context, is_test=False, session=None):
                     "body": "No factcheck found."
                 }
 
-        except Exception as e:
+        except Exception:
             response = {
                 "statusCode": 404,
-                "body": "No factcheck found. Exception: {}".format(e)
+                "body": "No factcheck found. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
-            "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not get item ID. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

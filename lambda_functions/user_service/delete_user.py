@@ -38,10 +38,10 @@ def delete_user(event, context, is_test=False, session=None):
             "statusCode": 200
         }
 
-    except Exception as exception:
+    except Exception:
         response = {
             "statusCode": 500,
-            "body": "User could not be deleted. Exception: {}".format(exception)
+            "body": "User could not be deleted. Exception: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

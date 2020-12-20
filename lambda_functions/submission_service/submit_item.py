@@ -2,6 +2,7 @@ import logging
 import json
 import boto3
 import os
+import traceback
 
 from core_layer import helper, connection_handler
 from core_layer.model.item_model import Item
@@ -68,10 +69,10 @@ def submit_item(event, context, is_test=False, session=None):
             "body": json.dumps(submission.to_dict())
         }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
-            "body": "Could not create item and/or submission. Check HTTP POST payload. Exception: {}".format(e)
+            "body": "Could not create item and/or submission. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)

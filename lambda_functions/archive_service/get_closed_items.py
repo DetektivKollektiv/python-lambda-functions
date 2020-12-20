@@ -1,6 +1,6 @@
 import logging
 import json
-
+import traceback
 from core_layer import helper, connection_handler
 from core_layer.handler import item_handler
 
@@ -36,10 +36,10 @@ def get_closed_items(event, context, is_test=False, session=None):
                 "body": json.dumps(items_dict)
             }
 
-    except Exception as e:
+    except Exception:
         response = {
             "statusCode": 400,
-            "body": "Could not get closed items. Exception: {}".format(e)
+            "body": "Could not get closed items. Stacktrace: {}".format(traceback.format_exc())
         }
 
     response_cors = helper.set_cors(response, event, is_test)
