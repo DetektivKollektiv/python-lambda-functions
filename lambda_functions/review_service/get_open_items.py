@@ -21,7 +21,10 @@ def get_open_items(event, context, is_test=False, session=None):
         id = helper.cognito_id_from_event(event)
 
         # get number of items from url path
-        num_items = int(event['pathParameters']['num_items'])
+        if('queryStringParameters' in event and 'num_items' in event['queryStringParameters']):
+            num_items = int(event['queryStringParameters']['num_items'])
+        else:
+            num_items = 5
 
         user = user_handler.get_user_by_id(id, is_test, session)
         items = item_handler.get_open_items_for_user(
