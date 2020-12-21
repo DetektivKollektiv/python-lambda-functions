@@ -7,7 +7,7 @@ from core_layer.handler import user_handler
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker
-import event_creator
+from ..helper import event_creator
 
 # TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
 

@@ -6,14 +6,14 @@ import base64
 from botocore.exceptions import ClientError
 import os
 import requests
+import datetime as dt
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 
-import pandas as pd 
+import csv
+import codecs
 from io import StringIO 
-# from io import BytesIO
-# from nltk.corpus import stopwords
-# import string
-# import gensim
-# from gensim.similarities.index import AnnoyIndexer
+import tempfile
 import pickle
 
 logger = logging.getLogger()
@@ -96,14 +96,16 @@ def get_factcheckBucketName():
     try:
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
     except ClientError:
-        s3_client.create_bucket(Bucket=bucket_name)
+        s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'eu-central-1'})
     return bucket_name
 
 # store a csv in S3
-def store_df(csv_df, csv_name):
+def store_df(dict_list, csv_name):
     bucket = get_factcheckBucketName()
     csv_buffer = StringIO() 
-    csv_df.to_csv(csv_buffer, index=False) 
+    dict_writer = csv.DictWriter(csv_buffer, fieldnames=dict_list[0].keys())
+    dict_writer.writeheader()
+    dict_writer.writerows(dict_list)    
     s3_resource.Object(bucket, csv_name).put(Body=csv_buffer.getvalue())
 
 # read a csv from S3 and return a dataframe
@@ -111,12 +113,14 @@ def read_df(csv_name):
     bucket = get_factcheckBucketName()
     try:
         obj = s3_client.get_object(Bucket=bucket, Key=csv_name)
-        csv_df = pd.read_csv(obj['Body'])
-        return csv_df
+        dict_reader = csv.DictReader(codecs.getreader("utf-8")(obj["Body"]))
+        # get a list of dictionaries from dct_reader
+        csv_dict = list(dict_reader)
+        return csv_dict
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
             logger.error('Error {} reading {} in bucket {}.'.format(e, csv_name, bucket))
-        return pd.DataFrame()
+        return []
 
 # read model from S3
 def read_model(model_name):
@@ -136,7 +140,7 @@ def save_model(model, model_name):
 
 # convert a factcheck from json to df
 def json2df(factcheck_json):
-    factcheck_df = pd.DataFrame()
+    factcheck_df = []
 
     # Check if the search was successful
     if 'claims' in factcheck_json:
@@ -144,6 +148,7 @@ def json2df(factcheck_json):
             text=" "
             if 'text' in article:
                 text=article['text']
+                text = text.replace("\"", "")                
             claimant=" "
             if 'claimant' in article:
                 claimant=article['claimant']
@@ -176,18 +181,18 @@ def json2df(factcheck_json):
                     if 'languageCode' in article['claimReview'][0]:
                         languageCode=article['claimReview'][0]['languageCode']
 
-            df = pd.DataFrame({  'claim_text' : str(text),
-                                 'claimant' : claimant,
-                                 'claimDate' : claimDate,
-                                 'review_publisher' : name,
-                                 'review_site' : site,
-                                 'review_url' : url,
-                                 'review_title' : title,
-                                 'review_reviewDate' : reviewDate,
-                                 'review_textualRating' : textualRating,
-                                 'review_languageCode' : languageCode},
-                                index=[0])
-            factcheck_df=factcheck_df.append(df, ignore_index=True)
+            df = {  'claim_text' : str(text),
+                    'claimant' : claimant,
+                    'claimDate' : claimDate,
+                    'review_publisher' : name,
+                    'review_site' : site,
+                    'review_url' : url,
+                    'review_title' : title,
+                    'review_reviewDate' : reviewDate,
+                    'review_textualRating' : textualRating,
+                    'review_languageCode' : languageCode
+                }
+            factcheck_df.append(df)
         
     return factcheck_df
 
@@ -218,10 +223,14 @@ def update_factcheck_models(event, context):
         obj = f.get()
         factcheck_json = json.load(obj['Body'])
         factcheck_df = json2df(factcheck_json)
-        for i, row in factcheck_df.iterrows():
-            if row["review_site"] not in df_factchecker.values: 
-                df = pd.DataFrame({'Factchecker': row["review_site"]}, index=[0])
-                df_factchecker=df_factchecker.append(df, ignore_index=True)
+        for row in factcheck_df:
+            factchecker_exists = False
+            for factchecker_row in df_factchecker:
+                if row["review_site"] == factchecker_row['Factchecker']:
+                    factchecker_exists = True
+                    break
+            if factchecker_exists == False:
+                df_factchecker.append({'Factchecker': row["review_site"]})
                 new_factchecker = True
         f.delete()
     # store factchecker if there are new ones
@@ -232,16 +241,24 @@ def update_factcheck_models(event, context):
     for LC in model_languages:
         df_factchecks = read_df(factchecks_prefix+LC+".csv")
         # determine the count of days until the last update
-        if len(df_factchecks.index)==0:
+        if len(df_factchecks)==0:
             days=0 # 0 means all available fatchecks will be downloaded
-        if new_factchecker:
+        elif new_factchecker:
             days=0 # 0 means all available fatchecks will be downloaded
         else:
-            recent_date = pd.to_datetime(df_factchecks['review_reviewDate']).max()
-            today = pd.Timestamp.today(tz=recent_date.tzinfo)
+            # find the most recent date
+            recent_date = dt.datetime.now(dt.timezone.utc)-relativedelta(years=5) # use at most the factchecks of the last 5 years
+            for d in df_factchecks:
+                try:
+                    date = parse(d['review_reviewDate'])
+                except:
+                    continue
+                if date>recent_date:
+                    recent_date = date
+            today = dt.datetime.now(dt.timezone.utc)
             days = int((today - recent_date).days)+1
         # get factchecks from all Fact Checker
-        for i, row in df_factchecker.iterrows():
+        for row in df_factchecker:
             pageToken=""
             logger.info("Get reviews from "+row['Factchecker'])
             while True:
@@ -250,8 +267,9 @@ def update_factcheck_models(event, context):
                                                     reviewPublisherSiteFilter=row['Factchecker'],
                                                     pageToken=pageToken)
                 df_page = json2df(response_json)
-                if len(df_page.index)>0:
-                    df_factchecks = df_factchecks.append(df_page, ignore_index=True)
+                for fc in df_page:
+                    if fc not in df_factchecks:
+                        df_factchecks.append(fc)
                 if 'nextPageToken' in response_json:
                     pageToken = response_json['nextPageToken']
                 else:
@@ -259,8 +277,7 @@ def update_factcheck_models(event, context):
                 if pageToken=="":
                     break
                 time.sleep(1)
-        df_factchecks = df_factchecks.drop_duplicates(subset=['review_url'], keep='last')
-        if len(df_factchecks.index)>0:
+        if len(df_factchecks)>0:
             store_df(df_factchecks, factchecks_prefix+LC+".csv")
             # prepare data for training
             # stoplist = list(string.punctuation)

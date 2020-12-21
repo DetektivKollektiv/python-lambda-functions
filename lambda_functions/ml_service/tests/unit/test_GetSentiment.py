@@ -1,4 +1,4 @@
-import GetSentiment
+from ml_service import GetSentiment
 import pytest
 
 

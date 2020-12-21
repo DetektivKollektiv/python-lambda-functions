@@ -7,7 +7,7 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, entity_handler, keyphrase_handler
-import SearchFactChecks
+from ml_service import SearchFactChecks
 
 
 def get_online_factcheck(event, context, is_test=False, session=None):
@@ -26,6 +26,8 @@ def get_online_factcheck(event, context, is_test=False, session=None):
 
         try:
             item = item_handler.get_item_by_id(id, is_test, session)
+            if item.language == None:
+                raise Exception("Language of Claim not recognized.")             
             entity_objects = entity_handler.get_entities_by_itemid(
                 id, is_test, session)
             phrase_objects = keyphrase_handler.get_phrases_by_itemid_db(
@@ -50,7 +52,11 @@ def get_online_factcheck(event, context, is_test=False, session=None):
             factcheck = SearchFactChecks.get_FactChecks(sfc_event, context)
             if 'claimReview' in factcheck[0]:
                 factcheck_dict = {
-                    "id": "0", "url": factcheck[0]['claimReview'][0]['url'], "title": factcheck[0]['claimReview'][0]['title']}
+                    "id": "0", "url": factcheck[0]['claimReview'][0]['url']}
+                if 'title' in factcheck[0]['claimReview'][0]:
+                    factcheck_dict["title"] = factcheck[0]['claimReview'][0]['title']
+                elif 'textualRating' in factcheck[0]['claimReview'][0]:
+                    factcheck_dict["title"] = factcheck[0]['claimReview'][0]['textualRating']
                 response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},

@@ -165,12 +165,3 @@ class TestGetKeyPhrases:
         ret = GetKeyPhrases.get_phrases(event, context)
         assert ret == ['einer kürzlich ausgestrahlten Pressekonferenz',
                        'der Obama-Administration', 'dies']
-
-    def test_get_phrases_13(self):
-        event = {
-            "Text": " Sebastian Karpf - Schweden als Vorbild, wie man es hätte... | Facebook ",
-            "LanguageCode": "de"
-        }
-        context = ""
-        ret = GetKeyPhrases.get_phrases(event, context)
-        assert ret == ['Obama', 'Labor', 'jeden']
