@@ -87,7 +87,8 @@ async def call_googleapi(session, search_terms, language_code):
     pageSize = 10  # Count of returned results
     query = ""
     for term in search_terms:
-        query += "\"" + term + "\" "
+        # query += "\"" + term + "\" "
+        query += term + " "
     parameters = {"query": query, "languageCode": language_code,
                   "pageSize": pageSize, "key": get_secret()}
     response = await session.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
@@ -129,16 +130,19 @@ async def get_article(search_terms, LanguageCode):
                     if 'text' in article:
                         for term in used_terms:
                             if term not in unique_terms:
-                                if re.search(term, article['text']):
-                                    unique_terms.append(term)
+                                try:
+                                    if re.search(term, article['text']):
+                                        unique_terms.append(term)
+                                except:
+                                    pass
                         if len(unique_terms) > count_bestfit:
                             article_bestfit = article
                             count_bestfit = len(unique_terms)
 
                         article_text = article['text'].replace("\"", "")
                         # input for article
-                        sm_input.append(sm_input_search +
-                                        ",\""+article_text+"\"")
+                        if len(used_terms)>1:
+                            sm_input.append(sm_input_search + ",\""+article_text+"\"")
                 # call sagemaker endpoint for similarity prediction
                 try:
                     endpoint = endpoint_prefix + \
@@ -176,10 +180,12 @@ async def get_article(search_terms, LanguageCode):
                     logger.error(
                         'Error {} putting object {} in bucket {}.'.format(e, key, bucket))
 
-    if article_bestsim != "":
+    if bestsim > 0.7:
         return article_bestsim
-    else:
+    elif bestsim == 0.0:
         return article_bestfit
+    else:
+        return ""
 
 
 # Search Fact Checks

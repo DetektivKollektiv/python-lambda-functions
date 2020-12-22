@@ -78,6 +78,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
       Layers:
         - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
 
@@ -96,6 +98,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
 
   UpdateFactCheckModelsFunction:
     Type: AWS::Serverless::Function
