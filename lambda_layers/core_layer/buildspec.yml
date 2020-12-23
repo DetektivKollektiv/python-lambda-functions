@@ -40,7 +40,7 @@ phases:
       - aws s3 cp s3://vm-access-keys/vm_keypair.pem .
       - chmod 400 vm_keypair.pem
 
-      - ssh -tt -i vm_keypair.pem -o "StrictHostKeyChecking no" -L 3307:${DB_URL}:3306 ${EC2_URL}
+      - ssh -tt -i vm_keypair.pem -o "StrictHostKeyChecking no" -L 3307:${DB_URL}:3306 ${EC2_URL} &
 
       # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
       # - python -m unittest discover lambda_functions/tests
