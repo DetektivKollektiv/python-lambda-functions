@@ -38,6 +38,7 @@ phases:
 
       # Open ssh tunnel to access db via jumphost vm
       - aws s3 cp s3://vm-access-keys/vm_keypair.pem .
+      - chmod 400 vm_keypair.pem
 
       - ssh -tt -i vm_keypair.pem -o "StrictHostKeyChecking no" -L 3307:${DB_URL}:3306 ${EC2_URL}
 
