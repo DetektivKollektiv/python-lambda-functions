@@ -37,7 +37,7 @@ phases:
       - cfn_nag_scan --input-path lambda_layers/core_layer/template.yaml
 
       # Open ssh tunnel to access db via jumphost vm
-      - cp s3://vm-access-keys/vm_keypair.pem .
+      - aws s3 cp s3://vm-access-keys/vm_keypair.pem .
 
       - ssh -i vm_keypair.pem -L 3307:${DB_URL}:3306 ${EC2_URL}
 
