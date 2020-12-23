@@ -159,6 +159,46 @@ Resources:
           - LambdaExecutionRole
           - Arn
 
+  GetTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-ml_api-GetTags-${STAGE}"
+      CodeUri: .
+      Handler: GetEntities.get_tags
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+
+  GetTagsByItemidFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-ml_api-get_tags_by_itemid-${STAGE}"
+      CodeUri: .
+      Handler: GetTags.get_tags_for_item
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /factchecks/{item_id}
+            Method: get
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+        
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -242,6 +282,23 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemEntities-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itementities
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+
+  StoreItemTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemTags-${STAGE}"
+      CodeUri: .
+      Handler: EnrichItem.store_itemtags
       Runtime: python3.8
       MemorySize: 832
       Role:

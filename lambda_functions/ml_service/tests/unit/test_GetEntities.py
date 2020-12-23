@@ -157,3 +157,14 @@ class TestGetEntities:
         context = ""
         ret = GetEntities.get_entities(event, context)
         assert ret == ['26. Juni 2020', 'Deutschland', '0,01 Prozent']
+
+
+class TestGetTags:
+    def test_get_tags_1(self):
+        event = {
+            "Text": "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition ",
+            "LanguageCode": "de"
+        }
+        context = ""
+        ret = GetEntities.get_tags(event, context)
+        assert ret == ['RKI', 'Covid', 'Corona Transition']

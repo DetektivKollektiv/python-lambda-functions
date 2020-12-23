@@ -24,13 +24,6 @@ class TestSearchFactChecks:
             ],
             "Entities": [
                 "RKI",
-                "Deutschland",
-                "RKI",
-                "136 Kreisen",
-                "Bundeskanzlerin"
-            ],
-            "TitleEntities": [
-                "RKI",
                 "0,01 Prozent",
                 "19 Sterblichkeitsrate",
                 "Corona Transition",
@@ -59,10 +52,7 @@ class TestSearchFactChecks:
                 "Corona-Tests"
             ],
             "Entities": [
-            ],
-            "TitleEntities": [
-            ],
-            "Sentiment": "NEUTRAL"
+            ]
         }
         context = ""
         s = time.perf_counter()

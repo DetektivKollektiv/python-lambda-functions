@@ -24,6 +24,7 @@ class Item(Base):
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
+    tags = relationship("ItemTag")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")

@@ -209,8 +209,6 @@ def get_FactChecks(event, context):
 
     search_terms = []
     # Check if search terms are available
-    if 'TitleEntities' in event:
-        search_terms.append(event['TitleEntities'])
     if 'KeyPhrases' in event:
         search_terms.append(event['KeyPhrases'])
     if 'Entities' in event:
