@@ -1,3 +1,4 @@
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -12,7 +13,6 @@ from os.path import abspath, dirname
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 from core_layer import helper
 from core_layer.model import model_base
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -25,8 +25,9 @@ if 'DBNAME' in os.environ:
     db = os.environ['DBNAME']
 else:
     db = "development_db"
-    host = "127.0.0.1"
-    port = "3307"
+
+host = "127.0.0.1"
+port = "3307"
 
 connection_string = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(
     user, password, host, port, db)
