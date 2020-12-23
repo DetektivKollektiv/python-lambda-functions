@@ -11,8 +11,8 @@ import os
 import json
 from os.path import abspath, dirname
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
-from core_layer.model import model_base
 from core_layer import helper
+from core_layer.model import model_base
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
