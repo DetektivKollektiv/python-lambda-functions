@@ -2,7 +2,7 @@ from core_layer.connection_handler import get_db_session
 
 from core_layer.model.item_model import Item
 from ml_service import ExtractClaim, GetLanguage, GetKeyPhrases, GetEntities, SearchFactChecks
-from core_layer.handler import item_handler
+from core_layer.handler import item_handler, tag_handler
 import os
 
 import logging
@@ -189,18 +189,10 @@ class TestDocSim:
         # search fact checks for all items
         count_fcExists = 0
         count_kp_tp = 0
-        count_e_tp = 0
-        count_t_tp = 0
         count_kp_fn = 0
-        count_e_fn = 0
-        count_t_fn = 0
         count_noFc = 0
         count_kp_tn = 0
-        count_e_tn = 0
-        count_t_tn = 0
         count_kp_fp = 0
-        count_e_fp = 0
-        count_t_fp = 0
 
         for i in range(len(claim_factcheck_dicts)):
             # creating item
@@ -243,16 +235,11 @@ class TestDocSim:
             claim_factcheck_dicts[i]["stepfunction"]["Entities"] = GetEntities.get_entities(event, context)
 
             # search factchecks with KeyPhrases
-            os.environ["STAGE"] = "dev"
             event = {
                 "item": claim_factcheck_dicts[i]["stepfunction"]["item"],
                 "KeyPhrases": claim_factcheck_dicts[i]["stepfunction"]["KeyPhrases"],
-                "Entities": claim_factcheck_dicts[i]["stepfunction"]["Entities"],
-                "TitleEntities": claim_factcheck_dicts[i]["stepfunction"]["Entities"]
+                "Entities": claim_factcheck_dicts[i]["stepfunction"]["Entities"]
             }
-            for phrase in claim_factcheck_dicts[i]["stepfunction"]["KeyPhrases"]:
-                if phrase not in event["TitleEntities"]:
-                    event["TitleEntities"].append(phrase)
             ret = SearchFactChecks.get_FactChecks(event, context)
             url = ""
             if 'claimReview' in ret[0]:
@@ -268,81 +255,28 @@ class TestDocSim:
                 else:
                     count_kp_fp = count_kp_fp+1
 
-            # search factchecks with Entities
-            event["KeyPhrases"] = []
-            event["Entities"] = claim_factcheck_dicts[i]["stepfunction"]["Entities"]
-            event["TitleEntities"] = []
-            ret = SearchFactChecks.get_FactChecks(event, context)
-            url = ""
-            if 'claimReview' in ret[0]:
-                url = ret[0]['claimReview'][0]['url']
-            if url == claim_factcheck_dicts[i]["factcheck"]:
-                if url == "":
-                    count_e_tn = count_e_tn+1
-                else:
-                    count_e_tp = count_e_tp+1
-            else:
-                if url == "":
-                    count_e_fn = count_e_fn+1
-                else:
-                    count_e_fp = count_e_fp+1
-
-            # search factchecks with Entities and keyphrases
-            event["Entities"] = []
-            event["TitleEntities"] = claim_factcheck_dicts[i]["stepfunction"]["Entities"]
-            for phrase in claim_factcheck_dicts[i]["stepfunction"]["KeyPhrases"]:
-                if phrase not in event["TitleEntities"]:
-                    event["TitleEntities"].append(phrase)
-            ret = SearchFactChecks.get_FactChecks(event, context)
-            url = ""
-            if 'claimReview' in ret[0]:
-                url = ret[0]['claimReview'][0]['url']
-            if url == claim_factcheck_dicts[i]["factcheck"]:
-                if url == "":
-                    count_t_tn = count_t_tn+1
-                else:
-                    count_t_tp = count_t_tp+1
-            else:
-                if url == "":
-                    count_t_fn = count_t_fn+1
-                else:
-                    count_t_fp = count_t_fp+1
-
         # calculate rate of false factchecks
-        e_fp = count_e_fp/(count_fcExists+count_noFc)
         kp_fp = count_kp_fp/(count_fcExists+count_noFc)
-        t_fp = count_t_fp/(count_fcExists+count_noFc)
         # calculate precision
-        e_pr = count_e_tp/(count_e_tp+count_e_fp)
         kp_pr = count_kp_tp/(count_kp_tp+count_kp_fp)
-        t_pr = count_t_tp/(count_t_tp+count_t_fp)
         # calculate Specitivity
         if count_noFc>0:
-            e_tn = count_e_tn/count_noFc
             kp_tn = count_kp_tn/count_noFc
-            t_tn = count_t_tn/count_noFc
         else:
-            e_tn = 1.
             kp_tn = 1.
-            t_tn = 1.
         if count_fcExists>0:
             # calculate Recall or Sensitivity, respectively
-            e_tp = count_e_tp/count_fcExists
             kp_tp = count_kp_tp/count_fcExists
-            t_tp = count_t_tp/count_fcExists
             # calculate false negatives
-            e_fn = count_e_fn/count_fcExists
             kp_fn = count_kp_fn/count_fcExists
-            t_fn = count_t_fn/count_fcExists
         else:
-            e_tp = 1.
             kp_tp = 1.
-            t_tp = 1.
-            e_fn = 1.
             kp_fn = 1.
-            t_fn = 1.
 
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
-        logger.info('Calling get_FactChecks with event')
-        logger.info(event)
+        logger.info('Precision (How much of the found factchecks are correct) for FactCheck Search: {}'.format(kp_pr))
+        logger.info('Recall (Sensitivity, how much of the factchecks were found) for FactCheck Search: {}'.format(kp_tp))
+        logger.info('Specifity (if no factcheck was found, how much of them are really without existing factcheck): {}'.format(kp_tn))
+        logger.info('False factchecks found: {}'.format(kp_fp))
+        logger.info('Existing Factcheck not found: {}'.format(kp_fn))
