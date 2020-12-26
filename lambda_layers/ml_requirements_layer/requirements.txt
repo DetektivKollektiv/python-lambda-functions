@@ -1,3 +1,4 @@
 aiohttp
 aiodns
 beautifulsoup4
+requests
