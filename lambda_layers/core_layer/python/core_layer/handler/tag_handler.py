@@ -30,8 +30,6 @@ def get_tag_by_content(content, is_test, session):
         """
     session = get_db_session(is_test, session)
     tag = session.query(Tag).filter(Tag.tag == content).first()
-    if tag is None:
-        raise Exception("No tag found.")
     return tag
 
 
@@ -46,6 +44,4 @@ def get_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     session = get_db_session(is_test, session)
     itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
                                                   ItemTag.item_id == item_id).first()
-    if itemtag is None:
-        raise Exception("No ItemTag found.")
     return itemtag

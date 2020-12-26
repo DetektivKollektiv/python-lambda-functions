@@ -22,7 +22,6 @@ def get_tags_for_item(event, context, is_test=False, session=None):
         id = event['pathParameters']['item_id']
 
         try:
-            item = item_handler.get_item_by_id(id, is_test, session)
             tag_objects = tag_handler.get_tags_by_itemid(id, is_test, session)
 
             tags = []

@@ -309,13 +309,11 @@ def store_itemtags(event, context, is_test=False, session=None):
 
     # Store all entities of the item
     for str_tag in event['Tags']:
-        tag = Tag()
         # search for tag in database
-        try:
-            tag = tag_handler.get_tag_by_content(
-                str_tag, is_test, session)
-        except Exception:
+        tag = tag_handler.get_tag_by_content(str_tag, is_test, session)
+        if tag is None:
             # store tag in database
+            tag = Tag()
             tag.id = str(uuid4())
             tag.tag = str_tag
             try:
@@ -324,14 +322,12 @@ def store_itemtags(event, context, is_test=False, session=None):
                 logger.error(
                     "Could not store tag. Exception: %s", e, exc_info=True)
                 raise
-        # store item tag in database
-        itemtag = ItemTag()
         # item tag already exists?
         item_id = event['item']['id']
-        try:
-            itemtag = tag_handler.get_itemtag_by_tag_and_item_id(
-                tag.id, item_id, is_test, session)
-        except Exception:
+        itemtag = tag_handler.get_itemtag_by_tag_and_item_id(tag.id, item_id, is_test, session)
+        if itemtag is None:
+            # store item tag in database
+            itemtag = ItemTag()
             itemtag.id = str(uuid4())
             itemtag.item_id = item_id
             itemtag.tag_id = tag.id
