@@ -2,6 +2,8 @@ import time
 import os
 from ml_service import SearchFactChecks
 from ml_service import UpdateFactChecks
+from core_layer.connection_handler import get_db_session
+from submission_service import submit_item
 
 
 class TestSearchFactChecks:
@@ -62,6 +64,23 @@ class TestSearchFactChecks:
         assert ret[0]['claimReview'][0]['url'] == 'https://www.br.de/nachrichten/wissen/warum-viele-corona-tests-noch-keine-qualitaetskontrolle-brauchen,SI1KrNC'
         assert ret[0]['claimReview'][0]['textualRating'] == 'Richtig. Corona-Tests, die für medizinisches Fachpersonal gedacht sind, müssen nicht durch eine externe Prüforganisation (Benannte Stelle) kontrolliert werden. Corona-Test zur Selbstanwendung hingegen schon. Ab 2022 müssen alle In-Vitro-Diagnostika, zu denen auch Corona-Tests zählen, von einer Benannte Stelle überprüft werden.'
         assert elapsed < 3
+
+class TestStepfunction:
+    def test_stepfunction_1(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        session = get_db_session(True, None)
+
+        event = {
+            "body": {
+                "content": "Manche Corona-Tests brauchen keine externe Qualitätskontrolle",
+                "type": "claim"
+            }
+        }
+        context = ""
+        response = submit_item.submit_item(event, context, True, session)
+        assert response['body']['item_id'] is not None
 
 class TestUpdateModels:
     def test_update_factchecker_1(self):
