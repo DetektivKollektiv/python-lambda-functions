@@ -1,6 +1,5 @@
 import re
 import logging
-import urllib.request
 import requests
 from bs4 import BeautifulSoup
 
