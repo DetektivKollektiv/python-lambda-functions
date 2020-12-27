@@ -80,8 +80,6 @@ Resources:
             Ref: CorsAllowOrigin
           STAGE:
             Ref: STAGE
-      Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
 
   SearchFactChecksFunction:
     Type: AWS::Serverless::Function
@@ -93,7 +91,6 @@ Resources:
       MemorySize: 832
       Layers:
         - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -111,6 +108,8 @@ Resources:
       Handler: UpdateFactChecks.update_factcheck_models
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -167,6 +166,8 @@ Resources:
       Handler: ExtractClaim.extract_claim
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
