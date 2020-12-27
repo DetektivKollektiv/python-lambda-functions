@@ -320,6 +320,33 @@
                 },
                 "timeoutSec": 120
             }
+        },
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Detect Language",
+            "invokeTarget": {
+                "target": "template",
+                "logicalId": "GetLanguageFunction",
+                "templatePath": "lambda_functions/ml_service/template.yaml",
+            },
+            "sam": {
+                "containerBuild": true,
+                "skipNewImageCheck": false
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {"json":
+                    {
+                        "Text": "Wenn Sie eine laufende Nase und einen Auswurf in Ihrer Erkältung haben, können Sie keine neue Art von Coronavirus-Pneumonie haben, da Coronavirus-Pneumonie ein trockener Husten ohne laufende Nase ist. "
+                    }
+                },
+                "environmentVariables": {
+                    "STAGE": "dev",
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
         }
     ]
 }
