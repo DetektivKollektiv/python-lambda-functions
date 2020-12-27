@@ -60,6 +60,8 @@ Resources:
       Handler: get_online_factcheck.get_online_factcheck
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -194,6 +196,8 @@ Resources:
       Handler: EnrichItem.update_item
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -211,6 +215,8 @@ Resources:
       Handler: EnrichItem.store_factchecks
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -228,6 +234,8 @@ Resources:
       Handler: EnrichItem.store_itemurl
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -245,6 +253,8 @@ Resources:
       Handler: EnrichItem.store_itementities
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -262,6 +272,8 @@ Resources:
       Handler: EnrichItem.store_itemsentiment
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -279,6 +291,8 @@ Resources:
       Handler: EnrichItem.store_itemphrases
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
