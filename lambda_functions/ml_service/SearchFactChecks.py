@@ -217,6 +217,13 @@ def get_FactChecks(event, context):
     loop = asyncio.get_event_loop()
     factcheck = loop.run_until_complete(
         get_article(search_terms, LanguageCode))
+
+    # check if there is a title of the factcheck, if not, then take the textualRating
+    if 'claimReview' in factcheck:
+        if 'title' not in factcheck['claimReview'][0]:
+            if 'textualRating' in factcheck['claimReview'][0]:
+                factcheck['claimReview'][0]['title'] = factcheck['claimReview'][0]['textualRating']
+
     claims.append(factcheck)
 
     return claims
