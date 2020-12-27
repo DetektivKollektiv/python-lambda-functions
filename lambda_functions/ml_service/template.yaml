@@ -171,6 +171,8 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Layers:
+        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
 
   GetSentimentFunction:
     Type: AWS::Serverless::Function
