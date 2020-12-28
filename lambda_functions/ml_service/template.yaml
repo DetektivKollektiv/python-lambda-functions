@@ -68,7 +68,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /tags/{item_id}
+            Path: /items/{item_id}/factcheck
             Method: get
             RestApiId:
               Ref: Api
@@ -188,7 +188,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /factchecks/{item_id}
+            Path: /items/{item_id}/tags
             Method: get
             RestApiId:
               Ref: Api
