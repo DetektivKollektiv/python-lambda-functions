@@ -102,42 +102,6 @@
                   "KeyPhrases.$": "$.KeyPhrases"
                 },
                 "ResultPath": null,
-                "Next": "Detect Title Key Phrases"
-              },
-              "Detect Title Key Phrases": {
-                "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-GetKeyPhrases-${STAGE}",
-                "Catch": [
-                  {
-                    "ErrorEquals": [
-                      "States.TaskFailed"
-                    ],
-                    "Next": "EnrichmentFailed"
-                  }
-                ],
-                "Parameters": {
-                  "Text.$": "$.Claim.title",
-                  "LanguageCode.$": "$.item.language"
-                },
-                "ResultPath": "$.TitleKeyPhrases",
-                "Next": "Store Item Title Keyphrases"
-              },
-              "Store Item Title Keyphrases": {
-                "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemKeyphrases-${STAGE}",
-                "Catch": [
-                  {
-                    "ErrorEquals": [
-                      "States.TaskFailed"
-                    ],
-                    "Next": "EnrichmentFailed"
-                  }
-                ],
-                "Parameters": {
-                  "item.$": "$.item",
-                  "KeyPhrases.$": "$.TitleKeyPhrases"
-                },
-                "ResultPath": null,
                 "Next": "Detect Entities"
               },
               "Detect Entities": {
@@ -174,47 +138,11 @@
                   "Entities.$": "$.Entities"
                 },
                 "ResultPath": null,
-                "Next": "Detect Title Entities"
+                "Next": "Detect Tags"
               },
-              "Detect Title Entities": {
+              "Detect Tags": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-GetEntities-${STAGE}",
-                "Catch": [
-                  {
-                    "ErrorEquals": [
-                      "States.TaskFailed"
-                    ],
-                    "Next": "EnrichmentFailed"
-                  }
-                ],
-                "Parameters": {
-                  "Text.$": "$.Claim.title",
-                  "LanguageCode.$": "$.item.language"
-                },
-                "ResultPath": "$.TitleEntities",
-                "Next": "Store Item Title Entities"
-              },
-              "Store Item Title Entities": {
-                "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemEntities-${STAGE}",
-                "Catch": [
-                  {
-                    "ErrorEquals": [
-                      "States.TaskFailed"
-                    ],
-                    "Next": "EnrichmentFailed"
-                  }
-                ],
-                "Parameters": {
-                  "item.$": "$.item",
-                  "Entities.$": "$.TitleEntities"
-                },
-                "ResultPath": null,
-                "Next": "Detect Sentiment"
-              },
-              "Detect Sentiment": {
-                "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-GetSentiment-${STAGE}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-GetTags-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [
@@ -227,12 +155,12 @@
                   "Text.$": "$.Claim.concatenation.Text",
                   "LanguageCode.$": "$.item.language"
                 },
-                "ResultPath": "$.Sentiment",
-                "Next": "Store Item Sentiment"
+                "ResultPath": "$.Tags",
+                "Next": "Store Item Tags"
               },
-              "Store Item Sentiment": {
+              "Store Item Tags": {
                 "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemSentiment-${STAGE}",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemTags-${STAGE}",
                 "Catch": [
                   {
                     "ErrorEquals": [
@@ -243,7 +171,7 @@
                 ],
                 "Parameters": {
                   "item.$": "$.item",
-                  "Sentiment.$": "$.Sentiment"
+                  "Tags.$": "$.Tags"
                 },
                 "ResultPath": null,
                 "Next": "Search Fact Checks"
@@ -262,7 +190,6 @@
                 "Parameters": {
                   "item.$": "$.item",
                   "KeyPhrases.$": "$.KeyPhrases",
-                  "TitleEntities.$": "$.TitleEntities",
                   "Entities.$": "$.Entities"
                 },
                 "ResultPath": "$.FactChecks",

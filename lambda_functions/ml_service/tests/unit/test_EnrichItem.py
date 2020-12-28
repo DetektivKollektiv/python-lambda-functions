@@ -1,8 +1,8 @@
 from core_layer.connection_handler import get_db_session
 
 from core_layer.model.item_model import Item
-from ml_service import EnrichItem, get_online_factcheck
-from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler
+from ml_service import EnrichItem, get_online_factcheck, GetEntities, GetTags
+from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler, tag_handler
 import json
 import time
 import pytest
@@ -119,8 +119,6 @@ class TestGetFactChecks:
                 "Covid",
                 "19",
                 "Corona Transition"
-            ],
-            "TitleEntities": [
             ]
         }
         context = ""
@@ -172,13 +170,6 @@ class TestGetFactChecks:
                 "den letzten 7 Tagen",
                 "das RKI",
                 "sich"
-            ],
-            "TitleEntities": [
-                "RKI",
-                "Deutschland",
-                "RKI",
-                "136 Kreisen",
-                "Bundeskanzlerin"
             ],
             "Entities": [
                 "RKI",
@@ -232,7 +223,6 @@ class TestGetFactChecks:
                 "language": item.language,
             },
             "KeyPhrases": [],
-            "TitleEntities": [],
             "Entities": [],
             "Sentiment": "NEUTRAL"
         }
@@ -274,7 +264,6 @@ class TestGetFactChecks:
                 "language": item.language,
             },
             "KeyPhrases": [],
-            "TitleEntities": [],
             "Entities": [],
             "Sentiment": "NEUTRAL"
         }
@@ -359,3 +348,41 @@ class TestStoreURLs:
         assert itemurl.id is not None
         assert claimant.claimant == domain
         assert url.claimant_id is not None
+
+
+class TestStoreTags:
+    def test_store_itemtag(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        session = get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition "
+        item.language = "de"
+        item = item_handler.create_item(item, True, session)
+        list_tags = ['RKI', 'Covid', 'Corona Transition']
+
+        # store tags
+        event = {
+            "item": item.to_dict(),
+            "Tags": list_tags
+        }
+        context = ""
+        EnrichItem.store_itemtags(event, context, True, session)
+
+        tag = tag_handler.get_tag_by_content(list_tags[0], True, session)
+        assert tag.tag == list_tags[0]
+
+        itemtag = tag_handler.get_itemtag_by_tag_and_item_id(
+            tag.id, item.id, True, session)
+        assert itemtag.id is not None
+
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            }
+        }
+        ret = GetTags.get_tags_for_item(event, context, True, session)
+        assert ret['body']['Tags'] == list_tags

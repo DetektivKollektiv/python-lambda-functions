@@ -67,7 +67,7 @@ def get_entities(event, context):
             entities_strings.append(obj.get('Text'))
 
     # respond at most 3 entities
-    entities_sorted = entities_sorted[:min(3, len(entities_sorted))]
+    entities_strings = entities_strings[:min(3, len(entities_strings))]
 
     return entities_strings
 

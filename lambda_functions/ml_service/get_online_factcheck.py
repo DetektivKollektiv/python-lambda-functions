@@ -32,7 +32,6 @@ def get_online_factcheck(event, context, is_test=False, session=None):
                 id, is_test, session)
             phrase_objects = keyphrase_handler.get_phrases_by_itemid_db(
                 id, is_test, session)
-            title_entities = []  # entities from the claim title are stored as entities in the database
 
             entities = []
             for obj in entity_objects:
@@ -45,7 +44,6 @@ def get_online_factcheck(event, context, is_test=False, session=None):
                 "item": item.to_dict(),
                 "KeyPhrases": phrases,
                 "Entities": entities,
-                "TitleEntities": title_entities,
             }
             context = ""
 
