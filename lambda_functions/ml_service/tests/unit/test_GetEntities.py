@@ -1,5 +1,6 @@
-from ml_service import GetEntities
 import pytest
+
+from ... import GetEntities
 
 
 class TestGetEntities:

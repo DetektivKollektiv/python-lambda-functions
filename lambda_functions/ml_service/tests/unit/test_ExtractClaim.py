@@ -1,4 +1,4 @@
-from ml_service import ExtractClaim
+from ... import ExtractClaim
 
 
 class TestExtractClaim:

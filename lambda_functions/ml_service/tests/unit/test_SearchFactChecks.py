@@ -1,7 +1,7 @@
 import time
 import os
-from ml_service import SearchFactChecks
-from ml_service import UpdateFactChecks
+from ... import SearchFactChecks
+from ... import UpdateFactChecks
 
 
 class TestSearchFactChecks:
@@ -70,8 +70,10 @@ class TestSearchFactChecks:
         elapsed = time.perf_counter() - s
         assert 'claimReview' in ret[0]
         assert ret[0]['claimReview'][0]['url'] == 'https://www.br.de/nachrichten/wissen/warum-viele-corona-tests-noch-keine-qualitaetskontrolle-brauchen,SI1KrNC'
-        assert ret[0]['claimReview'][0]['textualRating'] == 'Richtig. Corona-Tests, die für medizinisches Fachpersonal gedacht sind, müssen nicht durch eine externe Prüforganisation (Benannte Stelle) kontrolliert werden. Corona-Test zur Selbstanwendung hingegen schon. Ab 2022 müssen alle In-Vitro-Diagnostika, zu denen auch Corona-Tests zählen, von einer Benannte Stelle überprüft werden.'
+        assert ret[0]['claimReview'][0][
+            'textualRating'] == 'Richtig. Corona-Tests, die für medizinisches Fachpersonal gedacht sind, müssen nicht durch eine externe Prüforganisation (Benannte Stelle) kontrolliert werden. Corona-Test zur Selbstanwendung hingegen schon. Ab 2022 müssen alle In-Vitro-Diagnostika, zu denen auch Corona-Tests zählen, von einer Benannte Stelle überprüft werden.'
         assert elapsed < 3
+
 
 class TestUpdateModels:
     def test_update_factchecker_1(self):
@@ -94,7 +96,8 @@ class TestUpdateModels:
         context = ""
         os.environ["STAGE"] = "qa"
         UpdateFactChecks.update_factcheck_models(event, context)
-        df_factchecks = UpdateFactChecks.read_df(UpdateFactChecks.factchecks_prefix+"de.csv")
+        df_factchecks = UpdateFactChecks.read_df(
+            UpdateFactChecks.factchecks_prefix+"de.csv")
         qm_exists = False
         for fc in df_factchecks:
             if fc['claim_text'].find("\"") > -1:

@@ -1,5 +1,6 @@
-from ml_service import GetLanguage
 import pytest
+
+from ... import GetLanguage
 
 
 class TestGetLanguage:

@@ -1,5 +1,6 @@
-from ml_service import GetSentiment
 import pytest
+
+from ... import GetSentiment
 
 
 class TestGetSentiment:

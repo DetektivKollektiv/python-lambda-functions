@@ -1,12 +1,13 @@
-from core_layer.connection_handler import get_db_session
-
-from core_layer.model.item_model import Item
-from ml_service import EnrichItem, get_online_factcheck
-from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler
 import json
 import time
 import pytest
 import os
+
+from core_layer.connection_handler import get_db_session
+from core_layer.model.item_model import Item
+from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler
+
+from ... import EnrichItem, get_online_factcheck
 
 
 class TestGetFactChecks:
@@ -134,7 +135,8 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(
+            event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -200,7 +202,8 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(
+            event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -247,7 +250,8 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(
+            event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
@@ -289,7 +293,8 @@ class TestGetFactChecks:
         }
         context = {}
         s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
+        response = get_online_factcheck.get_online_factcheck(
+            event, context, True, session)
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string

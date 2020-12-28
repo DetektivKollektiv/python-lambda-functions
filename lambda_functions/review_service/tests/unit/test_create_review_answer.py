@@ -12,7 +12,7 @@ from core_layer.model.review_model import Review
 from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 
-from review_service.create_review_answer import create_review_answer
+from ...create_review_answer import create_review_answer
 from core_layer.handler import review_handler
 
 from ....tests.helper import event_creator

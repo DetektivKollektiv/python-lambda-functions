@@ -3,11 +3,14 @@ import logging
 import json
 import traceback
 from uuid import uuid4
-# Helper imports
+
+# Layer imports
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, entity_handler, keyphrase_handler
-from ml_service import SearchFactChecks
+
+# Local imports
+from . import SearchFactChecks
 
 
 def get_online_factcheck(event, context, is_test=False, session=None):
@@ -27,7 +30,7 @@ def get_online_factcheck(event, context, is_test=False, session=None):
         try:
             item = item_handler.get_item_by_id(id, is_test, session)
             if item.language == None:
-                raise Exception("Language of Claim not recognized.")             
+                raise Exception("Language of Claim not recognized.")
             entity_objects = entity_handler.get_entities_by_itemid(
                 id, is_test, session)
             phrase_objects = keyphrase_handler.get_phrases_by_itemid_db(

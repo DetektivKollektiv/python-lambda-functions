@@ -1,5 +1,6 @@
-from ml_service import GetKeyPhrases
 import pytest
+
+from ... import GetKeyPhrases
 
 
 class TestGetKeyPhrases:

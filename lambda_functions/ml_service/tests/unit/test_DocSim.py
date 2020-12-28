@@ -1,11 +1,12 @@
 from core_layer.connection_handler import get_db_session
 
 from core_layer.model.item_model import Item
-from ml_service import ExtractClaim, GetLanguage, GetKeyPhrases, GetEntities, SearchFactChecks
+from ... import ExtractClaim, GetLanguage, GetKeyPhrases, GetEntities, SearchFactChecks
 from core_layer.handler import item_handler
 import os
 
 import logging
+
 
 class TestDocSim:
     def test_DocSim_vs_RegExp(self, monkeypatch):
@@ -16,8 +17,8 @@ class TestDocSim:
 
         claim_factcheck_dicts = [
             {
-                "claim": "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
-                    "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 ",
+                "claim": "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in"
+                "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 ",
                 "factcheck": "https://correctiv.org/faktencheck/2020/07/09/nein-rki-bestaetigt-nicht-eine-covid-19-sterblichkeitsrate-von-001-prozent-in-deutschland/",
                 "stepfunction": {}
             },
@@ -207,25 +208,27 @@ class TestDocSim:
             item = Item()
             item.content = claim_factcheck_dicts[i]["claim"]
             item = item_handler.create_item(item, True, session)
-            claim_factcheck_dicts[i]["stepfunction"]["item"] =  {
-                    "id": item.id,
-                    "content": item.content,
-                    "language": item.language,
-                }
+            claim_factcheck_dicts[i]["stepfunction"]["item"] = {
+                "id": item.id,
+                "content": item.content,
+                "language": item.language,
+            }
 
-            #extract claim
+            # extract claim
             event = {
                 "item": claim_factcheck_dicts[i]["stepfunction"]["item"]
             }
             context = ""
-            claim_factcheck_dicts[i]["stepfunction"]["Claim"] = ExtractClaim.extract_claim(event, context)
+            claim_factcheck_dicts[i]["stepfunction"]["Claim"] = ExtractClaim.extract_claim(
+                event, context)
 
             # detect language
             event = {
                 "Text": claim_factcheck_dicts[i]["stepfunction"]["Claim"]["concatenation"]["Text"]
             }
             try:
-                claim_factcheck_dicts[i]["stepfunction"]["item"]["language"] = GetLanguage.get_language(event, context)
+                claim_factcheck_dicts[i]["stepfunction"]["item"]["language"] = GetLanguage.get_language(
+                    event, context)
             except:
                 continue
 
@@ -237,10 +240,12 @@ class TestDocSim:
 
             # detect key phrases
             event["LanguageCode"] = claim_factcheck_dicts[i]["stepfunction"]["item"]["language"]
-            claim_factcheck_dicts[i]["stepfunction"]["KeyPhrases"] = GetKeyPhrases.get_phrases(event, context)
+            claim_factcheck_dicts[i]["stepfunction"]["KeyPhrases"] = GetKeyPhrases.get_phrases(
+                event, context)
 
             # detect entities
-            claim_factcheck_dicts[i]["stepfunction"]["Entities"] = GetEntities.get_entities(event, context)
+            claim_factcheck_dicts[i]["stepfunction"]["Entities"] = GetEntities.get_entities(
+                event, context)
 
             # search factchecks with KeyPhrases
             os.environ["STAGE"] = "dev"
@@ -317,7 +322,7 @@ class TestDocSim:
         kp_pr = count_kp_tp/(count_kp_tp+count_kp_fp)
         t_pr = count_t_tp/(count_t_tp+count_t_fp)
         # calculate Specitivity
-        if count_noFc>0:
+        if count_noFc > 0:
             e_tn = count_e_tn/count_noFc
             kp_tn = count_kp_tn/count_noFc
             t_tn = count_t_tn/count_noFc
@@ -325,7 +330,7 @@ class TestDocSim:
             e_tn = 1.
             kp_tn = 1.
             t_tn = 1.
-        if count_fcExists>0:
+        if count_fcExists > 0:
             # calculate Recall or Sensitivity, respectively
             e_tp = count_e_tp/count_fcExists
             kp_tp = count_kp_tp/count_fcExists
