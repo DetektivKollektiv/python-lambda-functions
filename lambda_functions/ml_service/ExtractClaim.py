@@ -63,15 +63,27 @@ def extract_claim(event, context):
                 continue
         except (AttributeError, TypeError):
             continue
-        resp = requests.get(url)
+        # set headers for a web browser
+        headers = {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9", 
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        }
+        resp = requests.get(url, headers=headers)
         read_content = resp.content
         read_content_hidden = read_content.replace(b'<!--', b'')
         soup = BeautifulSoup(read_content_hidden, 'html.parser')
-        titles = soup.find_all('title')  # get the title of the web page
+        # get the title of the web page
+        titles = soup.find_all('title')  
         title = ""
         if len(titles) > 0:
             title = '{} '.format(titles[0].text)
-        pAll = soup.find_all('p')  # get all paragraphs of the web page
+        # get the description of the web page
+        description = soup.find("meta",  {"name":"description"})
+        page_description = ""
+        if description:
+            page_description = description["content"]
+        # get all paragraphs of the web page
+        pAll = soup.find_all('p')
         paragraphs = ''
 
         # concatenate all paragraphs for each url
@@ -79,16 +91,15 @@ def extract_claim(event, context):
             paragraphs += '{} '.format(t.text)
             # As more paragraphs are appended as higher is the probability that the paragraphs do not belong to the
             # main article
-            if len(paragraphs) > 1000:
+            if len(paragraphs) > 50:
                 break
         # use only title as claim, maybe this enhances the quality of entities and phrases
-        allText += title
-        # allText += paragraphs
+        allText += title + "\n" + page_description
+        if len(allText) < 50:
+            allText += paragraphs
 
     if len(allText) >= 4800:
         allText = allText[:4799]
-    # add as first entry a placeholder for item_content
-    # urls.insert(0, "")
 
     return {
         "urls": urls,
