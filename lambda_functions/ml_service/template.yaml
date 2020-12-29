@@ -50,7 +50,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess         
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
 
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -61,7 +61,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -92,7 +92,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -111,7 +111,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -199,7 +199,7 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
-        
+
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -209,7 +209,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -237,7 +237,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -256,7 +256,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -275,7 +275,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -294,7 +294,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -330,7 +330,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -349,7 +349,7 @@ Resources:
       Runtime: python3.8
       MemorySize: 832
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole

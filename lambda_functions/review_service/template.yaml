@@ -76,7 +76,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
   CreateReviewFunction: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -110,7 +110,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
   GetReviewQuestionFunction:
     Type: AWS::Serverless::Function
@@ -146,7 +146,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
   CreateReviewAnswerFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -175,7 +175,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
   ResetLockedItemsFunction:
     Type: AWS::Serverless::Function
@@ -202,4 +202,4 @@ Resources:
           DBNAME:
             Ref: DBNAME
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
