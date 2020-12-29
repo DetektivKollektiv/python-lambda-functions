@@ -17,6 +17,9 @@ class ReviewQuestion(Base):
     upper_bound = Column(Integer)
     max_children = Column(Integer)
 
+    item_type_id = Column(String(36), ForeignKey(
+        'item_types.id', ondelete='CASCADE', onupdate='CASCADE'))
+
     review_answers = relationship(
         "ReviewAnswer", back_populates="review_question")
     options = relationship("AnswerOption",
@@ -28,12 +31,19 @@ class ReviewQuestion(Base):
     child_questions = relationship(
         "ReviewQuestion", back_populates="parent_question")
 
+    item_type = relationship("ItemType", back_populates="questions")
+
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "info": self.info}
+        return {
+            "id": self.id,
+            "content": self.content,
+            "info": self.info
+        }
 
     def to_dict_with_answers(self):
-        question = {"id": self.id, "content": self.content,
-                    "info": self.info, "options": []}
-        for option in self.options:
-            question["options"].append(option.to_dict())
-        return question
+        return {
+            "id": self.id,
+            "content": self.content,
+            "info": self.info,
+            "options": [option.to_dict() for option in self.options]
+        }
