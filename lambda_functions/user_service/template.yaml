@@ -69,7 +69,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
   DeleteUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -97,7 +97,7 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
   GetUserFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -126,4 +126,4 @@ Resources:
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:
-        - arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-dev:1
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
