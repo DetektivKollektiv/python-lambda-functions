@@ -23,7 +23,7 @@ def get_user_by_id(id, is_test, session):
     """
 
     session = get_db_session(is_test, session)
-    user = session.query(User).get(id)
+    user = session.query(User).filter(User.id == id).one()
     return user
 
 

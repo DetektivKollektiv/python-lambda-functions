@@ -29,7 +29,7 @@ def get_user(event, context, is_test=False, session=None):
         except Exception:
             response = {
                 "statusCode": 404,
-                "body": "No user found with the specified id."
+                "body": "No user found with the specified id.{}".format(traceback.format_exc())
             }
 
     except Exception:
