@@ -107,7 +107,8 @@ def get_next_question_db(review: Review, previous_question: ReviewQuestion, is_t
     remaining_questions = 7 - len(review.review_answers)
 
     # Get all questions
-    all_questions = get_all_review_questions_db(is_test, session)
+    all_questions = get_review_questions_by_item_id(
+        review.item.item_type_id, is_test, session)
     random.shuffle(all_questions)
 
     for question in all_questions:
