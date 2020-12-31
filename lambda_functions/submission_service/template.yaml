@@ -64,13 +64,15 @@ Resources:
           - Arn
       Tracing: Active
       Events:
-        Echo:
+        ApiEvent:
           Type: Api
           Properties:
             Path: /items # Change for each lambda
             Method: post # Change for each lambda
             RestApiId:
               Ref: Api
+            Auth:
+              Authorizer: NONE
       Environment:
         Variables:
           DBNAME:
