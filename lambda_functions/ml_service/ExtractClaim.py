@@ -42,7 +42,7 @@ def extract_claim(event, context):
 
     # extract all urls from item_content
     urls = re.findall(
-        'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
+        'http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # remove urls from item_content
     for url in urls:
         item_content = item_content.replace(url, '')
@@ -93,9 +93,11 @@ def extract_claim(event, context):
             if len(paragraphs) > 50:
                 break
         # use only title as claim, maybe this enhances the quality of entities and phrases
-        allText += title + "\n" + page_description
+        allText += "\n" + title 
         if len(allText) < 50:
-            allText += paragraphs
+            allText +=  "\n" + page_description
+        if len(allText) < 50:
+            allText += "\n" + paragraphs
 
     if len(allText) >= 4800:
         allText = allText[:4799]
