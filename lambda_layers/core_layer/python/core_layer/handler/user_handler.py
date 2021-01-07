@@ -113,3 +113,19 @@ def get_all_users(is_test, session) -> [User]:
     session = get_db_session(is_test, session)
     users = session.query(User).all()
     return users
+
+
+def get_user_progress(user, is_test, session) -> int:
+    current_level = session.query(Level).filter(
+        Level.id == user.level_id).one()
+    next_level = session.query(Level).filter(
+        Level.id == user.level_id + 1).one()
+
+    exp_difference = next_level.required_experience_points - \
+        current_level.required_experience_points
+    exp_in_current_level = user.experience_points - \
+        current_level.required_experience_points
+
+    progress = int(exp_in_current_level / exp_difference * 100)
+
+    return progress
