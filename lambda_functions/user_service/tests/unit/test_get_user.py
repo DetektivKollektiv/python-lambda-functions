@@ -24,3 +24,4 @@ def test_get_user(monkeypatch):
     assert body["id"] == junior_detective1.id
     assert body["level"] == 1
     assert body["level_description"] == "Junior"
+    assert body["progress"] == 0
