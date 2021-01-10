@@ -209,6 +209,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
 
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
