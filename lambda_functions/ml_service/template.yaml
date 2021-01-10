@@ -116,6 +116,14 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-update_factchecks-${STAGE}"
+            Description: updates fact checks and models every day
+            Enabled: True
+            Schedule: rate(1 day)
       Environment:
         Variables:
           STAGE:
