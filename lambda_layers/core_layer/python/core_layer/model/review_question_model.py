@@ -10,6 +10,7 @@ class ReviewQuestion(Base):
     id = Column(String(36), primary_key=True)
     content = Column(Text)
     info = Column(Text)
+    hint = Column(Text)
 
     parent_question_id = Column(String(36), ForeignKey(
         'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))

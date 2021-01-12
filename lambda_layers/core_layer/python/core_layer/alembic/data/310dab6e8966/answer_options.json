@@ -1,0 +1,38 @@
+[
+  {
+    "id": "0a",
+    "text": "Trifft nicht zu",
+    "value": 0,
+    "tooltip": "Beurteilung nicht möglich/Kriterium nicht anwendbar"
+  },
+  {
+    "id": "0b",
+    "text": "Trifft nicht zu",
+    "value": 1,
+    "tooltip": "Beurteilung nicht möglich/Kriterium nicht anwendbar"
+  },
+  {
+    "id": "1",
+    "text": "Stimme nicht zu",
+    "value": 1,
+    "tooltip": null
+  },
+  {
+    "id": "2",
+    "text": "Stimme eher nicht zu",
+    "value": 2,
+    "tooltip": null
+  },
+  {
+    "id": "3",
+    "text": "Stimme eher zu",
+    "value": 3,
+    "tooltip": null
+  },
+  {
+    "id": "4",
+    "text": "Stimme zu",
+    "value": 4,
+    "tooltip": null
+  }
+]

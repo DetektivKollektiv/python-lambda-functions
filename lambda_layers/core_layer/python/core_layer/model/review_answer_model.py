@@ -36,8 +36,14 @@ class AnswerOption(Base):
     id = Column(String(36), primary_key=True)
     text = Column(Text)
     value = Column(Integer)
+    tooltip = Column(Text)
     questions = relationship(
         "ReviewQuestion", secondary=question_option_pairs, back_populates="options")
 
     def to_dict(self):
-        return {"id": self.id, "text": self.text, "value": self.value}
+        return {
+            "id": self.id,
+            "text": self.text,
+            "value": self.value,
+            "tooltip": self.tooltip
+        }
