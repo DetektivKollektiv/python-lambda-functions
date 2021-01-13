@@ -22,7 +22,7 @@ class Item(Base):
     verification_process_version = Column(Integer)
 
     item_type_id = Column(String(36), ForeignKey(
-        'item_types.id', ondelete='CASCADE', onupdate='CASCADE'))
+        'item_types.id', ondelete='SET NULL', onupdate='CASCADE'))
 
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")

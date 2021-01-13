@@ -30,13 +30,13 @@ def upgrade():
     op.add_column('items', sa.Column('item_type_id',
                                      sa.String(length=36), nullable=True))
     op.create_foreign_key('fk_items_item_type_id', 'items', 'item_types', [
-                          'item_type_id'], ['id'], onupdate='CASCADE', ondelete='CASCADE')
+                          'item_type_id'], ['id'], onupdate='CASCADE', ondelete='SET NULL')
     op.add_column('review_questions', sa.Column(
         'hint', sa.Text(), nullable=True))
     op.add_column('review_questions', sa.Column(
         'item_type_id', sa.String(length=36), nullable=True))
     op.create_foreign_key('fk_review_questions_item_type_id', 'review_questions', 'item_types', ['item_type_id'], [
-                          'id'], onupdate='CASCADE', ondelete='CASCADE')
+                          'id'], onupdate='CASCADE', ondelete='SET NULL')
 
     item_types_table = sa.table(
         'item_types',

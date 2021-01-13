@@ -37,7 +37,7 @@ def get_review_question_by_id(question_id, is_test, session):
     return question
 
 
-def get_review_questions_by_item_id(item_type_id, is_test, session):
+def get_review_questions_by_item_type_id(item_type_id, is_test, session):
     """Returns all review questions for a given item type from the database
 
     Returns
@@ -107,7 +107,7 @@ def get_next_question_db(review: Review, previous_question: ReviewQuestion, is_t
     remaining_questions = 7 - len(review.review_answers)
 
     # Get all questions
-    all_questions = get_review_questions_by_item_id(
+    all_questions = get_review_questions_by_item_type_id(
         review.item.item_type_id, is_test, session)
     random.shuffle(all_questions)
 

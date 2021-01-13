@@ -8,8 +8,8 @@ class ItemType(Base):
     id = Column(String(36), primary_key=True)
     name = Column(Text)
 
-    items = relationship("Item")
-    questions = relationship("ReviewQuestion")
+    items = relationship("Item", back_populates="item_type")
+    questions = relationship("ReviewQuestion", back_populates="item_type")
 
     def to_dict(self):
         return {"id": self.id, "name": self.name}

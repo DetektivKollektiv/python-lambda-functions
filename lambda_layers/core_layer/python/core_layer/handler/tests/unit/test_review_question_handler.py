@@ -113,11 +113,11 @@ def test_get_question_by_id(session, question_id_1, question_id_2, question_id_3
 
 
 def test_get_question_by_type_id(session, type_id_1, type_id_2, question_id_1, question_id_2):
-    review_questions_1 = review_question_handler.get_review_questions_by_item_id(
+    review_questions_1 = review_question_handler.get_review_questions_by_item_type_id(
         type_id_1, True, session)
-    review_questions_2 = review_question_handler.get_review_questions_by_item_id(
+    review_questions_2 = review_question_handler.get_review_questions_by_item_type_id(
         type_id_2, True, session)
-    review_questions_3 = review_question_handler.get_review_questions_by_item_id(
+    review_questions_3 = review_question_handler.get_review_questions_by_item_type_id(
         str(uuid4()), True, session)
 
     assert len(review_questions_1) == 1
@@ -153,7 +153,7 @@ def test_get_next_question_simple(session, review_id_1, review_id_2, question_id
     assert question2.id == question_id_2
 
 
-def test_get_next_question_simple(session, review_id_1, review_id_2, question_id_1, question_id_2, question_id_3):
+def test_get_next_question_multiple(session, review_id_1, review_id_2, question_id_1, question_id_2, question_id_3):
     review1 = review_handler.get_review_by_id(review_id_1, True, session)
     assert review1 is not None
 
