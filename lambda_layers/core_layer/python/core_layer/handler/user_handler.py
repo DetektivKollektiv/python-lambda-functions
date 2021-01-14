@@ -1,11 +1,13 @@
 from uuid import uuid4
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import boto3
 from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
+from core_layer.model.review_model import Review
 
 
 def get_user_by_id(id, is_test, session):
@@ -115,7 +117,19 @@ def get_all_users(is_test, session) -> [User]:
     return users
 
 
-def get_user_progress(user, is_test, session) -> int:
+def get_user_progress(user: User, is_test, session) -> int:
+    """Returns the users progress towards the next level
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return progress
+
+    Returns
+    ------
+    progress: int
+        Progress cast to an int value (between 0 and 100)
+    """
     current_level = session.query(Level).filter(
         Level.id == user.level_id).one()
     next_level = session.query(Level).filter(
@@ -129,3 +143,43 @@ def get_user_progress(user, is_test, session) -> int:
     progress = int(exp_in_current_level / exp_difference * 100)
 
     return progress
+
+
+def get_user_total_rank(user: User, is_test, session: Session) -> int:
+    """Returns the users overall rank
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return rank
+
+    Returns
+    ------
+    rank: int
+        The user's rank
+    """
+
+    if user.reviews == None:
+        raise Exception("User has not created any reviews yet")
+
+    count_subquery = session.query(
+        User,
+        func.count(User.id).label('closed_review_count')). \
+        join(User.reviews). \
+        filter(Review.status == "closed"). \
+        group_by(User.id). \
+        subquery('sq1')
+
+    rank_subquery = session.query(
+        count_subquery,
+        func.rank().
+        over(
+            order_by=count_subquery.c.closed_review_count.desc()
+        ).label('rank')
+    ).subquery('sq2')
+
+    final_query = session.query(rank_subquery).filter(
+        rank_subquery.c.id == user.id)
+
+    result_row = final_query.one()
+    return result_row.rank
