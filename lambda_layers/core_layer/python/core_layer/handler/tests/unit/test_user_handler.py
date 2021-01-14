@@ -60,7 +60,7 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1,
 
     user1 = user_creator.create_user(user_id_1, level1)
     user2 = user_creator.create_user(user_id_2, level1)
-    user3 = user_creator.create_user(user_id_3, level1)
+    user3 = user_creator.create_user(user_id_3, level2)
 
     review1 = review_creator.create_review(
         review_id_1, item1.id, user_id_1, "closed")
@@ -81,14 +81,28 @@ def session(fixtures):
     return session
 
 
-def test_get_user_rank(session, user_id_1, user_id_2, user_id_3):
+def test_get_user_total_rank(session, user_id_1, user_id_2, user_id_3):
     user_1 = session.query(User).filter(User.id == user_id_1).one()
     user_2 = session.query(User).filter(User.id == user_id_2).one()
     user_3 = session.query(User).filter(User.id == user_id_3).one()
-    user_rank_1 = user_handler.get_user_total_rank(user_1, True, session)
-    user_rank_3 = user_handler.get_user_total_rank(user_3, True, session)
-    with pytest.raises(Exception):
-        user_handler.get_user_total_rank(user_2, True, session)
+    user_rank_1 = user_handler.get_user_rank(user_1, False, True, session)
+    user_rank_3 = user_handler.get_user_rank(user_3, False, True, session)
+    # with pytest.raises(Exception):
+    user_rank_2 = user_handler.get_user_rank(user_2, False, True, session)
 
     assert user_rank_1 == 1
     assert user_rank_3 == 2
+    assert user_rank_2 == 3
+
+
+def test_get_user_level_rank(session, user_id_1, user_id_2, user_id_3):
+    user_1 = session.query(User).filter(User.id == user_id_1).one()
+    user_2 = session.query(User).filter(User.id == user_id_2).one()
+    user_3 = session.query(User).filter(User.id == user_id_3).one()
+    user_rank_1 = user_handler.get_user_rank(user_1, True, True, session)
+    user_rank_3 = user_handler.get_user_rank(user_3, True, True, session)
+    user_rank_2 = user_handler.get_user_rank(user_2, True, True, session)
+
+    assert user_rank_1 == 1
+    assert user_rank_3 == 1
+    assert user_rank_2 == 2

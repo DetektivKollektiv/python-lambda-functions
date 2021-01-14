@@ -25,3 +25,6 @@ def test_get_user(monkeypatch):
     assert body["level"] == 1
     assert body["level_description"] == "Junior"
     assert body["progress"] == 0
+    assert body["total_rank"] == session.query(User).count()
+    assert body["level_rank"] == session.query(User).filter(
+        User.level_id == junior_detective1.level_id).count()

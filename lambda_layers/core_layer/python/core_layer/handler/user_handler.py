@@ -145,7 +145,7 @@ def get_user_progress(user: User, is_test, session) -> int:
     return progress
 
 
-def get_user_total_rank(user: User, is_test, session: Session) -> int:
+def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
     """Returns the users overall rank
 
     Parameters
@@ -159,16 +159,32 @@ def get_user_total_rank(user: User, is_test, session: Session) -> int:
         The user's rank
     """
 
-    if user.reviews == None:
-        raise Exception("User has not created any reviews yet")
+    if not user.reviews:
+        if level_rank:
+            user_count = session.query(User).filter(
+                User.level_id == user.level_id).count()
+        else:
+            user_count = session.query(User).count()
 
-    count_subquery = session.query(
-        User,
-        func.count(User.id).label('closed_review_count')). \
-        join(User.reviews). \
-        filter(Review.status == "closed"). \
-        group_by(User.id). \
-        subquery('sq1')
+        return user_count
+        # raise Exception("User has not created any reviews yet")
+    if level_rank:
+        count_subquery = session.query(
+            User,
+            func.count(User.id).label('closed_review_count')). \
+            join(User.reviews). \
+            filter(Review.status == "closed", User.level_id == user.level_id). \
+            group_by(User.id). \
+            subquery('sq1')
+
+    else:
+        count_subquery = session.query(
+            User,
+            func.count(User.id).label('closed_review_count')). \
+            join(User.reviews). \
+            filter(Review.status == "closed"). \
+            group_by(User.id). \
+            subquery('sq1')
 
     rank_subquery = session.query(
         count_subquery,

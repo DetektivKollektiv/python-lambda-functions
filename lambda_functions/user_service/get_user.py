@@ -24,10 +24,13 @@ def get_user(event, context, is_test=False, session=None):
             user_dict = user.to_dict()
             progress = user_handler.get_user_progress(
                 user, is_test, session)
-            total_rank = user_handler.get_user_total_rank(
-                user_handler, is_test, session)
+            total_rank = user_handler.get_user_rank(
+                user, False, is_test, session)
+            level_rank = user_handler.get_user_rank(
+                user, True, is_test, session)
             user_dict['progress'] = progress
             user_dict['total_rank'] = total_rank
+            user_dict['level_rank'] = level_rank
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
