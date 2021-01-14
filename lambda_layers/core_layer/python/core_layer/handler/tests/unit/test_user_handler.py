@@ -1,5 +1,6 @@
 import pytest
 from uuid import uuid4
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 from core_layer.model import User
@@ -65,7 +66,7 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1,
     review1 = review_creator.create_review(
         review_id_1, item1.id, user_id_1, "closed")
     review2 = review_creator.create_review(
-        review_id_2, item2.id, user_id_1, "closed")
+        review_id_2, item2.id, user_id_1, "closed", datetime.now() - timedelta(days=3))
     review3 = review_creator.create_review(
         review_id_3, item1.id, user_id_3, "closed")
 
@@ -106,3 +107,35 @@ def test_get_user_level_rank(session, user_id_1, user_id_2, user_id_3):
     assert user_rank_1 == 1
     assert user_rank_3 == 1
     assert user_rank_2 == 2
+
+
+def test_get_total_solved_cases(session, user_id_1, user_id_2, user_id_3):
+    user_1 = session.query(User).filter(User.id == user_id_1).one()
+    user_2 = session.query(User).filter(User.id == user_id_2).one()
+    user_3 = session.query(User).filter(User.id == user_id_3).one()
+    solved_cases_1 = user_handler.get_solved_cases(
+        user_1, False, True, session)
+    solved_cases_2 = user_handler.get_solved_cases(
+        user_2, False, True, session)
+    solved_cases_3 = user_handler.get_solved_cases(
+        user_3, False, True, session)
+
+    assert solved_cases_1 == 2
+    assert solved_cases_2 == 0
+    assert solved_cases_3 == 1
+
+
+def test_get_today_solved_cases(session, user_id_1, user_id_2, user_id_3):
+    user_1 = session.query(User).filter(User.id == user_id_1).one()
+    user_2 = session.query(User).filter(User.id == user_id_2).one()
+    user_3 = session.query(User).filter(User.id == user_id_3).one()
+    solved_cases_1 = user_handler.get_solved_cases(
+        user_1, True, True, session)
+    solved_cases_2 = user_handler.get_solved_cases(
+        user_2, True, True, session)
+    solved_cases_3 = user_handler.get_solved_cases(
+        user_3, True, True, session)
+
+    assert solved_cases_1 == 1
+    assert solved_cases_2 == 0
+    assert solved_cases_3 == 1

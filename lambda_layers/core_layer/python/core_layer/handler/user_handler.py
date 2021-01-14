@@ -2,6 +2,7 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import boto3
+from datetime import date
 from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
@@ -146,7 +147,9 @@ def get_user_progress(user: User, is_test, session) -> int:
 
 
 def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
-    """Returns the users overall rank
+    """Returns the users rank.
+    If level_rank is set to True, the rank within the users level is returned.
+    If level_rank is set to False, the overall rank is returned.
 
     Parameters
     ----------
@@ -199,3 +202,33 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
 
     result_row = final_query.one()
     return result_row.rank
+
+
+def get_solved_cases(user: User, today: bool, is_test, session: Session) -> int:
+    """Returns the amount of cases a user solved.
+    If today is set to true, only today's cases will be considered.
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return rank
+
+    Returns
+    ------
+    count: int
+        The number of solved cases
+    """
+
+    if not today:
+        count = session.query(Review).filter(
+            Review.user_id == user.id,
+            Review.status == "closed"
+        ).count()
+    else:
+        count = session.query(Review).filter(
+            Review.user_id == user.id,
+            func.date(Review.finish_timestamp) == date.today(),
+            Review.status == "closed"
+        ).count()
+
+    return count

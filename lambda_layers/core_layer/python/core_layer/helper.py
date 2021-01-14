@@ -5,19 +5,27 @@ import base64
 import boto3
 from botocore.config import Config  # remove later
 from botocore.exceptions import ClientError
+from sqlalchemy import func
 
 from core_layer.connection_handler import get_db_session
 
 
-def get_date_time_now(is_test):
-    if is_test:
-        return datetime.now()
-    else:
-        return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def get_date_time_now(is_test=True):
+    return func.now()
+    # TODO: Remove this method. Use func.now() and set create_time in model
+    # https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
+    # TODO: Update to newer version of Sqlalchemy Aurora Library and adapt datemanagement accordingly
 
 
 def get_date_time_one_hour_ago(is_test):
     dt = datetime.now() + timedelta(hours=-1)
+    if is_test:
+        return dt
+    else:
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def get_date_time(dt, is_test):
     if is_test:
         return dt
     else:
