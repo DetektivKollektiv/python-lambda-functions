@@ -59,9 +59,9 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1,
     level2 = level_creator.create_level(2, 5)
     level3 = level_creator.create_level(3, 10)
 
-    user1 = user_creator.create_user(user_id_1, level1)
-    user2 = user_creator.create_user(user_id_2, level1)
-    user3 = user_creator.create_user(user_id_3, level2)
+    user1 = user_creator.create_user(user_id_1, level1, 0)
+    user2 = user_creator.create_user(user_id_2, level1, 1)
+    user3 = user_creator.create_user(user_id_3, level2, 8)
 
     review1 = review_creator.create_review(
         review_id_1, item1.id, user_id_1, "closed")
@@ -139,3 +139,16 @@ def test_get_today_solved_cases(session, user_id_1, user_id_2, user_id_3):
     assert solved_cases_1 == 1
     assert solved_cases_2 == 0
     assert solved_cases_3 == 1
+
+
+def test_exp_needed(session, user_id_1, user_id_2, user_id_3):
+    user_1 = session.query(User).filter(User.id == user_id_1).one()
+    user_2 = session.query(User).filter(User.id == user_id_2).one()
+    user_3 = session.query(User).filter(User.id == user_id_3).one()
+    exp_needed_1 = user_handler.get_needed_exp(user_1, True, session)
+    exp_needed_2 = user_handler.get_needed_exp(user_2, True, session)
+    exp_needed_3 = user_handler.get_needed_exp(user_3, True, session)
+
+    assert exp_needed_1 == 5
+    assert exp_needed_2 == 4
+    assert exp_needed_3 == 2

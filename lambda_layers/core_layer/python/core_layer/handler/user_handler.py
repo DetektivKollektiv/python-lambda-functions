@@ -146,6 +146,28 @@ def get_user_progress(user: User, is_test, session) -> int:
     return progress
 
 
+def get_needed_exp(user: User, is_test, session) -> int:
+    """Returns how many exp are needed for the user to level up
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return progress
+
+    Returns
+    ------
+    exp: int
+        The amount of exp needed to level up
+    """
+    next_level = session.query(Level).filter(
+        Level.id == user.level_id + 1).one()
+
+    exp_difference = next_level.required_experience_points - \
+        user.experience_points
+
+    return exp_difference
+
+
 def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
     """Returns the users rank.
     If level_rank is set to True, the rank within the users level is returned.
