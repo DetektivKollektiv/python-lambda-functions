@@ -63,6 +63,7 @@ def create_review_answer(event, context, is_test=False, session=None):
         if(len(review.review_answers) == 7):
 
             review.status = "closed"
+            review.finish_timestamp = helper.get_date_time_now(is_test)
             user_handler.give_experience_point(
                 review.user_id, is_test, session)
 
