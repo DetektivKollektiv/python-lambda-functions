@@ -170,13 +170,13 @@ def get_needed_exp(user: User, is_test, session) -> int:
 
 def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
     """Returns the users rank.
-    If level_rank is set to True, the rank within the users level is returned.
-    If level_rank is set to False, the overall rank is returned.
 
     Parameters
     ----------
     user: User, required
         The user for which to return rank
+    level_rank: bool, required
+        Whether to limit the rank to users within the same level
 
     Returns
     ------
@@ -200,7 +200,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed", User.level_id == user.level_id). \
             group_by(User.id). \
-            subquery('sq1')
+            order_by(func.count(User.id))
 
     else:
         count_subquery = session.query(
@@ -209,31 +209,25 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed"). \
             group_by(User.id). \
-            subquery('sq1')
+            order_by(func.count(User.id).desc())
+    i = 1
+    for row in count_subquery.all():
+        if row.User.id == user.id:
+            return i
+        i += 1
 
-    rank_subquery = session.query(
-        count_subquery,
-        func.rank().
-        over(
-            order_by=count_subquery.c.closed_review_count.desc()
-        ).label('rank')
-    ).subquery('sq2')
-
-    final_query = session.query(rank_subquery).filter(
-        rank_subquery.c.id == user.id)
-
-    result_row = final_query.one()
-    return result_row.rank
+    raise Exception("Could not get rank for user")
 
 
 def get_solved_cases(user: User, today: bool, is_test, session: Session) -> int:
     """Returns the amount of cases a user solved.
-    If today is set to true, only today's cases will be considered.
 
     Parameters
     ----------
     user: User, required
-        The user for which to return rank
+        The user for which to return the number of solved cases
+    today: bool, required
+        Whether to limit this function to today's cases
 
     Returns
     ------
