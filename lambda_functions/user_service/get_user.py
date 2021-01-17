@@ -21,10 +21,28 @@ def get_user(event, context, is_test=False, session=None):
 
         try:
             user = user_handler.get_user_by_id(id, is_test, session)
+            user_dict = user.to_dict()
+            progress = user_handler.get_user_progress(
+                user, is_test, session)
+            total_rank = user_handler.get_user_rank(
+                user, False, is_test, session)
+            level_rank = user_handler.get_user_rank(
+                user, True, is_test, session)
+            solved_cases_total = user_handler.get_solved_cases(
+                user, False, is_test, session)
+            solved_cases_today = user_handler.get_solved_cases(
+                user, True, is_test, session)
+            exp_needed = user_handler.get_needed_exp(user, is_test, session)
+            user_dict['progress'] = progress
+            user_dict['total_rank'] = total_rank
+            user_dict['level_rank'] = level_rank
+            user_dict['solved_cases_total'] = solved_cases_total
+            user_dict['solved_cases_today'] = solved_cases_today
+            user_dict['exp_needed'] = exp_needed
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(user.to_dict())
+                "body": json.dumps(user_dict)
             }
         except Exception:
             response = {

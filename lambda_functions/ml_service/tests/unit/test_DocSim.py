@@ -16,6 +16,33 @@ class TestDocSim:
 
         claim_factcheck_dicts = [
             {
+                "claim": "https://www.facebook.com/DieSteffi82/posts/5064896943550398",
+                "factcheck": "https://correctiv.org/faktencheck/2020/12/23/nein-abstrichstaebchen-von-corona-schnelltests-sind-nicht-verseucht/",
+                "stepfunction": {}
+            },
+            {
+                # nicht extrahierbar
+                "claim": "In Ägypten war das eine Strafe für Slaves... Breche die Drüse der Blutenzephalitis: https://www.facebook.com/photo.php?fbid=3591706030868619&set=a.368339826538605&type=3",
+                "factcheck": "https://correctiv.org/faktencheck/2020/12/23/nein-nasenabstriche-fuer-einen-corona-test-gleichen-nicht-einer-strafe-fuer-sklaven-im-alten-aegypten/",
+                "stepfunction": {}
+            },
+            {
+                # twitter benötigt eine andere extraktionsmethode
+                "claim": "An der Universität Cambridge wurden alle 9000 Studenten mit PCR getestet. Alle Tests stellten sich im nach hinein als falsch positiv heraus - 100% falsche Ergebnisse und auf diesem Test beruhen, Foderungen  und Massnahmen. Es reicht jetzt wirklich.: https://twitter.com/LuanaNussbaum/status/1336956296017350657?s=20",
+                "factcheck": "https://correctiv.org/faktencheck/2020/12/23/nein-an-der-universitaet-cambridge-wurden-nicht-9-000-studierende-falsch-positiv-auf-corona-getestet/",
+                "stepfunction": {}
+            },
+            {
+                "claim": "https://www.facebook.com/Silberjungede-Wir-wollen-Augen-öffnen-Thorsten-Schulte-155330287422/videos/381310726307004/",
+                "factcheck": "https://correctiv.org/faktencheck/2020/12/22/dauer-lockdown-angela-merkels-aussage-wird-irrefuehrend-interpretiert/",
+                "stepfunction": {}
+            },
+            {
+                "claim": "https://www.facebook.com/svensworld000/videos/2792271450987454/",
+                "factcheck": "https://correctiv.org/faktencheck/2020/12/21/video-keine-belege-dass-ein-corona-schnelltest-positiv-auf-fruchtsaft-reagierte/",
+                "stepfunction": {}
+            },
+            {
                 "claim": "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
                     "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 ",
                 "factcheck": "https://correctiv.org/faktencheck/2020/07/09/nein-rki-bestaetigt-nicht-eine-covid-19-sterblichkeitsrate-von-001-prozent-in-deutschland/",
@@ -47,13 +74,7 @@ class TestDocSim:
                 "stepfunction": {}
             },
             {
-                # The text is in tag description and therefore not extracted
                 "claim": "https://www.bitchute.com/video/WGkyGAUdwqlh/",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/17/sprachnachricht-verbreitet-unbelegte-behauptung-ueber-corona-tests-mit-voreingestelltem-ergebnis/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Apotheken helfen fleissig mit beim Pandemiebetrug!! Die Statistik wird von den Test-Herstellern vorgegeben!!",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/17/sprachnachricht-verbreitet-unbelegte-behauptung-ueber-corona-tests-mit-voreingestelltem-ergebnis/",
                 "stepfunction": {}
             },
@@ -63,13 +84,7 @@ class TestDocSim:
                 "stepfunction": {}
             },
             {
-                # The text is in tag description and therefore partly not extracted
                 "claim": "https://www.facebook.com/steffen.mono/videos/1531749847023893/",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/16/positiver-corona-test-bei-apfelmus-hat-keine-aussagekraft/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Corona-Test mit Apfelmus gemacht... Was denkt ihr, positiv oder negativ",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/16/positiver-corona-test-bei-apfelmus-hat-keine-aussagekraft/",
                 "stepfunction": {}
             },
@@ -80,45 +95,25 @@ class TestDocSim:
             },
             {
                 # twitter benötigt eine andere extraktionsmethode
-                "claim": "https://twitter.com/QuakDr/status/1332601338514038784",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/15/es-stimmt-nicht-dass-jeder-patient-mit-lungenentzuendung-als-corona-fall-gezaehlt-wird/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Ich übersetzte das mal für die #Gerichte: Jeder Patient mit #Lungenentzündung, der Kontakt mit einer positiv getesteten Person hatte, wird als Covid19 Fall gemeldet, auch wenn er selbst negativ getestet wurde.",
+                "claim": "Ich übersetzte das mal für die #Gerichte: Jeder Patient mit #Lungenentzündung, der Kontakt mit einer positiv getesteten Person hatte, wird als Covid19 Fall gemeldet, auch wenn er selbst negativ getestet wurde. https://twitter.com/QuakDr/status/1332601338514038784",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/15/es-stimmt-nicht-dass-jeder-patient-mit-lungenentzuendung-als-corona-fall-gezaehlt-wird/",
                 "stepfunction": {}
             },
             {
                 # nicht extrahierbar
-                "claim": "https://www.facebook.com/photo.php?fbid=3466879523407507&set=a.897173730378112&type=3",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/15/ob-es-das-virus-gibt-oder-nicht-zitat-von-rki-chef-lothar-wieler-aus-dem-kontext-gerissen/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Lothar Wieler vom RKI: Wir haben viel gelernt.. unabhängig davon ob es das Virus gibt, oder nicht Diese Aussage muss man sich mal auf der Zunge zergehen lassen!",
+                "claim": "Lothar Wieler vom RKI: Wir haben viel gelernt.. unabhängig davon ob es das Virus gibt, oder nicht Diese Aussage muss man sich mal auf der Zunge zergehen lassen! https://www.facebook.com/photo.php?fbid=3466879523407507&set=a.897173730378112&type=3",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/15/ob-es-das-virus-gibt-oder-nicht-zitat-von-rki-chef-lothar-wieler-aus-dem-kontext-gerissen/",
                 "stepfunction": {}
             },
             {
                 # nicht extrahierbar
-                "claim": "https://www.facebook.com/photo.php?fbid=1187531251644128&set=a.135783410152256&type=3",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/14/schweiz-nein-einem-corona-impfstoff-wurde-nicht-die-zulassung-verweigert-weil-er-zu-gefaehrlich-und-unkalkulierbar-sei/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Die Schweizer Zulassungsbehörde hat soeben den deutschen mRNA-Corona-Impfstoff als zu gefährlich und unkalkulierbar ABGELEHNT. ***** TELEBASEL.CH Swissmedic: Stand heute können wir keine Zulassung für einen Impfstoff erteilen",
+                "claim": "Die Schweizer Zulassungsbehörde hat soeben den deutschen mRNA-Corona-Impfstoff als zu gefährlich und unkalkulierbar ABGELEHNT. ***** TELEBASEL.CH Swissmedic: Stand heute können wir keine Zulassung für einen Impfstoff erteilen https://www.facebook.com/photo.php?fbid=1187531251644128&set=a.135783410152256&type=3",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/14/schweiz-nein-einem-corona-impfstoff-wurde-nicht-die-zulassung-verweigert-weil-er-zu-gefaehrlich-und-unkalkulierbar-sei/",
                 "stepfunction": {}
             },
             {
                 # Forbidden to extract
-                "claim": "https://2020news.de/italien-studie-belegt-stark-erhoehten-co2-wert-unter-der-maske/",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/14/nein-eine-angebliche-studie-belegt-keinen-zu-hohen-co2-wert-unter-masken/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Italien: Studie belegt stark erhöhten CO2-Wert unter der Maske - 2020 NEWS",
+                "claim": "Italien: Studie belegt stark erhöhten CO2-Wert unter der Maske https://2020news.de/italien-studie-belegt-stark-erhoehten-co2-wert-unter-der-maske/",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/14/nein-eine-angebliche-studie-belegt-keinen-zu-hohen-co2-wert-unter-masken/",
                 "stepfunction": {}
             },
@@ -129,12 +124,7 @@ class TestDocSim:
             },
             {
                 # nicht extrahierbar
-                "claim": "https://www.facebook.com/photo.php?fbid=1773053819513552&set=a.794989853986625&type=3",
-                "factcheck": "https://correctiv.org/faktencheck/2020/12/10/deshalb-wird-der-abstrich-fuer-pcr-tests-meist-am-nasenrachen-gemacht/",
-                "stepfunction": {}
-            },
-            {
-                "claim": "Warum ist es notwendig, tief in der Nase nach dem Virus zu suchen?... Wäre es nicht ausreichend, auf das Stäbchen zu spucken, wenn doch angeblich das Virus au einem Meter schon ansteckend sein soll?",
+                "claim": "Warum ist es notwendig, tief in der Nase nach dem Virus zu suchen?... Wäre es nicht ausreichend, auf das Stäbchen zu spucken, wenn doch angeblich das Virus au einem Meter schon ansteckend sein soll? https://www.facebook.com/photo.php?fbid=1773053819513552&set=a.794989853986625&type=3",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/10/deshalb-wird-der-abstrich-fuer-pcr-tests-meist-am-nasenrachen-gemacht/",
                 "stepfunction": {}
             },
@@ -154,7 +144,7 @@ class TestDocSim:
                 "stepfunction": {}
             },
             {
-                # TODO prüfen, ob der Link funktioniert
+                # nicht extrahierbar
                 "claim": "Weisheit des Tages: Wenn man an COVID stirbt, wird man sehr leicht... https://www.facebook.com/groups/648478082346782/permalink/978930515968202/",
                 "factcheck": "https://correctiv.org/faktencheck/2020/12/07/nein-diese-bilder-von-leichensaecken-und-einem-sarg-zeigen-nicht-dass-corona-todesfaelle-inszeniert-werden/",
                 "stepfunction": {}
@@ -210,11 +200,12 @@ class TestDocSim:
                 "item": claim_factcheck_dicts[i]["stepfunction"]["item"]
             }
             context = ""
-            claim_factcheck_dicts[i]["stepfunction"]["Claim"] = ExtractClaim.extract_claim(event, context)
+            claim = ExtractClaim.extract_claim(event, context)
+            claim_factcheck_dicts[i]["stepfunction"]["Claim"] = claim
 
             # detect language
             event = {
-                "Text": claim_factcheck_dicts[i]["stepfunction"]["Claim"]["concatenation"]["Text"]
+                "Text": claim["concatenation"]["Text"]
             }
             try:
                 claim_factcheck_dicts[i]["stepfunction"]["item"]["language"] = GetLanguage.get_language(event, context)

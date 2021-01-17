@@ -1,6 +1,5 @@
 from core_layer.model import Item
 
-
 def create_item(id, item_type_id) -> Item:
     item = Item()
 

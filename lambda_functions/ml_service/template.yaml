@@ -116,6 +116,14 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-update_factchecks-${STAGE}"
+            Description: updates fact checks and models every day
+            Enabled: True
+            Schedule: rate(1 day)
       Environment:
         Variables:
           STAGE:
@@ -181,6 +189,8 @@ Resources:
       Handler: GetTags.get_tags_for_item
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
@@ -199,6 +209,8 @@ Resources:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
 
   ExtractClaimFunction:
     Type: AWS::Serverless::Function
@@ -312,6 +324,8 @@ Resources:
       Handler: EnrichItem.store_itemtags
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole

@@ -1,11 +1,14 @@
 from uuid import uuid4
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import boto3
+from datetime import date
 from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
+from core_layer.model.review_model import Review
 
 
 def get_user_by_id(id, is_test, session):
@@ -113,3 +116,135 @@ def get_all_users(is_test, session) -> [User]:
     session = get_db_session(is_test, session)
     users = session.query(User).all()
     return users
+
+
+def get_user_progress(user: User, is_test, session) -> int:
+    """Returns the users progress towards the next level
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return progress
+
+    Returns
+    ------
+    progress: int
+        Progress cast to an int value (between 0 and 100)
+    """
+    current_level = session.query(Level).filter(
+        Level.id == user.level_id).one()
+    next_level = session.query(Level).filter(
+        Level.id == user.level_id + 1).one()
+
+    exp_difference = next_level.required_experience_points - \
+        current_level.required_experience_points
+    exp_in_current_level = user.experience_points - \
+        current_level.required_experience_points
+
+    progress = int(exp_in_current_level / exp_difference * 100)
+
+    return progress
+
+
+def get_needed_exp(user: User, is_test, session) -> int:
+    """Returns how many exp are needed for the user to level up
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return progress
+
+    Returns
+    ------
+    exp: int
+        The amount of exp needed to level up
+    """
+    next_level = session.query(Level).filter(
+        Level.id == user.level_id + 1).one()
+
+    exp_difference = next_level.required_experience_points - \
+        user.experience_points
+
+    return exp_difference
+
+
+def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
+    """Returns the users rank.
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return rank
+    level_rank: bool, required
+        Whether to limit the rank to users within the same level
+
+    Returns
+    ------
+    rank: int
+        The user's rank
+    """
+
+    if not user.reviews:
+        if level_rank:
+            user_count = session.query(User).filter(
+                User.level_id == user.level_id).count()
+        else:
+            user_count = session.query(User).count()
+
+        return user_count
+        # raise Exception("User has not created any reviews yet")
+    if level_rank:
+        count_subquery = session.query(
+            User,
+            func.count(User.id).label('closed_review_count')). \
+            join(User.reviews). \
+            filter(Review.status == "closed", User.level_id == user.level_id). \
+            group_by(User.id). \
+            order_by(func.count(User.id))
+
+    else:
+        count_subquery = session.query(
+            User,
+            func.count(User.id).label('closed_review_count')). \
+            join(User.reviews). \
+            filter(Review.status == "closed"). \
+            group_by(User.id). \
+            order_by(func.count(User.id).desc())
+    i = 1
+    for row in count_subquery.all():
+        if row.User.id == user.id:
+            return i
+        i += 1
+
+    raise Exception("Could not get rank for user")
+
+
+def get_solved_cases(user: User, today: bool, is_test, session: Session) -> int:
+    """Returns the amount of cases a user solved.
+
+    Parameters
+    ----------
+    user: User, required
+        The user for which to return the number of solved cases
+    today: bool, required
+        Whether to limit this function to today's cases
+
+    Returns
+    ------
+    count: int
+        The number of solved cases
+    """
+
+    if not today:
+        count = session.query(Review).filter(
+            Review.user_id == user.id,
+            Review.status == "closed"
+        ).count()
+    else:
+        count = session.query(Review).filter(
+            Review.user_id == user.id,
+            func.date(Review.finish_timestamp) == date.today(),
+            Review.status == "closed"
+        ).count()
+
+    return count
