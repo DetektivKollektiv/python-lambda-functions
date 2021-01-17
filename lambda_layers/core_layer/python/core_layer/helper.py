@@ -53,7 +53,7 @@ def set_cors(response, event, is_test):
     source_origin = None
     allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
 
-    if 'headers' in event:
+    if 'headers' in event and event['headers'] is not None:
         if 'Origin' in event['headers']:
             source_origin = event['headers']['Origin']
         if 'origin' in event['headers']:
