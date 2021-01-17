@@ -1,7 +1,7 @@
 """item_types
 
 Revision ID: 310dab6e8966
-Revises: 7e1207d1a7e1
+Revises: 35997fffdb9d
 Create Date: 2021-01-08 22:02:15.698965
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '310dab6e8966'
-down_revision = '7e1207d1a7e1'
+down_revision = '35997fffdb9d'
 branch_labels = None
 depends_on = None
 
