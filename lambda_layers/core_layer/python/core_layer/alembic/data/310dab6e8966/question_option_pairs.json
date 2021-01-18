@@ -1,0 +1,517 @@
+[
+  {
+    "question_id": "article_1",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_1",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_1",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_1",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_1",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_1a",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_1a",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_1a",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_1a",
+    "option_id": "1"
+  },
+
+  {
+    "question_id": "article_2",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_2",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_2",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_2",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_2",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_3",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_3",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_3",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_3",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_3",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_4",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_4",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_4",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_4",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_4",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_5",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_5",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_5",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_5",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_5",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_6",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_6",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_6",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_6",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_6",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_7",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_7",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_7",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_7",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_7",
+    "option_id": "0b"
+  },
+
+  {
+    "question_id": "article_8",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_8",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_8",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_8",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_8",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_8a",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_8a",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_8a",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_8a",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_8a",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_8b",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_8b",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_8b",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_8b",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_8b",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_9",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_9",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_9",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_9",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_9",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_10",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_10",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_10",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_10",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_10",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_11",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_11",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_11",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_11",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_11",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "article_12",
+    "option_id": "4"
+  },
+  {
+    "question_id": "article_12",
+    "option_id": "3"
+  },
+  {
+    "question_id": "article_12",
+    "option_id": "2"
+  },
+  {
+    "question_id": "article_12",
+    "option_id": "1"
+  },
+  {
+    "question_id": "article_12",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_1",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_1",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_1",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_1",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_1",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_1a",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_1a",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_1a",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_1a",
+    "option_id": "1"
+  },
+
+  {
+    "question_id": "claim_2",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_2",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_2",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_2",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_2",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_3",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_3",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_3",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_3",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_3",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_4",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_4",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_4",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_4",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_4",
+    "option_id": "0a"
+  },
+  {
+    "question_id": "claim_5",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_5",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_5",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_5",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_5",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_5a",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_5a",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_5a",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_5a",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_5a",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_5b",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_5b",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_5b",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_5b",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_5b",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_6",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_6",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_6",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_6",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_6",
+    "option_id": "0a"
+  },
+
+  {
+    "question_id": "claim_6",
+    "option_id": "4"
+  },
+  {
+    "question_id": "claim_7",
+    "option_id": "3"
+  },
+  {
+    "question_id": "claim_7",
+    "option_id": "2"
+  },
+  {
+    "question_id": "claim_7",
+    "option_id": "1"
+  },
+  {
+    "question_id": "claim_7",
+    "option_id": "0a"
+  }
+]

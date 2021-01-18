@@ -21,6 +21,9 @@ class Item(Base):
     close_timestamp = Column(DateTime)
     verification_process_version = Column(Integer)
 
+    item_type_id = Column(String(36), ForeignKey(
+        'item_types.id', ondelete='SET NULL', onupdate='CASCADE'))
+
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
@@ -30,10 +33,22 @@ class Item(Base):
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
+    item_type = relationship("ItemType", back_populates="items")
 
     def to_dict(self):
-        return {"id": self.id, "content": self.content, "language": self.language, "status": self.status,
-                "variance": self.variance, "result_score": self.result_score,
-                "open_reviews_level_1": self.open_reviews_level_1, "open_reviews_level_2": self.open_reviews_level_2, "open_reviews": self.open_reviews,
-                "open_timestamp": self.open_timestamp, "close_timestamp": self.close_timestamp, "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
-                "in_progress_reviews_level_2": self.in_progress_reviews_level_2}
+        return {
+            "id": self.id,
+            "item_type_id": self.item_type_id,
+            "content": self.content,
+            "language": self.language,
+            "status": self.status,
+            "variance": self.variance,
+            "result_score": self.result_score,
+            "open_reviews_level_1": self.open_reviews_level_1,
+            "open_reviews_level_2": self.open_reviews_level_2,
+            "open_reviews": self.open_reviews,
+            "open_timestamp": self.open_timestamp,
+            "close_timestamp": self.close_timestamp,
+            "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
+            "in_progress_reviews_level_2": self.in_progress_reviews_level_2
+        }

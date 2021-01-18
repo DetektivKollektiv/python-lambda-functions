@@ -20,6 +20,11 @@ class Review(Base):
     item = relationship("Item", back_populates="reviews")
 
     def to_dict(self):
-        return {"id": self.id, "is_peer_review": self.is_peer_review,
-                "belongs_to_good_pair": self.belongs_to_good_pair, "user_id": self.user_id,
-                "start_timestamp": str(self.start_timestamp), "finish_timestamp": str(self.finish_timestamp)}
+        return {
+            "id": self.id,
+            "is_peer_review": self.is_peer_review,
+            "belongs_to_good_pair": self.belongs_to_good_pair,
+            "user_id": self.user_id,
+            "start_timestamp": str(self.start_timestamp),
+            "finish_timestamp": str(self.finish_timestamp)
+        }
