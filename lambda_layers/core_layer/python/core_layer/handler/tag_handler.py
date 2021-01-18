@@ -45,3 +45,13 @@ def get_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
                                                   ItemTag.item_id == item_id).first()
     return itemtag
+
+def delete_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
+    """Deletes the itemtag for an item and tag
+    """
+    session = get_db_session(is_test, session)
+    itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
+                                                  ItemTag.item_id == item_id).first()
+    if itemtag != None:
+        session.delete(itemtag)
+        session.commit()
