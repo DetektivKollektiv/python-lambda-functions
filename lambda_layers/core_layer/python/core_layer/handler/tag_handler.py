@@ -1,5 +1,6 @@
-from core_layer.connection_handler import get_db_session
+from core_layer.connection_handler import get_db_session, update_object
 from core_layer.model.tag_model import Tag, ItemTag
+from uuid import uuid4
 
 
 def get_tags_by_itemid(item_id, is_test, session):
@@ -45,6 +46,25 @@ def get_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
                                                   ItemTag.item_id == item_id).first()
     return itemtag
+
+def store_tag_for_item(item_id, str_tag, is_test, session):
+    # search for tag in database
+    tag = get_tag_by_content(str_tag, is_test, session)
+    if tag is None:
+        # store tag in database
+        tag = Tag()
+        tag.id = str(uuid4())
+        tag.tag = str_tag
+        update_object(tag, is_test, session)
+    # item tag already exists?
+    itemtag = get_itemtag_by_tag_and_item_id(tag.id, item_id, is_test, session)
+    if itemtag is None:
+        # store item tag in database
+        itemtag = ItemTag()
+        itemtag.id = str(uuid4())
+        itemtag.item_id = item_id
+        itemtag.tag_id = tag.id
+        update_object(itemtag, is_test, session)
 
 def delete_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     """Deletes the itemtag for an item and tag
