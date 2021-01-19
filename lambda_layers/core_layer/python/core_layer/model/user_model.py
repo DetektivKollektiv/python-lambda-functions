@@ -24,5 +24,5 @@ class User(Base):
             "level": self.level_id,
             "level_description": self.level.description,
             "experience_points": self.experience_points,
-            "sign_up_timestamp": self.sign_up_timestamp
+            "sign_up_timestamp": str(self.sign_up_timestamp)
         }
