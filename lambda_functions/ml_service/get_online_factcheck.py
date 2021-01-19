@@ -62,7 +62,7 @@ def get_online_factcheck(event, context, is_test=False, session=None):
                 }
             else:
                 response = {
-                    "statusCode": 204,
+                    "statusCode": 404,
                     "body": "No factcheck found."
                 }
 
