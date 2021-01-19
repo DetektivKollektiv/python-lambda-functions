@@ -27,7 +27,7 @@ def get_online_factcheck(event, context, is_test=False, session=None):
         try:
             item = item_handler.get_item_by_id(id, is_test, session)
             if item.language == None:
-                raise Exception("Language of Claim not recognized.")             
+                raise Exception("Language of Claim not recognized.")
             entity_objects = entity_handler.get_entities_by_itemid(
                 id, is_test, session)
             phrase_objects = keyphrase_handler.get_phrases_by_itemid_db(
