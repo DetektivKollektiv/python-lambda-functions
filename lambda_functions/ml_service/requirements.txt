@@ -4,8 +4,6 @@ aiohttp==3.7.3
     # via -r requirements.in
 async-timeout==3.0.1
     # via aiohttp
-asyncio==3.4.3
-    # via -r requirements.in
 attrs==20.3.0
     # via aiohttp
 beautifulsoup4==4.9.3
