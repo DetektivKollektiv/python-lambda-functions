@@ -6,7 +6,7 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, tag_handler
-from ml_service import EnrichItem
+import EnrichItem
 
 
 def get_tags_for_item(event, context, is_test=False, session=None):
@@ -78,14 +78,8 @@ def post_tags_for_item(event, context, is_test=False, session=None):
 
     tags_new = list(set(tags_posted)-set(tags_existing))
     if tags_new != []:
-        sit_event = {
-            "Tags": tags_new,
-            "item": {
-                "id": id
-            }
-        }
-        sit_context = ""
-        EnrichItem.store_itemtags(sit_event, sit_context, is_test, session)
+        for str_tag in tags_new:
+            tag_handler.store_tag_for_item(id, str_tag, is_test, session)
 
     tags_removed = list(set(tags_existing)-set(tags_posted))
     for str_tag in tags_removed:

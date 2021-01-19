@@ -52,12 +52,7 @@ def update_item(event, context, is_test=False, session=None):
     for key in json_event:
         setattr(item, key, json_event[key])
 
-    try:
-        update_object(item, is_test, session)
-    except Exception:
-        logger.error("Could not update item. Exception: %s", e, exc_info=True)
-        raise
-
+    update_object(item, is_test, session)
 
 def store_factchecks(event, context, is_test=False, session=None):
     """stores data related to factchecks
@@ -307,37 +302,12 @@ def store_itemtags(event, context, is_test=False, session=None):
     if session is None:
         session = get_db_session(is_test, session)
 
-    # Store all entities of the item
-    for str_tag in event['Tags']:
-        # search for tag in database
-        tag = tag_handler.get_tag_by_content(str_tag, is_test, session)
-        if tag is None:
-            # store tag in database
-            tag = Tag()
-            tag.id = str(uuid4())
-            tag.tag = str_tag
-            try:
-                update_object(tag, is_test, session)
-            except Exception as e:
-                logger.error(
-                    "Could not store tag. Exception: %s", e, exc_info=True)
-                raise
-        # item tag already exists?
-        item_id = event['item']['id']
-        itemtag = tag_handler.get_itemtag_by_tag_and_item_id(tag.id, item_id, is_test, session)
-        if itemtag is None:
-            # store item tag in database
-            itemtag = ItemTag()
-            itemtag.id = str(uuid4())
-            itemtag.item_id = item_id
-            itemtag.tag_id = tag.id
-            try:
-                update_object(itemtag, is_test, session)
-            except Exception as e:
-                logger.error(
-                    "Could not store item tag. Exception: %s", e, exc_info=True)
-                raise
+    # extract item id
+    item_id = event['item']['id']
 
+    # Store all tags of the item
+    for str_tag in event['Tags']:
+        tag_handler.store_tag_for_item(item_id, str_tag, is_test, session)
 
 def store_itemsentiment(event, context, is_test=False, session=None):
     """stores sentiment of an item
