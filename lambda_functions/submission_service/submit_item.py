@@ -31,8 +31,18 @@ def submit_item(event, context, is_test=False, session=None):
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
-        type = body_dict["type"]
-        del body_dict["type"]
+
+        if("type" in body_dict):
+            type = body_dict["type"]
+            del body_dict["type"]
+        else:
+            type = None
+
+        if("item_type_id" in body_dict):
+            item_type_id = body_dict["item_type_id"]
+            del body_dict["item_type_id"]
+        else:
+            item_type_id = None
 
         submission = Submission()
         helper.body_to_object(body_dict, submission)
@@ -48,6 +58,7 @@ def submit_item(event, context, is_test=False, session=None):
             # Item does not exist yet, item_id in submission is the id of the newly created item
             new_item = Item()
             new_item.content = content
+            new_item.item_type_id = item_type_id
             new_item.type = type
             created_item = item_handler.create_item(
                 new_item, is_test, session)
@@ -57,9 +68,9 @@ def submit_item(event, context, is_test=False, session=None):
             client.start_execution(
                 stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
                 name='SFC_' + created_item.id,
-                input="{\"item\":{" \
-                            "\"id\":\"" + created_item.id + "\"," \
-                            "\"content\":\"" + created_item.content + "\" } }"
+                input="{\"item\":{"
+                "\"id\":\"" + created_item.id + "\","
+                "\"content\":\"" + created_item.content + "\" } }"
             )
 
         # Create submission
