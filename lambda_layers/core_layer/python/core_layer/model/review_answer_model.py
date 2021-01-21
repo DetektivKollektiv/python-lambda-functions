@@ -9,7 +9,7 @@ class ReviewAnswer(Base):
     review_id = Column(String(36), ForeignKey(
         'reviews.id', ondelete='CASCADE', onupdate='CASCADE'))
     review_question_id = Column(String(36), ForeignKey(
-        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'))
+        'review_questions.id', ondelete='SET NULL', onupdate='CASCADE'))
     answer = Column(Integer)
     comment = Column(Text)
 
