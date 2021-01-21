@@ -31,6 +31,10 @@ def upgrade():
                                      sa.String(length=36), nullable=True))
     op.create_foreign_key('fk_items_item_type_id', 'items', 'item_types', [
                           'item_type_id'], ['id'], onupdate='CASCADE', ondelete='SET NULL')
+    op.drop_constraint('review_answers_ibfk_2',
+                       'review_answers', type_='foreignkey')
+    op.create_foreign_key('review_answers_ibfk_2', 'review_answers', 'review_questions', [
+                          'review_question_id'], ['id'], onupdate='CASCADE', ondelete='SET NULL')
     op.add_column('review_questions', sa.Column(
         'hint', sa.Text(), nullable=True))
     op.add_column('review_questions', sa.Column(
@@ -123,6 +127,10 @@ def downgrade():
                        'review_questions', type_='foreignkey')
     op.drop_column('review_questions', 'item_type_id')
     op.drop_column('review_questions', 'hint')
+    op.drop_constraint('review_answers_ibfk_2',
+                       'review_answers', type_='foreignkey')
+    op.create_foreign_key('review_answers_ibfk_2', 'review_answers', 'review_questions', [
+                          'review_question_id'], ['id'], onupdate='CASCADE', ondelete='CASCADE')
     op.drop_constraint('fk_items_item_type_id', 'items', type_='foreignkey')
     op.drop_column('items', 'item_type_id')
     op.drop_column('answer_options', 'tooltip')
