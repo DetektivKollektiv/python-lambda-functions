@@ -6,6 +6,7 @@ import pytest
 from ....tests.helper import event_creator, setup_scenarios
 from ...get_user import get_user
 import json
+from datetime import datetime
 
 
 def test_get_user(monkeypatch):
@@ -31,3 +32,6 @@ def test_get_user(monkeypatch):
     assert body["solved_cases_total"] == 0
     assert body["solved_cases_today"] == 0
     assert body["exp_needed"] == 5
+    sign_up_date = datetime.strptime(
+        body["sign_up_timestamp"], '%Y-%m-%d %H:%M:%S').date()
+    assert sign_up_date != datetime.today()
