@@ -62,6 +62,7 @@ Resources:
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
