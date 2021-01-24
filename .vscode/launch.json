@@ -241,7 +241,7 @@
         {
             "type": "aws-sam",
             "request": "direct-invoke",
-            "name": "Search for Factchecks",
+            "name": "Get Factchecks",
             "invokeTarget": {
                 "target": "code",
                 "lambdaHandler": "SearchFactChecks.get_FactChecks",
@@ -279,6 +279,35 @@
                 },
                 "environmentVariables": {
                     "STAGE": "dev",
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                },
+                "timeoutSec": 120
+            }
+        },        
+        {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "Search for Factchecks",
+            "invokeTarget": {
+                "target": "template",
+                "logicalId": "GetFactcheckByItemidFunction",
+                "templatePath": "lambda_functions/ml_service/template.yaml",
+            },
+            "sam": {
+                "containerBuild": true,
+                "skipNewImageCheck": false
+            },
+            "lambda": {
+                "runtime": "python3.8",
+                "payload": {"json": {
+                        "pathParameters": {
+                            "item_id": "1bbf526b-4974-4584-93cd-1ef06912c9f9"
+                        }
+                    }
+                },
+                "environmentVariables": {
+                    "STAGE": "dev",
+                    "DBNAME": "development_db",
                     "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
                 },
                 "timeoutSec": 120
