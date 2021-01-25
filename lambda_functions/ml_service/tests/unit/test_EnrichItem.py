@@ -449,7 +449,9 @@ class TestPostTags:
             tags_added = body['added tags']
             tags_removed = body['removed tags']
         assert tags_added == ['Covid-19']
-        assert tags_removed == ['Covid', 'Corona Transition']
+        assert len(tags_removed) == 2
+        assert 'Covid' in tags_removed
+        assert 'Corona Transition' in tags_removed
         response = GetTags.get_tags_for_item(event, context, True, session)
         body = response['body']
         # Deserialize if body is string
