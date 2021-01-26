@@ -38,10 +38,11 @@ def get_tags_for_item(event, context, is_test=False, session=None):
             "statusCode": 400,
             "body": "Could not get item ID. Check HTTP GET payload. Exception: {}".format(e)
         }
+    body_json = {"Tags": tags}
     response = {
         "statusCode": 200,
         'headers': {"content-type": "application/json; charset=utf-8"},
-        "body": {"Tags": tags}
+        "body": json.dumps(body_json)
     }
 
     response_cors = helper.set_cors(response, event, is_test)
