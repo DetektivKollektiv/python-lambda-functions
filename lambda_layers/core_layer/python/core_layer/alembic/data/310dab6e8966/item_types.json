@@ -1,6 +1,4 @@
 [
   { "id": "1", "name": "article" },
-  { "id": "2", "name": "claim" },
-  { "id": "3", "name": "picture" },
-  { "id": "4", "name": "video" }
+  { "id": "2", "name": "claim" }
 ]
