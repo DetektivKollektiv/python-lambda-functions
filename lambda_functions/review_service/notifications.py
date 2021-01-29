@@ -70,7 +70,7 @@ def get_telegram_token():
 
 
 def notify_users(is_test, session, item):
-    """Notify telegram user(s) about a closed item.
+    """Notify user(s) about a closed item.
 
     Parameters
     ----------

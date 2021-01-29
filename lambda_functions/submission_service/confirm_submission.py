@@ -18,13 +18,13 @@ def confirm_submission(event, context, is_test=False, session=None):
     submission_id = event['pathParameters']['submission_id']
 
     try:
-        submission = Submission()
-        submission = submission_handler.confirm_submission(
+        submission_handler.confirm_submission(
             submission_id, is_test, session)
         response = {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(submission.to_dict())
+            # TODO: Style this response
+            "body": 'Deine Mailadresse wurde erfolgreich bestätigt!'
         }
 
     except Exception:
