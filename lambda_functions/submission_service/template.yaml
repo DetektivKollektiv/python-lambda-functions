@@ -152,3 +152,30 @@ Resources:
             Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  AnonymizeUnconfirmedSubmissionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-submission_api-anonymize-unconfirmed-submissions-${STAGE}"
+      CodeUri: .
+      Handler: anonymize_unconfirmed_submissions.anonymize_unconfirmed_submissions
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-anonymize-unconfirmed-submissions-${STAGE}"
+            Description: Schdule for starting anonymization of unconfirmed mails every hour
+            Enabled: True
+            Schedule: rate(1 hour)
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

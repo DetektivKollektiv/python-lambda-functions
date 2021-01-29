@@ -1,6 +1,8 @@
 # External imports
 from uuid import uuid4
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+from datetime import timedelta, datetime
 # Helper imports
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
@@ -49,3 +51,20 @@ def confirm_submission(submission_id, is_test, session):
     session.merge(submission)
     session.commit()
     return submission
+
+
+def anonymize_unconfirmed_submissions(is_test, session):
+
+    session = get_db_session(is_test, session)
+    two_days_ago = helper.get_date_time(
+        datetime.now() - timedelta(days=2), is_test)
+    submissions = session.query(Submission).filter(
+        Submission.status == 'unconfirmed', Submission.submission_date < two_days_ago).all()
+    counter = 0
+    for submission in submissions:
+        submission.mail = None
+        session.merge(submission)
+        counter += 1
+
+    session.commit()
+    return counter
