@@ -38,3 +38,14 @@ def get_submissions_by_item_id(item_id, is_test, session):
     submissions = session.query(Submission).filter(
         Submission.item_id == item_id).all()
     return submissions
+
+
+def confirm_submission(submission_id, is_test, session):
+
+    session = get_db_session(is_test, session)
+    submission = session.query(Submission).filter(
+        Submission.id == submission_id).one()
+    submission.status = 'confirmed'
+    session.merge(submission)
+    session.commit()
+    return submission
