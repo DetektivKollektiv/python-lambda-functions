@@ -110,10 +110,12 @@ def notify_users(is_test, session, item):
                 notifications_successful = False
 
         if submission.mail:
-            try:
-                notify_mail_user(submission.mail, item, rating, rating_text)
-            except Exception:
-                notifications_successful = False
+            if submission.status == 'confirmed':
+                try:
+                    notify_mail_user(submission.mail, item,
+                                     rating, rating_text)
+                except Exception:
+                    notifications_successful = False
 
     if notifications_successful:
         logger.info(
