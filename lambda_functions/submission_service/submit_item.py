@@ -3,6 +3,7 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 import os
+import io
 import traceback
 
 from core_layer import helper, connection_handler
@@ -12,10 +13,6 @@ from core_layer.handler import item_handler, submission_handler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-class EmailNotificationError(Exception):
-    pass
 
 
 def submit_item(event, context, is_test=False, session=None):
@@ -80,10 +77,7 @@ def submit_item(event, context, is_test=False, session=None):
 
         # Create submission
         submission_handler.create_submission_db(submission, is_test, session)
-        try:
-            send_confirmation_mail(submission)
-        except EmailNotificationError:
-            pass
+        send_confirmation_mail(submission)
 
         response = {
             "statusCode": 201,
@@ -112,23 +106,12 @@ def send_confirmation_mail(submission: Submission):
     recipient = submission.mail
     sender = "DetektivKollektiv <info@detektivkollektiv.org>"
     subject = 'Bestätige deine Mail-Adresse'
-    body_text = (
-        "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(confirmation_link))
 
-    body_html = """<html>
-    <head><title>Bestätige deine Mail-Adresse</title></head>
-    <body>
-    <h1 style="color: #ffcc00;">Danke fürs Einreichen deines Falles!</h1>
-    <p>Damit wir dich informieren können, sobald unsere Detektiv*innen deinen Fall gelöst haben, musst du uns noch deine E-Mail Adresse bestätigen.</p>
-    <p>Klicke dazu einfach auf folgenden Link</p>
-    <a href="{}">
-        Klicke hier, um deine Mailadresse zu bestätigen!
-    </a>
-    
-    <p>Falls du keine Inhalte beim DetektivKollektiv eingereicht hast, kannst du diese Mail einfach ignorieren.</p>
-    </body>
-    </html>
-    """.format(confirmation_link)
+    body_text = "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(
+        confirmation_link)
+
+    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                     'confirmation_file_body.html'), mode='r', encoding='utf-8').read().format(confirmation_link)
 
     charset = "UTF-8"
     client = boto3.client('ses', region_name='eu-central-1')
@@ -162,4 +145,4 @@ def send_confirmation_mail(submission: Submission):
     except ClientError as e:
         logging.exception("Could not send confirmation mail for submission with ID: {}. SNS Error: {}".format(
             submission.id, e.response['Error']['Message']))
-        raise EmailNotificationError
+        pass

@@ -3,7 +3,7 @@ from core_layer.model import Submission
 from uuid import uuid4
 from sqlalchemy import func
 from datetime import timedelta, datetime
-from submission_service.anonymize_unconfimed_submissions import anonymize_unconfirmed_submissions
+from submission_service.anonymize_unconfirmed_submissions import anonymize_unconfirmed_submissions
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
 

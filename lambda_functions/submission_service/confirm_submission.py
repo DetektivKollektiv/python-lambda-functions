@@ -6,10 +6,12 @@ from core_layer import connection_handler
 from core_layer.handler import submission_handler
 from core_layer.model import Submission
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 def confirm_submission(event, context, is_test=False, session=None):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+
     helper.log_method_initiated("Confirm submission", event, logger)
 
     if session == None:
