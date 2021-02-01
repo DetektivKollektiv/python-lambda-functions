@@ -14,10 +14,20 @@ class Submission(Base):
     channel = Column(String(100))
     frequency = Column(String(100))
     received_date = Column(DateTime)
+    status = Column(String(100), default='unconfirmed')
     item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")
 
     def to_dict(self):
-        return {"id": self.id, "submission_date": self.submission_date, "mail": self.mail, "telegram_id": self.telegram_id, "phone": self.phone,
-                "source": self.source, "frequency": self.frequency, "received_date": self.received_date,
-                "item_id": self.item_id}
+        return {
+            "id": self.id,
+            "submission_date": self.submission_date,
+            "mail": self.mail,
+            "telegram_id": self.telegram_id,
+            "phone": self.phone,
+            "source": self.source,
+            "frequency": self.frequency,
+            "received_date": self.received_date,
+            "item_id": self.item_id,
+            "status": self.status
+        }
