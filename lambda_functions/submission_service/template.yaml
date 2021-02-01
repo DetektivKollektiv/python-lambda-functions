@@ -156,7 +156,7 @@ Resources:
   AnonymizeUnconfirmedSubmissionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-submission_api-anonymize-unconfirmed-submissions-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-submission_api-anonymize-submissions-${STAGE}"
       CodeUri: .
       Handler: anonymize_unconfirmed_submissions.anonymize_unconfirmed_submissions
       Runtime: python3.8
