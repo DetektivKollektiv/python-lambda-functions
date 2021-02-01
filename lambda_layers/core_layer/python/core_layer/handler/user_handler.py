@@ -101,6 +101,32 @@ def give_experience_point(user_id, is_test, session):
     update_object(user, is_test, session)
 
 
+def get_top_users(n, attr, descending, is_test, session) -> [User]:
+    """
+    Returns a user by their id
+
+    Parameters
+    ----------
+    n: int, required
+        the number of users to return
+    attr: int, required
+        the number of users to return
+    descending: bool, required
+        which order to sort the rows by column 'attr' in False = ASC or True =DESC
+    is_test: bool, required
+        is this code being run as part of the tests or in production
+    session: Session??, required
+        a database session
+    Returns
+    ------
+    users: [User]
+        A list including the top n user objects as ordered by attr, desc
+    """
+    session = get_db_session(is_test, session)
+    sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
+    users = session.query(User).order_by(sort_column).limit(n).all()
+    return users
+
 def get_all_users(is_test, session) -> [User]:
     """Returns a user by their id
 
