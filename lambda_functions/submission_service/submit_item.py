@@ -98,10 +98,10 @@ def submit_item(event, context, is_test=False, session=None):
 def send_confirmation_mail(submission: Submission):
     stage = os.environ['STAGE']
     if stage == 'prod':
-        confirmation_link = 'https://api.detektivkollektiv.org/submissions/{}/confirm'.format(
+        confirmation_link = 'https://api.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
             submission.id)
     else:
-        confirmation_link = 'https://{}.api.detektivkollektiv.org/submissions/{}/confirm'.format(
+        confirmation_link = 'https://api.{}.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
             stage, submission.id)
     recipient = submission.mail
     sender = "DetektivKollektiv <info@detektivkollektiv.org>"
