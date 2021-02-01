@@ -49,6 +49,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
         - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
         - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
 
   SubmitItemFunction: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -141,7 +142,6 @@ Resources:
               Ref: Api
             Auth:
               Authorizer: NONE
-
       Environment:
         Variables:
           DBNAME:
