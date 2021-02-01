@@ -435,9 +435,7 @@ class TestPostTags:
             "pathParameters": {
                 "item_id": item.id
             },
-            "body": {
-                "tags": ['RKI', 'Covid-19']
-            }
+            "body": json.dumps({"tags": ['RKI', 'Covid-19']})
         }
         response = GetTags.post_tags_for_item(event, context, True, session)
         body = response['body']
@@ -452,6 +450,63 @@ class TestPostTags:
         assert len(tags_removed) == 2
         assert 'Covid' in tags_removed
         assert 'Corona Transition' in tags_removed
+        response = GetTags.get_tags_for_item(event, context, True, session)
+        body = response['body']
+        # Deserialize if body is string
+        if isinstance(body, str):
+            tags = json.loads(body)['Tags']
+        else:
+            tags = body['Tags']
+        assert tags == ['RKI', 'Covid-19']
+
+    def test_post_tags_for_item_2(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        session = get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
+                       "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
+        item.language = "de"
+        item = item_handler.create_item(item, True, session)
+
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            }
+        }
+        context = ""
+        response = GetTags.get_tags_for_item(event, context, True, session)
+        body = response['body']
+        # Deserialize if body is string
+        if isinstance(body, str):
+            tags = json.loads(body)['Tags']
+        else:
+            tags = body['Tags']
+        assert tags == []
+
+        json.dumps({"tags": ["RKI", "Covid-19"]})
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            },
+            "body": json.dumps({"tags": ["RKI", "Covid-19"]})
+        }
+        response = GetTags.post_tags_for_item(event, context, True, session)
+        body = response['body']
+        # Deserialize if body is string
+        if isinstance(body, str):
+            tags_added = json.loads(body)['added tags']
+            tags_removed = json.loads(body)['removed tags']
+        else:
+            tags_added = body['added tags']
+            tags_removed = body['removed tags']
+        assert 'RKI' in tags_added
+        assert 'Covid-19' in tags_added
+        assert len(tags_removed) == 0
+        assert tags_removed == []
         response = GetTags.get_tags_for_item(event, context, True, session)
         body = response['body']
         # Deserialize if body is string

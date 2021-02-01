@@ -72,8 +72,14 @@ def post_tags_for_item(event, context, is_test=False, session=None):
             "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
         }
 
-    if 'tags' in event['body']:
-        tags_posted = event['body']['tags']
+    body = event['body']
+
+    if isinstance(body, str):
+        body_dict = json.loads(body)
+    else:
+        body_dict = body
+    if 'tags' in body_dict:
+        tags_posted = body_dict['tags']
     else:
         tags_posted = []        
 
@@ -92,10 +98,7 @@ def post_tags_for_item(event, context, is_test=False, session=None):
     response = {
         "statusCode": 200,
         'headers': {"content-type": "application/json; charset=utf-8"},
-        "body": {
-            "added tags": tags_new,
-            "removed tags": tags_removed
-        }
+        "body": json.dumps({"added tags": tags_new,"removed tags": tags_removed})
     }
 
     response_cors = helper.set_cors(response, event, is_test)
