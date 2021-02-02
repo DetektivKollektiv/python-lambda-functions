@@ -385,7 +385,13 @@ class TestStoreTags:
             }
         }
         ret = GetTags.get_tags_for_item(event, context, True, session)
-        assert ret['body']['Tags'] == list_tags
+        body = ret['body']
+        # Deserialize if body is string
+        if isinstance(body, str):
+            tags = json.loads(body)['Tags']
+        else:
+            tags = body['Tags']
+        assert tags == list_tags
 
 class TestPostTags:
     def test_post_tags_for_item_1(self, monkeypatch):
