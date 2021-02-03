@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 import os
 import io
 import traceback
+import unicodedata
 
 from core_layer import helper, connection_handler
 from core_layer.model.item_model import Item
@@ -14,6 +15,9 @@ from core_layer.handler import item_handler, submission_handler
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
+def remove_control_characters(s):
+    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 def submit_item(event, context, is_test=False, session=None):
 
@@ -69,10 +73,10 @@ def submit_item(event, context, is_test=False, session=None):
             stage = os.environ['STAGE']
             client.start_execution(
                 stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
-                name='SFC_' + item.id,
-                input="{\"item\":{"
-                "\"id\":\"" + item.id + "\","
-                "\"content\":\"" + item.content + "\" } }"
+                name='SFC_' + created_item.id,
+                input="{\"item\":{" \
+                            "\"id\":\"" + created_item.id + "\"," \
+                            "\"content\":\"" + remove_control_characters(created_item.content) + "\" } }"
             )
 
         # Create submission
