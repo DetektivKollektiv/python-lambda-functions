@@ -1,23 +1,12 @@
 import random
 
 from core_layer.connection_handler import get_db_session
-from core_layer.model.review_question_model import ReviewQuestion
-from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.handler import review_handler
-
-
-def get_review_question_by_id(question_id, is_test, session):
-    session = get_db_session(is_test, session)
-
-    question = session.query(ReviewQuestion).filter(
-        ReviewQuestion.id == question_id
-    ).one()
-
-    return question
+from core_layer.model import Review, ReviewAnswer, ReviewQuestion
 
 
 def get_all_review_questions_db(is_test, session):
-    """Returns all review answers from the database
+    """Returns all review questions from the database
 
     Returns
     ------
@@ -30,12 +19,48 @@ def get_all_review_questions_db(is_test, session):
     return review_questions
 
 
-def get_next_question_db(review, previous_question, is_test, session):
+def get_review_question_by_id(question_id, is_test, session):
+    """Returns a review question for a given id from the database
+
+    Returns
+    ------
+    question: ReviewQuestion
+        The review question
+    """
+
+    session = get_db_session(is_test, session)
+
+    question = session.query(ReviewQuestion).filter(
+        ReviewQuestion.id == question_id
+    ).one()
+
+    return question
+
+
+def get_review_questions_by_item_type_id(item_type_id, is_test, session):
+    """Returns all review questions for a given item type from the database
+
+    Returns
+    ------
+    review_questions: ReviewQuestion[]
+        The review questions
+    """
+
+    session = get_db_session(is_test, session)
+    review_questions = session.query(ReviewQuestion).filter(
+        ReviewQuestion.item_type_id == item_type_id).all()
+
+    return review_questions
+
+
+def get_next_question_db(review: Review, previous_question: ReviewQuestion, is_test: bool, session):
     session = get_db_session(is_test, session)
 
     if len(review.review_answers) == 7:
         return None
 
+    # previous_question_ids = [
+    #     answer.review_question_id for answer in review.review_answers]
     previous_question_ids = []
     for answer in review.review_answers:
         previous_question_ids.append(answer.review_question_id)
@@ -82,7 +107,8 @@ def get_next_question_db(review, previous_question, is_test, session):
     remaining_questions = 7 - len(review.review_answers)
 
     # Get all questions
-    all_questions = get_all_review_questions_db(is_test, session)
+    all_questions = get_review_questions_by_item_type_id(
+        review.item.item_type_id, is_test, session)
     random.shuffle(all_questions)
 
     for question in all_questions:

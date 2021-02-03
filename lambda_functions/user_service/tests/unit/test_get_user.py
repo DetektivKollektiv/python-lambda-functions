@@ -6,6 +6,7 @@ import pytest
 from ....tests.helper import event_creator, setup_scenarios
 from ...get_user import get_user
 import json
+from datetime import datetime
 
 
 def test_get_user(monkeypatch):
@@ -25,3 +26,12 @@ def test_get_user(monkeypatch):
     assert body["level"] == 1
     assert body["level_description"] == "Junior"
     assert body["progress"] == 0
+    assert body["total_rank"] == session.query(User).count()
+    assert body["level_rank"] == session.query(User).filter(
+        User.level_id == junior_detective1.level_id).count()
+    assert body["solved_cases_total"] == 0
+    assert body["solved_cases_today"] == 0
+    assert body["exp_needed"] == 5
+    sign_up_date = datetime.strptime(
+        body["sign_up_timestamp"], '%Y-%m-%d %H:%M:%S').date()
+    assert sign_up_date != datetime.today()

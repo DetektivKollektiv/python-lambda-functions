@@ -1,7 +1,9 @@
 import logging
 import json
 import boto3
+from botocore.exceptions import ClientError
 import os
+import io
 import traceback
 import unicodedata
 
@@ -35,28 +37,39 @@ def submit_item(event, context, is_test=False, session=None):
             body_dict = body
         content = body_dict["content"]
         del body_dict["content"]
-        type = body_dict["type"]
-        del body_dict["type"]
+
+        if("type" in body_dict):
+            type = body_dict["type"]
+            del body_dict["type"]
+        else:
+            type = None
+
+        if("item_type_id" in body_dict):
+            item_type_id = body_dict["item_type_id"]
+            del body_dict["item_type_id"]
+        else:
+            item_type_id = None
 
         submission = Submission()
         helper.body_to_object(body_dict, submission)
 
         try:
             # Item already exists, item_id in submission is the id of the found item
-            found_item = item_handler.get_item_by_content(
+            item = item_handler.get_item_by_content(
                 content, is_test, session)
-            submission.item_id = found_item.id
+            submission.item_id = item.id
             new_item_created = False
 
         except Exception:
             # Item does not exist yet, item_id in submission is the id of the newly created item
-            new_item = Item()
-            new_item.content = content
-            new_item.type = type
-            created_item = item_handler.create_item(
-                new_item, is_test, session)
+            item = Item()
+            item.content = content
+            item.item_type_id = item_type_id
+            item.type = type
+            item = item_handler.create_item(
+                item, is_test, session)
             new_item_created = True
-            submission.item_id = created_item.id
+            submission.item_id = item.id
             stage = os.environ['STAGE']
             client.start_execution(
                 stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
@@ -68,11 +81,12 @@ def submit_item(event, context, is_test=False, session=None):
 
         # Create submission
         submission_handler.create_submission_db(submission, is_test, session)
+        send_confirmation_mail(submission)
 
         response = {
             "statusCode": 201,
             'headers': {"content-type": "application/json; charset=utf-8", "new-item-created": str(new_item_created)},
-            "body": json.dumps(submission.to_dict())
+            "body": json.dumps(item.to_dict())
         }
 
     except Exception:
@@ -83,3 +97,56 @@ def submit_item(event, context, is_test=False, session=None):
 
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors
+
+
+def send_confirmation_mail(submission: Submission):
+    stage = os.environ['STAGE']
+    if stage == 'prod':
+        confirmation_link = 'https://api.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
+            submission.id)
+    else:
+        confirmation_link = 'https://api.{}.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
+            stage, submission.id)
+    recipient = submission.mail
+    sender = "DetektivKollektiv <info@detektivkollektiv.org>"
+    subject = 'Bestätige deine Mail-Adresse'
+
+    body_text = "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(
+        confirmation_link)
+
+    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                     'confirmation_file_body.html'), mode='r', encoding='utf-8').read().format(confirmation_link)
+
+    charset = "UTF-8"
+    client = boto3.client('ses', region_name='eu-central-1')
+    try:
+        response = client.send_email(
+            Destination={
+                'ToAddresses': [
+                    recipient,
+                ],
+            },
+            Message={
+                'Body': {
+                    'Html': {
+                        'Charset': charset,
+                        'Data': body_html,
+                    },
+                    'Text': {
+                        'Charset': charset,
+                        'Data': body_text,
+                    },
+                },
+                'Subject': {
+                    'Charset': charset,
+                    'Data': subject,
+                },
+            },
+            Source=sender,
+        )
+        logger.info("Confirmation email sent for submission with ID: {}. SES Message ID: {}".format(
+            submission.id, response['MessageId']))
+    except ClientError as e:
+        logging.exception("Could not send confirmation mail for submission with ID: {}. SNS Error: {}".format(
+            submission.id, e.response['Error']['Message']))
+        pass

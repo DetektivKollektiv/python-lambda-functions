@@ -15,3 +15,4 @@ from core_layer.model.submission_model import Submission
 from core_layer.model.url_model import URL, ItemURL
 from core_layer.model.user_model import User
 from core_layer.model.tag_model import Tag, ItemTag
+from core_layer.model.item_type_model import ItemType
