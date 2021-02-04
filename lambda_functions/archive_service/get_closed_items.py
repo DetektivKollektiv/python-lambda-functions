@@ -28,7 +28,7 @@ def get_closed_items(event, context, is_test=False, session=None):
             items_list = []
 
             for item in items:
-                items_list.append(item.to_dict_with_tags())
+                items_list.append(item.to_dict(with_tags=True))
                             
             response = {
                 "statusCode": 200,
