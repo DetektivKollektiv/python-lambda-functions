@@ -59,7 +59,9 @@ def update_object(obj, is_test, session):
     obj: The merged object
     """
     session = get_db_session(is_test, session)
-
-    session.merge(obj)
-    session.commit()
-    return obj
+    try:
+        session.merge(obj)
+        session.commit()
+        return obj
+    except Exception:
+        return None
