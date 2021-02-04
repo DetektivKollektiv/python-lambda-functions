@@ -56,8 +56,8 @@ class Item(Base):
         
         if with_tags:
             tags_list = []
-            for tag in self.tags:
-                tags_list.append(tag.tag)
+            for item_tag in self.tags:
+                tags_list.append(item_tag.tag.tag)
             item_dict["tags"] = tags_list
             return item_dict
         else:
