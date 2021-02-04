@@ -27,16 +27,17 @@ class Item(Base):
     submissions = relationship("Submission")
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
+    #One to Many Relation: one Item has many ItemTags
     tags = relationship("ItemTag")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
-    item_type = relationship("ItemType", back_populates="items")
+    item_type = relationship("ItemType", back_populates="items")  
 
-    def to_dict(self):
-        return {
+    def to_dict(self, with_tags=False):
+        item_dict = {
             "id": self.id,
             "item_type_id": self.item_type_id,
             "content": self.content,
@@ -52,3 +53,12 @@ class Item(Base):
             "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
             "in_progress_reviews_level_2": self.in_progress_reviews_level_2
         }
+        
+        if with_tags:
+            tags_list = []
+            for tag in self.tags:
+                tags_list.append(tag.tag)
+            item_dict["tags"] = tags_list
+            return item_dict
+        else:
+            return item_dict

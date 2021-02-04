@@ -25,15 +25,15 @@ def get_closed_items(event, context, is_test=False, session=None):
                 "body": "No closed items found"
             }
         else:
-            items_dict = []
+            items_list = []
 
             for item in items:
-                items_dict.append(item.to_dict())
-
+                items_list.append(item.to_dict(with_tags=True))
+                            
             response = {
                 "statusCode": 200,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(items_dict)
+                "body": json.dumps(items_list)
             }
 
     except Exception:
