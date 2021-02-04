@@ -76,14 +76,13 @@ def create_item(item, is_test, session):
     item.in_progress_reviews_level_1 = 0
     item.in_progress_reviews_level_2 = 0
     item.open_timestamp = helper.get_date_time_now(is_test)
-    item.status = "open"
     session.add(item)
     session.commit()
 
     return item
 
 
-def get_item_by_id(id, is_test, session):
+def get_item_by_id(id, is_test, session) -> Item:
     """Returns an item by its id
 
     Parameters
@@ -97,12 +96,14 @@ def get_item_by_id(id, is_test, session):
         The item
     """
     session = get_db_session(is_test, session)
-    item = session.query(Item).get(id)
+    try:
+        item = session.query(Item).get(id)
+        return item
 
+    except Exception:
+        return None
     # Uncomment to test telegram user notification
     # notifications.notify_telegram_users(is_test, session, item)
-
-    return item
 
 
 def get_open_items_for_user(user, num_items, is_test, session):

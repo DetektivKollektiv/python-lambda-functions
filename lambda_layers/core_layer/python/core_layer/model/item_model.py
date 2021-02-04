@@ -9,7 +9,7 @@ class Item(Base):
     type = Column(String(36))
     content = Column(Text)
     language = Column(String(2))
-    status = Column(String(36))
+    status = Column(String(36), default='unconfirmed')
     variance = Column(Float)
     result_score = Column(Float)
     open_reviews = Column(Integer)
