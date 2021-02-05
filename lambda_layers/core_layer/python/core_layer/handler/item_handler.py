@@ -1,5 +1,6 @@
 import random
 import statistics
+import logging
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
 from sqlalchemy.orm import Session
@@ -9,18 +10,26 @@ from core_layer.handler import review_pair_handler
 from uuid import uuid4
 
 
-def get_all_items(is_test, session) -> [Item]:
-    """Gets all  items
+def get_all_items(is_test, session, params: dict = {}) -> [Item]:
+    """Returns all items filtered by the provided params
 
-    Returns
-    ------
-    items: Item[]
-        All items
+    Args:
+        is_test (bool): True, if the function is run from a test
+        session (Session): An SQLAlchemy Session
+        params (dict, optional): A dictionary consisting of key-value pairs for filtering. Defaults to an empty dict.
+
+    Returns:
+        [Item]: A list of item objects
     """
     session = get_db_session(is_test, session)
 
-    items = session.query(Item).all()
-    return items
+    query = session.query(Item)
+    if not params:
+        return query.all()
+    else:
+        for key in params:
+            query = query.filter(getattr(Item, key) == params[key])
+    return query.all()
 
 
 def get_all_closed_items(is_test, session):
@@ -76,14 +85,13 @@ def create_item(item, is_test, session):
     item.in_progress_reviews_level_1 = 0
     item.in_progress_reviews_level_2 = 0
     item.open_timestamp = helper.get_date_time_now(is_test)
-    item.status = "open"
     session.add(item)
     session.commit()
 
     return item
 
 
-def get_item_by_id(id, is_test, session):
+def get_item_by_id(id, is_test, session) -> Item:
     """Returns an item by its id
 
     Parameters
@@ -97,12 +105,15 @@ def get_item_by_id(id, is_test, session):
         The item
     """
     session = get_db_session(is_test, session)
-    item = session.query(Item).get(id)
+    try:
+        item = session.query(Item).get(id)
+        return item
 
+    except Exception:
+        logging.exception('Could not get item by id.')
+        return None
     # Uncomment to test telegram user notification
     # notifications.notify_telegram_users(is_test, session, item)
-
-    return item
 
 
 def get_open_items_for_user(user, num_items, is_test, session):
