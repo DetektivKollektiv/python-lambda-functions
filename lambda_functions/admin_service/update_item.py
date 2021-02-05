@@ -69,10 +69,9 @@ def update_item(event, context, is_test=False, session=None):
 
     item = update_object(item, is_test, session)
     if item is None:
-        # Does it make sense to output the stacktrace when exceptions are already handled?
         response = {
             "statusCode": 500,
-            "body": "Could not write changes to db. Stacktrace: {}".format(traceback.format_exc())
+            "body": "Could not write changes to db. Event id: {}".format(event['requestContext']['requestId'])
         }
         response_cors = helper.set_cors(response, event, is_test)
         return response_cors
