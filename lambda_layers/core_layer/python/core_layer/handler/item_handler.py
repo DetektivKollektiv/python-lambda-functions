@@ -1,5 +1,6 @@
 import random
 import statistics
+import logging
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
 from sqlalchemy.orm import Session
@@ -109,6 +110,7 @@ def get_item_by_id(id, is_test, session) -> Item:
         return item
 
     except Exception:
+        logging.exception('Could not get item by id.')
         return None
     # Uncomment to test telegram user notification
     # notifications.notify_telegram_users(is_test, session, item)

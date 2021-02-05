@@ -64,4 +64,5 @@ def update_object(obj, is_test, session):
         session.commit()
         return obj
     except Exception:
+        logging.exception('Could not update object.')
         return None
