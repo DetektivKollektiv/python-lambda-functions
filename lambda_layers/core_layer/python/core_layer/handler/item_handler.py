@@ -9,18 +9,26 @@ from core_layer.handler import review_pair_handler
 from uuid import uuid4
 
 
-def get_all_items(is_test, session) -> [Item]:
-    """Gets all  items
+def get_all_items(is_test, session, params: dict = {}) -> [Item]:
+    """Returns all items filtered by the provided params
 
-    Returns
-    ------
-    items: Item[]
-        All items
+    Args:
+        is_test (bool): True, if the function is run from a test
+        session (Session): An SQLAlchemy Session
+        params (dict, optional): A dictionary consisting of key-value pairs for filtering. Defaults to an empty dict.
+
+    Returns:
+        [Item]: A list of item objects
     """
     session = get_db_session(is_test, session)
 
-    items = session.query(Item).all()
-    return items
+    query = session.query(Item)
+    if not params:
+        return query.all()
+    else:
+        for key in params:
+            query = query.filter(getattr(Item, key) == params[key])
+    return query.all()
 
 
 def get_all_closed_items(is_test, session):

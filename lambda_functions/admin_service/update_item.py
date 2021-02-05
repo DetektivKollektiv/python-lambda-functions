@@ -14,7 +14,7 @@ logger.setLevel(logging.INFO)
 
 
 def update_item(event, context, is_test=False, session=None):
-    """Approves or rejects an item. 
+    """Updates an item. 
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def update_item(event, context, is_test=False, session=None):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-    helper.log_method_initiated("Get approve item", event, logger)
+    helper.log_method_initiated("Update item", event, logger)
 
     if session is None:
         session = get_db_session(is_test, session)
