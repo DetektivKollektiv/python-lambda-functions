@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def get_items(event, context, is_test=False, session=None):
-    """Returns the requested items. 
+    """Returns the requested items.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def get_items(event, context, is_test=False, session=None):
     if session is None:
         session = get_db_session(is_test, session)
 
-    if 'queryStringParameters' in event:
+    if 'queryStringParameters' in event and event['queryStringParameters'] is not None:
         params = event['queryStringParameters']
 
         for param in params:

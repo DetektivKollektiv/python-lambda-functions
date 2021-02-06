@@ -45,6 +45,10 @@ def test_get_items(session):
     response_body = json.loads(get_items(event, None, True, session)['body'])
     assert len(response_body) == 2
 
+    event = {'queryStringParameters': None}
+    response_body = json.loads(get_items(event, None, True, session)['body'])
+    assert len(response_body) == 2
+
     event = get_event('status', 'open')
     response_body = json.loads(get_items(event, None, True, session)['body'])
     assert len(response_body) == 1
