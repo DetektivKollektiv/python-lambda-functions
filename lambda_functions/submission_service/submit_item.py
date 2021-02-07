@@ -73,10 +73,10 @@ def submit_item(event, context, is_test=False, session=None):
             stage = os.environ['STAGE']
             client.start_execution(
                 stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
-                name='SFC_' + created_item.id,
+                name='SFC_' + item.id,
                 input="{\"item\":{" \
-                            "\"id\":\"" + created_item.id + "\"," \
-                            "\"content\":\"" + remove_control_characters(created_item.content) + "\" } }"
+                            "\"id\":\"" + item.id + "\"," \
+                            "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
             )
 
         # Create submission
