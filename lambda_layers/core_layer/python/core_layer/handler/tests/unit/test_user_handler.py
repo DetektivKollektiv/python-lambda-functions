@@ -52,8 +52,8 @@ def item_id_2():
 @pytest.fixture
 def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1, review_id_2, review_id_3):
 
-    item1 = item_creator.create_item(item_id_1)
-    item2 = item_creator.create_item(item_id_2)
+    item1 = item_creator.create_item(item_id_1, None)
+    item2 = item_creator.create_item(item_id_2, None)
 
     level1 = level_creator.create_level(1, 0)
     level2 = level_creator.create_level(2, 5)
@@ -88,7 +88,6 @@ def test_get_user_total_rank(session, user_id_1, user_id_2, user_id_3):
     user_3 = session.query(User).filter(User.id == user_id_3).one()
     user_rank_1 = user_handler.get_user_rank(user_1, False, True, session)
     user_rank_3 = user_handler.get_user_rank(user_3, False, True, session)
-    # with pytest.raises(Exception):
     user_rank_2 = user_handler.get_user_rank(user_2, False, True, session)
 
     assert user_rank_1 == 1
