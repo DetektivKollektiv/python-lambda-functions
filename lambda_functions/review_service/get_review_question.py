@@ -35,18 +35,12 @@ def get_review_question(event, context, is_test=False, session=None):
     except Exception:
         response = {
             "statusCode": 400,
-            "body": "Could not get user and/or item. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())
+            "body": "Could not get review. Check URL query parameters. Stacktrace: {}".format(traceback.format_exc())
         }
+        response_cors = helper.set_cors(response, event, is_test)
+        return response_cors
 
-    # Try getting previous question id from query params. If none is set, set previous_question as None
-    try:
-        previous_question_id = event['queryStringParameters']['previous_question_id']
-        previous_question = review_question_handler.get_review_question_by_id(
-            previous_question_id, is_test, session)
-
-    except Exception:
-        previous_question = None
-
+    previous_question = review.last_question
     try:
         question = review_question_handler.get_next_question_db(
             review, previous_question, is_test, session)
