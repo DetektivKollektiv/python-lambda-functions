@@ -118,6 +118,10 @@ def test_create_review_answer(session, junior_review_id, review_question_id):
     assert body["review_question_id"] == review_answer.review_question_id
     assert body["answer"] == review_answer.answer
     assert body["comment"] == review_answer.comment
+    junior_review = Review()
+    junior_review = session.query(Review).filter(
+        Review.id == junior_review_id).one()
+    assert junior_review.last_question_id == review_answer.review_question_id
 
 
 def test_create_multiple_review_answers(session, junior_review_id, review_question_id):
@@ -143,6 +147,10 @@ def test_create_multiple_review_answers(session, junior_review_id, review_questi
         assert body["review_question_id"] == review_answer.review_question_id
         assert body["answer"] == review_answer.answer
         assert body["comment"] == review_answer.comment
+        junior_review = Review()
+        junior_review = session.query(Review).filter(
+            Review.id == junior_review_id).one()
+        assert junior_review.last_question_id == review_answer.review_question_id
 
     item = review_handler.get_review_by_id(junior_review_id, True, session)
 
