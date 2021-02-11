@@ -8,6 +8,8 @@ class Review(Base):
     id = Column(String(36), primary_key=True)
     is_peer_review = Column(Boolean)
     belongs_to_good_pair = Column(Boolean)
+    last_question_id = Column(String(36), ForeignKey(
+        'review_questions.id', ondelete='SET NULL', onupdate='CASCADE'))
     user_id = Column(String(36), ForeignKey('users.id'))
     item_id = Column(String(36), ForeignKey('items.id',
                                             ondelete='CASCADE', onupdate='CASCADE'))
@@ -18,6 +20,7 @@ class Review(Base):
     review_answers = relationship(
         "ReviewAnswer", back_populates="review")
     item = relationship("Item", back_populates="reviews")
+    last_question = relationship('ReviewQuestion')
 
     def to_dict(self):
         return {

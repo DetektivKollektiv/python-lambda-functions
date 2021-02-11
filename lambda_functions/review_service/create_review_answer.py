@@ -8,6 +8,7 @@ from core_layer import helper
 from core_layer.connection_handler import get_db_session, update_object
 # Model imports
 from core_layer.model.review_answer_model import ReviewAnswer
+from core_layer.model.review_model import Review
 # Handler imports
 from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler, user_handler
 import notifications
@@ -40,7 +41,7 @@ def create_review_answer(event, context, is_test=False, session=None):
     logger.setLevel(logging.INFO)
 
     try:
-        helper.log_method_initiated("Get item by id", event, logger)
+        helper.log_method_initiated("Create review answer", event, logger)
 
         if session == None:
             session = get_db_session(is_test, session)
@@ -48,8 +49,10 @@ def create_review_answer(event, context, is_test=False, session=None):
         # Create actual review answer object
         review_answer = ReviewAnswer()
         helper.body_to_object(event['body'], review_answer)
-        review_answer_handler.create_review_answer(
+        review_answer = review_answer_handler.create_review_answer(
             review_answer, is_test, session)
+        review_answer.review.last_question_id = review_answer.review_question_id
+        update_object(review_answer.review, is_test, session)
 
         # Get partner review
         review = review_handler.get_review_by_id(
