@@ -49,13 +49,10 @@ def create_review_answer(event, context, is_test=False, session=None):
         # Create actual review answer object
         review_answer = ReviewAnswer()
         helper.body_to_object(event['body'], review_answer)
-        review_answer_handler.create_review_answer(
+        review_answer = review_answer_handler.create_review_answer(
             review_answer, is_test, session)
-
-        review = Review()
-        review = review_answer.review
-        review.last_question_id = review_answer.review_question_id
-        update_object(review, is_test, session)
+        review_answer.review.last_question_id = review_answer.review_question_id
+        update_object(review_answer.review, is_test, session)
 
         # Get partner review
         review = review_handler.get_review_by_id(
