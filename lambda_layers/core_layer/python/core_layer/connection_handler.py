@@ -52,7 +52,6 @@ def update_object(obj, is_test, session):
     Parameters
     ----------
     obj: object to be merged in the DB, required
-        The item to be updates
 
     Returns
     ------
@@ -65,4 +64,27 @@ def update_object(obj, is_test, session):
         return obj
     except Exception:
         logging.exception('Could not update object.')
+        session.rollback()
+        return None
+
+
+def add_object(obj, is_test, session):
+    """Adds an existing item to the database
+
+    Parameters
+    ----------
+    obj: object to be stored, required
+
+    Returns
+    ------
+    obj: The stored object
+    """
+    session = get_db_session(is_test, session)
+    try:
+        session.add(obj)
+        session.commit()
+        return obj
+    except Exception:
+        logging.exception('Could not store object.')
+        session.rollback()
         return None

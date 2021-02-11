@@ -36,6 +36,11 @@ batch:
         variables:
           LOCATION: "admin_service"
           STACK_NAME: "admin-service"
+    - identifier: issue_service
+      env:
+        variables:
+          LOCATION: "issue_service"
+          STACK_NAME: "issue-service"
 
 phases:
   install:

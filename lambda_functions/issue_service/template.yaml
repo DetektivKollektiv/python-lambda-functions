@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the DetektivKollektiv issue API"
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+
+Parameters:
+  STAGE:
+    Type: String
+  CorsAllowOrigin:
+    Type: String
+  DBNAME:
+    Type: String
+    Default: development_db
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: STAGE
+      Cors:
+        AllowMethods: "'OPTIONS, PUT, POST, GET, DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+        AddDefaultAuthorizerToCorsPreflight: false
+        InvokeRole: NONE
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "detektivkollektiv-api-execution-issue-service-${STAGE}"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+
+  SubmitIssueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-issue_api-submit_issue-${STAGE}"
+      CodeUri: .
+      Handler: submit_issue.submit_issue
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /issues
+            Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
