@@ -184,7 +184,10 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
         The user's rank
     """
 
-    if user.reviews is None or len(user.reviews) == 0:
+    closed_review_count = session.query(Review).filter(
+        Review.status == 'closed', Review.user_id == user.id).count()
+
+    if closed_review_count == 0:
         if level_rank:
             user_count = session.query(User).filter(
                 User.level_id == user.level_id).count()

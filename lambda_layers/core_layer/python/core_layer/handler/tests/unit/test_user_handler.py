@@ -40,6 +40,16 @@ def review_id_3():
 
 
 @pytest.fixture
+def review_id_4():
+    return str(uuid4())
+
+
+@pytest.fixture
+def review_id_5():
+    return str(uuid4())
+
+
+@pytest.fixture
 def item_id_1():
     return str(uuid4())
 
@@ -50,7 +60,7 @@ def item_id_2():
 
 
 @pytest.fixture
-def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1, review_id_2, review_id_3):
+def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1, review_id_2, review_id_3, review_id_4, review_id_5):
 
     item1 = item_creator.create_item(item_id_1, None)
     item2 = item_creator.create_item(item_id_2, None)
@@ -69,8 +79,12 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1,
         review_id_2, item2.id, user_id_1, "closed", datetime.now() - timedelta(days=3))
     review3 = review_creator.create_review(
         review_id_3, item1.id, user_id_3, "closed")
+    review4 = review_creator.create_review(
+        review_id_4, item1.id, user_id_2, "in progress")
+    review5 = review_creator.create_review(
+        review_id_5, item1.id, user_id_3, "in progress")
 
-    return[item1, item2, level1, level2, level3, user1, user2, user3, review1, review2, review3]
+    return[item1, item2, level1, level2, level3, user1, user2, user3, review1, review2, review3, review4, review5]
 
 
 @pytest.fixture
