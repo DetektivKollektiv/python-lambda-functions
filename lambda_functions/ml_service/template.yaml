@@ -51,6 +51,7 @@ Resources:
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+        - arn:aws:iam::aws:policy/APIGatewayFullAccess 
 
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction

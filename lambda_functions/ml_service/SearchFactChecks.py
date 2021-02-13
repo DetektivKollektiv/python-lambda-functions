@@ -95,6 +95,17 @@ async def call_googleapi(session, search_terms, language_code):
 
     return await response.json(), search_terms
 
+def post_DocSim(language, data):
+    if language == "de":
+        url="https://8wfgkfs2wc.execute-api.eu-central-1.amazonaws.com/models/DocSim"
+    else:
+        logger.error("Language not supported!")
+        raise Exception('Language not supported!')
+    headers = {"content-type": "text/csv", "Accept": "text/csv"}
+    
+    response = requests.post(url, headers=headers, data=data)
+
+    return response
 
 # Get best fitting fact check article
 async def get_article(search_terms, LanguageCode):
@@ -145,15 +156,16 @@ async def get_article(search_terms, LanguageCode):
                             sm_input.append(sm_input_search + ",\""+article_text+"\"")
                 # call sagemaker endpoint for similarity prediction
                 try:
-                    endpoint = endpoint_prefix + \
-                        LanguageCode+'-'+os.environ['STAGE']
                     payload = '\n'.join(sm_input)
-                    response = sm_client.invoke_endpoint(
-                        EndpointName=endpoint,
-                        ContentType="text/csv",
-                        Accept="text/csv",
-                        Body=payload
-                    )
+                    response = post_DocSim(LanguageCode, payload)
+#                    endpoint = endpoint_prefix + \
+#                        LanguageCode+'-'+os.environ['STAGE']
+#                    response = sm_client.invoke_endpoint(
+#                        EndpointName=endpoint,
+#                        ContentType="text/csv",
+#                        Accept="text/csv",
+#                        Body=payload
+#                    )
                     result = response['Body'].read()
                     result = result.decode()
                     scores = result.split('\n')
@@ -168,7 +180,9 @@ async def get_article(search_terms, LanguageCode):
                         ind = ind+1
                 except Exception as e:
                     logger.error(
-                        'Error {} invoking sagemaker endpoint {}.'.format(e, endpoint))
+                        'Error {} invoking ML Gateway.'.format(e))
+#                    logger.error(
+#                        'Error {} invoking sagemaker endpoint {}.'.format(e, endpoint))
                 # Store received factchecks in a bucket to be used for training a model to assess similarity between claims and factchecks
                 body = json.dumps(response_json)
                 key = newfactchecks_folder+str(uuid4())
