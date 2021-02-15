@@ -13,8 +13,7 @@ def test_get_top_users(monkeypatch):
 
     session = setup_scenarios.create_users_with_different_experience_levels(session)
 
-    # todo: What should this event be?
-    event = event_creator.get_create_review_event(1, "abc")
+    event = None
     resp = get_top_users(event, None, True, session)
     users = json.loads(resp["body"])
     
