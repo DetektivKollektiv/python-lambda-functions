@@ -1,0 +1,63 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      ruby: latest
+    commands:
+      # Upgrade pip to the latest version
+      - pip install --upgrade pip
+
+      - pip uninstall -y awscli
+      # Upgrade AWS CLI to the latest version
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip -q awscliv2.zip
+      - ./aws/install
+
+      # - pip install --upgrade awscli
+
+      # Install linter for CloudFormation template
+      - pip install cfn-lint
+
+      # Install cfn-nag
+      - gem install cfn-nag
+
+      # Install requirements
+      - pip install -r "lambda_layers/core_layer/requirements.txt" --target lambda_layers/core_layer/python/lib/python3.8/site-packages/
+      - pip install alembic sqlalchemy mysqlclient
+
+  pre_build:
+    commands:
+      # verify the validity of the state machine definition
+      - cfn-lint -t lambda_layers/core_layer/template.yaml
+      - cfn_nag_scan --input-path lambda_layers/core_layer/template.yaml
+
+      # Open ssh tunnel to access db via jumphost vm
+      - aws s3 cp s3://vm-access-keys/vm_keypair.pem .
+      - chmod 400 vm_keypair.pem
+
+      - ssh -tt -i vm_keypair.pem -o "StrictHostKeyChecking no" -L 3307:${DB_URL}:3306 ${EC2_URL} &
+
+      # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
+      # - python -m unittest discover lambda_functions/tests
+
+  build:
+    commands:
+      # Update cloudformation stack
+      - aws cloudformation package
+        --template-file lambda_layers/core_layer/template.yaml
+        --s3-bucket $S3_BUCKET
+        --output-template-file ${STAGE}-template-export.yml
+      - aws cloudformation deploy
+        --template-file ${STAGE}-template-export.yml
+        --stack-name detektivkollektiv-api-${STAGE}-core-layer
+        --s3-bucket $S3_BUCKET
+        --parameter-overrides file://${STAGE}-params.json
+        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+      # Run migrations
+      - cd lambda_layers/core_layer/python/core_layer
+      - alembic upgrade head

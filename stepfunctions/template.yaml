@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the DetektivKollektiv stepfuctions" # Change for each template
+
+Globals:
+  Function:
+    Timeout: 30
+
+Parameters:
+  STAGE:
+    Type: String
+
+Conditions:
+  Never: !Equals [!Sub "${STAGE}", b]
+
+Resources:
+  NullResource:
+    Type: Custom::Null
+    Condition: Never

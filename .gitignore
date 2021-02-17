@@ -205,6 +205,7 @@ ENV/
 env.bak/
 venv.bak/
 pyvenv.cfg
+dk_backend_venv/
 
 # Spyder project settings
 .spyderproject
