@@ -1,0 +1,278 @@
+[
+  {
+    "id": "article_1",
+    "content": "Im Artikel werden für alle Behauptungen Quellen genannt.",
+    "info": "Die Angabe von Quellen für Zitate oder Behauptungen erhöht die Glaubwürdigkeit einer Nachricht.",
+    "hint": "Überprüfe, ob bei essentiellen Aussagen im Artikel Quellen angegeben werden. Teilweise sind diese als Fussnote oder Link unter der Nachricht zu finden.",
+    "item_type_id": "1",
+    "max_children": "1",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_1a",
+    "content": "Die Behauptungen des Artikels decken sich vollständig mit denen der Originalquellen.",
+    "info": "Die Angabe von Quellen allein ist kein Garant für die Glaubwürdikeit von Informationen. Quellen werden auch als Alibi genutzt. Bei näherer Betrachtung können sie den Aussagen einer Nachricht sogar widersprechen.",
+    "hint": "Untersuche, ob Zitate oder Behauptungen korrekt wiedergegeben werden. Ist eine Verzerrung der Aussage erkennbar? Wurden Zitate verkürzt oder aus dem Kontext gerissen?",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": "article_1",
+    "lower_bound": 3,
+    "upper_bound": 4
+  },
+  {
+    "id": "article_2",
+    "content": "Die Grammatik und Rechtschreibung des Artikels sind fehlerfrei.",
+    "info": "Um Informationen schnell in Umlauf zu bringen, werden Artikel manchmal maschinell in andere Sprachen übersetzt. Fehlerhafte Grammatik oder auch unübliche Satzstellungen können hierfür ein Indiz sein.",
+    "hint": "Prüfe, ob es grammatikalische Fehler (z. B ein fehlender Artikel) oder Rechtschreibfehler gibt, die nicht wie flüchtige Tippfehler wirken.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_3",
+    "content": "Der Text besteht nicht nur aus einem einzigen Satz wie in einer Eilnachricht.",
+    "info": "Artikel oder Nachrichten, die den Charakter einer Eilnachricht annehmen, machen eine detaillierte Auseinandersetzung mit einem Thema unmöglich.",
+    "hint": "Eilnachrichten bestehen nur aus wenigen Wörtern oder einer Schlagzeile. Oft werden sie auch als ++Eilnachricht++ oder ++Breaking News++ betitelt.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_4",
+    "content": "Die Bilder stellen das beschriebene Geschehen dar oder skandalisieren nicht künstlich.",
+    "info": "Um Behauptungen glaubwürdiger erscheinen zu lassen, werden veraltete oder aus anderen Kontexten stammende Fotos, Bilder oder Videos für Artikel genutzt.",
+    "hint": "Nutze die umgekehrte Bildersuche bzw. Reverse Image Search wie z.B. <a href=\"https://tineye.com/\" target=\"_blank\">TinEye</a>, um zu sehen, ob Fotos in Artikeln echt sind und nicht aus anderen Kontexten gegriffen sind. Werden z.B für eine Demonstration in Berlin Bilder einer anderen, größeren Demonstration in einem anderen Land gezeigt? Wenn es sich um <a href=\"https://de.wikipedia.org/wiki/Stockfotografie\" target=\"_blank\">Stock Bilder</a> handelt, visualisieren sie den Artikel objektiv oder dramatisieren sie ihn künstlich?",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_5",
+    "content": "Der Internetauftritt (URL Adresse, Logo, Design) des Mediums ist authentisch. Er imitiert keine bereits bekannten Internetseiten und Medien.",
+    "info": "Es kommt vor, dass größe und populäre Medienhäuser oder andere Einrichtungen in ihrem Online Auftritt imitiert werden, um Glaubwürdigkeit vorzutäuschen.",
+    "hint": "Achte auf die gesamte Internetadresse (URL). Manche Webseiten imitieren bereits bekannte Medien. Beispiel: ABCnews.com vs. ABCnews.com.co. Achte bei Artikeln auf die Qualität des Logos, der Webseite und das Designs in seiner Gesamtheit.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_6",
+    "content": "Die Überschrift passt zum Inhalt des Artikels.",
+    "info": "Deckt sich der Inhalt des Artikels nicht mit der Überschrift, handelt es sich vielleicht um sogenanntes <a href=\"https://de.wikipedia.org/wiki/Clickbaiting\" target=\"_blank\">Clickbaiting</a>, bei dem sich durch reißerische Überschriften mehr Klicks versprochen werden, um Werbeeinnahmen zu erhöhen.",
+    "hint": "Finde heraus, ob die Überschrift wirklich zum Text passt.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_7",
+    "content": "Die Behauptungen des Artikels decken sich mit der Berichterstattung öffentlich-rechtlicher Medien und/oder Fachmedien.",
+    "info": "Enthält die Nachricht Behautpungen, die von großen und professionnellen Medienhäusern - wie öffentlich-rechtlichen Medien, etablierten Wochenzeitungen oder Fachmedien - nicht aufgegriffen wurden, mindert dies die Glaubwürdigkeit der Informationen.",
+    "hint": "Wir empfehlen das Abgleichen mit mindestens zwei großen Tages- oder Wochenzeitungen. Eine kurze Übersicht über die Zeitungen in der deutschen Medienlandschaft findest du z.B. <a href=\"https://www.deutschland.de/de/topic/kultur/kommunikation-medien/die-zeitungen-im-medienland-deutschland\" target=\"_blank\">hier</a>. Wenn du anschließend den Namen des Mediums und relevante thematische Schlüsselwörter bei einer Suchmaschine eingibst, kannst du die Ergebnisse vergleichen.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_8",
+    "content": "Im Artikel werden identifizierbare Personen direkt oder indirekt zitiert.",
+    "info": "Gesprächspartner in Zitaten zu Wort kommen zu lassen ist ein gebräuchliches journalistisches Mittel. Es macht die Recherche nachvollziehbarer. Werden Personen mit vollem Namen genannt, können ihre Positionen auch von anderen überprüft werden. Dies erhöht die Glaubwürdigkeit. Der Journalist C. Relotius, der Reportagen und Recherchen gefälscht hat, wurde zuletzt auch durch gefälschte Zitate seiner Lügen überführt.",
+    "hint": "Kommen in dem Artikel identifizierbare Personen (beispielsweise mit vollständigem Namen und/oder Wohnort) direkt oder indirekt zu Wort?",
+    "item_type_id": "1",
+    "max_children": "2",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_8a",
+    "content": "Zitierte Personen haben tatsächlich Expertise in dem Themenfeld und werden berechtigterweise als Quelle genutzt.",
+    "info": "Expert*in muss nicht bedeuten, dass die Person auch im ngesprochenen Thema Expertise besitzt. Beispielsweise haben Zahnärzt*innen anderes Fachwissen als Virolog*innen im Bereich der Epidemologie. Beide können jedoch als Mediziner*innen zitiert werden.",
+    "hint": "Benutze Internet-Suchmaschinen, um die zitierten Personen zu recherchieren. Führen sie wirklich den angegeben Beruf aus und haben passendes Fachwissen? Gibt es auch andere Artikel, in denen sie zitiert werden?",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": "article_8",
+    "lower_bound": 2,
+    "upper_bound": 4
+  },
+  {
+    "id": "article_8b",
+    "content": "Die im Artikel verwendeten Zitate stimmen mit ihrem ursprünglichen Kontext überein und wurden nicht zweckentfremdet.",
+    "info": "Manchmal werden Zitate fälschlicherweise in einem anderen Kontext gebraucht. Ebenso ist es möglich, dass Zitate gekürzt werden, um eine Aussage zu verzerren. Durch die Anführungszeichen kannst du nach exakt diesen Worten suchen.",
+    "hint": "Gib das Zitat in Anführungsstrichen in einer Internet-Suchmaschine ein und vergleiche die Ergebnisse.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": "article_8",
+    "lower_bound": 2,
+    "upper_bound": 4
+  },
+  {
+    "id": "article_9",
+    "content": "Das Medium scheint finanziell, politisch und thematisch unabhängig zu sein.",
+    "info": "Medien, die von einem Staat oder einer korrupten Gruppierung kontrolliert werden, sind nicht unabhängig und berichten oft nicht objektiv.",
+    "hint": "Achte auf die Besitzer*innen und Geldgeber*innen der Webseite des Mediums, auf der der Artikel erschienen ist. Gibt es einen Verdacht auf staatliche Einflüsse oder starke politische Färbung? RT (früher Russia Today) ist z.B. <a href=\"https://www.rand.org/pubs/perspectives/PE198.html\" target=\"_blank\">nachweislich</a> vom russischen Staat finanziert und verbreitet offiziell die Sichtweise der russischen Regierung auf und über das Weltgeschehen. Oft sind diese Informationen im Reiter \"Impressum\", \"Über Uns\" oder \"Kontakt\" zu finden, sowie auch über Suchmaschinen schnell im Netz.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_10",
+    "content": "Der Artikel ist von einer fachkundigen Person oder einer*m beruflichen Journalist*in geschrieben.",
+    "info": "Die Veröffentlichung von Inhalten unter dem eigenen Namen ermöglicht es, Inhalte zu einer bestimmten existierenden Person zurückzuführen und diese neispielsweise für eine Stellungnahme zu kontaktieren. Es ist ein Indiz für professionnell erstellte Inhalte.",
+    "hint": "Oft findest du diese Information entweder unter dem Titel oder unter dem Artikel. Ist es z.B. ein*e bekannte*r Journalist*in, Autor*in oder ein*e anerkannte*r Wissenschaftler*in? Ist es eine Person, die du aus dem öffentlichen Leben kennst? ",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_11",
+    "content": "Die Artikel ist objektiv geschrieben und frei von Hetze, Generalisierungen, Panikmache oder Ähnlichem.",
+    "info": "Die Nutzung stark subjektiver, geladener und eventuell sogar hetzender Sprache in einer Nachricht ist ein starkes Indiz dafür, dass es sich um eine Meinung oder persönliche Perspekive handelt. Dies kann die Glaubwürdigkeit der Nachricht mindern.",
+    "hint": "Überprüfe, ob ein sehr gefühlsbetonter Schreibstil verwendet wurde. Werden Meinungen oder Gefühle zum Ausdruck gebracht oder politische, emotionale oder geschmackliche Wertungen vorgenommen? Als Indiz hierfür gelten viele Superlative (z.b. \"die schlimmste Folge\"), subjektive Meinungen (z.B. \"Ich finde, dass...\") oder auch beleidigende oder extrem huldigende Ausdrücke.",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "article_12",
+    "content": "Im Artikel werden unterschiedliche Positionen dargestellt.",
+    "info": "Professionell erstelte Inhalte beleuchten Sachlagen häufig von unterschiedlichen Seiten. Es erhöht die Glaubwürdigkeit.",
+    "hint": "Schaue dir die im Text genannten Argumente an. Kommen unterschiedliche Positionen zum Ausdruck?",
+    "item_type_id": "1",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+
+  {
+    "id": "claim_1",
+    "content": "In der Nachricht werden für alle Behauptungen Quellen genannt.",
+    "info": "Die Angabe von Quellen für Zitate oder Behauptungen erhöht die Glaubwürdigkeit der Informationen einer Nachricht.",
+    "hint": "Überprüfe, ob bei essentiellen Aussagen Quellen angegeben werden. Teilweise sind diese als Fussnote oder Link unter der Nachricht zu finden.",
+    "item_type_id": "2",
+    "max_children": "1",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_1a",
+    "content": "Die Behauptungen in der Nachricht decken sich vollständig mit denen der Quellen.",
+    "info": "Die Angabe von Quellen allein ist kein Garant für die Glaubwürdigkeit von Informationen. Quellen werden auch als Alibi genutzt. Bei näherer Betrachtung können sie den Aussagen einer Nachricht sogar widersprechen.",
+    "hint": "Untersuche, ob Zitate oder Behauptungen korrekt wiedergegeben werden. Ist eine Verzerrung der Aussage erkennbar? Wurden Zitate verkürzt oder aus dem Kontext gerissen?",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": "claim_1",
+    "lower_bound": 3,
+    "upper_bound": 4
+  },
+  {
+    "id": "claim_2",
+    "content": "Die Grammatik und Rechtschreibung der Nachricht sind fehlerfrei.",
+    "info": "Um Informationen schnell in Umlauf zu bringen, werden Artikel manchmal maschinell in andere Sprachen übersetzt. Fehlerhafte Grammatik oder auch unübliche Satzstellungen können hierfür ein Indiz sein.",
+    "hint": "Prüfe, ob es grammatikalische Fehler (z. B ein fehlender Artikel) oder Rechtschreibfehler gibt, die nicht wie flüchtige Tippfehler wirken.",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_3",
+    "content": "Der Text besteht nicht nur aus einem einzigen Satz wie bspw. in einer Eilnachricht.",
+    "info": "Artikel oder Nachrichten, die den Charakter einer Eilnachricht annehmen, machen eine detaillierte Auseinandersetzung mit einem Thema unmöglich.",
+    "hint": "Eilnachrichten bestehen nur aus wenigen Wörtern oder einer Schlagzeile. Oft werden sie auch als ++Eilnachricht++ oder ++Breaking News++ betitelt.",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_4",
+    "content": "Die Berhauptungen in der Nachricht decken sich mit der Berichterstattung öffentlich-rechtlicher Medien, etablierten Wochenzeitungen und/oder Fachmedien.",
+    "info": "Enthält die Nachricht Behautpungen, die von großen und professionnellen Medienhäusern - wie öffentlich-rechtlichen Medien, etablierten Wochenzeitungen oder Fachmedien - nicht aufgegriffen wurden, mindert dies die Glaubwürdigkeit der Informationen.",
+    "hint": "Wir empfehlen das Abgleichen mit mindestens zwei großen Tages- oder Wochenzeitungen. Eine kurze Übersicht über die Zeitungen in der deutschen Medienlandschaft findest du z.B. <a href=\"https://www.deutschland.de/de/topic/kultur/kommunikation-medien/die-zeitungen-im-medienland-deutschland\" target=\"_blank\">hier</a>. Wenn du anschließend den Namen des Mediums und relevante thematische Schlüsselwörter bei einer Suchmaschine eingibst, kannst du die Ergebnisse vergleichen.",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_5",
+    "content": "In der Nachricht werden identifizierbare Personen direkt oder indirekt zitiert.",
+    "info": "Gesprächspartner in Zitaten zu Wort kommen zu lassen ist ein gebräuchliches journalistisches Mittel. Es macht die Recherche nachvollziehbarer. Werden Personen mit vollem Namen genannt, können ihre Positionen auch von anderen überprüft werden. Dies erhöht die Glaubwürdigkeit. Der Journalist C. Relotius, der Reportagen und Recherchen gefälscht hat, wurde zuletzt auch durch gefälschte Zitate seiner Lügen überführt.",
+    "hint": "Kommen in der Nachricht identifizierbare Personen (beispielsweise mit vollständigem Namen und/oder Wohnort) direkt oder indirekt zu Wort?",
+    "item_type_id": "2",
+    "max_children": "2",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_5a",
+    "content": "Zitierte Personen haben tatsächlich Expertise in dem Themenfeld und werden berechtigterweise als Quelle genutzt.",
+    "info": "Expert*in muss nicht bedeuten, dass die Person auch im ngesprochenen Thema Expertise besitzt. Beispielsweise haben Zahnärzt*innen anderes Fachwissen als Virolog*innen im Bereich der Epidemologie. Beide können jedoch als Mediziner*innen zitiert werden.",
+    "hint": "Benutze Internet-Suchmaschinen, um die zitierten Personen zu recherchieren. Führen sie wirklich den angegeben Beruf aus und haben passendes Fachwissen? Gibt es auch andere Artikel, in denen sie zitiert werden?",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": "claim_5",
+    "lower_bound": 2,
+    "upper_bound": 4
+  },
+  {
+    "id": "claim_5b",
+    "content": "Die in der Nachricht verwendeten Zitate stimmen mit ihrem ursprünglichen Kontext überein und wurden nicht zweckentfremdet.",
+    "info": "Manchmal werden Zitate fälschlicherweise in einem anderen Kontext gebraucht. Ebenso ist es möglich, dass Zitate gekürzt werden, um eine Aussage zu verzerren. Durch die Anführungszeichen kannst du nach exakt diesen Worten suchen.",
+    "hint": "Gib das Zitat in Anführungsstrichen in einer Internet-Suchmaschine ein und vergleiche die Ergebnisse. ",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": "claim_5",
+    "lower_bound": 2,
+    "upper_bound": 4
+  },
+  {
+    "id": "claim_6",
+    "content": "Die Nachricht ist objektiv geschrieben und frei von Hetze, Generalisierungen, Panikmache oder Ähnlichem.",
+    "info": "Die Nutzung stark subjektiver, geladener und eventuell sogar hetzender Sprache in einer Nachricht ist ein starkes Indiz dafür, dass es sich um eine Meinung oder persönliche Perspekive handelt. Dies kann die Glaubwürdigkeit der Nachricht mindern.",
+    "hint": "Überprüfe, ob ein sehr gefühlsbetonter Schreibstil verwendet wurde. Werden Meinugen oder Gefühle zum Ausdruck gebracht oder politische, emotionale oder geschmackliche Wertungen vorgenommen? Als Indiz hierfür gelten viele Superlative (z.b. \"die schlimmste Folge\"), subjektive Meinungen (z.B. \"Ich finde, dass...\") oder auch beleidigende oder extrem huldigende Ausdrücke.",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  },
+  {
+    "id": "claim_7",
+    "content": "Wenn Bilder vorhanden sind, stellen sie das beschriebene Geschehen dar oder skandalisieren nicht künstlich.",
+    "info": "Um Behauptungen glaubwürdiger erscheinen zu lassen, werden veraltete oder aus anderen Kontexten stammende Fotos, Bilder oder Videos für Artikel genutzt.",
+    "hint": "Nutze die umgekehrte Bildersuche bzw. Reverse Image Search wie z.B. <a href=\"https://tineye.com/\" target=\"_blank\">TinEye</a>, um zu sehen, ob Fotos in Artikeln echt sind und nicht aus anderen Kontexten gegriffen sind. Werden z.B für eine Demonstration in Berlin Bilder einer anderen, größeren Demonstration in einem anderen Land gezeigt? Wenn es sich um <a href=\"https://de.wikipedia.org/wiki/Stockfotografie\" target=\"_blank\">Stock Bilder</a> handelt, visualisieren sie den Artikel objektiv oder dramatisieren sie ihn künstlich?",
+    "item_type_id": "2",
+    "max_children": "0",
+    "parent_question_id": null,
+    "lower_bound": null,
+    "upper_bound": null
+  }
+]

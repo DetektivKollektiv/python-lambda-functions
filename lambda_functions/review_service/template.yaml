@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the DetektivKollektiv review API" # Change for each template
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+
+Parameters:
+  STAGE:
+    Type: String
+  CorsAllowOrigin:
+    Type: String
+  DBNAME:
+    Type: String
+    Default: development_db
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: STAGE
+      Cors:
+        AllowMethods: "'OPTIONS, PUT, POST, GET, DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+        AddDefaultAuthorizerToCorsPreflight: false
+        InvokeRole: NONE
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "detektivkollektiv-api-execution-review-service-${STAGE}" # Change for each Role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+
+  GetOpenItemsFunction: # Change for each lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-review_api-get-open-items-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: get_open_items.get_open_items # Change for each lambda
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /items # Change for each lambda
+            Method: get # Change for each lambda
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  CreateReviewFunction: # Change for each lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-review_api-create-review-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: create_review.create_review # Change for each lambda
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /reviews # Change for each lambda
+            Method: post # Change for each lambda
+            RestApiId:
+              Ref: Api
+            RequestParameters:
+              - method.request.querystring.item_id:
+                  Required: true
+                  Caching: true
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  GetReviewQuestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-review_api-get_review_question-${STAGE}"
+      CodeUri: .
+      Handler: get_review_question.get_review_question
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /review_questions
+            Method: get
+            RestApiId:
+              Ref: Api
+            RequestParameters:
+              - method.request.querystring.review_id:
+                  Required: true
+                  Caching: true
+              - method.request.querystring.previous_question_id:
+                  Required: true
+                  Caching: true
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  CreateReviewAnswerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-review_api-create_review_answer-${STAGE}"
+      CodeUri: .
+      Handler: create_review_answer.create_review_answer
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Echo:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /review_answers
+            Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  ResetLockedItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-review_api-reset_locked_items-${STAGE}"
+      CodeUri: .
+      Handler: reset_locked_items.reset_locked_items
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-reset_locked_items-${STAGE}"
+            Description: Schdule for starting reset lambda every 10 minutes
+            Enabled: True
+            Schedule: rate(10 minutes)
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
