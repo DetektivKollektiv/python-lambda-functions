@@ -100,7 +100,7 @@ def post_DocSim(language, data):
         url="https://8wfgkfs2wc.execute-api.eu-central-1.amazonaws.com/models/DocSim"
     else:
         logger.error("Language not supported!")
-        raise Exception('Language not supported!')
+        raise Exception('Language not supported by DocSim!')
     headers = {"content-type": "text/csv", "Accept": "text/csv"}
     
     response = requests.post(url, headers=headers, data=data)

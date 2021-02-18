@@ -1,5 +1,6 @@
 import boto3
 import logging
+import requests
 from botocore.exceptions import ClientError, ParamValidationError
 from operator import itemgetter
 
@@ -10,6 +11,30 @@ logger.setLevel(logging.INFO)
 
 comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 
+
+def post_TopicalPageRank(language, data):
+    if language == "de":
+        url="https://8wfgkfs2wc.execute-api.eu-central-1.amazonaws.com/models/TopicalPageRank"
+    else:
+        logger.error("Language not supported by TopicalPageRank!")
+        return {}
+
+    headers = {"content-type": "text/csv", "Accept": "text/csv"}
+    prediction = requests.post(url, headers=headers, data=data.encode('utf-8'))
+    if 'Body' not in prediction:
+        return {}
+    result = prediction['Body'].read()
+    result = result.decode()
+    # convert to a structure according comprehend
+    keyphrases = []
+    for item in result:
+        phrase = {}
+        phrase["Text"] = item[0]
+        phrase["Score"] = item[1]
+        keyphrases.append(phrase)
+    response = {}
+    response["KeyPhrases"] = keyphrases
+    return response
 
 def get_phrases(event, context):
     """Detect Key Phrases
@@ -45,14 +70,20 @@ def get_phrases(event, context):
         logger.error("Language Code not supported!")
         return []
 
+    response = {}
     try:
-        response = comprehend.detect_key_phrases(Text=text, LanguageCode=LanguageCode)
+        response = post_TopicalPageRank(LanguageCode, text)
     except ClientError as e:
-        logger.error("Received error: %s", e, exc_info=True)
-        return []
-    except ParamValidationError as e:
-        logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
-        return []
+        logger.error("TopicalPageRank error: %s", e, exc_info=True)
+    if not "KeyPhrases" in response:
+        try:
+            response = comprehend.detect_key_phrases(Text=text, LanguageCode=LanguageCode)
+        except ClientError as e:
+            logger.error("Received error: %s", e, exc_info=True)
+            return []
+        except ParamValidationError as e:
+            logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
+            return []
 
     # sort list of key phrases according the score
     keyPhrases_sorted = sorted(response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
