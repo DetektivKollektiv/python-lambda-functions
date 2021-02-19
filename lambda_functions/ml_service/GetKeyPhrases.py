@@ -1,6 +1,8 @@
 import boto3
 import logging
 import requests
+import os
+import json
 from botocore.exceptions import ClientError, ParamValidationError
 from operator import itemgetter
 
@@ -13,18 +15,19 @@ comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 
 
 def post_TopicalPageRank(language, data):
+    stage = os.environ['STAGE']    
     if language == "de":
-        url="https://8wfgkfs2wc.execute-api.eu-central-1.amazonaws.com/models/TopicalPageRank"
+        url="https://8wfgkfs2wc.execute-api.eu-central-1.amazonaws.com/"+stage+"/models/TopicalPageRank"
     else:
         logger.error("Language not supported by TopicalPageRank!")
         return {}
 
     headers = {"content-type": "text/csv", "Accept": "text/csv"}
     prediction = requests.post(url, headers=headers, data=data.encode('utf-8'))
-    if 'Body' not in prediction:
-        return {}
-    result = prediction['Body'].read()
-    result = result.decode()
+    if not prediction.ok:
+        raise Exception('Received status code {}.'.format(prediction.status_code))
+    result = prediction.text
+    result = json.loads(result)
     # convert to a structure according comprehend
     keyphrases = []
     for item in result:
@@ -73,7 +76,7 @@ def get_phrases(event, context):
     response = {}
     try:
         response = post_TopicalPageRank(LanguageCode, text)
-    except ClientError as e:
+    except Exception as e:
         logger.error("TopicalPageRank error: %s", e, exc_info=True)
     if not "KeyPhrases" in response:
         try:

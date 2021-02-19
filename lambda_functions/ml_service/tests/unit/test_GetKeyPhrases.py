@@ -1,9 +1,11 @@
 from ml_service import GetKeyPhrases
 import pytest
+import os
 
 
 class TestGetKeyPhrases:
     def test_get_phrases_1(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
                     "coronavirus in [young people] who do not have any health problems. Their problem is that when "
@@ -17,6 +19,7 @@ class TestGetKeyPhrases:
                        'Their problem']
 
     def test_get_phrases_2(self):
+        os.environ["STAGE"] = "dev"
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
                     "coronavirus in [young people] who do not have any health problems. Their problem is that when "
@@ -30,6 +33,7 @@ class TestGetKeyPhrases:
         assert ret == []
 
     def test_get_phrases_3(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "LanguageCode": "en"
         }
@@ -40,6 +44,7 @@ class TestGetKeyPhrases:
         assert ret == []
 
     def test_get_phrases_4(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
                     "coronavirus in [young people] who do not have any health problems. Their problem is that when "
@@ -52,6 +57,7 @@ class TestGetKeyPhrases:
         assert ret == []
 
     def test_get_phrases_5(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "Spanien korrigiert Anzahl der  Corona-Toten von über 26.000 auf 2.000. Bin mal gespannt, "
                     "wie lange D-A-CH noch an den FAKE-Zahlen festhalten wollen.",
@@ -63,6 +69,7 @@ class TestGetKeyPhrases:
                        'Anzahl der  Corona-Toten', 'den FAKE-Zahlen']
 
     def test_get_phrases_6(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "GERADE VON NTV AUFGENOMMEN!!!! MERKEL EMPFÄNGT MINSITERPRÄSIDENTEN IM KANZLERAMT.WO IST DER "
                     "SICHERHEITSABSTAND, WO SIND DIE MASKEN??? SELBST SÖDER TRÄGT KEINE, ABER WEHE DER STEHT IN "
@@ -76,6 +83,7 @@ class TestGetKeyPhrases:
                        '??? SELBST SÖDER TRÄGT KEINE']
 
     def test_get_phrases_7(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "Der Postillon: Erstes Baby mit Maske geboren ",
             "LanguageCode": "de"
@@ -85,6 +93,7 @@ class TestGetKeyPhrases:
         assert ret == ['Der Postillon', 'Erstes Baby mit Maske']
 
     def test_get_phrases_8(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "https://www.der-postillon.com/2020/09/baby-maske.html \n  München (dpo) - Sensation in der "
                     "Frauenklinik Neuperlach! Dort ist in der\n  Nacht von Dienstag auf Mittwoch das weltweit erste "
@@ -106,6 +115,7 @@ class TestGetKeyPhrases:
         assert ret == ['das Material', 'sie', 'die Maske']
 
     def test_get_phrases_9(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition ",
             "LanguageCode": "de"
@@ -116,6 +126,7 @@ class TestGetKeyPhrases:
                        '19 Sterblichkeitsrate von 0,01 Prozent']
 
     def test_get_phrases_10(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "\nVeröffentlicht am 26. Juni 2020 von VG.\n Dem Papier zufolge gab es bis zum 24. Juni 2020 in "
                     "Deutschland insgesamt 8’914 Todesfälle im Zusammenhang mit der Erkrankung. Bei 83 Millionen "
@@ -136,6 +147,7 @@ class TestGetKeyPhrases:
         assert ret == ['den letzten 7 Tagen', 'das Zahlenmaterial', 'es']
 
     def test_get_phrases_11(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "Obama finanzierte Labor in Wuhan. | Viral Virus - Lass es jeden wissen ",
             "LanguageCode": "de"
@@ -145,6 +157,7 @@ class TestGetKeyPhrases:
         assert ret == ['Obama', 'Labor', 'jeden']
 
     def test_get_phrases_12(self):
+        os.environ["STAGE"] = "dev"        
         event = {
             "Text": "https://viralvirus.de/politik/obama-finanzierte-labor-in-wuhan/?fbclid=IwAR3qOdSnC"
                     "-A7h6wvPQcOFmuFPgLGNOImn_Ee6_vjAGeAmVJ9MVZnoNeFMBk Dass Bill Gates offenbar zu den Finanziers "
