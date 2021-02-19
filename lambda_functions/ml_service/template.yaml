@@ -156,6 +156,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
 
   GetEntitiesFunction:
     Type: AWS::Serverless::Function
