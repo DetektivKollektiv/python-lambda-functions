@@ -41,7 +41,8 @@ def session(item, submission_id):
 
 
 @mock_ses
-def test_mail_notification(session, item, submission_id):
+def test_mail_notification(session, item, submission_id, monkeypatch):
+    monkeypatch.setenv("STAGE", "dev")
     from review_service import notifications
 
     conn = boto3.client("ses", region_name="eu-central-1")
@@ -58,7 +59,11 @@ def test_mail_notification(session, item, submission_id):
             'submission_id': submission_id
         }
     }
-    confirm_submission(event, None, True, session)
+    response = confirm_submission(event, None, True, session)
+    assert response['statusCode'] == 200
+    assert response['headers']['content-type'] == 'text/html; charset=utf-8'
+    assert 'Mail-Adresse erfolgreich bestätigt!' in response['body']
+    assert 'https://dev.detective-collective.org' in response['body']
 
     notifications.notify_users(True, session, item)
 
