@@ -123,9 +123,11 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
         A list including the top n user objects as ordered by attr, desc
     """
     session = get_db_session(is_test, session)
-    sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
     users = session.query(User).order_by(sort_column).limit(n).all()
     return users
+
 
 def get_all_users(is_test, session) -> [User]:
     """Returns a user by their id
@@ -221,7 +223,6 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             user_count = session.query(User).count()
 
         return user_count
-        # raise Exception("User has not created any reviews yet")
     if level_rank:
         count_subquery = session.query(
             User,
@@ -229,7 +230,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed", User.level_id == user.level_id). \
             group_by(User.id). \
-            order_by(func.count(User.id))
+            order_by(func.count(User.id).desc(), User.name)
 
     else:
         count_subquery = session.query(
@@ -238,7 +239,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed"). \
             group_by(User.id). \
-            order_by(func.count(User.id).desc())
+            order_by(func.count(User.id).desc(), User.name)
     i = 1
     for row in count_subquery.all():
         if row.User.id == user.id:
