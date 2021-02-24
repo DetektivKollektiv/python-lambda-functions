@@ -79,12 +79,6 @@ def create_item(item, is_test, session):
     session = get_db_session(is_test, session)
 
     item.id = str(uuid4())
-    item.open_reviews = 4
-    item.open_reviews_level_1 = 4
-    item.open_reviews_level_2 = 4
-    item.in_progress_reviews_level_1 = 0
-    item.in_progress_reviews_level_2 = 0
-    item.open_timestamp = helper.get_date_time_now(is_test)
     session.add(item)
     session.commit()
 
@@ -152,6 +146,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
             .filter(~Item.reviews.any(Review.user_id == user.id)) \
+            .filter(Item.status == "open") \
             .order_by(Item.open_timestamp.asc()) \
             .limit(num_items).all()
 
@@ -166,6 +161,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
     result = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
         .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        .filter(Item.status == "open") \
         .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
 

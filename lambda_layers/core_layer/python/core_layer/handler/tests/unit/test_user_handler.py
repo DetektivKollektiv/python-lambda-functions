@@ -25,6 +25,11 @@ def user_id_3():
 
 
 @pytest.fixture
+def user_id_4():
+    return str(uuid4())
+
+
+@pytest.fixture
 def review_id_1():
     return str(uuid4())
 
@@ -50,6 +55,11 @@ def review_id_5():
 
 
 @pytest.fixture
+def review_id_6():
+    return str(uuid4())
+
+
+@pytest.fixture
 def item_id_1():
     return str(uuid4())
 
@@ -60,7 +70,7 @@ def item_id_2():
 
 
 @pytest.fixture
-def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1, review_id_2, review_id_3, review_id_4, review_id_5):
+def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, user_id_4, review_id_1, review_id_2, review_id_3, review_id_4, review_id_5, review_id_6):
 
     item1 = item_creator.create_item(item_id_1, None)
     item2 = item_creator.create_item(item_id_2, None)
@@ -69,22 +79,25 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, review_id_1,
     level2 = level_creator.create_level(2, 5)
     level3 = level_creator.create_level(3, 10)
 
-    user1 = user_creator.create_user(user_id_1, level1, 0)
-    user2 = user_creator.create_user(user_id_2, level1, 1)
-    user3 = user_creator.create_user(user_id_3, level2, 8)
+    user1 = user_creator.create_user(user_id_1, level1, 0, 'user1')
+    user2 = user_creator.create_user(user_id_2, level1, 1, 'user2')
+    user3 = user_creator.create_user(user_id_3, level2, 8, 'user3')
+    user4 = user_creator.create_user(user_id_4, level2, 8, 'user4')
 
-    review1 = review_creator.create_review(
+    closed_review1 = review_creator.create_review(
         review_id_1, item1.id, user_id_1, "closed")
-    review2 = review_creator.create_review(
+    closed_review2 = review_creator.create_review(
         review_id_2, item2.id, user_id_1, "closed", datetime.now() - timedelta(days=3))
-    review3 = review_creator.create_review(
+    closed_review3 = review_creator.create_review(
         review_id_3, item1.id, user_id_3, "closed")
-    review4 = review_creator.create_review(
-        review_id_4, item1.id, user_id_2, "in progress")
-    review5 = review_creator.create_review(
-        review_id_5, item1.id, user_id_3, "in progress")
+    closed_review4 = review_creator.create_review(
+        review_id_4, item1.id, user_id_4, "closed")
+    open_review1 = review_creator.create_review(
+        review_id_5, item1.id, user_id_2, "in progress")
+    open_review2 = review_creator.create_review(
+        review_id_6, item1.id, user_id_3, "in progress")
 
-    return[item1, item2, level1, level2, level3, user1, user2, user3, review1, review2, review3, review4, review5]
+    return[item1, item2, level1, level2, level3, user1, user2, user3, user4, closed_review1, closed_review2, closed_review3, closed_review4, open_review1, open_review2]
 
 
 @pytest.fixture
@@ -96,30 +109,37 @@ def session(fixtures):
     return session
 
 
-def test_get_user_total_rank(session, user_id_1, user_id_2, user_id_3):
+def test_get_user_total_rank(session, user_id_1, user_id_2, user_id_3, user_id_4):
     user_1 = session.query(User).filter(User.id == user_id_1).one()
     user_2 = session.query(User).filter(User.id == user_id_2).one()
     user_3 = session.query(User).filter(User.id == user_id_3).one()
+    user_4 = session.query(User).filter(User.id == user_id_4).one()
+
     user_rank_1 = user_handler.get_user_rank(user_1, False, True, session)
     user_rank_3 = user_handler.get_user_rank(user_3, False, True, session)
     user_rank_2 = user_handler.get_user_rank(user_2, False, True, session)
+    user_rank_4 = user_handler.get_user_rank(user_4, False, True, session)
 
     assert user_rank_1 == 1
     assert user_rank_3 == 2
-    assert user_rank_2 == 3
+    assert user_rank_2 == 4
+    assert user_rank_4 == 3
 
 
-def test_get_user_level_rank(session, user_id_1, user_id_2, user_id_3):
+def test_get_user_level_rank(session, user_id_1, user_id_2, user_id_3, user_id_4):
     user_1 = session.query(User).filter(User.id == user_id_1).one()
     user_2 = session.query(User).filter(User.id == user_id_2).one()
     user_3 = session.query(User).filter(User.id == user_id_3).one()
+    user_4 = session.query(User).filter(User.id == user_id_4).one()
     user_rank_1 = user_handler.get_user_rank(user_1, True, True, session)
     user_rank_3 = user_handler.get_user_rank(user_3, True, True, session)
     user_rank_2 = user_handler.get_user_rank(user_2, True, True, session)
+    user_rank_4 = user_handler.get_user_rank(user_4, True, True, session)
 
     assert user_rank_1 == 1
     assert user_rank_3 == 1
     assert user_rank_2 == 2
+    assert user_rank_4 == 2
 
 
 def test_get_total_solved_cases(session, user_id_1, user_id_2, user_id_3):

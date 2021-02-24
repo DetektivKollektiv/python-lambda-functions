@@ -1,3 +1,5 @@
+import os
+import io
 import logging
 import json
 import traceback
@@ -19,14 +21,22 @@ def confirm_submission(event, context, is_test=False, session=None):
 
     submission_id = event['pathParameters']['submission_id']
 
+    stage = os.environ['STAGE']
+    if stage == 'prod':
+        link = 'https://detective-collective.org'
+    else:
+        link = 'https://{}.detective-collective.org'.format(stage)
+
+    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                     'submission_confirmed_webpage.html'), mode='r', encoding='utf-8').read().format(link)
+
     try:
         submission_handler.confirm_submission(
             submission_id, is_test, session)
         response = {
-            "statusCode": 200,
-            'headers': {"content-type": "application/json; charset=utf-8"},
-            # TODO: Style this response
-            "body": 'Deine Mailadresse wurde erfolgreich bestätigt!'
+            'statusCode': 200,
+            'headers': {"content-type": "text/html; charset=utf-8"},
+            'body': body_html
         }
 
     except Exception:
