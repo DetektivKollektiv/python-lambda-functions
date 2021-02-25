@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
+from core_layer import helper
 
 
 class Item(Base):
@@ -48,10 +49,10 @@ class Item(Base):
             "open_reviews_level_1": self.open_reviews_level_1,
             "open_reviews_level_2": self.open_reviews_level_2,
             "open_reviews": self.open_reviews,
-            "open_timestamp": self.open_timestamp,
-            "close_timestamp": self.close_timestamp,
             "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
-            "in_progress_reviews_level_2": self.in_progress_reviews_level_2
+            "in_progress_reviews_level_2": self.in_progress_reviews_level_2,
+            "open_timestamp": helper.get_date_time_str(self.open_timestamp),
+            "close_timestamp": helper.get_date_time_str(self.close_timestamp)
         }
 
         if with_tags:

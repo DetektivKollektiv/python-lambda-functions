@@ -32,6 +32,13 @@ def get_date_time(dt, is_test):
         return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
+def get_date_time_str(dt):
+    if isinstance(dt, datetime):
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return dt
+
+
 def set_cors(response, event, is_test):
     """Adds a CORS header to a response according to the headers found in the event.
 
