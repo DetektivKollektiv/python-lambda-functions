@@ -7,8 +7,10 @@ class ReviewPair(Base):
     __tablename__ = 'review_pairs'
     id = Column(String(36), primary_key=True)
     item_id = Column(String(36), ForeignKey('items.id'))
-    junior_review_id = Column(String(36), ForeignKey('reviews.id'))
-    senior_review_id = Column(String(36), ForeignKey('reviews.id'))
+    junior_review_id = Column(String(36), ForeignKey(
+        'reviews.id', ondelete='SET NULL'))
+    senior_review_id = Column(String(36), ForeignKey(
+        'reviews.id', ondelete='SET NULL'))
     is_good = Column(Boolean)
     variance = Column(Float)
 

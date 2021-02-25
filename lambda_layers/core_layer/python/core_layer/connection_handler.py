@@ -34,14 +34,18 @@ def get_db_session(is_test, session) -> Session:
         db = create_engine('mysql+auroradataapi://:@/{0}'.format(database_name),
                            echo=True,
                            connect_args=dict(aurora_cluster_arn=cluster_arn, secret_arn=secret_arn))
+
+        Session = sessionmaker(bind=db, expire_on_commit=False)
+        session = Session()
+
     else:
         def creator(): return sqlite3.connect(
             'file::memory:?cache=shared', uri=True, check_same_thread=False)
         db = create_engine('sqlite://', creator=creator)
         Base.metadata.create_all(db)
-
-    Session = sessionmaker(bind=db, expire_on_commit=False)
-    session = Session()
+        Session = sessionmaker(bind=db, expire_on_commit=False)
+        session = Session()
+        session.execute('pragma foreign_keys=on')
 
     return session
 
