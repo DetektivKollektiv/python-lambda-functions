@@ -2,6 +2,7 @@ from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, fun
 from sqlalchemy.orm import relationship
 from .model_base import Base
 from core_layer import helper
+from sqlalchemy.sql import func
 
 
 class Item(Base):
@@ -18,7 +19,8 @@ class Item(Base):
     open_reviews_level_2 = Column(Integer, default=4)
     in_progress_reviews_level_1 = Column(Integer, default=0)
     in_progress_reviews_level_2 = Column(Integer, default=0)
-    open_timestamp = Column(DateTime, server_default=func.now())
+    open_timestamp = Column(
+        DateTime, server_default=func.now(), nullable=False)
     close_timestamp = Column(DateTime)
     verification_process_version = Column(Integer)
 
