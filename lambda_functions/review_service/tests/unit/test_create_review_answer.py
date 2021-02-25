@@ -3,8 +3,6 @@ import json
 import pytest
 from sqlalchemy.orm import Session
 
-from core_layer.connection_handler import get_db_session
-
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.model.review_pair_model import ReviewPair
@@ -16,6 +14,7 @@ from review_service.create_review_answer import create_review_answer
 from core_layer.handler import review_handler
 
 from ....tests.helper import event_creator
+from core_layer.connection_handler import get_db_session
 
 from uuid import uuid4
 
