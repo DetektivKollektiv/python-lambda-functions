@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
+from sqlalchemy.sql import func
 
 
 class Item(Base):
