@@ -1,6 +1,6 @@
 aiodns==2.0.0
     # via -r requirements.in
-aiohttp==3.7.3
+aiohttp==3.7.4
     # via -r requirements.in
 async-timeout==3.0.1
     # via aiohttp
