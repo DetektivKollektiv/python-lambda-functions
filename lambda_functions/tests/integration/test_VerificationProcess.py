@@ -8,6 +8,7 @@ from core_layer.model.review_model import Review
 from core_layer.model.review_pair_model import ReviewPair
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.review_answer_model import ReviewAnswer
+from core_layer.model.submission_model import Submission
 
 from core_layer.handler import user_handler, item_handler, review_handler, review_pair_handler, review_question_handler
 
@@ -17,10 +18,16 @@ from ...review_service.create_review import create_review
 from ...review_service.get_review_question import get_review_question
 from uuid import uuid4
 from ..helper import helper_functions
+from moto import mock_ses
+import boto3
 
 
+@mock_ses
 def test_verification_process_best_case(monkeypatch):
+    monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("DBNAME", "Test")
+    conn = boto3.client("ses", region_name="eu-central-1")
+    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
 
     session = get_db_session(True, None)
     session = setup_scenarios.create_levels_junior_and_senior_detectives(
@@ -43,9 +50,24 @@ def test_verification_process_best_case(monkeypatch):
     assert len(users) == 10
 
     # Creating an item
+
     item = Item()
     item.content = "This item needs to be checked"
     item = item_handler.create_item(item, True, session)
+    assert item.in_progress_reviews_level_1 == 0
+    assert item.open_reviews_level_1 == 4
+    assert item.status == 'unconfirmed'
+
+    item.status = 'open'
+    session.merge(item)
+
+    submission = Submission()
+    submission.id = 'Submission 1'
+    submission.item_id = item.id
+    submission.mail = 'test@test.de'
+    submission.status = 'confirmed'
+    session.add(submission)
+    session.commit()
 
     items = item_handler.get_all_items(True, session)
     assert len(items) == 1
@@ -108,6 +130,10 @@ def test_verification_process_best_case(monkeypatch):
     assert item.open_reviews_level_2 == 0
     assert item.open_reviews == 0
 
+    send_quota = conn.get_send_quota()
+    sent_count = int(send_quota["SentLast24Hours"])
+    assert sent_count == 1
+
 
 def test_verification_process_worst_case(monkeypatch):
 
@@ -135,6 +161,7 @@ def test_verification_process_worst_case(monkeypatch):
     # Creating an item
     item = Item()
     item.content = "This item needs to be checked"
+    item.status = 'open'
     item = item_handler.create_item(item, True, session)
 
     items = item_handler.get_all_items(True, session)
