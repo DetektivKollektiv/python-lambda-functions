@@ -1,8 +1,8 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
-from core_layer import helper
 from sqlalchemy.sql import func
+from datetime import datetime
 
 
 class Item(Base):
@@ -53,8 +53,8 @@ class Item(Base):
             "open_reviews": self.open_reviews,
             "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
             "in_progress_reviews_level_2": self.in_progress_reviews_level_2,
-            "open_timestamp": helper.get_date_time_str(self.open_timestamp),
-            "close_timestamp": helper.get_date_time_str(self.close_timestamp)
+            "open_timestamp": self.open_timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.open_timestamp, datetime) else self.open_timestamp,
+            "close_timestamp": self.close_timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.close_timestamp, datetime) else self.close_timestamp
         }
 
         if with_tags:
