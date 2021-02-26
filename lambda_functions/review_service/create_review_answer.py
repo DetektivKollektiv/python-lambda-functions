@@ -81,7 +81,7 @@ def create_review_answer(event, context, is_test=False, session=None):
                         if partner_answer == None:
                             pair.is_good = False
                         else:
-                            if((review_answer.answer == 0 and partner_answer.answer != 0) or (review_answer.answer != 0 and partner_answer.answer == 0)):
+                            if((answer.answer == 0 and partner_answer.answer != 0) or (answer.answer != 0 and partner_answer.answer == 0)):
                                 pair.is_good = False
 
                     if (pair.is_good):
