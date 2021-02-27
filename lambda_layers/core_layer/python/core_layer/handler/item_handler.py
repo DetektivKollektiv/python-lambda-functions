@@ -6,7 +6,7 @@ from core_layer.model.review_model import Review
 from sqlalchemy.orm import Session
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
-from core_layer.handler import review_pair_handler
+from core_layer.handler import review_pair_handler, review_handler
 from uuid import uuid4
 
 
@@ -177,7 +177,9 @@ def compute_item_result_score(item_id, is_test, session):
 
     average_scores = []
     for pair in list(filter(lambda p: p.is_good, pairs)):
-        average_scores.append(pair.variance)
-
+        average_scores.append(review_handler.compute_review_result(
+            pair.junior_review.review_answers))
+        average_scores.append(review_handler.compute_review_result(
+            pair.senior_review.review_answers))
     result = statistics.median(average_scores)
     return result
