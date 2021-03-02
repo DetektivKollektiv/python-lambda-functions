@@ -77,3 +77,27 @@ class TestGetLanguage:
         ret = GetLanguage.get_language(event, context)
         assert ret != "en"
         assert ret != "de"
+
+    def test_get_language_8(self):
+        event = {
+            "Text": "https://www.compact-online.de/die-vergessenen-corona-opfer-jugend-psychiatrien-melden-rekordansturm/"
+        }
+        context = ""
+        ret = GetLanguage.get_language(event, context)
+        assert ret == "de"
+
+    def test_get_language_9(self):
+        event = {
+            "Text": "Min. viermal krabbeln einem im Jahr Spinnen in den Mund während man schläft. Hab ich gehört. :-)"
+        }
+        context = ""
+        ret = GetLanguage.get_language(event, context)
+        assert ret == "de"
+
+    def test_get_language_10(self):
+        event = {
+            "Text": "@Alice_Weidel Feb 18 \"50.000 Grenzkontrollen, 10.000 Zurückweisungen: #Seehofer ist stolz auf seine Lockdown-Kontrollbilanz an den Außengrenzen. Zur Erinnerung: Wir haben derzeit 359.000 Migranten ohne Bleiberecht im Land, weil die Grenzen seit 2015 angeblich nicht kontrolliert werden konnten! #AfD"
+        }
+        context = ""
+        ret = GetLanguage.get_language(event, context)
+        assert ret == "de"
