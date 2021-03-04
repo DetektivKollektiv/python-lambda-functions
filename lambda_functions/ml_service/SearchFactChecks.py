@@ -98,7 +98,7 @@ async def call_googleapi(session, search_terms, language_code):
 def post_DocSim(language, data):
     stage = os.environ['STAGE']    
     if language == "de":
-        url="https://api."+stage+".detektivkollektiv.org/models/DocSim"
+        url="https://api."+stage+".detektivkollektiv.org/ml_model_service/models/DocSim"
     else:
         logger.error("Language not supported!")
         raise Exception('Language not supported by DocSim!')

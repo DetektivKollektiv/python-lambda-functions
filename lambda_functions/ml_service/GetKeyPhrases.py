@@ -17,7 +17,7 @@ comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 def post_TopicalPageRank(language, data):
     stage = os.environ['STAGE']    
     if language == "de":
-        url="https://api."+stage+".detektivkollektiv.org/models/TopicalPageRank"
+        url="https://api."+stage+".detektivkollektiv.org/ml_model_service/models/TopicalPageRank"
     else:
         logger.error("Language not supported by TopicalPageRank!")
         return {}
