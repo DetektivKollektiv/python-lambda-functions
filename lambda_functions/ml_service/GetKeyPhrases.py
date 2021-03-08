@@ -1,6 +1,7 @@
 import boto3
 import logging
 import requests
+from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 import os
 import json
 from botocore.exceptions import ClientError, ParamValidationError
@@ -17,17 +18,22 @@ comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
 def post_TopicalPageRank(language, data):
     stage = os.environ['STAGE']    
     if stage == 'prod':
-        link = 'https://api.detektivkollektiv.org/ml_model_service/models/'
+        host = 'api.detektivkollektiv.org'
     else:
-        link = 'https://api.{}.detektivkollektiv.org/ml_model_service/models/'.format(stage)
+        host = 'api.{}.detektivkollektiv.org'.format(stage)
     if language == "de":
-        url = link+"TopicalPageRank"
+        url = "https://"+host+"/ml_model_service/models/TopicalPageRank"
     else:
         logger.error("Language not supported by TopicalPageRank!")
         return {}
 
     headers = {"content-type": "text/csv", "Accept": "text/csv"}
-    prediction = requests.post(url, headers=headers, data=data.encode('utf-8'))
+    auth = BotoAWSRequestsAuth(
+        aws_host=host,
+        aws_region="eu-central-1",
+        aws_service="execute-api"
+    )
+    prediction = requests.post(url, headers=headers, data=data.encode('utf-8'), auth=auth)
     if not prediction.ok:
         raise Exception('Received status code {}.'.format(prediction.status_code))
     result = prediction.text
