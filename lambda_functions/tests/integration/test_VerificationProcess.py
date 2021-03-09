@@ -133,6 +133,8 @@ def test_verification_process_best_case(monkeypatch):
     send_quota = conn.get_send_quota()
     sent_count = int(send_quota["SentLast24Hours"])
     assert sent_count == 1
+    session.refresh(submission)
+    assert not submission.mail
 
 
 def test_verification_process_worst_case(monkeypatch):

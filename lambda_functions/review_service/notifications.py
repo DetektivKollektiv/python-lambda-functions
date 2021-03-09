@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 from botocore.config import Config
 # Helper imports
 from core_layer import helper
-from core_layer.connection_handler import get_db_session
+from core_layer.connection_handler import get_db_session, update_object
 # Handler imports
 from core_layer.handler import submission_handler
 
@@ -106,6 +106,7 @@ def notify_users(is_test, session, item):
             try:
                 notify_telegram_user(
                     is_test, submission.telegram_id, item, rating, rating_text)
+                submission.telegram_id = None
             except Exception:
                 notifications_successful = False
 
@@ -114,12 +115,14 @@ def notify_users(is_test, session, item):
                 try:
                     notify_mail_user(submission.mail, item,
                                      rating, rating_text)
+                    submission.mail = None
                 except Exception:
                     notifications_successful = False
 
     if notifications_successful:
         logger.info(
             "User(s) notified. Check logs to see if mail and/or telegram notifications were successful.")
+        update_object(submission, is_test, session)
     else:
         logger.exception(
             "An error occurred during closed item user notification. Please check logs.")
