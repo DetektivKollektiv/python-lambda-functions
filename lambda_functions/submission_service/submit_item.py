@@ -17,7 +17,8 @@ logger.setLevel(logging.INFO)
 
 
 def remove_control_characters(s):
-    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+    return "".join(ch for ch in s if unicodedata.category(ch)[0] != "C")
+
 
 def submit_item(event, context, is_test=False, session=None):
 
@@ -74,14 +75,17 @@ def submit_item(event, context, is_test=False, session=None):
             client.start_execution(
                 stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
                 name='SFC_' + item.id,
-                input="{\"item\":{" \
-                            "\"id\":\"" + item.id + "\"," \
-                            "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
+                input="{\"item\":{"
+                "\"id\":\"" + item.id + "\","
+                "\"content\":\"" +
+                                remove_control_characters(
+                                    item.content) + "\" } }"
             )
 
         # Create submission
         submission_handler.create_submission_db(submission, is_test, session)
-        send_confirmation_mail(submission)
+        if submission.mail:
+            send_confirmation_mail(submission)
 
         response = {
             "statusCode": 201,
@@ -107,7 +111,10 @@ def send_confirmation_mail(submission: Submission):
     else:
         confirmation_link = 'https://api.{}.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
             stage, submission.id)
-    recipient = submission.mail
+    if submission.mail:
+        recipient = submission.mail
+    else:
+        return
     sender = "DetektivKollektiv <info@detektivkollektiv.org>"
     subject = 'Bestätige deine Mail-Adresse'
 
