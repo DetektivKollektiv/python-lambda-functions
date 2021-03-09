@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from uuid import uuid4
 import os
 import requests
+from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -98,17 +99,22 @@ async def call_googleapi(session, search_terms, language_code):
 def post_DocSim(language, data):
     stage = os.environ['STAGE']    
     if stage == 'prod':
-        link = 'https://api.detektivkollektiv.org/ml_model_service/models/'
+        host = 'api.detektivkollektiv.org'
     else:
-        link = 'https://api.{}.detektivkollektiv.org/ml_model_service/models/'.format(stage)
+        host = 'api.{}.detektivkollektiv.org'.format(stage)
     if language == "de":
-        url= link+"DocSim"
+        url = "https://"+host+"/ml_model_service/models/DocSim"
     else:
         logger.error("Language not supported!")
         raise Exception('Language not supported by DocSim!')
     headers = {"content-type": "text/csv", "Accept": "text/csv"}
+    auth = BotoAWSRequestsAuth(
+        aws_host=host,
+        aws_region="eu-central-1",
+        aws_service="execute-api"
+    )
     
-    response = requests.post(url, headers=headers, data=data.encode('utf-8'))
+    response = requests.post(url, headers=headers, data=data.encode('utf-8'), auth=auth)
 
     return response
 
