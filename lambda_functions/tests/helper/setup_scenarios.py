@@ -5,6 +5,7 @@ from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.handler import user_handler
 
 import pytest
+from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, Session, sessionmaker
 from ..helper import event_creator
@@ -23,16 +24,30 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
 
     return level
 
-def create_users_with_different_experience_levels(session) -> Session:
-    levels_to_create = [
-        {
-            'id': 1000,
-            'description': 'Junior',
-            'required_experience_points': 0
-        }
-    ]
 
-    level1Id = levels_to_create[0]['id']
+def create_users_for_ranking(session) -> Session:
+    """ 
+    Creates My Detective looking up ranking and his own position
+    3 different Levels (Junior, Senior, Master)
+    20 Users on Junior Level, 20 Users on Senior Level, 20 Users on Master Level
+    """
+    my_detective = User()
+    my_detective.id = "999"
+    my_detective.name = "MyDetektiv"
+    user_handler.create_user(my_detective, True, session)
+    my_detective.level_id = 2
+    my_detective.experience_points = 35
+    my_detective.sign_up_timestamp = datetime.today()
+    
+    levels_to_create = [
+        { 'id': 1, 'description': 'Junior', 'required_experience_points': 0 },
+        { 'id': 2, 'description': 'Senior', 'required_experience_points': 20 },
+        { 'id': 3, 'description': 'Master', 'required_experience_points': 40 }
+    ]
+    
+    level1_id = levels_to_create[0]['id']
+    level2_id = levels_to_create[1]['id']
+    level3_id = levels_to_create[2]['id']
 
     for level in levels_to_create:
         new_level = session.query(Level).get(level['id'])
@@ -42,31 +57,50 @@ def create_users_with_different_experience_levels(session) -> Session:
 
     users_to_create = []
 
-    # the last created will be 120
-    for i in range(100,121):
+    # the last created will be 60
+    for i in range(1, 21):
         users_to_create.append({
             'id': str(i),
-            'name': str(i),
-            'level_id': level1Id,
+            'name': "JuniorUser" + str(i),
+            'level_id': level1_id,
             'experience_points': i,
+            'sign_up_timestamp': datetime.today() - timedelta(days=i)
         })
-
+    for i in range(21, 41):
+        users_to_create.append({
+            'id': str(i),
+            'name': "SeniorUser" + str(i),
+            'level_id': level2_id,
+            'experience_points': i,
+            'sign_up_timestamp': datetime.today() - timedelta(days=i)
+        })
+    for i in range(41, 61):
+        users_to_create.append({
+            'id': str(i),
+            'name': "MasterUser" + str(i),
+            'level_id': level3_id,
+            'experience_points': i,
+            'sign_up_timestamp': datetime.now() - timedelta(days=i)
+        })
+    
+    
     for new_user in users_to_create:
         user_already_exists = session.query(User).get(new_user['id']) is not None
         # todo -> should wipe the database before the tests, instead of allowing tests to share the same data
         if(not user_already_exists):
             user = User()
             user.id = str(new_user['id'])
+            user = user_handler.create_user( user, True, session)
             user.name = new_user['name']
-            user = user_handler.create_user(
-                user, True, session)
             user.level_id = new_user['level_id']
             user.experience_points = new_user['experience_points']
+            user.sign_up_timestamp = new_user['sign_up_timestamp']
             session.merge(user)
 
     session.commit()
-
+    
     return session
+
 
 def create_levels_junior_and_senior_detectives(session):
     """

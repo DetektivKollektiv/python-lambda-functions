@@ -7,7 +7,7 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, entity_handler, keyphrase_handler
-import SearchFactChecks
+from ml_service import SearchFactChecks
 
 
 def get_online_factcheck(event, context, is_test=False, session=None):

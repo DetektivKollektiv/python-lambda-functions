@@ -10,14 +10,13 @@ def test_get_top_users(monkeypatch):
     monkeypatch.setenv("DBNAME", "Test")
 
     session = get_db_session(True, None)
-
-    session = setup_scenarios.create_users_with_different_experience_levels(session)
+    session = setup_scenarios.create_users_for_ranking(session)
 
     event = None
     resp = get_top_users(event, None, True, session)
     users = json.loads(resp["body"])
-    
-    assert users[0]['experience_points'] == 120
+
+    assert users[0]['experience_points'] == 60
 
     # each should be higher than the next (for the sorted column "experience_points")
     assert int(users[0]['experience_points']) > int(users[1]['experience_points'])
