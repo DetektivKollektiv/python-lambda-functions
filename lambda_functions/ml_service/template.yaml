@@ -40,7 +40,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [apigateway.amazonaws.com, lambda.amazonaws.com]
+              Service: 
+                - lambda.amazonaws.com
+                - apigateway.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
