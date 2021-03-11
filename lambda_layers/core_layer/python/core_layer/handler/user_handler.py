@@ -160,7 +160,7 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
     if session == None:
         session = get_db_session(is_test, session)
 
-    compare_timestamp = datetime.now() - timedelta(weeks=p)
+    compare_timestamp = helper.get_date_time(datetime.now(), is_test) - timedelta(weeks=p)
     sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
 
     users = session.query(User) \

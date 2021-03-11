@@ -59,35 +59,39 @@ def create_users_for_ranking(session) -> Session:
 
     # the last created will be 60
     for i in range(1, 21):
-        users_to_create.append({
-            'id': str(i),
-            'name': "JuniorUser" + str(i),
-            'level_id': level1_id,
-            'experience_points': i,
-            'sign_up_timestamp': datetime.today() - timedelta(days=i)
-        })
+        junior_user = User()
+        junior_user.id = str(i)
+        junior_user = user_handler.create_user( junior_user, True, session)
+        junior_user.name = "JuniorUser" + str(i)
+        junior_user.level_id = level1_id
+        junior_user.experience_points = i
+        junior_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(junior_user)
     for i in range(21, 41):
-        users_to_create.append({
-            'id': str(i),
-            'name': "SeniorUser" + str(i),
-            'level_id': level2_id,
-            'experience_points': i,
-            'sign_up_timestamp': datetime.today() - timedelta(days=i)
-        })
+        senior_user = User()
+        senior_user.id = str(i)
+        senior_user = user_handler.create_user( senior_user, True, session)
+        senior_user.name = "SeniorUser" + str(i)
+        senior_user.level_id = level2_id
+        senior_user.experience_points = i
+        senior_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(senior_user)
     for i in range(41, 61):
-        users_to_create.append({
-            'id': str(i),
-            'name': "MasterUser" + str(i),
-            'level_id': level3_id,
-            'experience_points': i,
-            'sign_up_timestamp': datetime.now() - timedelta(days=i)
-        })
+        master_user = User()
+        master_user.id = str(i)
+        master_user = user_handler.create_user( master_user, True, session)
+        master_user.name = "MasterUser" + str(i)
+        master_user.level_id = level3_id
+        master_user.experience_points = i
+        master_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(master_user)
     
     
-    for new_user in users_to_create:
-        user_already_exists = session.query(User).get(new_user['id']) is not None
+    for user in users_to_create:
+        user_already_exists = session.query(User).get(user.id) is not None
         # todo -> should wipe the database before the tests, instead of allowing tests to share the same data
         if(not user_already_exists):
+            """
             user = User()
             user.id = str(new_user['id'])
             user = user_handler.create_user( user, True, session)
@@ -95,6 +99,7 @@ def create_users_for_ranking(session) -> Session:
             user.level_id = new_user['level_id']
             user.experience_points = new_user['experience_points']
             user.sign_up_timestamp = new_user['sign_up_timestamp']
+            """
             session.merge(user)
 
     session.commit()
