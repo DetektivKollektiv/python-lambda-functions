@@ -139,9 +139,10 @@ def compute_review_result(review_answers):
     if(len(review_answers) <= 0):
         raise ValueError('ReviewAnswers is an empty list')
 
-    answers = (review_answer.answer for review_answer in review_answers)
+    answers = [
+        review_answer.answer for review_answer in review_answers if review_answer.answer > 0]
 
-    return sum(answers) / len(review_answers)
+    return sum(answers) / len(answers)
 
 
 def get_old_reviews_in_progress(is_test, session):
