@@ -86,22 +86,7 @@ def create_users_for_ranking(session) -> Session:
         master_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
         users_to_create.append(master_user)
     
-    
-    for user in users_to_create:
-        user_already_exists = session.query(User).get(user.id) is not None
-        # todo -> should wipe the database before the tests, instead of allowing tests to share the same data
-        if(not user_already_exists):
-            """
-            user = User()
-            user.id = str(new_user['id'])
-            user = user_handler.create_user( user, True, session)
-            user.name = new_user['name']
-            user.level_id = new_user['level_id']
-            user.experience_points = new_user['experience_points']
-            user.sign_up_timestamp = new_user['sign_up_timestamp']
-            """
-            session.merge(user)
-
+    session.add_all(users_to_create)
     session.commit()
     
     return session
