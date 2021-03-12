@@ -31,14 +31,7 @@ def create_users_for_ranking(session) -> Session:
     3 different Levels (Junior, Senior, Master)
     20 Users on Junior Level, 20 Users on Senior Level, 20 Users on Master Level
     """
-    my_detective = User()
-    my_detective.id = "999"
-    my_detective.name = "MyDetektiv"
-    user_handler.create_user(my_detective, True, session)
-    my_detective.level_id = 2
-    my_detective.experience_points = 35
-    my_detective.sign_up_timestamp = datetime.today()
-    
+   
     levels_to_create = [
         { 'id': 1, 'description': 'Junior', 'required_experience_points': 0 },
         { 'id': 2, 'description': 'Senior', 'required_experience_points': 20 },
@@ -56,6 +49,13 @@ def create_users_for_ranking(session) -> Session:
                 level['id'], level['description'], level['required_experience_points'])
             session.add(new_level)
 
+    my_detective = User()
+    my_detective.id = "999"
+    my_detective.name = "MyDetektiv"
+    user_handler.create_user(my_detective, True, session)
+    my_detective.level_id = 2
+    my_detective.experience_points = 35
+    my_detective.sign_up_timestamp = datetime.today()
     users_to_create = []
 
     # the last created will be 60
