@@ -6,7 +6,7 @@ from core_layer.model.review_model import Review
 from sqlalchemy.orm import Session
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
-from core_layer.handler import review_pair_handler
+from core_layer.handler import review_pair_handler, review_handler
 from uuid import uuid4
 
 
@@ -79,12 +79,6 @@ def create_item(item, is_test, session):
     session = get_db_session(is_test, session)
 
     item.id = str(uuid4())
-    item.open_reviews = 4
-    item.open_reviews_level_1 = 4
-    item.open_reviews_level_2 = 4
-    item.in_progress_reviews_level_1 = 0
-    item.in_progress_reviews_level_2 = 0
-    item.open_timestamp = helper.get_date_time_now(is_test)
     session.add(item)
     session.commit()
 
@@ -152,6 +146,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
         result = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
             .filter(~Item.reviews.any(Review.user_id == user.id)) \
+            .filter(Item.status == "open") \
             .order_by(Item.open_timestamp.asc()) \
             .limit(num_items).all()
 
@@ -166,6 +161,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
     result = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
         .filter(~Item.reviews.any(Review.user_id == user.id)) \
+        .filter(Item.status == "open") \
         .order_by(Item.open_timestamp.asc()) \
         .limit(num_items).all()
 
@@ -181,7 +177,9 @@ def compute_item_result_score(item_id, is_test, session):
 
     average_scores = []
     for pair in list(filter(lambda p: p.is_good, pairs)):
-        average_scores.append(pair.variance)
-
+        average_scores.append(review_handler.compute_review_result(
+            pair.junior_review.review_answers))
+        average_scores.append(review_handler.compute_review_result(
+            pair.senior_review.review_answers))
     result = statistics.median(average_scores)
     return result

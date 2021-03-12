@@ -248,14 +248,14 @@ def update_factcheck_models(event, context):
         else:
             # find the most recent date
             recent_date = dt.datetime.now(dt.timezone.utc)-relativedelta(years=5) # use at most the factchecks of the last 5 years
+            today = dt.datetime.now(dt.timezone.utc)
             for d in df_factchecks:
                 try:
                     date = parse(d['review_reviewDate'])
                 except:
                     continue
-                if date>recent_date:
+                if date>recent_date and date<today:
                     recent_date = date
-            today = dt.datetime.now(dt.timezone.utc)
             days = int((today - recent_date).days)+1
         # get factchecks from all Fact Checker
         for row in df_factchecker:

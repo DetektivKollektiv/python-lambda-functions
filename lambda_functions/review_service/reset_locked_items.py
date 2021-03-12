@@ -22,7 +22,7 @@ def reset_locked_items(event, context, is_test=False, session=None):
         return {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": "Items updated"
+            "body": "{} Review(s) deleted".format(len(reviews_in_progress))
         }
     except Exception:
         return {

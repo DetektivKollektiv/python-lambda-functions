@@ -92,3 +92,15 @@ class TestExtractClaim:
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
         assert resp["title"] == 'Helios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '
+
+    def test_extract_claim_6(self):
+        event = {
+            "item": {
+                "content": "https://de.rt.com/inland/110251-baden-wurttemberg-zwangseinweisung-fur-hartnackige/",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["title"] == 'Helios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '

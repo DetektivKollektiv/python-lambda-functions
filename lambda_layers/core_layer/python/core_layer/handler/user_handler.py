@@ -300,7 +300,6 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             user_count = session.query(User).count()
 
         return user_count
-        # raise Exception("User has not created any reviews yet")
     if level_rank:
         count_subquery = session.query(
             User,
@@ -308,7 +307,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed", User.level_id == user.level_id). \
             group_by(User.id). \
-            order_by(func.count(User.id))
+            order_by(func.count(User.id).desc(), User.name)
 
     else:
         count_subquery = session.query(
@@ -317,7 +316,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
             join(User.reviews). \
             filter(Review.status == "closed"). \
             group_by(User.id). \
-            order_by(func.count(User.id).desc())
+            order_by(func.count(User.id).desc(), User.name)
     i = 1
     for row in count_subquery.all():
         if row.User.id == user.id:

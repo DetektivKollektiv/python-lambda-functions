@@ -52,7 +52,8 @@ def create_users_for_ranking(session) -> Session:
     for level in levels_to_create:
         new_level = session.query(Level).get(level['id'])
         if new_level is None:
-            new_level = create_level(level['id'], level['description'], level['required_experience_points'])
+            new_level = create_level(
+                level['id'], level['description'], level['required_experience_points'])
             session.add(new_level)
 
     users_to_create = []
@@ -200,6 +201,7 @@ def create_questions(session):
     childquestion1a.parent_question_id = "1"
     childquestion1a.upper_bound = 4
     childquestion1a.lower_bound = 3
+    childquestion1a.max_children = 0
 
     childquestion1b = ReviewQuestion()
     childquestion1b.id = "1b"
@@ -207,6 +209,7 @@ def create_questions(session):
     childquestion1b.parent_question_id = "1"
     childquestion1b.upper_bound = 2
     childquestion1b.lower_bound = 1
+    childquestion1b.max_children = 0
 
     childquestion1c = ReviewQuestion()
     childquestion1c.id = "1c"
@@ -214,6 +217,7 @@ def create_questions(session):
     childquestion1c.parent_question_id = "1"
     childquestion1c.upper_bound = 3
     childquestion1c.lower_bound = 2
+    childquestion1c.max_children = 0
 
     parentquestion2 = ReviewQuestion()
     parentquestion2.id = "2"
@@ -226,6 +230,7 @@ def create_questions(session):
     childquestion2a.parent_question_id = "2"
     childquestion2a.upper_bound = 4
     childquestion2a.lower_bound = 3
+    childquestion2a.max_children = 0
 
     childquestion2b = ReviewQuestion()
     childquestion2b.id = "2b"
@@ -233,46 +238,47 @@ def create_questions(session):
     childquestion2b.parent_question_id = "2"
     childquestion2b.upper_bound = 2
     childquestion2b.lower_bound = 1
+    childquestion2b.max_children = 0
 
     parentquestion3 = ReviewQuestion()
     parentquestion3.id = "3"
     parentquestion3.info = "3"
-    parentquestion3.max_children = None
+    parentquestion3.max_children = 0
 
     parentquestion4 = ReviewQuestion()
     parentquestion4.id = "4"
     parentquestion4.info = "4"
-    parentquestion4.max_children = None
+    parentquestion4.max_children = 0
 
     parentquestion5 = ReviewQuestion()
     parentquestion5.id = "5"
     parentquestion5.info = "5"
-    parentquestion5.max_children = None
+    parentquestion5.max_children = 0
 
     parentquestion6 = ReviewQuestion()
     parentquestion6.id = "6"
     parentquestion6.info = "6"
-    parentquestion6.max_children = None
+    parentquestion6.max_children = 0
 
     parentquestion7 = ReviewQuestion()
     parentquestion7.id = "7"
     parentquestion7.info = "7"
-    parentquestion7.max_children = None
+    parentquestion7.max_children = 0
 
     parentquestion8 = ReviewQuestion()
     parentquestion8.id = "8"
     parentquestion8.info = "8"
-    parentquestion8.max_children = None
+    parentquestion8.max_children = 0
 
     parentquestion9 = ReviewQuestion()
     parentquestion9.id = "9"
     parentquestion9.info = "9"
-    parentquestion9.max_children = None
+    parentquestion9.max_children = 0
 
     parentquestion10 = ReviewQuestion()
     parentquestion10.id = "10"
     parentquestion10.info = "10"
-    parentquestion10.max_children = None
+    parentquestion10.max_children = 0
 
     session.add(parentquestion1)
     session.add(parentquestion2)

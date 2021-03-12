@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from uuid import uuid4
 import os
 import requests
+from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -95,6 +96,27 @@ async def call_googleapi(session, search_terms, language_code):
 
     return await response.json(), search_terms
 
+def post_DocSim(language, data):
+    stage = os.environ['STAGE']    
+    if stage == 'prod':
+        host = 'api.detektivkollektiv.org'
+    else:
+        host = 'api.{}.detektivkollektiv.org'.format(stage)
+    if language == "de":
+        url = "https://"+host+"/ml_model_service/models/DocSim"
+    else:
+        logger.error("Language not supported!")
+        raise Exception('Language not supported by DocSim!')
+    headers = {"content-type": "text/csv", "Accept": "text/csv"}
+    auth = BotoAWSRequestsAuth(
+        aws_host=host,
+        aws_region="eu-central-1",
+        aws_service="execute-api"
+    )
+    
+    response = requests.post(url, headers=headers, data=data.encode('utf-8'), auth=auth)
+
+    return response
 
 # Get best fitting fact check article
 async def get_article(search_terms, LanguageCode):
@@ -145,18 +167,14 @@ async def get_article(search_terms, LanguageCode):
                             sm_input.append(sm_input_search + ",\""+article_text+"\"")
                 # call sagemaker endpoint for similarity prediction
                 try:
-                    endpoint = endpoint_prefix + \
-                        LanguageCode+'-'+os.environ['STAGE']
+                    if sm_input == []:
+                        raise Exception('Nothing to compare.')
                     payload = '\n'.join(sm_input)
-                    response = sm_client.invoke_endpoint(
-                        EndpointName=endpoint,
-                        ContentType="text/csv",
-                        Accept="text/csv",
-                        Body=payload
-                    )
-                    result = response['Body'].read()
-                    result = result.decode()
-                    scores = result.split('\n')
+                    response = post_DocSim(LanguageCode, payload)
+                    if not response.ok:
+                        raise Exception('Received status code {}.'.format(response.status_code))
+                    result = response.text
+                    scores = json.loads(result)
                     ind = 0
                     for score in scores:
                         if score == '':
@@ -167,8 +185,7 @@ async def get_article(search_terms, LanguageCode):
                             bestsim = sim
                         ind = ind+1
                 except Exception as e:
-                    logger.error(
-                        'Error {} invoking sagemaker endpoint {}.'.format(e, endpoint))
+                    logger.error('DocSim error: {}.'.format(e))
                 # Store received factchecks in a bucket to be used for training a model to assess similarity between claims and factchecks
                 body = json.dumps(response_json)
                 key = newfactchecks_folder+str(uuid4())

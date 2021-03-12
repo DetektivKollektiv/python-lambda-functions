@@ -10,3 +10,4 @@ urllib3==1.25.11
 aiodns
 aiohttp
 asyncio
+aws_requests_auth

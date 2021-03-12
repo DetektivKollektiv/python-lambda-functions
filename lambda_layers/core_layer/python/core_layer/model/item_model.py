@@ -1,6 +1,8 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
+from sqlalchemy.sql import func
+from datetime import datetime
 
 
 class Item(Base):
@@ -12,12 +14,13 @@ class Item(Base):
     status = Column(String(36), default='unconfirmed')
     variance = Column(Float)
     result_score = Column(Float)
-    open_reviews = Column(Integer)
-    open_reviews_level_1 = Column(Integer)
-    open_reviews_level_2 = Column(Integer)
-    in_progress_reviews_level_1 = Column(Integer)
-    in_progress_reviews_level_2 = Column(Integer)
-    open_timestamp = Column(DateTime)
+    open_reviews = Column(Integer, default=4)
+    open_reviews_level_1 = Column(Integer, default=4)
+    open_reviews_level_2 = Column(Integer, default=4)
+    in_progress_reviews_level_1 = Column(Integer, default=0)
+    in_progress_reviews_level_2 = Column(Integer, default=0)
+    open_timestamp = Column(
+        DateTime, server_default=func.now(), nullable=False)
     close_timestamp = Column(DateTime)
     verification_process_version = Column(Integer)
 
@@ -48,10 +51,10 @@ class Item(Base):
             "open_reviews_level_1": self.open_reviews_level_1,
             "open_reviews_level_2": self.open_reviews_level_2,
             "open_reviews": self.open_reviews,
-            "open_timestamp": self.open_timestamp,
-            "close_timestamp": self.close_timestamp,
             "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
-            "in_progress_reviews_level_2": self.in_progress_reviews_level_2
+            "in_progress_reviews_level_2": self.in_progress_reviews_level_2,
+            "open_timestamp": self.open_timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.open_timestamp, datetime) else self.open_timestamp,
+            "close_timestamp": self.close_timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.close_timestamp, datetime) else self.close_timestamp
         }
 
         if with_tags:
