@@ -127,12 +127,12 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
-  GetTopUsersFunction:
+  GetUserRankingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: !Sub "detektivkollektiv-user_api-get_top_users-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-user_api-get_user_ranking-${STAGE}"
       CodeUri: .
-      Handler: get_top_users.get_top_users
+      Handler: get_user_ranking.get_user_ranking
       Runtime: python3.8
       MemorySize: 832
       Role:
@@ -143,7 +143,7 @@ Resources:
         Echo:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /top_users
+            Path: /ranking
             Method: get
             RestApiId:
               Ref: Api
