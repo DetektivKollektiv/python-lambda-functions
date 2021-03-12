@@ -13,7 +13,7 @@ from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-sm_client = boto3.client('sagemaker-runtime')
+sm_client = boto3.client('sagemaker-runtime', region_name='eu-central-1')
 endpoint_prefix = "fc-sim-"
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3')

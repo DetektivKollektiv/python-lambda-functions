@@ -1,4 +1,5 @@
 import logging
+import traceback
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import user_handler
