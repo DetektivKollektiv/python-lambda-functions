@@ -96,7 +96,7 @@ def give_experience_point(user_id, is_test, session):
         .order_by(Level.required_experience_points.desc()) \
         .first()
 
-    if new_level != user.level_id:
+    if new_level.id != user.level_id:
         user.level_id = new_level.id
     update_object(user, is_test, session)
 
