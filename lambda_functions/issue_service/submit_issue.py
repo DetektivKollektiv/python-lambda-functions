@@ -20,8 +20,11 @@ def submit_issue(event, context, is_test=False, session=None):
     if session == None:
         session = get_db_session(is_test, session)
 
-    issue = Issue()
-    issue = helper.body_to_object(event['body'], issue)
+    issue = Issue() #create object from issue_model.py (DB table: issues)
+    issue = helper.body_to_object(event['body'], issue) 
+    # add ip address
+    ip_address = event['requestContext']['identity']['sourceIp']
+    setattr(issue, 'ip_address', ip_address)
 
     issue = add_object(issue, is_test, session)
     if issue is None:
