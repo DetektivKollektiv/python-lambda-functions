@@ -44,3 +44,4 @@ def test_send_confirmation_mail(session, submission, monkeypatch):
     assert 'test@test.de' in message.destinations['ToAddresses']
     assert 'Bestätige deine Mail-Adresse' in message.body
     assert submission.id in message.body
+

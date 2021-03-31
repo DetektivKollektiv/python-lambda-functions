@@ -20,6 +20,8 @@ def item():
 @pytest.fixture
 def good_event():
     return {
+        # TODO: IP Adress mitschicken
+        # ip: 1.1.1.1
         'body': {
             'category': 'Feedback',
             'message': 'Good Job'
@@ -74,7 +76,9 @@ def test_submit_issue(session, good_event, bad_event, item_event, item):
     assert 'info@detektivkollektiv.org' in message.destinations['ToAddresses']
     assert good_event['body']['message'] in message.body
     # Check database entry
-    issue_count = session.query(Issue).count()
+    # issue_count = session.query(Issue).count()
+    # issue = session-query(Issue).first()
+    # assert issue.ip == 1.1.1.1
     assert issue_count == 1
 
     # Send bad event
