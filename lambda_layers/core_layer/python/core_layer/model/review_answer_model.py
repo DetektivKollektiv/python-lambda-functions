@@ -2,6 +2,7 @@ from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, fun
 from sqlalchemy.orm import relationship
 from .model_base import Base
 
+from core_layer.model.review_question_model import question_option_pairs
 
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
@@ -21,15 +22,6 @@ class ReviewAnswer(Base):
     def to_dict(self):
         return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
                 "answer": self.answer, "comment": self.comment}
-
-
-question_option_pairs = Table('question_option_pairs', Base.metadata,
-                              Column('question_id', String(36),
-                                     ForeignKey('review_questions.id')),
-                              Column('option_id', String(36),
-                                     ForeignKey('answer_options.id'))
-                              )
-
 
 class AnswerOption(Base):
     __tablename__ = 'answer_options'
