@@ -55,6 +55,3 @@ class ReviewQuestion(Base):
             "hint": self.hint,
             "options": [option.to_dict() for option in self.options]
         }
-
-
-
