@@ -1,6 +1,8 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
+from .review_model import Review
+from .review_question_model import ReviewQuestion
 
 from core_layer.model.review_question_model import question_option_pairs
 
@@ -14,14 +16,30 @@ class ReviewAnswer(Base):
     answer = Column(Integer)
     comment = Column(Text)
 
-    review_question = relationship(
-        "ReviewQuestion", back_populates="review_answers")
+    review_question = relationship(ReviewQuestion, back_populates="review_answers")
 
-    review = relationship("Review", back_populates="review_answers")
+    review = relationship(Review, back_populates="review_answers")
 
     def to_dict(self):
-        return {"id": self.id, "review_id": self.review_id, "review_question_id": self.review_question_id,
-                "answer": self.answer, "comment": self.comment}
+        return {
+            "id": self.id,
+            "review_id": self.review_id,
+            "review_question_id": self.review_question_id,
+            "answer": self.answer,
+            "comment": self.comment
+        }
+
+    def to_dict_with_questions_and_answers(self):
+        return {
+            "id": self.id,
+            "content": self.review_question.content,
+            "info": self.review_question.info,
+            "hint": self.review_question.hint,
+            "selected_option_id": self.answer,
+            "comment": self.comment,
+            "options": [option.to_dict() for option in self.review_question.options]
+        }
+
 
 class AnswerOption(Base):
     __tablename__ = 'answer_options'

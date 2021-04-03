@@ -29,6 +29,21 @@ def get_create_review_event(user_id, item_id):
     return accept_event
 
 
+def get_get_review_event(user_id, review_id):
+
+    accept_event = {
+        "queryStringParameters": {
+            "review_id": review_id
+        },
+        "requestContext": {
+            "identity": {
+                "cognitoAuthenticationProvider": "...CognitoSignIn:{}".format(user_id)
+            }
+        }
+    }
+    return accept_event
+
+
 def get_next_question_event(review_id, previous_question_id=None):
     if previous_question_id == None:
         event = {
