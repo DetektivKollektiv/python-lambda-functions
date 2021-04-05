@@ -1,10 +1,14 @@
 from uuid import uuid4
+import random
 from sqlalchemy import or_
+from sqlalchemy.orm import sessionmaker
 from core_layer.connection_handler import get_db_session
 from core_layer import helper
 from core_layer.model.review_model import Review
 from core_layer.model.review_pair_model import ReviewPair
+from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.handler import item_handler
+from core_layer.handler import review_question_handler
 
 
 def get_review_by_id(review_id, is_test, session) -> Review:
@@ -17,7 +21,7 @@ def get_review_by_id(review_id, is_test, session) -> Review:
     return review
 
 
-def get_partner_review(review, is_test, session):
+def get_partner_review(review, is_test, session) -> Review:
     session = get_db_session(is_test, session)
 
     pair = session.query(ReviewPair).filter(or_(ReviewPair.junior_review_id ==
@@ -126,6 +130,7 @@ def create_review(user, item, is_test, session) -> Review:
     session.merge(rip)
     session.merge(item)
     session.commit()
+    rip = create_answers_for_review(rip, is_test, session)
     return rip
 
 
@@ -163,3 +168,38 @@ def delete_old_reviews_in_progress(rips, is_test, session):
         session.merge(item)
         session.delete(rip)
     session.commit()
+
+
+def create_answers_for_review(review: Review, is_test, session):
+    partner_review = get_partner_review(review, is_test, session)
+    if partner_review != None:
+        for partner_answer in partner_review.review_answers:
+            answer = ReviewAnswer()
+            answer.id = str(uuid4())
+            answer.review_question = partner_answer.review_question
+            answer.review = review
+            session.add(answer)
+    else:
+        item_type_id = review.item.item_type_id
+        questions = review_question_handler.get_all_parent_questions(
+            item_type_id, is_test, session)
+        random.shuffle(questions)
+        for question in questions[:6]:
+            answer = ReviewAnswer()
+            answer.id = str(uuid4())
+            answer.review_question = question
+            answer.review = review
+            session.add(answer)
+            if question.max_children > 0:
+                child_questions = review_question_handler.get_all_child_questions(
+                    question.id, True, session)
+                for child_question in child_questions:
+                    answer = ReviewAnswer()
+                    answer.id = str(uuid4())
+                    answer.review_question = child_question
+                    answer.review = review
+                    session.add(answer)
+
+    session.commit()
+    session.refresh(review)
+    return review

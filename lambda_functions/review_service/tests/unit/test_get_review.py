@@ -1,5 +1,3 @@
-from turtle import reset
-
 import pytest
 import json
 from sqlalchemy.orm import Session
@@ -70,7 +68,7 @@ def session(item_id, review_id, review_question_id, user_id):
     o4.questions = [review_question]
     o3.questions = [review_question]
 
-    ## all answers use the same review questions in order to keep the test data small
+    # all answers use the same review questions in order to keep the test data small
     reviewanswer1 = generate_review_answer(1, review_id, review_question_id)
     reviewanswer2 = generate_review_answer(0, review_id, review_question_id)
     reviewanswer3 = generate_review_answer(1, review_id, review_question_id)
@@ -78,12 +76,13 @@ def session(item_id, review_id, review_question_id, user_id):
     reviewanswer5 = generate_review_answer(2, review_id, review_question_id)
     reviewanswer6 = generate_review_answer(1, review_id, review_question_id)
     reviewanswer7 = generate_review_answer(2, review_id, review_question_id)
-    review.review_answers = [reviewanswer1, reviewanswer2, reviewanswer3, reviewanswer4, reviewanswer5, reviewanswer6, reviewanswer7]
+    review.review_answers = [reviewanswer1, reviewanswer2, reviewanswer3,
+                             reviewanswer4, reviewanswer5, reviewanswer6, reviewanswer7]
 
     session.add(item)
     session.add(user)
     session.add(review_question)
-    ## refernenced ReviewAnswers are stored as well
+    # refernenced ReviewAnswers are stored as well
     session.add(review)
 
     session.commit()
@@ -107,11 +106,14 @@ def test_get_review(session, user_id, review_id):
     assert body["id"] == review_id
 
     assert len(body["questions"]) == 7
-    assert body["questions"][0]["id"] != None
+    assert body["questions"][0]["answer_id"] != None
+    assert body["questions"][0]["question_id"] != None
+    assert body["questions"][0]["parent_question_id"] == None
+    assert body["questions"][0]["max_children"] == None
     assert body["questions"][0]["content"] != None
     assert body["questions"][0]["info"] != None
     assert body["questions"][0]["hint"] != None
-    assert body["questions"][0]["selected_option_id"] == 1
+    assert body["questions"][0]["answer_value"] == 1
     assert len(body["questions"][0]["options"]) == 4
     assert body["questions"][0]["options"][0]["text"] != None
     assert body["questions"][0]["options"][0]["value"] == 0

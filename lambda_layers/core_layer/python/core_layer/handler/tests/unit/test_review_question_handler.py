@@ -4,6 +4,7 @@ from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound
 
 from core_layer.model import ItemType
+from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.handler import review_question_handler, review_handler, review_answer_handler
 from core_layer import connection_handler
 from helper import item_type_creator, review_question_creator, review_creator, item_creator, review_answer_creator
@@ -55,6 +56,15 @@ def item_id_2():
 
 
 @pytest.fixture
+def child_question1(question_id_1, type_id_1) -> ReviewQuestion:
+    cq1 = ReviewQuestion()
+    cq1.id = str(uuid4())
+    cq1.parent_question_id = question_id_1
+    cq1.item_type_id = type_id_1
+    return cq1
+
+
+@pytest.fixture
 def fixtures(type_id_1, type_id_2, question_id_1, question_id_2, question_id_3, item_id_1, item_id_2, review_id_1, review_id_2):
     type1 = item_type_creator.create_item_type(type_id_1, "type1")
     type2 = item_type_creator.create_item_type(type_id_2, "type2")
@@ -80,6 +90,17 @@ def session(fixtures):
     session = connection_handler.get_db_session(True, None)
 
     session.add_all(fixtures)
+    session.commit()
+
+    return session
+
+
+@pytest.fixture
+def session2(fixtures, child_question1):
+    session = connection_handler.get_db_session(True, None)
+
+    session.add_all(fixtures)
+    session.add(child_question1)
     session.commit()
 
     return session
@@ -185,5 +206,16 @@ def test_get_next_question_multiple(session, review_id_1, review_id_2, question_
     review_answer_handler.create_review_answer(review_answer2, True, session)
 
     with pytest.raises(Exception):
-        question4 = review_question_handler.get_next_question_db(
+        review_question_handler.get_next_question_db(
             review2, question3, True, session)
+
+
+def test_get_all_parent_questions(question_id_1, question_id_2, question_id_3, child_question1, type_id_1, type_id_2, session2):
+    all_questions_type_1 = review_question_handler.get_review_questions_by_item_type_id(
+        type_id_1, True, session2)
+    assert len(all_questions_type_1) == 2
+    assert child_question1 in all_questions_type_1
+    parent_questions_type_1 = review_question_handler.get_all_parent_questions(
+        type_id_1, True, session2)
+    assert len(parent_questions_type_1) == 1
+    assert child_question1 not in parent_questions_type_1

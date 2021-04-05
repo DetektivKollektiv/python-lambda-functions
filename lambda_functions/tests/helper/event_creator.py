@@ -1,5 +1,6 @@
 import json
 
+
 def get_create_review_answer_event(review_answer):
 
     event = {
@@ -14,16 +15,17 @@ def get_create_review_answer_event(review_answer):
 
     return event
 
+
 def get_create_review_event(user_id, item_id):
 
     accept_event = {
-        "queryStringParameters": {
-            "item_id": item_id
-        },
         "requestContext": {
             "identity": {
                 "cognitoAuthenticationProvider": "...CognitoSignIn:{}".format(user_id)
             }
+        },
+        "body": {
+            'item_id': item_id
         }
     }
     return accept_event

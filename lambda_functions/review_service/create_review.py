@@ -30,7 +30,8 @@ def create_review(event, context, is_test=False, session=None):
 
     try:
         # get item id from url query params
-        item_id = event['queryStringParameters']['item_id']
+        item_id = json.loads(event['body'])['item_id'] if isinstance(
+            event['body'], str) else event['body']['item_id']
 
         # get cognito id
         user_id = helper.cognito_id_from_event(event)
@@ -38,6 +39,13 @@ def create_review(event, context, is_test=False, session=None):
         # get user and item from the db
         user = user_handler.get_user_by_id(user_id, is_test, session)
         item = item_handler.get_item_by_id(item_id, is_test, session)
+        if item is None:
+            response = {
+                "statusCode": 404,
+                "body": "Item not found"
+            }
+            response_cors = helper.set_cors(response, event, is_test)
+            return response_cors
 
         # Try to accept item
         try:
@@ -47,7 +55,7 @@ def create_review(event, context, is_test=False, session=None):
             response = {
                 "statusCode": 201,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(review.to_dict())
+                "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
 
         except Exception:

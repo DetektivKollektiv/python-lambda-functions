@@ -6,6 +6,7 @@ from .review_question_model import ReviewQuestion
 
 from core_layer.model.review_question_model import question_option_pairs
 
+
 class ReviewAnswer(Base):
     __tablename__ = 'review_answers'
     id = Column(String(36), primary_key=True)
@@ -16,7 +17,8 @@ class ReviewAnswer(Base):
     answer = Column(Integer)
     comment = Column(Text)
 
-    review_question = relationship(ReviewQuestion, back_populates="review_answers")
+    review_question = relationship(
+        ReviewQuestion, back_populates="review_answers")
 
     review = relationship(Review, back_populates="review_answers")
 
@@ -31,11 +33,16 @@ class ReviewAnswer(Base):
 
     def to_dict_with_questions_and_answers(self):
         return {
-            "id": self.id,
+            "answer_id": self.id,
+            "question_id": self.review_question_id,
             "content": self.review_question.content,
             "info": self.review_question.info,
             "hint": self.review_question.hint,
-            "selected_option_id": self.answer,
+            "lower_bound": self.review_question.lower_bound,
+            "upper_bound": self.review_question.upper_bound,
+            "parent_question_id": self.review_question.parent_question_id,
+            "max_children": self.review_question.max_children,
+            "answer_value": self.answer,
             "comment": self.comment,
             "options": [option.to_dict() for option in self.review_question.options]
         }
