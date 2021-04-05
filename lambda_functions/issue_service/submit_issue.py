@@ -23,8 +23,14 @@ def submit_issue(event, context, is_test=False, session=None):
     issue = Issue() #create object from issue_model.py (DB table: issues)
     issue = helper.body_to_object(event['body'], issue) 
     # add ip address
-    ip_address = event['requestContext']['identity']['sourceIp']
-    setattr(issue, 'ip_address', ip_address)
+    try:
+        ip_address = event['requestContext']['identity']['sourceIp']
+        setattr(issue, 'ip_address', ip_address)
+    except Exception:
+        response = {
+            "statusCode": 400,
+            "body": "Could not read/add ip address. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
+        }        
 
     issue = add_object(issue, is_test, session)
     if issue is None:
