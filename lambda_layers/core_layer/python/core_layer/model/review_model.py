@@ -42,4 +42,3 @@ class Review(Base):
             "finish_timestamp": str(self.finish_timestamp),
             "questions": [review_answer.to_dict_with_questions_and_answers() for review_answer in self.review_answers]
         }
-

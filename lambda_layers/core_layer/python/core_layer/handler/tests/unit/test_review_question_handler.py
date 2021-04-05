@@ -152,7 +152,7 @@ def test_get_question_by_type_id(session, type_id_1, type_id_2, question_id_1, q
 
 def test_get_next_question_no_review():
     with pytest.raises(AttributeError):
-        review_question = review_question_handler.get_next_question_db(
+        review_question_handler.get_next_question_db(
             None, None, True, None)
 
 
