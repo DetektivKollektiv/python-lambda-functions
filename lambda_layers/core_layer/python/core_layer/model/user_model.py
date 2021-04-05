@@ -8,9 +8,9 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(String(36), primary_key=True)
     name = Column(String(100))
-    score = Column(Integer)
-    experience_points = Column(Integer)
-    level_id = Column(Integer, ForeignKey('levels.id'))
+    score = Column(Integer, default=0)
+    experience_points = Column(Integer, default=0)
+    level_id = Column(Integer, ForeignKey('levels.id'), default=1)
     sign_up_timestamp = Column(DateTime, server_default=func.now())
 
     level = relationship("Level", back_populates="users")
