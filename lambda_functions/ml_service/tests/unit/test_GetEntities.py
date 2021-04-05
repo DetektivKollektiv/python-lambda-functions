@@ -1,5 +1,7 @@
-from ml_service import GetEntities
+from ml_service import GetEntities, GetTags, UpdateFactChecks
 import pytest
+import os
+import random
 
 
 class TestGetEntities:
@@ -168,3 +170,16 @@ class TestGetTags:
         context = ""
         ret = GetEntities.get_tags(event, context)
         assert ret == ['RKI', 'Covid', 'Corona Transition']
+
+    def test_predict_tags_1(self):
+        os.environ["STAGE"] = "dev"
+        df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
+        claim_text = random.choice(df_factchecks)['claim_text']
+        event = {
+            "Text": claim_text,
+            "LanguageCode": "de"
+        }
+        context = ""
+        ret = GetTags.predict_tags(event, context)
+        assert ret == ['RKI', 'Covid', 'Corona Transition']
+        
