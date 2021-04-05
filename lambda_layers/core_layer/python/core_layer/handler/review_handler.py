@@ -2,13 +2,13 @@ from uuid import uuid4
 import random
 from sqlalchemy import or_
 from sqlalchemy.orm import sessionmaker
-from core_layer.connection_handler import get_db_session
+from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 from core_layer.model.review_model import Review
 from core_layer.model.review_pair_model import ReviewPair
 from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.handler import item_handler
-from core_layer.handler import review_question_handler
+from core_layer.handler import review_question_handler, user_handler, review_pair_handler, review_answer_handler
 
 
 def get_review_by_id(review_id, is_test, session) -> Review:
@@ -203,3 +203,51 @@ def create_answers_for_review(review: Review, is_test, session):
     session.commit()
     session.refresh(review)
     return review
+
+
+def close_review(review: Review, is_test, session) -> Review:
+    review.status = "closed"
+    review.finish_timestamp = helper.get_date_time_now(is_test)
+    user_handler.give_experience_point(
+        review.user_id, is_test, session)
+
+    pair = review_pair_handler.get_review_pair_from_review(
+        review, is_test, session)
+    partner_review = get_partner_review(
+        review, is_test, session)
+
+    if partner_review != None and partner_review.status == 'closed':
+        pair.is_good = True
+        for answer in review.review_answers:
+            partner_answer = review_answer_handler.get_partner_answer(
+                partner_review, answer.review_question_id, is_test, session)
+            if (answer.answer == None and partner_answer.answer != None) or (answer.answer != None and partner_answer.answer == None):
+                pair.is_good = False
+            elif (answer.answer == 0 and partner_answer.answer > 0) or (answer.answer > 0 and partner_answer.answer == 0):
+                pair.is_good = False
+
+        if pair.is_good:
+            difference = review_pair_handler.compute_difference(pair)
+            pair.variance = difference
+            pair.is_good = True if difference <= 1 else False
+
+        review.item.in_progress_reviews_level_1 -= 1
+        review.item.in_progress_reviews_level_2 -= 1
+        if pair.is_good:
+            review.item.open_reviews -= 1
+            review.item.open_reviews_level_1 -= 1
+            review.item.open_reviews_level_2 -= 1
+
+        pairs = review_pair_handler.get_review_pairs_by_item(
+            pair.item_id, is_test, session)
+
+        if(len(list(filter(lambda p: p.is_good, pairs))) >= 4):
+            review.item.status = "closed"
+            review.item.result_score = item_handler.compute_item_result_score(
+                review.item_id, is_test, session)
+
+        update_object(review, is_test, session)
+        update_object(pair, is_test, session)
+        update_object(review.item, is_test, session)
+
+        return review

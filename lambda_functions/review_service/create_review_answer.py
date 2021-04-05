@@ -11,7 +11,7 @@ from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.model.review_model import Review
 # Handler imports
 from core_layer.handler import review_answer_handler, review_handler, review_pair_handler, item_handler, user_handler
-import notifications
+from . import notifications
 
 
 def create_review_answer(event, context, is_test=False, session=None):
@@ -85,7 +85,7 @@ def create_review_answer(event, context, is_test=False, session=None):
                                 pair.is_good = False
 
                     if (pair.is_good):
-                        variance = review_pair_handler.compute_variance(pair)
+                        variance = review_pair_handler.compute_difference(pair)
                         pair.variance = variance
                         if(variance <= 1):
                             pair.is_good = True

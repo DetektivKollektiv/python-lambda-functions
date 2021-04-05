@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from .model_base import Base
 from .review_model import Review
 from .review_question_model import ReviewQuestion
@@ -46,6 +46,11 @@ class ReviewAnswer(Base):
             "comment": self.comment,
             "options": [option.to_dict() for option in self.review_question.options]
         }
+
+    @validates('answer')
+    def validate_answer(self, key, value):
+        assert value == None or (value >= 0 and value <= 4)
+        return value
 
 
 class AnswerOption(Base):

@@ -36,6 +36,6 @@ def test_simple_pair(junior_answer_1: int, junior_answer_2: int, senior_answer_1
         review_answer_creator.generate_answer(senior_answer_2)
     ]
 
-    result = review_pair_handler.compute_variance(pair)
+    result = review_pair_handler.compute_difference(pair)
 
     assert result == expected
