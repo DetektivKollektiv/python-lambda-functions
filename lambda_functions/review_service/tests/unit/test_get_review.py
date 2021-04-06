@@ -7,6 +7,7 @@ from core_layer.model.review_answer_model import ReviewAnswer, AnswerOption
 from core_layer.model.review_model import Review
 from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
+from core_layer.model.level_model import Level
 
 from review_service.get_review import get_review
 from core_layer.handler import review_handler
@@ -47,6 +48,8 @@ def session(item_id, review_id, review_question_id, user_id):
     user = User()
     user.id = user_id
 
+    level = Level(id=1)
+
     review = Review()
     review.id = review_id
     review.item_id = item.id
@@ -81,6 +84,7 @@ def session(item_id, review_id, review_question_id, user_id):
 
     session.add(item)
     session.add(user)
+    session.add(level)
     session.add(review_question)
     # refernenced ReviewAnswers are stored as well
     session.add(review)
