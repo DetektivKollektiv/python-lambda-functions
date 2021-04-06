@@ -145,7 +145,9 @@ def compute_review_result(review_answers):
         raise ValueError('ReviewAnswers is an empty list')
 
     answers = [
-        review_answer.answer for review_answer in review_answers if review_answer.answer > 0]
+        review_answer.answer for review_answer in review_answers if review_answer.answer is not None]
+
+    answers = [answer for answer in answers if answer > 0]
 
     return sum(answers) / len(answers)
 
@@ -223,7 +225,7 @@ def close_review(review: Review, is_test, session) -> Review:
                 partner_review, answer.review_question_id, is_test, session)
             if (answer.answer == None and partner_answer.answer != None) or (answer.answer != None and partner_answer.answer == None):
                 pair.is_good = False
-            elif (answer.answer == 0 and partner_answer.answer > 0) or (answer.answer > 0 and partner_answer.answer == 0):
+            elif (answer.answer == 0 and partner_answer.answer != 0) or (answer.answer != 0 and partner_answer.answer == 0):
                 pair.is_good = False
 
         if pair.is_good:
@@ -246,8 +248,8 @@ def close_review(review: Review, is_test, session) -> Review:
             review.item.result_score = item_handler.compute_item_result_score(
                 review.item_id, is_test, session)
 
-        update_object(review, is_test, session)
-        update_object(pair, is_test, session)
-        update_object(review.item, is_test, session)
+    update_object(review, is_test, session)
+    update_object(pair, is_test, session)
+    update_object(review.item, is_test, session)
 
-        return review
+    return review
