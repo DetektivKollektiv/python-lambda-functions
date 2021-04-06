@@ -43,9 +43,9 @@ def update_review(event, context, is_test=False, session=None):
             }
             response_cors = helper.set_cors(response, event, is_test)
             return response_cors
-        else:
-            review = review_handler.get_review_by_id(
-                body['id'], is_test, session)
+
+        review = review_handler.get_review_by_id(
+            body['id'], is_test, session)
 
         if review.user_id != user.id:
             response = {

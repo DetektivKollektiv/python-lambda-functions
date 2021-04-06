@@ -27,8 +27,9 @@ def get_open_items(event, context, is_test=False, session=None):
             num_items = 5
 
         user = user_handler.get_user_by_id(id, is_test, session)
-        items = item_handler.get_open_items_for_user(
+        response = item_handler.get_open_items_for_user(
             user, num_items, is_test, session)
+        items = response['items']
 
         if len(items) < 1:
             response = {
@@ -43,7 +44,11 @@ def get_open_items(event, context, is_test=False, session=None):
 
             response = {
                 "statusCode": 200,
-                'headers': {"content-type": "application/json; charset=utf-8"},
+                'headers':
+                    {
+                        "content-type": "application/json; charset=utf-8",
+                        "is_open_review": str(response['is_open_review'])
+                    },
                 "body": json.dumps(items_dict)
             }
 

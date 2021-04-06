@@ -37,7 +37,7 @@ def get_create_review_event(user_id, item_id):
 def get_get_review_event(user_id, review_id):
 
     accept_event = {
-        "queryStringParameters": {
+        "pathParameters": {
             "review_id": review_id
         },
         "requestContext": {
