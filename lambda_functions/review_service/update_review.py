@@ -31,31 +31,32 @@ def update_review(event, context, is_test=False, session=None):
 
     try:
         user_id = helper.cognito_id_from_event(event)
-        user = user_handler.get_user_by_id(user_id, is_test, session)
-
         body = json.loads(event['body']) if isinstance(
             event['body'], str) else event['body']
 
-        if 'id' not in body:
-            response = {
-                "statusCode": 400,
-                "body": "Bad request. Please provide a review id"
-            }
-            response_cors = helper.set_cors(response, event, is_test)
-            return response_cors
+    except:
+        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
 
+    if 'id' not in body:
+        return helper.get_text_response(400, "Malformed request. Please provide a review id.", event, is_test)
+
+    try:
         review = review_handler.get_review_by_id(
             body['id'], is_test, session)
+    except:
+        return helper.get_text_response(404, "No review found", event, is_test)
 
-        if review.user_id != user.id:
-            response = {
-                "statusCode": 403,
-                "body": "Forbidden. You are not allowed to access other users reviews."
-            }
-            response_cors = helper.set_cors(response, event, is_test)
-            return response_cors
+    try:
+        user = user_handler.get_user_by_id(user_id, is_test, session)
+    except:
+        return helper.get_text_response(404, "No user found.", event, is_test)
+
+    if review.user_id != user.id:
+        return helper.get_text_response(403, "Forbidden.", event, is_test)
+
         # If review is set closed
-        if 'status' in body and body['status'] == 'closed':
+    if 'status' in body and body['status'] == 'closed':
+        try:
             review = review_handler.close_review(review, is_test, session)
             if review.item.status == 'closed':
                 notifications.notify_users(is_test, session, review.item)
@@ -63,53 +64,39 @@ def update_review(event, context, is_test=False, session=None):
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
+        except:
+            return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
 
-        # If answers are appended
-        elif 'questions' in body:
-            for question in body['questions']:
-                if 'answer_value' in question:
-                    answer_value = question['answer_value']
-                else:
-                    response = {
-                        "statusCode": 400,
-                        "body": "Bad request. Please provide a valid body"
-                    }
-                    response_cors = helper.set_cors(response, event, is_test)
-                    return response_cors
+    # If answers are appended
+    elif 'questions' in body:
+        if not isinstance(body['questions'], list):
+            return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
+        for question in body['questions']:
+            if 'answer_value' in question:
+                answer_value = question['answer_value']
+            else:
+                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
 
-                if answer_value is not None:
-                    # Check if conditionality is met
-                    if question['parent_question_id'] is not None:
-                        parent_answer = review_answer_handler.get_parent_answer(
-                            question['answer_id'], is_test, session)
-                        if parent_answer.answer > question['upper_bound'] or parent_answer.answer < question['lower_bound']:
-                            response = {
-                                "statusCode": 400,
-                                "body": "Bad request. Please adhere to conditionality of questions."
-                            }
-                            response_cors = helper.set_cors(
-                                response, event, is_test)
-                            return response_cors
-                    # Update answer in db
+            if answer_value is not None:
+                # Check if conditionality is met
+                if question['parent_question_id'] is not None:
+                    parent_answer = review_answer_handler.get_parent_answer(
+                        question['answer_id'], is_test, session)
+                    if parent_answer.answer > question['upper_bound'] or parent_answer.answer < question['lower_bound']:
+                        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
+                # Update answer in db
+                try:
                     review_answer_handler.set_answer_value(
                         question['answer_id'], question['answer_value'], is_test, session)
+                except:
+                    return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
 
-            response = {
-                "statusCode": 200,
-                "body": json.dumps(review.to_dict_with_questions_and_answers())
-            }
-
-        else:
-            response = {
-                "statusCode": 400,
-                "body": "Bad request"
-            }
-
-    except Exception:
         response = {
-            "statusCode": 500,
-            "body": "Internal server error/uncaught exception. Stacktrace: {}".format(traceback.format_exc())
+            "statusCode": 200,
+            "body": json.dumps(review.to_dict_with_questions_and_answers())
         }
+        response_cors = helper.set_cors(response, event, is_test)
+        return response_cors
 
-    response_cors = helper.set_cors(response, event, is_test)
-    return response_cors
+    else:
+        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)

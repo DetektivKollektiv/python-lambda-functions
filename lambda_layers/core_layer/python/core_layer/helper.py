@@ -176,3 +176,13 @@ def get_secret(secret_name, region_name="eu-central-1"):
             decoded_binary_secret = base64.b64decode(
                 get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
+
+
+def get_text_response(status_code: int, text: str, event, is_test):
+    response = {
+        "statusCode": status_code,
+        'headers': {"content-type": "application/json; charset=utf-8"},
+        "body": text
+    }
+    response = set_cors(response, event, is_test)
+    return response
