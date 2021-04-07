@@ -6,7 +6,6 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, tag_handler
-import EnrichItem
 import SearchFactChecks
 
 import boto3
