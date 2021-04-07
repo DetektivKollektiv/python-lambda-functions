@@ -29,7 +29,7 @@ def create_review(event, context, is_test=False, session=None):
         session = connection_handler.get_db_session(False, None)
 
     try:
-        # get item id from url query params
+        # get item id from body
         item_id = json.loads(event['body'])['item_id'] if isinstance(
             event['body'], str) else event['body']['item_id']
 
