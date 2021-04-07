@@ -7,7 +7,7 @@ from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, tag_handler
 import EnrichItem
-from SearchFactChecks import post_DocSim
+import SearchFactChecks
 
 import boto3
 import os
@@ -202,7 +202,7 @@ def predict_tags(event, context, is_test=False, session=None):
         if sim_input == []:
             raise Exception('Nothing to compare.')
         payload = '\n'.join(sim_input)
-        response = post_DocSim(LanguageCode, payload)
+        response = SearchFactChecks.post_DocSim(LanguageCode, payload)
         if not response.ok:
             raise Exception('Received status code {}.'.format(response.status_code))
         result = response.text
@@ -215,7 +215,8 @@ def predict_tags(event, context, is_test=False, session=None):
                 continue
             sim = float(score)
             if sim > 0.5:
-                tags.append(term2tags[ind])
+                if term2tags[ind] not in tags:
+                    tags.append(term2tags[ind])
             ind = ind+1
     except Exception as e:
         logger.error('DocSim error: {}.'.format(e))
