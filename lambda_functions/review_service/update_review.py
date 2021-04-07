@@ -82,9 +82,12 @@ def update_review(event, context, is_test=False, session=None):
             if answer_value is not None:
                 # Check if conditionality is met
                 if question['parent_question_id'] is not None:
+                    for q in body['questions']:
+                        if q['question_id'] == question['parent_question_id']:
+                            parent_question = q
                     parent_answer = review_answer_handler.get_parent_answer(
                         question['answer_id'], is_test, session)
-                    if parent_answer.answer > question['upper_bound'] or parent_answer.answer < question['lower_bound']:
+                    if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
                         return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
                 # Update answer in db
                 try:
