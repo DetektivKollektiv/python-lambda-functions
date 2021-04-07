@@ -41,15 +41,15 @@ def get_open_items(event, context, is_test=False, session=None):
             items_dict = []
             for item in items:
                 items_dict.append(item.to_dict())
-
+            body = {"items": items_dict,
+                    "is_open_review": response['is_open_review']}
             response = {
                 "statusCode": 200,
                 'headers':
                     {
-                        "content-type": "application/json; charset=utf-8",
-                        "is_open_review": str(response['is_open_review'])
+                        "content-type": "application/json; charset=utf-8"
                     },
-                "body": json.dumps(items_dict)
+                "body": json.dumps(body)
             }
 
     except Exception:

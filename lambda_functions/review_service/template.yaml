@@ -100,10 +100,6 @@ Resources:
             Method: post # Change for each lambda
             RestApiId:
               Ref: Api
-            RequestParameters:
-              - method.request.querystring.item_id:
-                  Required: true
-                  Caching: true
       Environment:
         Variables:
           DBNAME:

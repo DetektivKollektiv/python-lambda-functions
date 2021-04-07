@@ -4,7 +4,7 @@ import traceback
 from core_layer import helper
 from core_layer import connection_handler
 from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
-from . import notifications
+import notifications
 
 
 def update_review(event, context, is_test=False, session=None):
@@ -64,6 +64,8 @@ def update_review(event, context, is_test=False, session=None):
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
+            response_cors = helper.set_cors(response, event, is_test)
+            return response_cors
         except:
             return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
 
