@@ -4,7 +4,7 @@ import traceback
 from core_layer import helper
 from core_layer import connection_handler
 from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
-from . import notifications
+import notifications
 
 
 def update_review(event, context, is_test=False, session=None):
@@ -64,6 +64,8 @@ def update_review(event, context, is_test=False, session=None):
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
+            response_cors = helper.set_cors(response, event, is_test)
+            return response_cors
         except:
             return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
 
@@ -80,9 +82,12 @@ def update_review(event, context, is_test=False, session=None):
             if answer_value is not None:
                 # Check if conditionality is met
                 if question['parent_question_id'] is not None:
+                    for q in body['questions']:
+                        if q['question_id'] == question['parent_question_id']:
+                            parent_question = q
                     parent_answer = review_answer_handler.get_parent_answer(
                         question['answer_id'], is_test, session)
-                    if parent_answer.answer > question['upper_bound'] or parent_answer.answer < question['lower_bound']:
+                    if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
                         return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
                 # Update answer in db
                 try:
