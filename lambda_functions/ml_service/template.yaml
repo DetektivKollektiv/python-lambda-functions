@@ -194,6 +194,8 @@ Resources:
       Handler: GetTags.predict_tags
       Runtime: python3.8
       MemorySize: 832
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
       Role:
         Fn::GetAtt:
           - LambdaExecutionRole
