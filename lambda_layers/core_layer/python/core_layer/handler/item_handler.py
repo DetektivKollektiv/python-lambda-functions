@@ -110,7 +110,7 @@ def get_item_by_id(id, is_test, session) -> Item:
     # notifications.notify_telegram_users(is_test, session, item)
 
 
-def get_open_items_for_user(user, num_items, is_test, session):
+def get_open_items_for_user(user, num_items, is_test, session) -> {'items': [Item], 'is_open_review': bool}:
     """Retreives a list of open items (in random order) to be reviewed by a user.
 
     Parameters
@@ -124,6 +124,8 @@ def get_open_items_for_user(user, num_items, is_test, session):
     ------
     items: Item[]
         The list of open items for the user
+    is_open_review: bool
+        True, if an open review was found. False, if no open review was found 
     """
 
     session = get_db_session(is_test, session)
@@ -139,7 +141,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
             items.append(item)
         # shuffle list order
         random.shuffle(items)
-        return items
+        return {'items': items, 'is_open_review': True}
 
     if user.level_id > 1:
         # Get open items for senior review
@@ -155,7 +157,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
             for item in result:
                 items.append(item)
             random.shuffle(items)
-            return items
+            return {'items': items, 'is_open_review': False}
 
     # Get open items for junior review and return them
     result = session.query(Item) \
@@ -168,7 +170,7 @@ def get_open_items_for_user(user, num_items, is_test, session):
     for item in result:
         items.append(item)
     random.shuffle(items)
-    return items
+    return {'items': items, 'is_open_review': False}
 
 
 def compute_item_result_score(item_id, is_test, session):

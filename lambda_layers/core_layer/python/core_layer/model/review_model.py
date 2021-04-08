@@ -31,3 +31,14 @@ class Review(Base):
             "start_timestamp": str(self.start_timestamp),
             "finish_timestamp": str(self.finish_timestamp)
         }
+
+    def to_dict_with_questions_and_answers(self):
+        return {
+            "id": self.id,
+            "is_peer_review": self.is_peer_review,
+            "belongs_to_good_pair": self.belongs_to_good_pair,
+            "user_id": self.user_id,
+            "start_timestamp": str(self.start_timestamp),
+            "finish_timestamp": str(self.finish_timestamp),
+            "questions": [review_answer.to_dict_with_questions_and_answers() for review_answer in self.review_answers]
+        }

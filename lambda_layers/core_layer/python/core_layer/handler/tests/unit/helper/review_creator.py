@@ -3,7 +3,7 @@ from core_layer.helper import get_date_time, get_date_time_now
 from datetime import datetime
 
 
-def create_review(id: int, item_id: str, user_id: str, status: str, finish_time=None) -> Review:
+def create_review(id: int, item_id: str, user_id: str=None, status: str=None, finish_time=None) -> Review:
     review = Review()
 
     review.id = id

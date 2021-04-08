@@ -2,7 +2,7 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import boto3
-from datetime import date
+from datetime import date, datetime, timedelta
 from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
@@ -79,9 +79,6 @@ def create_user(user, is_test, session):
     if session == None:
         session = get_db_session(is_test, session)
 
-    user.score = 0
-    user.level_id = 1
-    user.experience_points = 0
     session.add(user)
     session.commit()
 
@@ -96,7 +93,7 @@ def give_experience_point(user_id, is_test, session):
         .order_by(Level.required_experience_points.desc()) \
         .first()
 
-    if new_level != user.level_id:
+    if new_level.id != user.level_id:
         user.level_id = new_level.id
     update_object(user, is_test, session)
 
@@ -122,10 +119,91 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-    session = get_db_session(is_test, session)
+
+    if session == None:
+        session = get_db_session(is_test, session)
+
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
+
     users = session.query(User).order_by(sort_column).limit(n).all()
+    return users
+
+
+def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
+    """
+    Returns the top "n" users in a period (1 week)
+    sorted by "attr" in descending or ascending order as set by "descending"
+
+    Parameters
+    ----------
+    n: int, required
+        the number of users to return
+    p: period weeks, required
+
+    attr: str, required
+        the column on the users table to sort by
+    descending: bool, required
+        which order to sort the rows by column 'attr' in False = ASC or True =DESC
+    is_test: bool, required
+        is this code being run as part of the tests or in production
+    session: Session??, required
+        a database session
+    Returns
+    ------
+    users: [User]
+        A list including the top n user objects as ordered by attr, desc
+    """
+
+    if session == None:
+        session = get_db_session(is_test, session)
+
+    compare_timestamp = helper.get_date_time(
+        datetime.now() - timedelta(weeks=p), is_test)
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
+
+    users = session.query(User) \
+        .filter(User.sign_up_timestamp >= compare_timestamp) \
+        .order_by(sort_column) \
+        .limit(n).all()
+    return users
+
+
+def get_top_users_by_level(user_level, n, attr, descending, is_test, session) -> [User]:
+    """
+    Returns the top "n" users on the user's level
+    sorted by "attr" in descending or ascending order as set by "descending"
+
+    Parameters
+    ----------
+    event: dict, required
+        API Gateway Lambda Proxy Input Format
+    n: int, required
+        the number of users to return
+    attr: str, required
+        the column on the users table to sort by
+    descending: bool, required
+        which order to sort the rows by column 'attr' in False = ASC or True =DESC
+    is_test: bool, required
+        is this code being run as part of the tests or in production
+    session: Session??, required
+        a database session
+    Returns
+    ------
+    users: [User]
+        A list including the top n user objects as ordered by attr, desc
+    """
+    if session == None:
+        session = get_db_session(is_test, session)
+
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
+
+    users = session.query(User) \
+        .filter(User.level_id == user_level) \
+        .order_by(sort_column) \
+        .limit(n).all()
     return users
 
 

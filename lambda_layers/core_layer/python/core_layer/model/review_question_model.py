@@ -2,7 +2,12 @@ from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, fun
 from sqlalchemy.orm import relationship
 from .model_base import Base
 
-from core_layer.model.review_answer_model import question_option_pairs
+question_option_pairs = Table('question_option_pairs', Base.metadata,
+                              Column('question_id', String(36),
+                                     ForeignKey('review_questions.id', ondelete='SET NULL', onupdate='CASCADE')),
+                              Column('option_id', String(36),
+                                     ForeignKey('answer_options.id', ondelete='SET NULL', onupdate='CASCADE'))
+                              )
 
 
 class ReviewQuestion(Base):

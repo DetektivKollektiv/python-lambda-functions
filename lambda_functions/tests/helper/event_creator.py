@@ -1,4 +1,8 @@
 import json
+from core_layer.model.review_answer_model import ReviewAnswer
+from core_layer.model.review_model import Review
+from core_layer.handler import review_answer_handler
+
 
 def get_create_review_answer_event(review_answer):
 
@@ -14,11 +18,27 @@ def get_create_review_answer_event(review_answer):
 
     return event
 
+
 def get_create_review_event(user_id, item_id):
 
     accept_event = {
-        "queryStringParameters": {
-            "item_id": item_id
+        "requestContext": {
+            "identity": {
+                "cognitoAuthenticationProvider": "...CognitoSignIn:{}".format(user_id)
+            }
+        },
+        "body": {
+            'item_id': item_id
+        }
+    }
+    return accept_event
+
+
+def get_get_review_event(user_id, review_id):
+
+    accept_event = {
+        "pathParameters": {
+            "review_id": review_id
         },
         "requestContext": {
             "identity": {
@@ -47,64 +67,61 @@ def get_next_question_event(review_id, previous_question_id=None):
     return event
 
 
-def get_review_event(item_id, user_id, score):
+def get_review_event(review: Review, item_id, status, user_id, score, session):
+
+    questions = []
+    for answer in review.review_answers:
+        if answer.review_question.parent_question_id is None:
+            answer_dict = {
+                "answer_id": answer.id,
+                "question_id": answer.review_question_id,
+                "content": answer.review_question.content,
+                "info": answer.review_question.info,
+                "hint": answer.review_question.hint,
+                "lower_bound": answer.review_question.lower_bound,
+                "upper_bound": answer.review_question.upper_bound,
+                "parent_question_id": answer.review_question.parent_question_id,
+                "max_children": answer.review_question.max_children,
+                "answer_value": score,
+                "comment": answer.comment,
+            }
+            questions.append(answer_dict)
+        else:
+            if answer.review_question.lower_bound > score or answer.review_question.upper_bound < score:
+                answer_dict = {
+                    "answer_id": answer.id,
+                    "question_id": answer.review_question_id,
+                    "content": answer.review_question.content,
+                    "info": answer.review_question.info,
+                    "hint": answer.review_question.hint,
+                    "lower_bound": answer.review_question.lower_bound,
+                    "upper_bound": answer.review_question.upper_bound,
+                    "parent_question_id": answer.review_question.parent_question_id,
+                    "max_children": answer.review_question.max_children,
+                    "answer_value": None,
+                    "comment": answer.comment,
+                }
+            else:
+                answer_dict = {
+                    "answer_id": answer.id,
+                    "question_id": answer.review_question_id,
+                    "content": answer.review_question.content,
+                    "info": answer.review_question.info,
+                    "hint": answer.review_question.hint,
+                    "lower_bound": answer.review_question.lower_bound,
+                    "upper_bound": answer.review_question.upper_bound,
+                    "parent_question_id": answer.review_question.parent_question_id,
+                    "max_children": answer.review_question.max_children,
+                    "answer_value": score,
+                    "comment": answer.comment,
+                }
+            questions.append(answer_dict)
+
     review_event = {
         "body": {
+            "id": review.id,
             "item_id": item_id,
-            "review_answers": [
-                {
-                    "review_question_id": "1",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "2",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "3",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "4",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "5",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "6",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "7",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "8",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "9",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "10",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "11",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "12",
-                    "answer": score
-                },
-                {
-                    "review_question_id": "13",
-                    "answer": score
-                }
-            ]
+            "status": status
         },
         "requestContext": {
             "identity": {
@@ -112,4 +129,6 @@ def get_review_event(item_id, user_id, score):
             }
         }
     }
+
+    review_event['body']['questions'] = questions
     return review_event

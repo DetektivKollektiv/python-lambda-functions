@@ -174,6 +174,42 @@
                   "Tags.$": "$.Tags"
                 },
                 "ResultPath": null,
+                "Next": "Predict Tags"
+              },
+              "Predict Tags": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-PredictTags-${STAGE}",
+                "Catch": [
+                  {
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
+                    "Next": "EnrichmentFailed"
+                  }
+                ],
+                "Parameters": {
+                  "Text.$": "$.Claim.concatenation.Text",
+                  "LanguageCode.$": "$.item.language"
+                },
+                "ResultPath": "$.Tags",
+                "Next": "Store more Tags"
+              },
+              "Store more Tags": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemTags-${STAGE}",
+                "Catch": [
+                  {
+                    "ErrorEquals": [
+                      "States.TaskFailed"
+                    ],
+                    "Next": "EnrichmentFailed"
+                  }
+                ],
+                "Parameters": {
+                  "item.$": "$.item",
+                  "Tags.$": "$.Tags"
+                },
+                "ResultPath": null,
                 "Next": "Search Fact Checks"
               },
               "Search Fact Checks": {

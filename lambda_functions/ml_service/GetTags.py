@@ -6,7 +6,15 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, tag_handler
-import EnrichItem
+import SearchFactChecks
+
+import boto3
+import os
+import tarfile
+import csv
+from urllib.parse import unquote_plus
+
+s3_client = boto3.client('s3')
 
 
 def get_tags_for_item(event, context, is_test=False, session=None):
@@ -103,3 +111,112 @@ def post_tags_for_item(event, context, is_test=False, session=None):
 
     response_cors = helper.set_cors(response, event, is_test)
     return response_cors
+
+def topics_to_json(event, context, is_test=False, session=None):
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    helper.log_method_initiated("Convert topics modelling output to json", event, logger)
+
+    for record in event['Records']:
+        bucket = record['s3']['bucket']['name']
+        key = unquote_plus(record['s3']['object']['key'])
+        logger.info('bucket: {}'.format(bucket))
+        logger.info('key: {}'.format(key))
+        # download new topic and term list
+        download_path = '/tmp/'
+        os.chdir(download_path)
+        output_file_name = "output.tar.gz"
+        s3_client.download_file(bucket, key, download_path+output_file_name)
+        # extract topics and terms
+        with tarfile.open(download_path+output_file_name) as tar:
+            tar.extractall(download_path)
+        new_topics_json = {}
+        csv_file = csv.DictReader(open("topic-terms.csv"))
+        for row in csv_file:
+            category = "c"+row["topic"]
+            tag = "t"+row["topic"]
+            term = row["term"]
+            if category not in new_topics_json:
+                new_topics_json[category] = {}
+            if tag not in new_topics_json[category]:
+                new_topics_json[category][tag] = {}
+            if term not in new_topics_json[category][tag]:
+                new_topics_json[category][tag][term] = row["weight"]
+        # Write the tag-terms json file
+        new_json_file_name = "tag-terms_new.json"
+        with open(new_json_file_name, "w") as f:
+            json.dump(new_topics_json, f, indent=4)        
+        # upload tag-terms json file
+        destkey = 'topics/'+new_json_file_name
+        s3_client.upload_file(new_json_file_name, bucket, destkey)
+
+        # upload tag-terms json file
+        destkey = 'topics/'+diff_json_file_name
+        s3_client.upload_file(diff_json_file_name, bucket, destkey)
+
+def predict_tags(event, context, is_test=False, session=None):
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    helper.log_method_initiated("Predict tags for claim", event, logger)
+
+    stage = os.environ['STAGE']    
+
+    text = ""
+    if 'Text' in event:
+        text = str(event['Text'])
+    if len(text) == 0:
+        logger.error("There is no Text!")
+        return []
+
+    # Check if LanguageCode is supported
+    if 'LanguageCode' in event:
+        LanguageCode = event['LanguageCode']
+    else:
+        logger.error("There is no Language Code!")
+        return []
+    if not (LanguageCode in ["de"]):
+        logger.error("Language Code not supported!")
+        return []
+
+    # download taxonomy
+    download_path = '/tmp/'
+    os.chdir(download_path)
+    taxonomy_file_name = "category-tag-terms-de.json"
+    bucket = "factchecks-"+stage
+    key = "tagging/"+taxonomy_file_name
+    s3_client.download_file(bucket, key, download_path+taxonomy_file_name)
+    with open(taxonomy_file_name, "r") as f:
+        taxonomy_json = json.load(f)
+
+    text = text.replace("\"", "")
+    sim_input = []
+    term2tags = []
+    for category in taxonomy_json:
+        for tag in taxonomy_json[category]:
+            for term in taxonomy_json[category][tag]:
+                sim_input.append("\""+term+"\"" + ",\""+text+"\"")
+                term2tags.append(tag)
+    # call sagemaker endpoint for similarity prediction
+    try:
+        if sim_input == []:
+            raise Exception('Nothing to compare.')
+        payload = '\n'.join(sim_input)
+        response = SearchFactChecks.post_DocSim(LanguageCode, payload)
+        if not response.ok:
+            raise Exception('Received status code {}.'.format(response.status_code))
+        result = response.text
+        scores = json.loads(result)
+        ind = 0
+        tags = []
+        for score in scores:
+            if score == '':
+                ind = ind+1
+                continue
+            sim = float(score)
+            if sim > 0.5:
+                if term2tags[ind] not in tags:
+                    tags.append(term2tags[ind])
+            ind = ind+1
+    except Exception as e:
+        logger.error('DocSim error: {}.'.format(e))
+    return tags

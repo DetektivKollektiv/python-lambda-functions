@@ -50,7 +50,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
         - arn:aws:iam::aws:policy/ComprehendFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+        - arn:aws:iam::891514678401:policy/APIGatewayFullAccess 
 
   GetFactcheckByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -155,6 +155,10 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
 
   GetEntitiesFunction:
     Type: AWS::Serverless::Function
@@ -181,6 +185,25 @@ Resources:
         Fn::GetAtt:
           - LambdaExecutionRole
           - Arn
+
+  PredictTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-ml_api-PredictTags-${STAGE}"
+      CodeUri: .
+      Handler: GetTags.predict_tags
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
 
   GetTagsByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction

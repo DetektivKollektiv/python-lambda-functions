@@ -17,7 +17,7 @@ def get_review_pair_from_review(review, is_test, session) -> ReviewPair:
     return pair
 
 
-def compute_variance(pair: ReviewPair) -> float:
+def compute_difference(pair: ReviewPair) -> float:
     junior_review_average = review_handler.compute_review_result(
         pair.junior_review.review_answers)
     senior_review_average = review_handler.compute_review_result(

@@ -2,9 +2,11 @@ from core_layer.model.user_model import User
 from core_layer.model.item_model import Item
 from core_layer.model.level_model import Level
 from core_layer.model.review_question_model import ReviewQuestion
+from core_layer.model.item_type_model import ItemType
 from core_layer.handler import user_handler
 
 import pytest
+from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, Session, sessionmaker
 from ..helper import event_creator
@@ -23,50 +25,74 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
 
     return level
 
-def create_users_with_different_experience_levels(session) -> Session:
+
+def create_users_for_ranking(session) -> Session:
+    """ 
+    Creates My Detective looking up ranking and his own position
+    3 different Levels (Junior, Senior, Master)
+    20 Users on Junior Level, 20 Users on Senior Level, 20 Users on Master Level
+    """
+
     levels_to_create = [
-        {
-            'id': 1000,
-            'description': 'Junior',
-            'required_experience_points': 0
-        }
+        {'id': 1, 'description': 'Junior', 'required_experience_points': 0},
+        {'id': 2, 'description': 'Senior', 'required_experience_points': 20},
+        {'id': 3, 'description': 'Master', 'required_experience_points': 40}
     ]
 
-    level1Id = levels_to_create[0]['id']
+    level1_id = levels_to_create[0]['id']
+    level2_id = levels_to_create[1]['id']
+    level3_id = levels_to_create[2]['id']
 
     for level in levels_to_create:
         new_level = session.query(Level).get(level['id'])
         if new_level is None:
-            new_level = create_level(level['id'], level['description'], level['required_experience_points'])
+            new_level = create_level(
+                level['id'], level['description'], level['required_experience_points'])
             session.add(new_level)
 
+    my_detective = User()
+    my_detective.id = "999"
+    my_detective.name = "MyDetektiv"
+    user_handler.create_user(my_detective, True, session)
+    my_detective.level_id = 2
+    my_detective.experience_points = 35
+    my_detective.sign_up_timestamp = datetime.today()
     users_to_create = []
 
-    # the last created will be 120
-    for i in range(100,121):
-        users_to_create.append({
-            'id': str(i),
-            'name': str(i),
-            'level_id': level1Id,
-            'experience_points': i,
-        })
+    # the last created will be 60
+    for i in range(1, 21):
+        junior_user = User()
+        junior_user.id = str(i)
+        junior_user = user_handler.create_user(junior_user, True, session)
+        junior_user.name = "JuniorUser" + str(i)
+        junior_user.level_id = level1_id
+        junior_user.experience_points = i
+        junior_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(junior_user)
+    for i in range(21, 41):
+        senior_user = User()
+        senior_user.id = str(i)
+        senior_user = user_handler.create_user(senior_user, True, session)
+        senior_user.name = "SeniorUser" + str(i)
+        senior_user.level_id = level2_id
+        senior_user.experience_points = i
+        senior_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(senior_user)
+    for i in range(41, 61):
+        master_user = User()
+        master_user.id = str(i)
+        master_user = user_handler.create_user(master_user, True, session)
+        master_user.name = "MasterUser" + str(i)
+        master_user.level_id = level3_id
+        master_user.experience_points = i
+        master_user.sign_up_timestamp = datetime.today() - timedelta(days=i)
+        users_to_create.append(master_user)
 
-    for new_user in users_to_create:
-        user_already_exists = session.query(User).get(new_user['id']) is not None
-        # todo -> should wipe the database before the tests, instead of allowing tests to share the same data
-        if(not user_already_exists):
-            user = User()
-            user.id = str(new_user['id'])
-            user.name = new_user['name']
-            user = user_handler.create_user(
-                user, True, session)
-            user.level_id = new_user['level_id']
-            user.experience_points = new_user['experience_points']
-            session.merge(user)
-
+    session.add_all(users_to_create)
     session.commit()
 
     return session
+
 
 def create_levels_junior_and_senior_detectives(session):
     """
@@ -165,10 +191,17 @@ def create_levels_junior_and_senior_detectives(session):
 
 def create_questions(session):
 
+    item_type1 = ItemType()
+    item_type1.id = "Type1"
+
+    item_type2 = ItemType()
+    item_type2.id = "Type2"
+
     parentquestion1 = ReviewQuestion()
     parentquestion1.id = "1"
     parentquestion1.info = "1"
     parentquestion1.max_children = 2
+    parentquestion1.item_type = item_type1
 
     childquestion1a = ReviewQuestion()
     childquestion1a.id = "1a"
@@ -176,6 +209,8 @@ def create_questions(session):
     childquestion1a.parent_question_id = "1"
     childquestion1a.upper_bound = 4
     childquestion1a.lower_bound = 3
+    childquestion1a.max_children = 0
+    childquestion1a.item_type = item_type1
 
     childquestion1b = ReviewQuestion()
     childquestion1b.id = "1b"
@@ -183,6 +218,8 @@ def create_questions(session):
     childquestion1b.parent_question_id = "1"
     childquestion1b.upper_bound = 2
     childquestion1b.lower_bound = 1
+    childquestion1b.max_children = 0
+    childquestion1b.item_type = item_type1
 
     childquestion1c = ReviewQuestion()
     childquestion1c.id = "1c"
@@ -190,11 +227,14 @@ def create_questions(session):
     childquestion1c.parent_question_id = "1"
     childquestion1c.upper_bound = 3
     childquestion1c.lower_bound = 2
+    childquestion1c.max_children = 0
+    childquestion1c.item_type = item_type1
 
     parentquestion2 = ReviewQuestion()
     parentquestion2.id = "2"
     parentquestion2.info = "2"
     parentquestion2.max_children = 1
+    parentquestion2.item_type = item_type1
 
     childquestion2a = ReviewQuestion()
     childquestion2a.id = "2a"
@@ -202,6 +242,8 @@ def create_questions(session):
     childquestion2a.parent_question_id = "2"
     childquestion2a.upper_bound = 4
     childquestion2a.lower_bound = 3
+    childquestion2a.max_children = 0
+    childquestion2a.item_type = item_type1
 
     childquestion2b = ReviewQuestion()
     childquestion2b.id = "2b"
@@ -209,47 +251,65 @@ def create_questions(session):
     childquestion2b.parent_question_id = "2"
     childquestion2b.upper_bound = 2
     childquestion2b.lower_bound = 1
+    childquestion2b.max_children = 0
+    childquestion2b.item_type = item_type1
 
     parentquestion3 = ReviewQuestion()
     parentquestion3.id = "3"
     parentquestion3.info = "3"
-    parentquestion3.max_children = None
+    parentquestion3.max_children = 0
+    parentquestion3.item_type = item_type1
 
     parentquestion4 = ReviewQuestion()
     parentquestion4.id = "4"
     parentquestion4.info = "4"
-    parentquestion4.max_children = None
+    parentquestion4.max_children = 0
+    parentquestion4.item_type = item_type1
 
     parentquestion5 = ReviewQuestion()
     parentquestion5.id = "5"
     parentquestion5.info = "5"
-    parentquestion5.max_children = None
+    parentquestion5.max_children = 0
+    parentquestion5.item_type = item_type1
 
     parentquestion6 = ReviewQuestion()
     parentquestion6.id = "6"
     parentquestion6.info = "6"
-    parentquestion6.max_children = None
+    parentquestion6.max_children = 0
+    parentquestion6.item_type = item_type1
 
     parentquestion7 = ReviewQuestion()
     parentquestion7.id = "7"
     parentquestion7.info = "7"
-    parentquestion7.max_children = None
+    parentquestion7.max_children = 0
+    parentquestion7.item_type = item_type1
 
     parentquestion8 = ReviewQuestion()
     parentquestion8.id = "8"
     parentquestion8.info = "8"
-    parentquestion8.max_children = None
+    parentquestion8.max_children = 0
+    parentquestion8.item_type = item_type1
 
     parentquestion9 = ReviewQuestion()
     parentquestion9.id = "9"
     parentquestion9.info = "9"
-    parentquestion9.max_children = None
+    parentquestion9.max_children = 0
+    parentquestion9.item_type = item_type1
 
     parentquestion10 = ReviewQuestion()
     parentquestion10.id = "10"
     parentquestion10.info = "10"
-    parentquestion10.max_children = None
+    parentquestion10.max_children = 0
+    parentquestion10.item_type = item_type1
 
+    other_type_question = ReviewQuestion()
+    other_type_question.id = "other_type"
+    other_type_question.info = "other_type"
+    other_type_question.max_children = 0
+    other_type_question.item_type = item_type2
+
+    session.add(item_type1)
+    session.add(item_type2)
     session.add(parentquestion1)
     session.add(parentquestion2)
     session.add(parentquestion3)
