@@ -197,6 +197,7 @@ def predict_tags(event, context, is_test=False, session=None):
                 sim_input.append("\""+term+"\"" + ",\""+text+"\"")
                 term2tags.append(tag)
     # call sagemaker endpoint for similarity prediction
+    tags = []
     try:
         if sim_input == []:
             raise Exception('Nothing to compare.')
@@ -207,7 +208,6 @@ def predict_tags(event, context, is_test=False, session=None):
         result = response.text
         scores = json.loads(result)
         ind = 0
-        tags = []
         for score in scores:
             if score == '':
                 ind = ind+1
