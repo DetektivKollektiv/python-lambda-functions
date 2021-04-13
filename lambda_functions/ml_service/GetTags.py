@@ -188,16 +188,32 @@ def predict_tags(event, context, is_test=False, session=None):
     with open(taxonomy_file_name, "r") as f:
         taxonomy_json = json.load(f)
 
-    text = text.replace("\"", "")
+    for stopword in ["\"", ",", ".", "!", "?", "«", "»", "(", ")", "-"]:
+        text = text.replace(stopword, " ")
+    new_text = ""
+    text_split = []
+    for substr in text.split():
+        if str.lower(substr) not in taxonomy_json["excluded-terms"]:
+            new_text += substr+" "
+            if substr != "5G":
+                substr = str.lower(substr)
+            text_split.append(substr)
+
     sim_input = []
     term2tags = []
+    tags = []
     for category in taxonomy_json:
+        if category == "unsorted-terms":
+            continue
+        if category == "excluded-terms":
+            continue
         for tag in taxonomy_json[category]:
             for term in taxonomy_json[category][tag]:
-                sim_input.append("\""+term+"\"" + ",\""+text+"\"")
+                sim_input.append("\""+term+"\"" + ",\""+new_text+"\"")
                 term2tags.append(tag)
+                if (term in text_split) and (tag not in tags):
+                    tags.append(tag)
     # call sagemaker endpoint for similarity prediction
-    tags = []
     try:
         if sim_input == []:
             raise Exception('Nothing to compare.')
@@ -213,7 +229,7 @@ def predict_tags(event, context, is_test=False, session=None):
                 ind = ind+1
                 continue
             sim = float(score)
-            if sim > 0.5:
+            if sim > 0.7:
                 if term2tags[ind] not in tags:
                     tags.append(term2tags[ind])
             ind = ind+1
