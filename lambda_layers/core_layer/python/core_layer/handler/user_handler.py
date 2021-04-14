@@ -79,9 +79,6 @@ def create_user(user, is_test, session):
     if session == None:
         session = get_db_session(is_test, session)
 
-    user.score = 0
-    user.level_id = 1
-    user.experience_points = 0
     session.add(user)
     session.commit()
 
@@ -126,8 +123,9 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
     if session == None:
         session = get_db_session(is_test, session)
 
-    sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
-    
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
+
     users = session.query(User).order_by(sort_column).limit(n).all()
     return users
 
@@ -142,7 +140,7 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
     n: int, required
         the number of users to return
     p: period weeks, required
-        
+
     attr: str, required
         the column on the users table to sort by
     descending: bool, required
@@ -156,25 +154,27 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-     
+
     if session == None:
         session = get_db_session(is_test, session)
 
-    compare_timestamp = helper.get_date_time(datetime.now() - timedelta(weeks=p), is_test)
-    sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
+    compare_timestamp = helper.get_date_time(
+        datetime.now() - timedelta(weeks=p), is_test)
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
 
     users = session.query(User) \
-    .filter(User.sign_up_timestamp >= compare_timestamp) \
-    .order_by(sort_column) \
-    .limit(n).all()
-    return users    
-    
-    
+        .filter(User.sign_up_timestamp >= compare_timestamp) \
+        .order_by(sort_column) \
+        .limit(n).all()
+    return users
+
+
 def get_top_users_by_level(user_level, n, attr, descending, is_test, session) -> [User]:
     """
     Returns the top "n" users on the user's level
     sorted by "attr" in descending or ascending order as set by "descending"
-    
+
     Parameters
     ----------
     event: dict, required
@@ -194,15 +194,16 @@ def get_top_users_by_level(user_level, n, attr, descending, is_test, session) ->
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-    if session == None:    
+    if session == None:
         session = get_db_session(is_test, session)
-    
-    sort_column = getattr(User, attr).desc() if descending else getattr(User, attr)
-    
+
+    sort_column = getattr(User, attr).desc(
+    ) if descending else getattr(User, attr)
+
     users = session.query(User) \
-    .filter(User.level_id == user_level) \
-    .order_by(sort_column) \
-    .limit(n).all()
+        .filter(User.level_id == user_level) \
+        .order_by(sort_column) \
+        .limit(n).all()
     return users
 
 

@@ -58,11 +58,11 @@ class TestDocSim:
                 "factcheck": "https://www.br.de/nachrichten/wissen/warum-viele-corona-tests-noch-keine-qualitaetskontrolle-brauchen,SI1KrNC",
                 "stepfunction": {}
             },
-            {
-                "claim": "https://viralvirus.de/politik/obama-finanzierte-labor-in-wuhan/?fbclid=IwAR3qOdSnC-A7h6wvPQcOFmuFPgLGNOImn_Ee6_vjAGeAmVJ9MVZnoNeFMBk",
-                "factcheck": "https://correctiv.org/faktencheck/2020/07/21/nein-die-us-regierung-unter-obama-hat-das-institut-fuer-virologie-in-wuhan-nicht-mit-37-millionen-dollar-unterstuetzt/",
-                "stepfunction": {}
-            },
+#            {
+#                "claim": "https://viralvirus.de/politik/obama-finanzierte-labor-in-wuhan/?fbclid=IwAR3qOdSnC-A7h6wvPQcOFmuFPgLGNOImn_Ee6_vjAGeAmVJ9MVZnoNeFMBk",
+#                "factcheck": "https://correctiv.org/faktencheck/2020/07/21/nein-die-us-regierung-unter-obama-hat-das-institut-fuer-virologie-in-wuhan-nicht-mit-37-millionen-dollar-unterstuetzt/",
+#                "stepfunction": {}
+#            },
             {
                 "claim": "Spanien korrigiert Anzahl der  Corona-Toten von über 26.000 auf 2.000. Bin mal gespannt, wie lange D-A-CH noch an den FAKE-Zahlen festhalten wollen.",
                 "factcheck": "https://correctiv.org/faktencheck/2020/06/16/nein-spanien-hat-die-zahl-der-corona-toten-nicht-auf-2-000-korrigiert/",
