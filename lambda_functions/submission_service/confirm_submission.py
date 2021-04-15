@@ -23,9 +23,9 @@ def confirm_submission(event, context, is_test=False, session=None):
 
     stage = os.environ['STAGE']
     if stage == 'prod':
-        link = 'https://detective-collective.org'
+        link = 'https://codetekt.org'
     else:
-        link = 'https://{}.detective-collective.org'.format(stage)
+        link = 'https://{}.codetekt.org'.format(stage)
 
     body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
                                      'submission_confirmed_webpage.html'), mode='r', encoding='utf-8').read().format(link)

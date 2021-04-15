@@ -106,16 +106,16 @@ def submit_item(event, context, is_test=False, session=None):
 def send_confirmation_mail(submission: Submission):
     stage = os.environ['STAGE']
     if stage == 'prod':
-        confirmation_link = 'https://api.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
+        confirmation_link = 'https://api.codetekt.org/submission_service/submissions/{}/confirm'.format(
             submission.id)
     else:
-        confirmation_link = 'https://api.{}.detektivkollektiv.org/submission_service/submissions/{}/confirm'.format(
+        confirmation_link = 'https://api.{}.codetekt.org/submission_service/submissions/{}/confirm'.format(
             stage, submission.id)
     if submission.mail:
         recipient = submission.mail
     else:
         return
-    sender = "DetektivKollektiv <info@detektivkollektiv.org>"
+    sender = "codetekt <no-reply@codetekt.org>"
     subject = 'Bestätige deine Mail-Adresse'
 
     body_text = "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(
