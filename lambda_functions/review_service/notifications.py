@@ -151,7 +151,7 @@ def notify_telegram_user(is_test, telegram_id, item, rating, rating_text):
         text_rating = "Der Vertrauensindex beträgt *{} von 4*. Damit ist dein Fall *{}*. Was bedeutet das?\n\n".format(
             rating, rating_text)
         text_legend = "1: nicht vertrauenswürdig\n2: eher nicht vertrauenswürdig\n3: eher vertrauenswürdig\n4: vertrauenswürdig\n\n"
-        text_archive = "Mehr Details zu deinem Fall findest du in unserem [Archiv](https://qa.detective-collective.org/archive).\n\n"
+        text_archive = "Mehr Details zu deinem Fall findest du in unserem [Archiv](https://qa.codetekt.org/archive).\n\n"
         text_thanks = "Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!\n\n"
         text_case = "Dein Fall lautete: \n{}".format(item.content)
 

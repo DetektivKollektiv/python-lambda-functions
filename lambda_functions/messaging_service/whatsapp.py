@@ -30,12 +30,13 @@ def whatsapp_forwarding(event, context):
     item = content['Body'][0].encode('utf-8')
 
     # Send to API
-    url = "https://api.detective-collective.org/stage/items"
+    url = "https://api.codetekt.org/stage/items"
     dk_api_response = requests.post(url, data=item)
 
     # Add a message
     resp = MessagingResponse()
-    resp.message("Thanks for submitting your item. Our detectives are checking it immediately")
+    resp.message(
+        "Thanks for submitting your item. Our detectives are checking it immediately")
 
     print(str(resp))
 

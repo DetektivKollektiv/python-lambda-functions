@@ -20,7 +20,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 }
             }
         },
@@ -43,7 +43,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 }
             }
         },
@@ -64,7 +64,7 @@
                 "payload": {},
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -88,7 +88,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -112,7 +112,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -136,7 +136,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -160,7 +160,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -185,7 +185,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -210,7 +210,7 @@
                 },
                 "environmentVariables": {
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -233,7 +233,7 @@
                 "payload": {},
                 "environmentVariables": {
                     "STAGE": "dev",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
@@ -253,8 +253,8 @@
             },
             "lambda": {
                 "runtime": "python3.8",
-                "payload": {"json":
-                    {
+                "payload": {
+                    "json": {
                         "item": {
                             "id": "3fb83912-7a97-423a-b820-36718d51b1a6",
                             "content": "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22",
@@ -279,11 +279,11 @@
                 },
                 "environmentVariables": {
                     "STAGE": "dev",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
-        },        
+        },
         {
             "type": "aws-sam",
             "request": "direct-invoke",
@@ -299,7 +299,8 @@
             },
             "lambda": {
                 "runtime": "python3.8",
-                "payload": {"json": {
+                "payload": {
+                    "json": {
                         "pathParameters": {
                             "item_id": "1bbf526b-4974-4584-93cd-1ef06912c9f9"
                         }
@@ -308,11 +309,11 @@
                 "environmentVariables": {
                     "STAGE": "dev",
                     "DBNAME": "development_db",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
-        },        
+        },
         {
             "type": "aws-sam",
             "request": "direct-invoke",
@@ -328,8 +329,8 @@
             },
             "lambda": {
                 "runtime": "python3.8",
-                "payload": {"json":
-                    {
+                "payload": {
+                    "json": {
                         "item": {
                             "id": "3fb83912-7a97-423a-b820-36718d51b1a6",
                             "content": "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22",
@@ -338,7 +339,7 @@
                 },
                 "environmentVariables": {
                     "STAGE": "dev",
-                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.detective-collective.org,https://www.dev.detective-collective.org"
+                    "CORS_ALLOW_ORIGIN": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org"
                 },
                 "timeoutSec": 120
             }
