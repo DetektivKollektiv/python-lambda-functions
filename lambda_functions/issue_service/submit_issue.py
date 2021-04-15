@@ -51,7 +51,8 @@ def submit_issue(event, context, is_test=False, session=None):
 
 
 def send_issue_notification(issue: Issue) -> bool:
-    mail_adress = 'info@detektivkollektiv.org'
+    sender = 'no-reply@codetekt.org'
+    mail_adress = 'support@codetekt.org'
     aws_region = 'eu-central-1'
     subject = 'Eine Nutzer*in hat das Kontaktformular ausgefüllt'
     body_text = '''Eine Nutzer*in hat das Kontaktformular ausgefüllt! \n
@@ -115,7 +116,7 @@ def send_issue_notification(issue: Issue) -> bool:
                     'Data': subject,
                 },
             },
-            Source=mail_adress,
+            Source=sender,
         )
         logger.info("Notification email sent. SES Message ID: {}".format(
             response['MessageId']))

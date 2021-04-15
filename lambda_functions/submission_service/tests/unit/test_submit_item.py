@@ -32,7 +32,7 @@ def test_send_confirmation_mail(session, submission, monkeypatch):
     monkeypatch.setenv("STAGE", "dev")
 
     conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     send_confirmation_mail(submission)
 

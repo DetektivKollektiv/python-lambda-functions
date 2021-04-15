@@ -46,7 +46,7 @@ def test_mail_notification(session, item, submission_id, monkeypatch):
     from review_service import notifications
 
     conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     notifications.notify_users(True, session, item)
 

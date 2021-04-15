@@ -14,8 +14,8 @@ from core_layer.connection_handler import get_db_session, update_object
 from core_layer.handler import submission_handler
 
 
-# Set DetektivKollektiv email address here (displayed name <mail address>)
-SENDER = "DetektivKollektiv <info@detektivkollektiv.org>"
+# Set codetekt email address here (displayed name <mail address>)
+SENDER = "codetekt <no-reply@codetekt.org>"
 
 
 class TelegramNotificationError(Exception):
@@ -88,9 +88,9 @@ def notify_users(is_test, session, item):
     # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
     rating = round(item.result_score, 1)
     rating_text = "nicht vertrauenswürdig"
-    if 1.5 <= rating < 2.5:
+    if 2 <= rating < 3:
         rating_text = "eher nicht vertrauenswürdig"
-    if 2.5 <= rating < 3.5:
+    if 3 <= rating < 3.5:
         rating_text = "eher vertrauenswürdig"
     if rating >= 3.5:
         rating_text = "vertrauenswürdig"
@@ -203,32 +203,21 @@ def notify_mail_user(mail, item, rating, rating_text):
 
     # The HTML body of the email
     BODY_HTML = """<html>
-    <head><title>Dein Fall wurde gelöst!</title></head>
-    <body>
-    <a href="http://detektivkollektiv.de/">
-        <img src="http://detektivkollektiv.de/wp-content/uploads/2020/07/cropped-Zeichenfla%CC%88che-1-Kopie-2.png" alt="DetektivKollektiv" width="300">
-    </a>
-    <h1 style="color: #ffcc00;">Dein Fall wurde gelöst!</h1>
-    <p>Hi! Unsere Detektiv*innen haben deinen Fall gelöst.</p>
-    <p>Der Vertrauensindex beträgt <b>{} von 4</b>. Damit ist dein Fall <b>{}</b>.</p>
+    <p>&nbsp;</p>
+    <p><a href="http://codetekt.org/"> <img style="display: block; margin-left: auto; margin-right: auto;" src="https://codetekt-logo.s3.eu-central-1.amazonaws.com/codetekt_V2_rgb%404x.png" alt="codetekt" width="300" /> </a></p>
+    <h1 style="color: #fac800; text-align: center;">Dein Fall wurde gel&ouml;st!</h1>
+    <p>Hi! Unsere Community hat deinen Fall gel&ouml;st.</p>
+    <h2>Der Vertrauensindex betr&auml;gt <strong>{} von 4</strong>. Damit ist dein Fall <strong>{}</strong>.</h2>
     <p>Was bedeutet das?</p>
-    <div style="width: inherit; max-width: 400px; background-color: #ffcc00; padding: 10px 15px 10px 15px; border-radius: 5px;">
-    1: nicht vertrauenswürdig<br>
-    2: eher nicht vertrauenswürdig<br>
-    3: eher vertrauenswürdig<br>
-    4: vertrauenswürdig
-    </div>
-    <p>
-    Mehr Details zu deinem Fall findest du in unserem <a href="https://qa.detective-collective.org/archive">Archiv</a>.<br><br>
-    Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!
-    </p>
-    <p>
-    Dein Fall lautete: <br>
-    {}
-    </p>
-    </body>
+    <div style="width: inherit; max-width: 400px; background-color: #c62828; padding: 10px 15px 10px 15px; border-radius: 5px;">1 - 2: nicht vertrauensw&uuml;rdig</div>
+    <div style="width: inherit; max-width: 400px; background-color: #e57373; padding: 10px 15px 10px 15px; border-radius: 5px;">2 - 3: eher nicht vertrauensw&uuml;rdig</div>
+    <div style="width: inherit; max-width: 400px; background-color: #66bb6a; padding: 10px 15px 10px 15px; border-radius: 5px;">3 - 3,5: eher vertrauensw&uuml;rdig</div>
+    <div style="width: inherit; max-width: 400px; background-color: #1b5e20; padding: 10px 15px 10px 15px; border-radius: 5px;">3,5 - 4: vertrauensw&uuml;rdig</div>
+    <p>Mehr Details zu deinem Fall findest du in unserem <a href="https://codetekt.org/archive?id={}">Archiv</a>.<br /><br />Wir danken dir f&uuml;r deine Unterst&uuml;tzung in unserer Mission f&uuml;r mehr Transparenz!</p>
+    <p>Dein Fall lautete: <br />{}</p>
+    <p>Antworten auf diese Mail werden nicht gelesen.</p>
     </html>
-    """.format(rating, rating_text, item.content)
+    """.format(rating, rating_text, item.id, item.content)
 
     # The character encoding for the email.
     CHARSET = "UTF-8"

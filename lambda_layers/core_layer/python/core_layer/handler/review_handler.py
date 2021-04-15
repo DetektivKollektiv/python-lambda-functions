@@ -176,11 +176,12 @@ def create_answers_for_review(review: Review, is_test, session):
     partner_review = get_partner_review(review, is_test, session)
     if partner_review != None:
         for partner_answer in partner_review.review_answers:
-            answer = ReviewAnswer()
-            answer.id = str(uuid4())
-            answer.review_question = partner_answer.review_question
-            answer.review = review
-            session.add(answer)
+            if partner_answer.review_question is not None:
+                answer = ReviewAnswer()
+                answer.id = str(uuid4())
+                answer.review_question = partner_answer.review_question
+                answer.review = review
+                session.add(answer)
     else:
         item_type_id = review.item.item_type_id
         questions = review_question_handler.get_all_parent_questions(
@@ -245,6 +246,7 @@ def close_review(review: Review, is_test, session) -> Review:
 
         if(len(list(filter(lambda p: p.is_good, pairs))) >= 4):
             review.item.status = "closed"
+            review.item.close_timestamp = review.finish_timestamp
             review.item.result_score = item_handler.compute_item_result_score(
                 review.item_id, is_test, session)
 
