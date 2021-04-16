@@ -74,6 +74,8 @@ def get_secret():
             return decoded_binary_secret
 
 # return bucket name for storing factchecks and models
+
+
 def get_factcheckBucketName():
     bucket_name = bucket_prefix+os.environ['STAGE']
     try:
@@ -84,6 +86,8 @@ def get_factcheckBucketName():
     return bucket_name
 
 # Call Google API for Fact Check search
+
+
 async def call_googleapi(session, search_terms, language_code):
     pageSize = 10  # Count of returned results
     query = ""
@@ -96,12 +100,13 @@ async def call_googleapi(session, search_terms, language_code):
 
     return await response.json(), search_terms
 
+
 def post_DocSim(language, data):
-    stage = os.environ['STAGE']    
+    stage = os.environ['STAGE']
     if stage == 'prod':
-        host = 'api.detektivkollektiv.org'
+        host = 'api.codetekt.org'
     else:
-        host = 'api.{}.detektivkollektiv.org'.format(stage)
+        host = 'api.{}.codetekt.org'.format(stage)
     if language == "de":
         url = "https://"+host+"/ml_model_service/models/DocSim"
     else:
@@ -113,12 +118,15 @@ def post_DocSim(language, data):
         aws_region="eu-central-1",
         aws_service="execute-api"
     )
-    
-    response = requests.post(url, headers=headers, data=data.encode('utf-8'), auth=auth)
+
+    response = requests.post(url, headers=headers,
+                             data=data.encode('utf-8'), auth=auth)
 
     return response
 
 # Get best fitting fact check article
+
+
 async def get_article(search_terms, LanguageCode):
     import aiohttp
     import aiodns
@@ -163,8 +171,9 @@ async def get_article(search_terms, LanguageCode):
 
                         article_text = article['text'].replace("\"", "")
                         # input for article
-                        if len(used_terms)>1:
-                            sm_input.append(sm_input_search + ",\""+article_text+"\"")
+                        if len(used_terms) > 1:
+                            sm_input.append(sm_input_search +
+                                            ",\""+article_text+"\"")
                 # call sagemaker endpoint for similarity prediction
                 try:
                     if sm_input == []:
@@ -172,7 +181,8 @@ async def get_article(search_terms, LanguageCode):
                     payload = '\n'.join(sm_input)
                     response = post_DocSim(LanguageCode, payload)
                     if not response.ok:
-                        raise Exception('Received status code {}.'.format(response.status_code))
+                        raise Exception(
+                            'Received status code {}.'.format(response.status_code))
                     result = response.text
                     scores = json.loads(result)
                     ind = 0

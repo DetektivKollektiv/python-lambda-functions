@@ -7,20 +7,22 @@ import json
 from botocore.exceptions import ClientError, ParamValidationError
 from operator import itemgetter
 
-supportedLanguageCodes = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
+supportedLanguageCodes = ['en', 'es', 'fr', 'de',
+                          'it', 'pt', 'ar', 'hi', 'ja', 'ko', 'zh', 'zh-TW']
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
+comprehend = boto3.client(service_name='comprehend',
+                          region_name='eu-central-1')
 
 
 def post_TopicalPageRank(language, data):
-    stage = os.environ['STAGE']    
+    stage = os.environ['STAGE']
     if stage == 'prod':
-        host = 'api.detektivkollektiv.org'
+        host = 'api.codetekt.org'
     else:
-        host = 'api.{}.detektivkollektiv.org'.format(stage)
+        host = 'api.{}.codetekt.org'.format(stage)
     if language == "de":
         url = "https://"+host+"/ml_model_service/models/TopicalPageRank"
     else:
@@ -33,9 +35,11 @@ def post_TopicalPageRank(language, data):
         aws_region="eu-central-1",
         aws_service="execute-api"
     )
-    prediction = requests.post(url, headers=headers, data=data.encode('utf-8'), auth=auth)
+    prediction = requests.post(
+        url, headers=headers, data=data.encode('utf-8'), auth=auth)
     if not prediction.ok:
-        raise Exception('Received status code {}.'.format(prediction.status_code))
+        raise Exception('Received status code {}.'.format(
+            prediction.status_code))
     result = prediction.text
     result = json.loads(result)
     # convert to a structure according comprehend
@@ -48,6 +52,7 @@ def post_TopicalPageRank(language, data):
     response = {}
     response["KeyPhrases"] = keyphrases
     return response
+
 
 def get_phrases(event, context):
     """Detect Key Phrases
@@ -90,16 +95,19 @@ def get_phrases(event, context):
         logger.error("TopicalPageRank error: %s", e, exc_info=True)
     if not "KeyPhrases" in response:
         try:
-            response = comprehend.detect_key_phrases(Text=text, LanguageCode=LanguageCode)
+            response = comprehend.detect_key_phrases(
+                Text=text, LanguageCode=LanguageCode)
         except ClientError as e:
             logger.error("Received error: %s", e, exc_info=True)
             return []
         except ParamValidationError as e:
-            logger.error("The provided parameters are incorrect: %s", e, exc_info=True)
+            logger.error(
+                "The provided parameters are incorrect: %s", e, exc_info=True)
             return []
 
     # sort list of key phrases according the score
-    keyPhrases_sorted = sorted(response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
+    keyPhrases_sorted = sorted(
+        response["KeyPhrases"], key=itemgetter('Score'), reverse=True)
 
     # respond at most 5 key phrases
     keyPhrases_sorted = keyPhrases_sorted[:min(3, len(keyPhrases_sorted))]
