@@ -69,6 +69,8 @@ Resources:
             Method: get
             RestApiId:
               Ref: Api
+            Auth:
+              Authorizer: NONE
       Environment:
         Variables:
           DBNAME:
