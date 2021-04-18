@@ -1,7 +1,8 @@
 {
-    "Parameters": {
-        "STAGE": "qa",
-        "DBNAME": "qa_db",
-        "CorsAllowOrigin": "https://qa.codetekt.org,https://www.qa.codetekt.org"
-    }
+  "Parameters": {
+    "STAGE": "qa",
+    "DBNAME": "qa_db",
+    "CorsAllowOrigin": "https://qa.codetekt.org,https://www.qa.codetekt.org",
+    "CorsAllowOriginAdmin": "https://qa.codetekt.org,https://www.qa.codetekt.org,https://qa.admin.codetekt.org,https://www.qa.admin.codetekt.org"
+  }
 }
