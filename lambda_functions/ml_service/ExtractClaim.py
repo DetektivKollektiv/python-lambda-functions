@@ -69,7 +69,7 @@ def extract_claim(event, context):
         }
         resp = requests.get(url, headers=headers)
         read_content = resp.content
-        read_content_hidden = read_content.replace(b'<!--', b'')
+        read_content_hidden = read_content.replace(b'<!--', b'<!')
         soup = BeautifulSoup(read_content_hidden, 'html.parser')
         # get the title of the web page
         titles = soup.find_all('title')  

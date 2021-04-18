@@ -27,7 +27,7 @@ class TestExtractClaim:
                                   "?sara_ecid=soci_upd_wbMbjhOSvViISjc8RPU89NcCvtlFcJ"
         assert resp["title"] == titel
         # assert resp["text"][0] == text_1
-        assert resp["concatenation"]["Text"] == text_0 + ' ' + titel
+        assert resp["concatenation"]["Text"] == text_0 + ' \n' + titel
 
     def test_extract_claim_2(self):
         event = {
@@ -72,14 +72,14 @@ class TestExtractClaim:
     def test_extract_claim_5(self):
         event = {
             "item": {
-                "content": "Was für ein Trottel ist das denn? https://www.facebook.com/karpfsebastian/photos/a.929158223891040/1854136161393237/?type=3&theater",
+                "content": "https://www.facebook.com/permalink.php?story_fbid=1268489640219684&id=100011759814614",
                 "id": "123456",
                 "language": ""
             }
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["concatenation"]["Text"] == 'Was für ein Trottel ist das denn?  Facebook '
+        assert resp["concatenation"]["Text"] == ' \nTyrac Dracun - 💢  Aufgedeckt: Einführung von Impfpässen... | Facebook '
 
     def test_extract_claim_6(self):
         event = {
@@ -91,9 +91,9 @@ class TestExtractClaim:
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["title"] == 'Helios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '
+        assert resp["concatenation"]["Text"] == ' \nHelios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '
 
-    def test_extract_claim_6(self):
+    def test_extract_claim_7(self):
         event = {
             "item": {
                 "content": "https://de.rt.com/inland/110251-baden-wurttemberg-zwangseinweisung-fur-hartnackige/",
@@ -103,4 +103,52 @@ class TestExtractClaim:
         }
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
-        assert resp["title"] == 'Helios-Kliniken veröffentlichen Corona-Fakten: Keine Pandemie von nationaler Tragweite? - Kopp Report '
+        assert resp["concatenation"]["Text"] == ' \nBaden-Württemberg: Zwangseinweisung für "hartnäckige Quarantäneverweigerer" beschlossen — RT DE '
+
+    def test_extract_claim_8(self):
+        event = {
+            "item": {
+                "content": "https://www.wochenblick.at/trauriger-rekord-bei-toten-nach-impfung-so-viele-waren-es-noch-nie/",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["concatenation"]["Text"] == ' \nTrauriger Rekord bei Toten nach Impfung – so viele waren es noch nie! '
+
+    def test_extract_claim_9(self):
+        event = {
+            "item": {
+                "content": "https://2020news.de/erschreckende-statistik-impfnebenwirkungen-jetzt-amtlich/",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["concatenation"]["Text"] == ' \nErschreckende Statistik - Impfnebenwirkungen jetzt amtlich - 2020 NEWS '
+
+    def test_extract_claim_10(self):
+        event = {
+            "item": {
+                "content": "https://unser-mitteleuropa.com/lauterbach-nach-tod-von-32-jaehriger-impftote-fuer-impferfolg-muesse-man-hinnehmen/",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["concatenation"]["Text"] == ' \nLauterbach nach Tod von 32-Jähriger: Impftote für Impferfolg müsse man hinnehmen | UNSER MITTELEUROPA '
+
+    def test_extract_claim_11(self):
+        event = {
+            "item": {
+                "content": "https://2020news.de/italien-studie-belegt-stark-erhoehten-co2-wert-unter-der-maske/",
+                "id": "123456",
+                "language": ""
+            }
+        }
+        context = ""
+        resp = ExtractClaim.extract_claim(event, context)
+        assert resp["concatenation"]["Text"] == ' \nItalien: Studie belegt stark erhöhten CO2-Wert unter der Maske - 2020 NEWS '
