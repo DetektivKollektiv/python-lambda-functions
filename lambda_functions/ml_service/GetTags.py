@@ -155,6 +155,8 @@ def topics_to_json(event, context, is_test=False, session=None):
         s3_client.upload_file(diff_json_file_name, bucket, destkey)
 
 def download_taxonomy(LanguageCode):
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
     stage = os.environ['STAGE']    
 
     if not (LanguageCode in ["de"]):
