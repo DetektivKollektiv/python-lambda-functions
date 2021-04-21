@@ -17,7 +17,8 @@ logger.setLevel(logging.INFO)
 
 
 def remove_control_characters(s):
-    return "".join(ch for ch in s if unicodedata.category(ch)[0] != "C")
+    s_clean = s.replace("\"", " ")
+    return "".join(ch for ch in s_clean if unicodedata.category(ch)[0] != "C")
 
 
 def submit_item(event, context, is_test=False, session=None):
