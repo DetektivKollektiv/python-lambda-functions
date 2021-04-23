@@ -75,16 +75,15 @@ def submit_item(event, context, is_test=False, session=None):
             new_item_created = True
             submission.item_id = item.id
             stage = os.environ['STAGE']
-            if is_test == False:
-                client.start_execution(
-                    stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
-                    name='SFC_' + item.id,
-                    input="{\"item\":{"
-                    "\"id\":\"" + item.id + "\","
-                    "\"content\":\"" +
-                                    remove_control_characters(
-                                        item.content) + "\" } }"
-                )
+            client.start_execution(
+                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
+                name='SFC_' + item.id,
+                input="{\"item\":{"
+                "\"id\":\"" + item.id + "\","
+                "\"content\":\"" +
+                                remove_control_characters(
+                                    item.content) + "\" } }"
+            )
 
         # Create submission
         submission_handler.create_submission_db(submission, is_test, session)
