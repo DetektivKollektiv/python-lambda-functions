@@ -23,6 +23,5 @@ class Issue(Base):
         return {
             'category': self.category,
             'message': self.message,
-            'ip_address' : self.ip_address,
             'item_id': self.item_id
         }
