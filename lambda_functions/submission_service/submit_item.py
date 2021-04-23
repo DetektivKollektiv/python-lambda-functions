@@ -22,7 +22,7 @@ def remove_control_characters(s):
 
 def submit_item(event, context, is_test=False, session=None):
 
-    client = boto3.client('stepfunctions')
+    client = boto3.client('stepfunctions', region_name="eu-central-1")
 
     helper.log_method_initiated("Item submission", event, logger)
 
@@ -75,15 +75,16 @@ def submit_item(event, context, is_test=False, session=None):
             new_item_created = True
             submission.item_id = item.id
             stage = os.environ['STAGE']
-            client.start_execution(
-                stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
-                name='SFC_' + item.id,
-                input="{\"item\":{"
-                "\"id\":\"" + item.id + "\","
-                "\"content\":\"" +
-                                remove_control_characters(
-                                    item.content) + "\" } }"
-            )
+            if is_test == False:
+                client.start_execution(
+                    stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-'+stage,
+                    name='SFC_' + item.id,
+                    input="{\"item\":{"
+                    "\"id\":\"" + item.id + "\","
+                    "\"content\":\"" +
+                                    remove_control_characters(
+                                        item.content) + "\" } }"
+                )
 
         # Create submission
         submission_handler.create_submission_db(submission, is_test, session)
