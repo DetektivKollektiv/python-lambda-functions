@@ -73,7 +73,7 @@ def test_mail_notification(session, item, submission_id, monkeypatch):
 
     message = ses_backend.sent_messages[0]
     assert 'test@test.de' in message.destinations['ToAddresses']
-    assert 'Dein Fall wurde gelöst' in message.body
+    assert 'Dein Fall wurde gel&ouml;st' in message.body
     assert '1.0' in message.body
     assert 'nicht vertrauenswürdig' in message.body
 

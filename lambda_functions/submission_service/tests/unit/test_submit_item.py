@@ -90,7 +90,7 @@ def test_submit_item(session, event1, event2, monkeypatch):
         ) == 2  # number of submissions to first item increased
         # ip address of second submission assigned to first item
         assert session.query(Submission.ip_address).all()[1][0] == '2.3.4.5'
-
+        # Check if confirmation mails have been sent
         send_quota = ses_client.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 2
