@@ -6,7 +6,7 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer.connection_handler import get_db_session
 from core_layer.handler import item_handler, tag_handler
-import SearchFactChecks
+import SearchFactChecks, UpdateFactChecks
 
 import boto3
 import os
@@ -154,12 +154,32 @@ def topics_to_json(event, context, is_test=False, session=None):
         destkey = 'topics/'+diff_json_file_name
         s3_client.upload_file(diff_json_file_name, bucket, destkey)
 
+def download_taxonomy(LanguageCode):
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    stage = os.environ['STAGE']    
+
+    if LanguageCode not in UpdateFactChecks.model_languages:
+        logger.error("Language Code {} not supported!".format(LanguageCode))
+        return {}
+
+    # download taxonomy
+    download_path = '/tmp/'
+    os.chdir(download_path)
+    taxonomy_file_name = "category-tag-terms-{}.json".format(LanguageCode)
+    bucket = "factchecks-"+stage
+    key = "tagging/"+taxonomy_file_name
+    s3_client.download_file(bucket, key, download_path+taxonomy_file_name)
+    with open(taxonomy_file_name, "r") as f:
+        taxonomy_json = json.load(f)
+
+    return taxonomy_json
+
 def predict_tags(event, context, is_test=False, session=None):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Predict tags for claim", event, logger)
 
-    stage = os.environ['STAGE']    
 
     text = ""
     if 'Text' in event:
@@ -171,31 +191,41 @@ def predict_tags(event, context, is_test=False, session=None):
     # Check if LanguageCode is supported
     if 'LanguageCode' in event:
         LanguageCode = event['LanguageCode']
+        if LanguageCode not in UpdateFactChecks.model_languages:
+            logger.error("Language Code {} not supported!".format(LanguageCode))
+            return []
     else:
         logger.error("There is no Language Code!")
         return []
-    if not (LanguageCode in ["de"]):
-        logger.error("Language Code not supported!")
-        return []
+    taxonomy_json = download_taxonomy(LanguageCode)
 
-    # download taxonomy
-    download_path = '/tmp/'
-    os.chdir(download_path)
-    taxonomy_file_name = "category-tag-terms-de.json"
-    bucket = "factchecks-"+stage
-    key = "tagging/"+taxonomy_file_name
-    s3_client.download_file(bucket, key, download_path+taxonomy_file_name)
-    with open(taxonomy_file_name, "r") as f:
-        taxonomy_json = json.load(f)
+    for stopword in ["\"", ",", ".", "!", "?", "«", "»", "(", ")", "-"]:
+        text = text.replace(stopword, " ")
+    new_text = ""
+    text_split = []
+    for substr in text.split():
+        if str.lower(substr) not in taxonomy_json["excluded-terms"]:
+            new_text += substr+" "
+            if substr != "5G":
+                substr = str.lower(substr)
+            text_split.append(substr)
 
-    text = text.replace("\"", "")
     sim_input = []
     term2tags = []
+    tags = []
     for category in taxonomy_json:
+        if category == "unsorted-terms":
+            continue
+        if category == "excluded-terms":
+            continue
         for tag in taxonomy_json[category]:
             for term in taxonomy_json[category][tag]:
-                sim_input.append("\""+term+"\"" + ",\""+text+"\"")
+                sim_input.append("\""+term+"\"" + ",\""+new_text+"\"")
                 term2tags.append(tag)
+                if (term in text_split) and (tag not in tags):
+                    tags.append(tag)
+    if tags != []:
+        return tags
     # call sagemaker endpoint for similarity prediction
     try:
         if sim_input == []:
@@ -207,13 +237,12 @@ def predict_tags(event, context, is_test=False, session=None):
         result = response.text
         scores = json.loads(result)
         ind = 0
-        tags = []
         for score in scores:
             if score == '':
                 ind = ind+1
                 continue
             sim = float(score)
-            if sim > 0.5:
+            if sim > 0.7:
                 if term2tags[ind] not in tags:
                     tags.append(term2tags[ind])
             ind = ind+1

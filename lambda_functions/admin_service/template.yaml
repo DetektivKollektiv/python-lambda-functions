@@ -11,7 +11,7 @@ Globals:
 Parameters:
   STAGE:
     Type: String
-  CorsAllowOrigin:
+  CorsAllowOriginAdmin:
     Type: String
   DBNAME:
     Type: String
@@ -46,7 +46,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
-        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
 
   UpdateItemFunction:
     Type: AWS::Serverless::Function
@@ -74,7 +74,7 @@ Resources:
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
+            Ref: CorsAllowOriginAdmin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
@@ -111,6 +111,6 @@ Resources:
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
+            Ref: CorsAllowOriginAdmin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

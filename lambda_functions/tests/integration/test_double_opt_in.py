@@ -46,7 +46,7 @@ def test_mail_notification(session, item, submission_id, monkeypatch):
     from review_service import notifications
 
     conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     notifications.notify_users(True, session, item)
 
@@ -63,7 +63,7 @@ def test_mail_notification(session, item, submission_id, monkeypatch):
     assert response['statusCode'] == 200
     assert response['headers']['content-type'] == 'text/html; charset=utf-8'
     assert 'Mail-Adresse erfolgreich bestätigt!' in response['body']
-    assert 'https://dev.detective-collective.org' in response['body']
+    assert 'https://dev.codetekt.org' in response['body']
 
     notifications.notify_users(True, session, item)
 

@@ -26,7 +26,7 @@ def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("DBNAME", "Test")
     conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     session = get_db_session(True, None)
     session = setup_scenarios.create_levels_junior_and_senior_detectives(
@@ -135,6 +135,7 @@ def test_verification_process_best_case(monkeypatch):
     assert item.open_reviews_level_1 == 0
     assert item.open_reviews_level_2 == 0
     assert item.open_reviews == 0
+    assert item.close_timestamp is not None
 
     send_quota = conn.get_send_quota()
     sent_count = int(send_quota["SentLast24Hours"])

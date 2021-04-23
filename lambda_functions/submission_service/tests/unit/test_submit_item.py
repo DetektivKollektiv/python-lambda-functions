@@ -67,7 +67,7 @@ def test_submit_item(session, event1, event2, monkeypatch):
             roleArn='arn:aws:iam::891514678401:role/detektivkollektiv-stepfunct-StateMachineLambdaRole'
         )
         ses_client = boto3.client("ses", region_name="eu-central-1")
-        ses_client.verify_email_identity(EmailAddress="info@codetekt.org")
+        ses_client.verify_email_identity(EmailAddress="no-reply@codetekt.org")
         # Submit item
         response = submit_item(event1, None, True, session)
 

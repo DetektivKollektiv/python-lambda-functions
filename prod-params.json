@@ -1,7 +1,8 @@
 {
-    "Parameters": {
-        "STAGE": "prod",
-        "DBNAME": "prod_db",
-        "CorsAllowOrigin": "https://detective-collective.org,https://www.detective-collective.org"
-    }
+  "Parameters": {
+    "STAGE": "prod",
+    "DBNAME": "prod_db",
+    "CorsAllowOrigin": "https://codetekt.org,https://www.codetekt.org",
+    "CorsAllowOriginAdmin": "https://codetekt.org,https://www.codetekt.org,https://admin.codetekt.org,https://www.admin.codetekt.org"
+  }
 }

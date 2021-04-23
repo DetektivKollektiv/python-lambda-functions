@@ -174,12 +174,46 @@ class TestGetTags:
     def test_predict_tags_1(self):
         os.environ["STAGE"] = "dev"
         df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
-        claim_text = random.choice(df_factchecks)['claim_text']
+        for ind in range(100):
+            claim_text = random.choice(df_factchecks)['claim_text']
+            event = {
+                "Text": claim_text,
+                "LanguageCode": "de"
+            }
+            context = ""
+            ret = GetTags.predict_tags(event, context)
+            assert ret != []
+        
+    def test_predict_tags_2(self):
+        os.environ["STAGE"] = "dev"
+        LanguageCode = "de"
+        taxonomy_json = GetTags.download_taxonomy(LanguageCode)
+
+        for category in taxonomy_json:
+            if category == "unsorted-terms":
+                continue
+            if category == "excluded-terms":
+                continue
+            for tag in taxonomy_json[category]:
+                for term in taxonomy_json[category][tag]:
+                    event = {
+                        "Text": term,
+                        "LanguageCode": LanguageCode
+                    }
+                    context = ""
+                    ret = GetTags.predict_tags(event, context)
+                    assert ret == [tag]
+
+    def test_predict_tags_3(self):
+        os.environ["STAGE"] = "dev"
+        LanguageCode = "de"
+
+        term = "ffp2"
+
         event = {
-            "Text": claim_text,
-            "LanguageCode": "de"
+            "Text": term,
+            "LanguageCode": LanguageCode
         }
         context = ""
         ret = GetTags.predict_tags(event, context)
-        assert ret == ['RKI', 'Covid', 'Corona Transition']
-        
+        assert ret == ["masken"]

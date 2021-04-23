@@ -46,7 +46,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
-        - arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
 
   GetAllClosedItemsFunction:
     Type: AWS::Serverless::Function
@@ -69,6 +69,8 @@ Resources:
             Method: get
             RestApiId:
               Ref: Api
+            Auth:
+              Authorizer: NONE
       Environment:
         Variables:
           DBNAME:

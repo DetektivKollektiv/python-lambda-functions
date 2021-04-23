@@ -65,7 +65,7 @@ def session(item):
 def test_submit_issue(session, good_event, bad_event, item_event, item):
     from issue_service.submit_issue import submit_issue
     conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="info@detektivkollektiv.org")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
     # Send good event
     response = submit_issue(good_event, None, True, session)
     # Check response
@@ -76,7 +76,7 @@ def test_submit_issue(session, good_event, bad_event, item_event, item):
     sent_count = int(send_quota["SentLast24Hours"])
     assert sent_count == 1
     message = ses_backend.sent_messages[0]
-    assert 'info@detektivkollektiv.org' in message.destinations['ToAddresses']
+    assert 'support@codetekt.org' in message.destinations['ToAddresses']
     assert good_event['body']['message'] in message.body
     # Check database entry
     issue_count = session.query(Issue).count()
@@ -106,7 +106,7 @@ def test_submit_issue(session, good_event, bad_event, item_event, item):
     sent_count = int(send_quota["SentLast24Hours"])
     assert sent_count == 2
     message = ses_backend.sent_messages[1]
-    assert 'info@detektivkollektiv.org' in message.destinations['ToAddresses']
+    assert 'support@codetekt.org' in message.destinations['ToAddresses']
     assert item_event['body']['message'] in message.body
     assert item.id in message.body
     assert item.content in message.body
