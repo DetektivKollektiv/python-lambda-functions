@@ -23,7 +23,12 @@ def good_event():
         'body': {
             'category': 'Feedback',
             'message': 'Good Job'
-        }
+        },
+        'requestContext': {
+            'identity': {
+                'sourceIp': '1.2.3.4'
+            }
+    }
     }
 
 
@@ -75,6 +80,8 @@ def test_submit_issue(session, good_event, bad_event, item_event, item):
     assert good_event['body']['message'] in message.body
     # Check database entry
     issue_count = session.query(Issue).count()
+    issue = session.query(Issue).first()
+    assert issue.ip_address == '1.2.3.4'
     assert issue_count == 1
 
     # Send bad event

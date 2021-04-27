@@ -13,6 +13,7 @@ class Issue(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     category = Column(String(100), nullable=False)
     message = Column(String(1000), nullable=False)
+    ip_address = Column(String(15))
     item_id = Column(String(36), ForeignKey('items.id',
                                             ondelete='SET NULL', onupdate='CASCADE'))
 
