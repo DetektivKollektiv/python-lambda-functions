@@ -14,6 +14,7 @@ class Submission(Base):
     channel = Column(String(100))
     frequency = Column(String(100))
     received_date = Column(DateTime)
+    ip_address = Column(String(15))
     status = Column(String(100), default='unconfirmed')
     item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")

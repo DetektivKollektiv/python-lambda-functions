@@ -86,7 +86,7 @@ def create_review(user, item, is_test, session) -> Review:
     # except if no senior reviews are needed
     if user.level_id > 1 and item.open_reviews_level_2 > item.in_progress_reviews_level_2:
         rip.is_peer_review = True
-        item.in_progress_reviews_level_2 = item.in_progress_reviews_level_2 + 1
+        item.in_progress_reviews_level_2 += 1
 
         # Check if a pair with open senior review exists
         pair_found = False
@@ -108,7 +108,7 @@ def create_review(user, item, is_test, session) -> Review:
     # If review is junior review
     else:
         rip.is_peer_review = False
-        item.in_progress_reviews_level_1 = item.in_progress_reviews_level_1 + 1
+        item.in_progress_reviews_level_1 += 1
 
         # Check if a pair with open junior review exists
         pair_found = False
@@ -149,7 +149,7 @@ def compute_review_result(review_answers):
 
     answers = [answer for answer in answers if answer > 0]
 
-    return sum(answers) / len(answers)
+    return sum(answers) / len(answers) if len(answers) > 0 else 0
 
 
 def get_old_reviews_in_progress(is_test, session):
@@ -220,19 +220,10 @@ def close_review(review: Review, is_test, session) -> Review:
         review, is_test, session)
 
     if partner_review != None and partner_review.status == 'closed':
-        pair.is_good = True
-        for answer in review.review_answers:
-            partner_answer = review_answer_handler.get_partner_answer(
-                partner_review, answer.review_question_id, is_test, session)
-            if (answer.answer == None and partner_answer.answer != None) or (answer.answer != None and partner_answer.answer == None):
-                pair.is_good = False
-            elif (answer.answer == 0 and partner_answer.answer != 0) or (answer.answer != 0 and partner_answer.answer == 0):
-                pair.is_good = False
 
-        if pair.is_good:
-            difference = review_pair_handler.compute_difference(pair)
-            pair.variance = difference
-            pair.is_good = True if difference <= 1 else False
+        difference = review_pair_handler.compute_difference(pair)
+        pair.variance = difference
+        pair.is_good = True if difference <= 1 else False
 
         review.item.in_progress_reviews_level_1 -= 1
         review.item.in_progress_reviews_level_2 -= 1

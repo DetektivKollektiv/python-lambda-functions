@@ -23,7 +23,7 @@ def remove_control_characters(s):
 
 def submit_item(event, context, is_test=False, session=None):
 
-    client = boto3.client('stepfunctions')
+    client = boto3.client('stepfunctions', region_name="eu-central-1")
 
     helper.log_method_initiated("Item submission", event, logger)
 
@@ -54,6 +54,9 @@ def submit_item(event, context, is_test=False, session=None):
 
         submission = Submission()
         helper.body_to_object(body_dict, submission)
+        # add ip address
+        ip_address = event['requestContext']['identity']['sourceIp']
+        setattr(submission, 'ip_address', ip_address)
 
         try:
             # Item already exists, item_id in submission is the id of the found item
