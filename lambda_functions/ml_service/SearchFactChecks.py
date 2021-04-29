@@ -24,7 +24,7 @@ newfactchecks_folder = "new/"
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
 def get_secret():
-    secret_name = "/factcheck/search/Google_API__KEY"
+    secret_name = "google/api_key"
     region_name = "eu-central-1"
 
     # Create a Secrets Manager client
@@ -67,7 +67,7 @@ def get_secret():
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         if 'SecretString' in get_secret_value_response:
             secret = get_secret_value_response['SecretString']
-            return json.loads(secret)['FactCheckSearch_API_KEY']
+            return json.loads(secret)['Google_API_KEY']
         else:
             decoded_binary_secret = base64.b64decode(
                 get_secret_value_response['SecretBinary'])
