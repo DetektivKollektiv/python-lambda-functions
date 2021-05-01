@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from .model_base import Base
 from sqlalchemy.sql import func
 from datetime import datetime
+import pandas as pd
 
 
 class Item(Base):
@@ -58,9 +59,14 @@ class Item(Base):
         }
 
         if with_tags:
-            tags_list = []
+            # Load tags and related counts into DataFrame
+            df_unsorted = pd.DataFrame(columns = ['tag', 'count'])
             for item_tag in self.tags:
-                tags_list.append(item_tag.tag.tag)
+                df_unsorted = df_unsorted.append({'tag': item_tag.tag.tag, 'count': item_tag.count}, ignore_index = True)
+            # Sort tags by number of mentions (first) and alphabetical (second)
+            df_sorted = df_unsorted.sort_values(by = ['count', 'tag'], ascending = [False, True])
+            tags_list = list(df_sorted['tag'])
+
             item_dict["tags"] = tags_list
             return item_dict
         else:
