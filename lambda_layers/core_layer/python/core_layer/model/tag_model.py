@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, ForeignKey
+from sqlalchemy import Table, Column, String, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from .model_base import Base
 
@@ -20,3 +20,4 @@ class ItemTag(Base):
     item = relationship("Item", back_populates="tags")
     tag_id = Column(String(36), ForeignKey('tags.id'))
     tag = relationship("Tag", back_populates="items")
+    count = Column(Integer, default = 1) # number of mentions
