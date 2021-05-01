@@ -7,9 +7,7 @@ from core_layer.model.item_model import Item
 from core_layer.connection_handler import get_db_session
 from submission_service.submit_item import submit_item
 
-# First item so submit
-
-
+# First item
 @pytest.fixture
 def event1():
     return {
@@ -26,9 +24,7 @@ def event1():
         }
     }
 
-# Second item to submit, same content as first one
-
-
+# Second item, same content as first one
 @pytest.fixture
 def event2():
     return {
@@ -68,7 +64,7 @@ def test_submit_item(session, event1, event2, monkeypatch):
         )
         ses_client = boto3.client("ses", region_name="eu-central-1")
         ses_client.verify_email_identity(EmailAddress="no-reply@codetekt.org")
-        # Submit item
+        # Submit first item
         response = submit_item(event1, None, True, session)
 
         assert response['statusCode'] == 201
@@ -79,17 +75,15 @@ def test_submit_item(session, event1, event2, monkeypatch):
         assert session.query(Submission).count() == 1
         assert session.query(Submission.ip_address).first()[0] == '1.2.3.4'
 
-        # Submit same item again
+        # Submit second item with same content as first one
         submit_item(event2, None, True, session)
         # Check database entries
         assert session.query(Item).count() == 1  # items didn't increase
         assert session.query(Submission).count() == 2  # submissions increased
         first_item_id = session.query(Item.id).first()[0]
         assert session.query(Item.submissions).\
-            filter(Item.id == first_item_id).count(
-        ) == 2  # number of submissions to first item increased
-        # ip address of second submission assigned to first item
-        assert session.query(Submission.ip_address).all()[1][0] == '2.3.4.5'
+            filter(Item.id == first_item_id).count() == 2  # number of submissions to first item increased
+        assert session.query(Submission.ip_address).all()[1][0] == '2.3.4.5' # ip address of second submission assigned to first item
         # Check if confirmation mails have been sent
         send_quota = ses_client.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
