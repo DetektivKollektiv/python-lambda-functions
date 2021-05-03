@@ -52,4 +52,4 @@ def test_get_closed_items(monkeypatch):
     response = get_closed_items(event1, context, True, session)
     body = response['body']
     tags = json.loads(body)[0]['tags']
-    assert tags == ['B', 'C', 'A', 'D']
+    assert tags == ['B', 'C', 'D', 'A']

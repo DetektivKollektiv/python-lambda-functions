@@ -32,7 +32,7 @@ class Item(Base):
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
     # One to Many Relation: one Item has many ItemTags
-    tags = relationship("ItemTag")
+    tags = relationship("ItemTag", order_by = "desc(ItemTag.count)")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
@@ -59,14 +59,9 @@ class Item(Base):
         }
 
         if with_tags:
-            # Load tags and related counts into DataFrame
-            df_unsorted = pd.DataFrame(columns = ['tag', 'count'])
+            tags_list = []
             for item_tag in self.tags:
-                df_unsorted = df_unsorted.append({'tag': item_tag.tag.tag, 'count': item_tag.count}, ignore_index = True)
-            # Sort tags by number of mentions (first) and alphabetical (second)
-            df_sorted = df_unsorted.sort_values(by = ['count', 'tag'], ascending = [False, True])
-            tags_list = list(df_sorted['tag'])
-
+                tags_list.append(item_tag.tag.tag)
             item_dict["tags"] = tags_list
             return item_dict
         else:
