@@ -79,3 +79,14 @@ def delete_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     if itemtag != None:
         session.delete(itemtag)
         session.commit()
+
+def get_all_tags(is_test, session):
+    """Returns all tags
+
+    Returns:
+        [Tag]: A list of tag objects
+    """
+    session = get_db_session(is_test, session)
+
+    query = session.query(Tag)
+    return query.all()

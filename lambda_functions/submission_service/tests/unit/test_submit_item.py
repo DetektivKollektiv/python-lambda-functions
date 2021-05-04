@@ -88,3 +88,10 @@ def test_submit_item(session, event1, event2, monkeypatch):
         send_quota = ses_client.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 2
+
+def test_remove_control_characters_1():
+    from submission_service.submit_item import remove_control_characters
+
+    s = remove_control_characters("Solange der CT Wert beim PCR Test nicht berücksichtigt wird, sind die Zahlen nix Wert und treiben lediglich die \"Statistik\" in die Höhe. Der einzige Grund warum der CT Wert nicht ermittelt wird, ist, dass die Einschränkungen der Bürger incl. Gesetzesänderung, weiter vorangetrieben werden sollen.")
+
+    assert s == 'Solange der CT Wert beim PCR Test nicht berücksichtigt wird, sind die Zahlen nix Wert und treiben lediglich die  Statistik  in die Höhe. Der einzige Grund warum der CT Wert nicht ermittelt wird, ist, dass die Einschränkungen der Bürger incl. Gesetzesänderung, weiter vorangetrieben werden sollen.'
