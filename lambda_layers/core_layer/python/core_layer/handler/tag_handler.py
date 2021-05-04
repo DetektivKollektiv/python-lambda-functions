@@ -65,6 +65,10 @@ def store_tag_for_item(item_id, str_tag, is_test, session):
         itemtag.item_id = item_id
         itemtag.tag_id = tag.id
         update_object(itemtag, is_test, session)
+    else:
+        # increase tag counter
+        itemtag.count += 1
+        update_object(itemtag, is_test, session)
 
 def delete_itemtag_by_tag_and_item_id(tag_id, item_id, is_test, session):
     """Deletes the itemtag for an item and tag

@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from .model_base import Base
 from sqlalchemy.sql import func
 from datetime import datetime
+import pandas as pd
 
 
 class Item(Base):
@@ -31,7 +32,7 @@ class Item(Base):
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
     # One to Many Relation: one Item has many ItemTags
-    tags = relationship("ItemTag")
+    tags = relationship("ItemTag", order_by = "desc(ItemTag.count)")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")

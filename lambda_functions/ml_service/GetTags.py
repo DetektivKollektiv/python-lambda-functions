@@ -65,6 +65,7 @@ def post_tags_for_item(event, context, is_test=False, session=None):
     if session is None:
         session = get_db_session(is_test, None)
 
+    # get list of existing tags
     tags_existing = []
     try:
         # get id (str) from path
@@ -80,6 +81,7 @@ def post_tags_for_item(event, context, is_test=False, session=None):
             "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
         }
 
+    # get list of posted tags
     body = event['body']
 
     if isinstance(body, str):
@@ -91,22 +93,18 @@ def post_tags_for_item(event, context, is_test=False, session=None):
     else:
         tags_posted = []        
 
-    tags_new = list(set(tags_posted)-set(tags_existing))
-    if tags_new != []:
-        for str_tag in tags_new:
+    # save tags
+    if tags_posted != []:
+        for str_tag in tags_posted:
             tag_handler.store_tag_for_item(id, str_tag, is_test, session)
 
-    tags_removed = list(set(tags_existing)-set(tags_posted))
-    for str_tag in tags_removed:
-        # search for tag in database
-        tag = tag_handler.get_tag_by_content(str_tag, is_test, session)
-        if tag is not None:
-            tag_handler.delete_itemtag_by_tag_and_item_id(tag.id, id, is_test, session)
-
+    # create response
+    tags_new = list(set(tags_posted)-set(tags_existing))
+    tags_counter_increased = list(set(tags_posted)-set(tags_new))
     response = {
         "statusCode": 200,
         'headers': {"content-type": "application/json; charset=utf-8"},
-        "body": json.dumps({"added tags": tags_new,"removed tags": tags_removed})
+        "body": json.dumps({"added new tags": tags_new,"increased tag counter": tags_counter_increased})
     }
 
     response_cors = helper.set_cors(response, event, is_test)
