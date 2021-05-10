@@ -39,7 +39,7 @@ class Item(Base):
     review_pairs = relationship("ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
 
-    def to_dict(self, with_tags=False):
+    def to_dict(self, with_tags=False, include_type=False):
         item_dict = {
             "id": self.id,
             "item_type_id": self.item_type_id,
@@ -62,6 +62,8 @@ class Item(Base):
             for item_tag in self.tags:
                 tags_list.append(item_tag.tag.tag)
             item_dict["tags"] = tags_list
-            return item_dict
-        else:
-            return item_dict
+
+        if include_type and self.item_type:
+            item_dict["item_type"] = self.item_type.to_dict()
+
+        return item_dict
