@@ -45,11 +45,7 @@ def test_post_tags_for_item(monkeypatch):
 
     response = GetTags.get_tags_for_item(event, context, True, session)
     body = response['body']
-    # Deserialize if body is string
-    if isinstance(body, str):
-        tags = json.loads(body)['Tags']
-    else:
-        tags = body['Tags']
+    tags = json.loads(body)['Tags']
     assert tags == ['RKI', 'Covid', 'Corona Transition']
 
     # create event with 1 already existing tag and 1 new tag
@@ -62,13 +58,8 @@ def test_post_tags_for_item(monkeypatch):
 
     response = GetTags.post_tags_for_item(event, context, True, session)
     body = response['body']
-    # Deserialize if body is string
-    if isinstance(body, str):
-        tags_added = json.loads(body)['added new tags']
-        tags_counter_increased = json.loads(body)['increased tag counter']
-    else:
-        tags_added = body['added new tags']
-        tags_counter_increased = body['increased tag counter']
+    tags_added = json.loads(body)['added new tags']
+    tags_counter_increased = json.loads(body)['increased tag counter']
     assert tags_added == ['Covid-19']
     assert len(tags_counter_increased) == 1
     assert 'RKI' in tags_counter_increased
@@ -76,11 +67,7 @@ def test_post_tags_for_item(monkeypatch):
 
     response = GetTags.get_tags_for_item(event, context, True, session)
     body = response['body']
-    # Deserialize if body is string
-    if isinstance(body, str):
-        tags = json.loads(body)['Tags']
-    else:
-        tags = body['Tags']
+    tags = json.loads(body)['Tags']
     assert tags == ['RKI', 'Covid', 'Corona Transition', 'Covid-19']
 
     # Check counts: RKI posted twice, all other once

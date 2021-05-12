@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from .model_base import Base
 from sqlalchemy.sql import func
 from datetime import datetime
-import pandas as pd
 
 
 class Item(Base):
