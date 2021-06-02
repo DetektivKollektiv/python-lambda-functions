@@ -10,6 +10,8 @@ aiohttp==3.7.4
     # via -r requirements.in
 async-timeout==3.0.1
     # via aiohttp
+asyncio==3.4.3
+    # via -r requirements.in
 attrs==20.3.0
     # via aiohttp
 aws-requests-auth==0.4.3
@@ -59,7 +61,7 @@ soupsieve==2.1
     #   beautifulsoup4
 typing-extensions==3.7.4.3
     # via aiohttp
-urllib3==1.25.11
+urllib3==1.26.5
     # via
     #   -r requirements.in
     #   requests
