@@ -56,7 +56,7 @@ def get_items(event, context, is_test=False, session=None):
     items_list = []
 
     for item in items:
-        items_list.append(item.to_dict())
+        items_list.append(item.to_dict(include_type=True))
 
     response = {
         "statusCode": 200,

@@ -50,3 +50,14 @@ def get_itemphrase_by_phrase_and_item_id(phrase_id, item_id, is_test, session):
     if itemphrase is None:
         raise Exception("No ItemKeyphrase found.")
     return itemphrase
+
+def get_all_keyphrases(is_test, session):
+    """Returns all keyphrases
+
+    Returns:
+        [Keyphrase]: A list of Keyphrase objects
+    """
+    session = get_db_session(is_test, session)
+
+    query = session.query(Keyphrase)
+    return query.all()

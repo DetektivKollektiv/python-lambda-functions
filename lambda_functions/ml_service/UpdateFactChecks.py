@@ -25,7 +25,6 @@ bucket_prefix = "factchecks-"
 newfactchecks_folder = "new/"
 factchecker_filename = "factchecker.csv"
 factchecks_prefix = "factchecks_"
-doc2vec_models_prefix = "model_sim_"
 model_languages = ["de"] # defines for which languages should be supported with machine learnig models
 stopword_languages = {"de": "german"}
 hyper_parameter = [ {"vector_size": 40, "min_count": 2, "epochs": 100},
@@ -148,7 +147,7 @@ def json2df(factcheck_json):
             text=" "
             if 'text' in article:
                 text=article['text']
-                text = text.replace("\"", "")                
+                text = text.replace("\"", "")
             claimant=" "
             if 'claimant' in article:
                 claimant=article['claimant']
@@ -279,19 +278,3 @@ def update_factcheck_models(event, context):
                 time.sleep(1)
         if len(df_factchecks)>0:
             store_df(df_factchecks, factchecks_prefix+LC+".csv")
-            # prepare data for training
-            # stoplist = list(string.punctuation)
-            # stoplist += stopwords.words(stopword_languages[LC]) # TODO Download german stopwords
-            # documents_train = []
-            # for i, row in df_factchecks.iterrows():
-            #     tokens = gensim.utils.simple_preprocess(row["claim_text"])
-                # Remove stop words
-            #     words = [w for w in tokens if not w in stoplist]
-                # For training data, add tags
-            #     documents_train.append(gensim.models.doc2vec.TaggedDocument(words, [i]))
-            # model = gensim.models.doc2vec.Doc2Vec(  vector_size=hyper_parameter[0]["vector_size"], 
-            #                                         min_count=hyper_parameter[0]["min_count"], 
-            #                                         epochs=hyper_parameter[0]["epochs"])
-            # model.build_vocab(documents_train)
-            # model.train(documents_train, total_examples=model.corpus_count, epochs=model.epochs)
-            # save_model(model, doc2vec_models_prefix+LC)
