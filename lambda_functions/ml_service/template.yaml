@@ -205,6 +205,35 @@ Resources:
           STAGE:
             Ref: STAGE
 
+  CreateTagReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-ml_api-CreateTagReport-${STAGE}"
+      CodeUri: .
+      Handler: GetTags.create_tagreport
+      Runtime: python3.8
+      MemorySize: 832
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-ml_api-rules-CreateTagReport-${STAGE}"
+            Description: creates a new tag report every two week
+            Enabled: True
+            Schedule: rate(14 days)
+      Environment:
+        Variables:
+          STAGE:
+            Ref: STAGE
+          DBNAME:
+            Ref: DBNAME
+
   GetTagsByItemidFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:

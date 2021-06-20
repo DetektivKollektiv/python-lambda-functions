@@ -335,6 +335,58 @@ class TestGetFactChecks:
         assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
         assert elapsed < 3
 
+    def test_get_online_factcheck_by_itemid_6(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        session = get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "https://www.pressenza.com/de/2021/01/geoengineering-fuer-bill-gates-ist-die-sonne-das-problem/"
+        item.language = "de"
+        item = item_handler.create_item(item, True, session)
+
+        # store a fact check
+        event = {
+            "item": {
+                "id": item.id,
+                "content": item.content,
+                "language": item.language,
+            },
+            "KeyPhrases": [
+                "problem", 
+                "gates", 
+                "bill"
+            ],
+            "Entities": [
+                "Bill Gates", 
+                "Sonne"
+            ]
+        }
+        context = ""
+        EnrichItem.store_itementities(event, context, True, session)
+        EnrichItem.store_itemphrases(event, context, True, session)
+
+        event = {
+            "pathParameters": {
+                "item_id": item.id
+            }
+        }
+        context = {}
+        s = time.perf_counter()
+        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
+        elapsed = time.perf_counter() - s
+        body = response['body']
+        # Deserialize if body is string
+        if isinstance(body, str):
+            factcheck = json.loads(body)
+        else:
+            factcheck = body
+        assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/11/23/nein-christian-drosten-hat-2014-nicht-gesagt-dass-er-pcr-tests-fuer-untauglich-halte/'
+        assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
+        assert elapsed < 3
+
 class TestStoreFactChecks:
     def test_store_factcheck_empty(self, monkeypatch):
         monkeypatch.setenv("DBNAME", "Test")
@@ -441,132 +493,3 @@ class TestStoreTags:
         else:
             tags = body['Tags']
         assert tags == list_tags
-
-class TestPostTags:
-    def test_post_tags_for_item_1(self, monkeypatch):
-        monkeypatch.setenv("DBNAME", "Test")
-        os.environ["STAGE"] = "dev"
-
-        session = get_db_session(True, None)
-
-        # creating items
-        item = Item()
-        item.content = "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
-                       "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
-        item.language = "de"
-        item = item_handler.create_item(item, True, session)
-
-        # store a fact check
-        event = {
-            "item": {
-                "id": item.id,
-                "content": item.content,
-                "language": item.language,
-            },
-            "Tags": [
-                "RKI",
-                "Covid",
-                "Corona Transition"
-            ]
-        }
-        context = ""
-        EnrichItem.store_itemtags(event, context, True, session)
-
-        event = {
-            "pathParameters": {
-                "item_id": item.id
-            }
-        }
-        response = GetTags.get_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags = json.loads(body)['Tags']
-        else:
-            tags = body['Tags']
-        assert tags == ['RKI', 'Covid', 'Corona Transition']
-
-        event = {
-            "pathParameters": {
-                "item_id": item.id
-            },
-            "body": json.dumps({"tags": ['RKI', 'Covid-19']})
-        }
-        response = GetTags.post_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags_added = json.loads(body)['added tags']
-            tags_removed = json.loads(body)['removed tags']
-        else:
-            tags_added = body['added tags']
-            tags_removed = body['removed tags']
-        assert tags_added == ['Covid-19']
-        assert len(tags_removed) == 2
-        assert 'Covid' in tags_removed
-        assert 'Corona Transition' in tags_removed
-        response = GetTags.get_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags = json.loads(body)['Tags']
-        else:
-            tags = body['Tags']
-        assert tags == ['RKI', 'Covid-19']
-
-    def test_post_tags_for_item_2(self, monkeypatch):
-        monkeypatch.setenv("DBNAME", "Test")
-        os.environ["STAGE"] = "dev"
-
-        session = get_db_session(True, None)
-
-        # creating items
-        item = Item()
-        item.content = "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
-                       "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
-        item.language = "de"
-        item = item_handler.create_item(item, True, session)
-
-        event = {
-            "pathParameters": {
-                "item_id": item.id
-            }
-        }
-        context = ""
-        response = GetTags.get_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags = json.loads(body)['Tags']
-        else:
-            tags = body['Tags']
-        assert tags == []
-
-        json.dumps({"tags": ["RKI", "Covid-19"]})
-        event = {
-            "pathParameters": {
-                "item_id": item.id
-            },
-            "body": json.dumps({"tags": ["RKI", "Covid-19"]})
-        }
-        response = GetTags.post_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags_added = json.loads(body)['added tags']
-            tags_removed = json.loads(body)['removed tags']
-        else:
-            tags_added = body['added tags']
-            tags_removed = body['removed tags']
-        assert 'RKI' in tags_added
-        assert 'Covid-19' in tags_added
-        assert len(tags_removed) == 0
-        assert tags_removed == []
-        response = GetTags.get_tags_for_item(event, context, True, session)
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            tags = json.loads(body)['Tags']
-        else:
-            tags = body['Tags']
-        assert tags == ['RKI', 'Covid-19']

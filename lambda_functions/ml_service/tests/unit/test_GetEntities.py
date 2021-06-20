@@ -1,4 +1,7 @@
-from ml_service import GetEntities, GetTags, UpdateFactChecks
+from core_layer.connection_handler import get_db_session
+from ml_service import GetEntities, GetTags, UpdateFactChecks, EnrichItem
+from core_layer.model.item_model import Item
+from core_layer.handler import item_handler
 import pytest
 import os
 import random
@@ -174,7 +177,7 @@ class TestGetTags:
     def test_predict_tags_1(self):
         os.environ["STAGE"] = "dev"
         df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
-        for ind in range(100):
+        for ind in range(1):
             claim_text = random.choice(df_factchecks)['claim_text']
             event = {
                 "Text": claim_text,
@@ -190,7 +193,7 @@ class TestGetTags:
         taxonomy_json = GetTags.download_taxonomy(LanguageCode)
 
         for category in taxonomy_json:
-            if category == "unsorted-terms":
+            if category == "similarity-threshold":
                 continue
             if category == "excluded-terms":
                 continue
@@ -216,4 +219,81 @@ class TestGetTags:
         }
         context = ""
         ret = GetTags.predict_tags(event, context)
-        assert ret == ["masken"]
+        assert ret == ["Masken"]
+
+    def test_predict_tags_4(self):
+        os.environ["STAGE"] = "dev"
+        LanguageCode = "de"
+        taxonomy_json = GetTags.download_taxonomy(LanguageCode)
+        df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
+
+        for _ in range(1):
+            claim_text = random.choice(df_factchecks)['claim_text']
+            for stopword in ["\"", ",", ".", "!", "?", "«", "»", "(", ")", "-"]:
+                claim_text = claim_text.replace(stopword, " ")
+            new_text = ""
+            tags = []
+            for substr in claim_text.split():
+                substr = str.lower(substr)
+                term_found = False
+                for category in taxonomy_json:
+                    if category == "similarity-threshold":
+                        continue
+                    if category == "excluded-terms":
+                        continue
+                    for tag in taxonomy_json[category]:
+                        for term in taxonomy_json[category][tag]:
+                            if substr == term:
+                                term_found = True
+                                if tag not in tags:
+                                    tags.append(tag)
+                                break
+                        if term_found:
+                            break
+                if not term_found:
+                    new_text += substr+" "
+            event = {
+                "Text": new_text,
+                "LanguageCode": LanguageCode
+            }
+            context = ""
+            ret = GetTags.predict_tags(event, context)
+            assert ret == tags
+
+    def test_predict_tags_5(self):
+        os.environ["STAGE"] = "dev"
+        LanguageCode = ""
+
+        term = "ffp2"
+
+        event = {
+            "Text": term,
+            "LanguageCode": LanguageCode
+        }
+        context = ""
+        ret = GetTags.predict_tags(event, context)
+        assert ret == []
+
+    def test_create_tagreport_1(self, monkeypatch):
+        monkeypatch.setenv("DBNAME", "Test")
+        os.environ["STAGE"] = "dev"
+
+        session = get_db_session(True, None)
+
+        # creating items
+        item = Item()
+        item.content = "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition "
+        item.language = "de"
+        item = item_handler.create_item(item, True, session)
+        list_tags = ['Corona-Maßnahmen', 'Senkung der Treibhausgasemissionen', 'Kanzlerkandidatur', 'sars-cov-2', '#verunglimpft', 'g.co/privacytools', 'Gregor Gysi', 'Bundestagswahl2021', '19', '-', 'Statistik falsch interpretiert', 'Bild.de', 'JF', 'MdB Hansjörg Müller (AFD)', '100 Tage', 'Gruene', '#notwendige Polizeimaßnahmen', 'Sonne']
+        # store tags
+        event = {
+            "item": item.to_dict(),
+            "Tags": list_tags
+        }
+        context = ""
+        EnrichItem.store_itemtags(event, context, True, session)
+
+        event = ""
+        context = ""
+        GetTags.create_tagreport(event, context, True, session)
