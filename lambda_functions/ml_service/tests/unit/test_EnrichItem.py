@@ -5,7 +5,6 @@ from ml_service import EnrichItem, get_online_factcheck, GetEntities, GetTags
 from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler, tag_handler
 import json
 import time
-from datetime import datetime, timedelta
 import pytest
 import os
 
