@@ -1,10 +1,13 @@
 import logging
 import json
 import traceback
+from uuid import uuid4
 from core_layer import helper
 from core_layer import connection_handler
+from core_layer.model.comment_model import Comment
 from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
 import notifications
+from datetime import datetime
 
 
 def update_review(event, context, is_test=False, session=None):
@@ -46,6 +49,21 @@ def update_review(event, context, is_test=False, session=None):
     except:
         return helper.get_text_response(404, "No review found", event, is_test)
 
+    # Save qualitative_comment
+    if 'qualitative_comment' in body:
+        try:
+            #comment = body['qualitative_comments']
+            comments_obj = Comment(id = str(uuid4()), 
+                                   user_id = body['user_id'],
+                                   timestamp = datetime.now(),
+                                   comment = body['qualitative_comment'],
+                                   item_id = body['item_id']
+                                   )
+            session.add(comments_obj)
+            session.commit()
+        except:
+            return helper.get_text_response(404, "No qualitative comment found.", event, is_test)
+
     try:
         user = user_handler.get_user_by_id(user_id, is_test, session)
     except:
@@ -54,7 +72,7 @@ def update_review(event, context, is_test=False, session=None):
     if review.user_id != user.id:
         return helper.get_text_response(403, "Forbidden.", event, is_test)
 
-        # If review is set closed
+    # If review is set closed
     if 'status' in body and body['status'] == 'closed':
         try:
             review = review_handler.close_review(review, is_test, session)

@@ -8,6 +8,7 @@ from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 from core_layer.model.review_model import Review
 from core_layer.model.review_question_model import ReviewQuestion
+from core_layer.model.comment_model import Comment
 from ....tests.helper import event_creator, setup_scenarios
 
 
@@ -55,6 +56,12 @@ def test_update_review(session, item_id, junior_user_id, senior_user_id):
         review, item_id, "in progress", senior_user_id, 1, session)
     response = update_review.update_review(event, None, True, session)
     assert response['statusCode'] == 403
+    # Test comments
+    comments = session.query(Comment).all()[0]
+    assert comments.comment == "Test comment"
+    assert comments.item_id == item_id
+    assert comments.user_id == senior_user_id
+    assert comments.status == "published"
 
     event = event_creator.get_review_event(
         review, item_id, "in progress", junior_user_id, 1, session)
