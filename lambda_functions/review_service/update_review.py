@@ -52,10 +52,8 @@ def update_review(event, context, is_test=False, session=None):
     # Save qualitative_comment
     if 'qualitative_comment' in body:
         try:
-            #comment = body['qualitative_comments']
             comments_obj = Comment(id = str(uuid4()), 
                                    user_id = body['user_id'],
-                                   timestamp = datetime.now(),
                                    comment = body['qualitative_comment'],
                                    item_id = body['item_id']
                                    )
