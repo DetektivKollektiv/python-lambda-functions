@@ -2,11 +2,12 @@ from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey
 from sqlalchemy.orm import relationship
 from .model_base import Base
+from sqlalchemy.sql import func
 
 class Comment(Base):
     __tablename__ = 'comments'
     id = Column(String(36), primary_key = True)  
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime, server_default = func.now())
     status = Column(String, default = "published") # e.g. published, flagged, cleared, removed
     comment = Column(String)
 

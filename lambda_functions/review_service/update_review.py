@@ -5,9 +5,8 @@ from uuid import uuid4
 from core_layer import helper
 from core_layer import connection_handler
 from core_layer.model.comment_model import Comment
-from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
+from core_layer.handler import user_handler, review_handler, review_answer_handler
 import notifications
-from datetime import datetime
 
 
 def update_review(event, context, is_test=False, session=None):
@@ -52,10 +51,8 @@ def update_review(event, context, is_test=False, session=None):
     # Save qualitative_comment
     if 'qualitative_comment' in body:
         try:
-            #comment = body['qualitative_comments']
             comments_obj = Comment(id = str(uuid4()), 
                                    user_id = body['user_id'],
-                                   timestamp = datetime.now(),
                                    comment = body['qualitative_comment'],
                                    item_id = body['item_id']
                                    )
