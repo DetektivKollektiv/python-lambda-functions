@@ -4,6 +4,7 @@ import traceback
 # Helper imports
 from core_layer import helper
 from core_layer.connection_handler import get_db_session, update_object
+from core_layer.event_publisher import EventPublisher
 # Model imports
 from core_layer.model import Item
 # Handler imports
@@ -14,7 +15,7 @@ logger.setLevel(logging.INFO)
 
 
 def update_item(event, context, is_test=False, session=None):
-    """Updates an item. 
+    """Updates an item.
 
     Parameters
     ----------
@@ -68,6 +69,11 @@ def update_item(event, context, is_test=False, session=None):
             return response_cors
 
     item = update_object(item, is_test, session)
+
+    if(item.status == 'rejected'):
+        EventPublisher().publish_event(
+            'codetekt.admin_service', 'item_rejected', {'item_id': item.id})
+
     if item is None:
         response = {
             "statusCode": 500,

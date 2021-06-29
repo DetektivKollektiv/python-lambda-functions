@@ -31,6 +31,11 @@ batch:
         variables:
           LOCATION: 'user_service'
           STACK_NAME: 'user-service'
+    - identifier: notification_service
+      env:
+        variables:
+          LOCATION: "notification_service"
+          STACK_NAME: "notification-service"
 
 phases:
   install:

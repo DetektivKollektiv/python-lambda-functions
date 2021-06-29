@@ -3,8 +3,8 @@ import json
 import traceback
 from core_layer import helper
 from core_layer import connection_handler
-from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
-import notifications
+from core_layer.event_publisher import EventPublisher
+from core_layer.handler import user_handler, review_handler, review_answer_handler
 
 
 def update_review(event, context, is_test=False, session=None):
@@ -58,8 +58,11 @@ def update_review(event, context, is_test=False, session=None):
     if 'status' in body and body['status'] == 'closed':
         try:
             review = review_handler.close_review(review, is_test, session)
+
             if review.item.status == 'closed':
-                notifications.notify_users(is_test, session, review.item)
+                EventPublisher().publish_event('codetekt.review_service',
+                                               'item_closed', {'item_id': review.item.id})
+
             response = {
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
