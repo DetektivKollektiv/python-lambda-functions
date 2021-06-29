@@ -222,7 +222,7 @@ class TestGetTags:
         assert ret == ["Masken"]
 
     def test_predict_tags_4(self):
-        os.environ["STAGE"] = "dev"
+        os.environ["STAGE"] = "qa"
         LanguageCode = "de"
         taxonomy_json = GetTags.download_taxonomy(LanguageCode)
         df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
