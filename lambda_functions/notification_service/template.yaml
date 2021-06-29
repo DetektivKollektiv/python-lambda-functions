@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "SAM template for the codetekt notification service" # Change for each template
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    OpenApiVersion: 3.0.1
+
+Parameters:
+  STAGE:
+    Type: String
+  NOTIFICATION_TEMPLATE_BUCKET:
+    Type: String
+    Default: codetekt-notification-templates-dev
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "codetekt-api-execution-notification-service-${STAGE}" # Change for each Role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+
+  NotifyItemClosed: # Change for each lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "codetekt-notifications-item-closed-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: src.item_closed_handler.handle_item_closed # Change for each lambda
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        EventBridge:
+          Type: EventBridgeRule
+          Pattern:
+            source:
+              - codetekt.review_service
+            detail-type:
+              - item_closed
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  NotifyItemRejected: # Change for each lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "codetekt-notifications-item-rejected-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: src.item_rejected_handler.handle_item_rejected # Change for each lambda
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        EventBridge:
+          Type: EventBridgeRule
+          Pattern:
+            source:
+              - codetekt.admin_service
+            detail-type:
+              - item_rejected
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

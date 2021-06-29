@@ -1,0 +1,9 @@
+{
+  "test1": {
+    "mail": {
+      "subject": { "de": "Dein Fall {placeholder1} wurde gelöst! {placeholder2}" },
+      "html": { "de": "mail/test1.html" },
+      "text": { "de": "mail/test1.txt" }
+    }
+  }
+}
