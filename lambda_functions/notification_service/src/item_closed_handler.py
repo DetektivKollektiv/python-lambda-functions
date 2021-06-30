@@ -49,14 +49,18 @@ def handle_item_closed(event, context):
 
         for submission in item.submissions:
             if submission.mail is not None:
-                mail_sender.send_notification(
-                    "item_closed", mail=submission.mail, replacements=parameters)
-                pass
+                try:
+                    mail_sender.send_notification(
+                        "item_closed", mail=submission.mail, replacements=parameters)
+                except Exception as e:
+                    logger.exception(e)
 
             if submission.telegram_id is not None:
-                mail_sender.send_notification(
-                    "item_closed", telegram_id=submission.telegram_id, replacements=parameters)
-                pass
+                try:
+                    mail_sender.send_notification(
+                        "item_closed", telegram_id=submission.telegram_id, replacements=parameters)
+                except Exception as e:
+                    logger.exception(e)
 
         response = Success()
         return helper.set_cors(response, event, is_test)
