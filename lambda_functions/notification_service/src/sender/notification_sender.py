@@ -1,7 +1,7 @@
 import logging
 
 from core_layer.boto_client_provider import BotoClientProvider
-from core_layer.handler.notification_template_handler import NotificationTemplateHandler
+from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 
 
 logger = logging.getLogger()
@@ -14,9 +14,9 @@ class NotificationSender:
     _message_type: str
 
     _client_provider: BotoClientProvider
-    _notification_template_handler: NotificationTemplateHandler
+    _notification_template_handler: S3NotificationTemplateHandler
 
-    def __init__(self, notification_template_handler: NotificationTemplateHandler) -> None:
+    def __init__(self, notification_template_handler: S3NotificationTemplateHandler) -> None:
         self._client_provider = BotoClientProvider()
         self._notification_template_handler = notification_template_handler
         pass

@@ -1,5 +1,5 @@
 import logging
-from core_layer.handler.notification_template_handler import NotificationTemplateHandler
+from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 import requests
 import os
 import boto3
@@ -18,7 +18,7 @@ class TelegramNotificationError(Exception):
 
 
 class TelegramSender(NotificationSender):
-    def __init__(self, notification_template_handler: NotificationTemplateHandler) -> None:
+    def __init__(self, notification_template_handler: S3NotificationTemplateHandler) -> None:
         super().__init__(notification_template_handler)
 
         self._message_type = "telegram"

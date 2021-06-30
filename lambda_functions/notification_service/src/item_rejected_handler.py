@@ -2,7 +2,7 @@ import logging
 import os
 
 from core_layer import helper
-from core_layer.handler.notification_template_handler import NotificationTemplateHandler
+from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 from core_layer.responses import BadRequest, InternalError, Success
 from core_layer.handler import item_handler
 from notification_service.src.sender.mail_sender import MailSender
@@ -12,7 +12,7 @@ from notification_service.src.sender.telegram_sender import TelegramSender
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-notification_template_handler = NotificationTemplateHandler()
+notification_template_handler = S3NotificationTemplateHandler()
 
 mail_sender = MailSender(notification_template_handler)
 telegram_sender = TelegramSender(notification_template_handler)
@@ -28,16 +28,13 @@ def handle_item_rejected(event, context):
         helper.log_method_initiated("Handle item rejected", event, logger)
 
         if "item_id" not in event:
-            response = BadRequest("Event contains no item_id.")
-            return helper.set_cors(response, event, is_test)
+            return BadRequest(event, "Event contains no item_id.")
 
         item_id = event["item_id"]
         item = item_handler.get_item_by_id(item_id, is_test, session)
 
         if item is None:
-            response = BadRequest(
-                f"No item was found with the given item_id [{item_id}].")
-            return helper.set_cors(response, event, is_test)
+            return BadRequest(event, f"No item was found with the given item_id [{item_id}].")
 
         parameters = dict(
             content=item.content
@@ -58,8 +55,6 @@ def handle_item_rejected(event, context):
                 except Exception as e:
                     logger.exception(e)
 
-        response = Success()
-        return helper.set_cors(response, event, is_test)
+        return Success(event)
     except Exception as e:
-        response = InternalError("Error sending notification", e)
-        return helper.set_cors(response, event, is_test)
+        return InternalError(event, "Error sending notification", e)
