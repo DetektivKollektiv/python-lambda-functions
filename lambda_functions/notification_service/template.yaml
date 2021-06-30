@@ -11,7 +11,7 @@ Globals:
 Parameters:
   STAGE:
     Type: String
-  NOTIFICATION_TEMPLATE_BUCKET:
+  NotificationTemplateBucket:
     Type: String
     Default: codetekt-notification-templates-dev
 
@@ -49,17 +49,16 @@ Resources:
       Events:
         EventBridge:
           Type: EventBridgeRule
-          Pattern:
-            source:
-              - codetekt.review_service
-            detail-type:
-              - item_closed
+          Properties:
+            Pattern:
+              source:
+                - codetekt.review_service
+              detail-type:
+                - item_closed
       Environment:
         Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
+          NOTIFICATION_TEMPLATE_BUCKET:
+            Ref: NotificationTemplateBucket
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
@@ -79,16 +78,15 @@ Resources:
       Events:
         EventBridge:
           Type: EventBridgeRule
-          Pattern:
-            source:
-              - codetekt.admin_service
-            detail-type:
-              - item_rejected
+          Properties:
+            Pattern:
+              source:
+                - codetekt.admin_service
+              detail-type:
+                - item_rejected
       Environment:
         Variables:
-          DBNAME:
-            Ref: DBNAME
-          CORS_ALLOW_ORIGIN:
-            Ref: CorsAllowOrigin
+          NOTIFICATION_TEMPLATE_BUCKET:
+            Ref: NotificationTemplateBucket
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
