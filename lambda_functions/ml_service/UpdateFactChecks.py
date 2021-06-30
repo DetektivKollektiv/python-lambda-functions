@@ -100,6 +100,10 @@ def get_factcheckBucketName():
 
 # store a csv in S3
 def store_df(dict_list, csv_name):
+    # remove quotation marks in text used for training
+    for fc in dict_list:
+        if "claim_text" in fc:
+            fc["claim_text"] = fc["claim_text"].replace("\"", "")
     bucket = get_factcheckBucketName()
     csv_buffer = StringIO() 
     dict_writer = csv.DictWriter(csv_buffer, fieldnames=dict_list[0].keys())

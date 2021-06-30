@@ -1,5 +1,6 @@
 import time
 import os
+import json
 from ml_service import SearchFactChecks
 from ml_service import UpdateFactChecks
 from core_layer.connection_handler import get_db_session
@@ -104,11 +105,17 @@ class TestStepfunction:
             "body": {
                 "content": "Manche Corona-Tests brauchen keine externe Qualitätskontrolle",
                 "type": "claim"
+            },
+            "requestContext": {
+                "identity": {
+                    "sourceIp": '2.3.4.5'
+                }
             }
         }
         context = ""
         response = submit_item.submit_item(event, context, True, session)
-        assert response['body']['item_id'] is not None
+        body = json.loads(response['body'])
+        assert body['id'] is not None
 
 class TestUpdateModels:
     def test_update_factchecker_1(self):
@@ -129,7 +136,7 @@ class TestUpdateModels:
     def test_update_factchecker_2(self):
         event = ""
         context = ""
-        os.environ["STAGE"] = "qa"
+        os.environ["STAGE"] = "dev"
         UpdateFactChecks.update_factcheck_models(event, context)
         df_factchecks = UpdateFactChecks.read_df(UpdateFactChecks.factchecks_prefix+"de.csv")
         qm_exists = False

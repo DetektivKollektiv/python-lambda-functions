@@ -282,7 +282,7 @@ class TestGetFactChecks:
         elapsed = time.perf_counter() - s
         body = response['body']
         # Deserialize if body is string
-        assert body == 'No factcheck found. Exception: Language of Claim not recognized.'
+        assert 'Language of Claim not recognized.' in body
         assert elapsed < 3
 
     def test_get_online_factcheck_by_itemid_5(self, monkeypatch):
@@ -335,57 +335,6 @@ class TestGetFactChecks:
         assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
         assert elapsed < 3
 
-    def test_get_online_factcheck_by_itemid_6(self, monkeypatch):
-        monkeypatch.setenv("DBNAME", "Test")
-        os.environ["STAGE"] = "dev"
-
-        session = get_db_session(True, None)
-
-        # creating items
-        item = Item()
-        item.content = "https://www.pressenza.com/de/2021/01/geoengineering-fuer-bill-gates-ist-die-sonne-das-problem/"
-        item.language = "de"
-        item = item_handler.create_item(item, True, session)
-
-        # store a fact check
-        event = {
-            "item": {
-                "id": item.id,
-                "content": item.content,
-                "language": item.language,
-            },
-            "KeyPhrases": [
-                "problem", 
-                "gates", 
-                "bill"
-            ],
-            "Entities": [
-                "Bill Gates", 
-                "Sonne"
-            ]
-        }
-        context = ""
-        EnrichItem.store_itementities(event, context, True, session)
-        EnrichItem.store_itemphrases(event, context, True, session)
-
-        event = {
-            "pathParameters": {
-                "item_id": item.id
-            }
-        }
-        context = {}
-        s = time.perf_counter()
-        response = get_online_factcheck.get_online_factcheck(event, context, True, session)
-        elapsed = time.perf_counter() - s
-        body = response['body']
-        # Deserialize if body is string
-        if isinstance(body, str):
-            factcheck = json.loads(body)
-        else:
-            factcheck = body
-        assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/11/23/nein-christian-drosten-hat-2014-nicht-gesagt-dass-er-pcr-tests-fuer-untauglich-halte/'
-        assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
-        assert elapsed < 3
 
 class TestStoreFactChecks:
     def test_store_factcheck_empty(self, monkeypatch):
