@@ -3,6 +3,7 @@
     "STAGE": "qa",
     "DBNAME": "qa_db",
     "CorsAllowOrigin": "https://qa.codetekt.org,https://www.qa.codetekt.org",
-    "CorsAllowOriginAdmin": "https://qa.codetekt.org,https://www.qa.codetekt.org,https://qa.admin.codetekt.org,https://www.qa.admin.codetekt.org"
+    "CorsAllowOriginAdmin": "https://qa.codetekt.org,https://www.qa.codetekt.org,https://qa.admin.codetekt.org,https://www.qa.admin.codetekt.org",
+    "NotificationTemplateBucket": "codetekt-notification-templates-qa"
   }
 }
