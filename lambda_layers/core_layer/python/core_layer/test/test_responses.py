@@ -132,7 +132,7 @@ def test_bad_request(monkeypatch):
     assert response.body is None
 
 
-def test_bad_request(monkeypatch):
+def test_bad_request_with_message(monkeypatch):
 
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", ORIGIN)
     MESSAGE = "message"
