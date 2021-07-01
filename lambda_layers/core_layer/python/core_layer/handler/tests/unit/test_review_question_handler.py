@@ -3,11 +3,10 @@ import pytest
 from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound
 
-from core_layer.model import ItemType
 from core_layer.model.review_question_model import ReviewQuestion
-from core_layer.handler import review_question_handler, review_handler, review_answer_handler
-from core_layer import connection_handler
-from helper import item_type_creator, review_question_creator, review_creator, item_creator, review_answer_creator
+from core_layer.handler import review_question_handler
+from core_layer.db_handler import Session
+from core_layer.handler.tests.unit.helper import item_type_creator, review_question_creator, review_creator, item_creator
 
 
 @pytest.fixture
@@ -85,77 +84,67 @@ def fixtures(type_id_1, type_id_2, question_id_1, question_id_2, question_id_3, 
     return [type1, type2, question1, question2, question3, item1, item2, review1, review2]
 
 
-@pytest.fixture
-def session(fixtures):
-    session = connection_handler.get_db_session(True, None)
+def test_get_all_questions(fixtures):
 
-    session.add_all(fixtures)
-    session.commit()
+    with Session() as session:
 
-    return session
+        session.add_all(fixtures)
+        session.commit()
 
+        review_questions = review_question_handler.get_all_review_questions_db(session)
 
-@pytest.fixture
-def session2(fixtures, child_question1):
-    session = connection_handler.get_db_session(True, None)
-
-    session.add_all(fixtures)
-    session.add(child_question1)
-    session.commit()
-
-    return session
+        assert len(review_questions) == 3
 
 
-def test_get_all_questions(session):
-    review_questions = review_question_handler.get_all_review_questions_db(
-        True, session)
+def test_get_question_by_id(fixtures, question_id_1, question_id_2, question_id_3):
+    with Session() as session:
 
-    assert len(review_questions) == 3
+        session.add_all(fixtures)
+        session.commit()
+        review_question_1 = review_question_handler.get_review_question_by_id(question_id_1, session)
+        review_question_2 = review_question_handler.get_review_question_by_id(question_id_2, session)
+        review_question_3 = review_question_handler.get_review_question_by_id(question_id_3, session)
 
+        with pytest.raises(NoResultFound):
+            review_question_3 = review_question_handler.get_review_question_by_id(str(uuid4()), session)
 
-def test_get_question_by_id(session, question_id_1, question_id_2, question_id_3):
-    review_question_1 = review_question_handler.get_review_question_by_id(
-        question_id_1, True, session)
-    review_question_2 = review_question_handler.get_review_question_by_id(
-        question_id_2, True, session)
-    review_question_3 = review_question_handler.get_review_question_by_id(
-        question_id_3, True, session)
-
-    with pytest.raises(NoResultFound):
-        review_question_3 = review_question_handler.get_review_question_by_id(
-            str(uuid4()), True, session)
-
-    assert review_question_1 is not None
-    assert review_question_2 is not None
-    assert review_question_3 is not None
-    assert review_question_1.id == question_id_1
-    assert review_question_2.id == question_id_2
-    assert review_question_3.id == question_id_3
+        assert review_question_1 is not None
+        assert review_question_2 is not None
+        assert review_question_3 is not None
+        assert review_question_1.id == question_id_1
+        assert review_question_2.id == question_id_2
+        assert review_question_3.id == question_id_3
 
 
-def test_get_question_by_type_id(session, type_id_1, type_id_2, question_id_1, question_id_2):
-    review_questions_1 = review_question_handler.get_review_questions_by_item_type_id(
-        type_id_1, True, session)
-    review_questions_2 = review_question_handler.get_review_questions_by_item_type_id(
-        type_id_2, True, session)
-    review_questions_3 = review_question_handler.get_review_questions_by_item_type_id(
-        str(uuid4()), True, session)
+def test_get_question_by_type_id(fixtures, type_id_1, type_id_2, question_id_1, question_id_2):
+    with Session() as session:
 
-    assert len(review_questions_1) == 1
-    assert review_questions_1[0].id == question_id_1
+        session.add_all(fixtures)
+        session.commit()
 
-    assert len(review_questions_2) == 2
-    assert review_questions_2[0].id == question_id_2
+        review_questions_1 = review_question_handler.get_review_questions_by_item_type_id(type_id_1, session)
+        review_questions_2 = review_question_handler.get_review_questions_by_item_type_id(type_id_2, session)
+        review_questions_3 = review_question_handler.get_review_questions_by_item_type_id(str(uuid4()), session)
 
-    assert len(review_questions_3) == 0
+        assert len(review_questions_1) == 1
+        assert review_questions_1[0].id == question_id_1
+
+        assert len(review_questions_2) == 2
+        assert review_questions_2[0].id == question_id_2
+
+        assert len(review_questions_3) == 0
 
 
-def test_get_all_parent_questions(question_id_1, question_id_2, question_id_3, child_question1, type_id_1, type_id_2, session2):
-    all_questions_type_1 = review_question_handler.get_review_questions_by_item_type_id(
-        type_id_1, True, session2)
-    assert len(all_questions_type_1) == 2
-    assert child_question1 in all_questions_type_1
-    parent_questions_type_1 = review_question_handler.get_all_parent_questions(
-        type_id_1, True, session2)
-    assert len(parent_questions_type_1) == 1
-    assert child_question1 not in parent_questions_type_1
+def test_get_all_parent_questions(fixtures, child_question1, type_id_1):
+    with Session() as session:
+
+        session.add_all(fixtures)
+        session.add(child_question1)
+        session.commit()
+
+        all_questions_type_1 = review_question_handler.get_review_questions_by_item_type_id(type_id_1, session)
+        assert len(all_questions_type_1) == 2
+        assert child_question1 in all_questions_type_1
+        parent_questions_type_1 = review_question_handler.get_all_parent_questions(type_id_1, session)
+        assert len(parent_questions_type_1) == 1
+        assert child_question1 not in parent_questions_type_1

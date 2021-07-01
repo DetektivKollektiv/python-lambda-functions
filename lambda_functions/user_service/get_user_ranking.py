@@ -2,12 +2,12 @@ import logging
 import json
 import traceback
 
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from core_layer.handler import user_handler
 from core_layer import helper
 
 
-def get_user_ranking(event, context, is_test=False, session=None):
+def get_user_ranking(event, context):
     """
     returns a dictionary with
     list top_users:           10 top users
@@ -24,9 +24,6 @@ def get_user_ranking(event, context, is_test=False, session=None):
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Get User Ranking", event, logger)
 
-    if session == None:
-        session = get_db_session(False, None)
-
     user_ranking_dict = {}
 
     top_users_list = []
@@ -40,38 +37,40 @@ def get_user_ranking(event, context, is_test=False, session=None):
             "statusCode": 400,
             "body": "Could not get User. Check Cognito Authentication. Stacktrace: {}".format(traceback.format_exc())
         }
-        
-    try:
-        helper.log_method_initiated("Get Top n Users", event, logger) 
-        top_users = user_handler.get_top_users(n, attr, descending, is_test, session)
-        for user in top_users:            
-            top_users_list.append(user.to_dict())
-        user_ranking_dict['top_users'] = top_users_list    
 
-        helper.log_method_initiated("Get Top n Users on the User's Level", event, logger)
-        my_user = user_handler.get_user_by_id(my_user_id, is_test, session)
-        user_level = my_user.level_id
-        top_users_by_level = user_handler.get_top_users_by_level(user_level, n, attr, descending, is_test, session)
-        for user in top_users_by_level:            
-            top_users_by_level_list.append(user.to_dict())
-        user_ranking_dict['top_users_by_level'] = top_users_by_level_list
-        
-        helper.log_method_initiated("Get Top n Users in a Period", event, logger)   
-        top_users_by_period = user_handler.get_top_users_by_period(n, p, attr, descending, is_test, session)
-        for user in top_users_by_period:            
-            top_users_by_period_list.append(user.to_dict())
-        user_ranking_dict['top_users_by_period'] = top_users_by_period_list
-    except Exception:
-        response = {
-            "statusCode": 500,
-            "body": "Server Error. Stacktrace: {}".format(traceback.format_exc())
-        }
-    
-    response = {
-            "statusCode": 200,
-            'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(user_ranking_dict)
-        }
+    with Session() as session:
 
-    response_cors = helper.set_cors(response, event, is_test)
+        try:
+            helper.log_method_initiated("Get Top n Users", event, logger) 
+            top_users = user_handler.get_top_users(n, attr, descending, session)
+            for user in top_users:            
+                top_users_list.append(user.to_dict())
+            user_ranking_dict['top_users'] = top_users_list    
+
+            helper.log_method_initiated("Get Top n Users on the User's Level", event, logger)
+            my_user = user_handler.get_user_by_id(my_user_id, session)
+            user_level = my_user.level_id
+            top_users_by_level = user_handler.get_top_users_by_level(user_level, n, attr, descending, session)
+            for user in top_users_by_level:            
+                top_users_by_level_list.append(user.to_dict())
+            user_ranking_dict['top_users_by_level'] = top_users_by_level_list
+            
+            helper.log_method_initiated("Get Top n Users in a Period", event, logger)   
+            top_users_by_period = user_handler.get_top_users_by_period(n, p, attr, descending, session)
+            for user in top_users_by_period:            
+                top_users_by_period_list.append(user.to_dict())
+            user_ranking_dict['top_users_by_period'] = top_users_by_period_list
+            response = {
+                "statusCode": 200,
+                'headers': {"content-type": "application/json; charset=utf-8"},
+                "body": json.dumps(user_ranking_dict)
+            }
+
+        except Exception:
+            response = {
+                "statusCode": 500,
+                "body": "Server Error. Stacktrace: {}".format(traceback.format_exc())
+            }     
+   
+    response_cors = helper.set_cors(response, event)
     return response_cors

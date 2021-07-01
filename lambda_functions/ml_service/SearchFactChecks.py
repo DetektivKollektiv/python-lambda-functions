@@ -1,6 +1,5 @@
 import logging
 import json
-import time
 import boto3
 import base64
 import re

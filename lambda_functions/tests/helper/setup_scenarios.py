@@ -1,15 +1,9 @@
 from core_layer.model.user_model import User
-from core_layer.model.item_model import Item
 from core_layer.model.level_model import Level
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.item_type_model import ItemType
 from core_layer.handler import user_handler
-
-import pytest
 from datetime import datetime, timedelta
-from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, Session, sessionmaker
-from ..helper import event_creator
 
 # TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
 
@@ -18,6 +12,7 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
     """
     Creates a level object
     """
+
     level = Level()
     level.id = id
     level.description = desc
@@ -26,7 +21,7 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
     return level
 
 
-def create_users_for_ranking(session) -> Session:
+def create_users_for_ranking(session):
     """ 
     Creates My Detective looking up ranking and his own position
     3 different Levels (Junior, Senior, Master)
@@ -53,7 +48,7 @@ def create_users_for_ranking(session) -> Session:
     my_detective = User()
     my_detective.id = "999"
     my_detective.name = "MyDetektiv"
-    user_handler.create_user(my_detective, True, session)
+    user_handler.create_user(my_detective, session)
     my_detective.level_id = 2
     my_detective.experience_points = 35
     my_detective.sign_up_timestamp = datetime.today()
@@ -63,7 +58,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(1, 21):
         junior_user = User()
         junior_user.id = str(i)
-        junior_user = user_handler.create_user(junior_user, True, session)
+        junior_user = user_handler.create_user(junior_user, session)
         junior_user.name = "JuniorUser" + str(i)
         junior_user.level_id = level1_id
         junior_user.experience_points = i
@@ -72,7 +67,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(21, 41):
         senior_user = User()
         senior_user.id = str(i)
-        senior_user = user_handler.create_user(senior_user, True, session)
+        senior_user = user_handler.create_user(senior_user, session)
         senior_user.name = "SeniorUser" + str(i)
         senior_user.level_id = level2_id
         senior_user.experience_points = i
@@ -81,7 +76,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(41, 61):
         master_user = User()
         master_user.id = str(i)
-        master_user = user_handler.create_user(master_user, True, session)
+        master_user = user_handler.create_user(master_user, session)
         master_user.name = "MasterUser" + str(i)
         master_user.level_id = level3_id
         master_user.experience_points = i
@@ -104,80 +99,76 @@ def create_levels_junior_and_senior_detectives(session):
     """
 
     # Create three levels
+    
     level1 = create_level(1, "Junior", 0)
     level2 = create_level(2, "Senior", 5)
-    level3 = create_level(3, "master", 10)
+    level3 = create_level(3, "Master", 10)
 
     session.add(level1)
     session.add(level2)
-    session.add(level3)
+    session.add(level3)    
 
-    # Create 4 level-1-detectives
+    # Create 5 level-1-detectives
     junior_detective1 = User()
     junior_detective1.id = "1"
     junior_detective1.name = "Junior1"
-    user_handler.create_user(junior_detective1, True, session)
+    user_handler.create_user(junior_detective1, session)
 
     junior_detective2 = User()
     junior_detective2.id = "2"
     junior_detective2.name = "Junior2"
-    user_handler.create_user(junior_detective2, True, session)
+    user_handler.create_user(junior_detective2, session)
 
     junior_detective3 = User()
     junior_detective3.id = "3"
     junior_detective3.name = "Junior3"
-    user_handler.create_user(junior_detective3, True, session)
+    user_handler.create_user(junior_detective3, session)
 
     junior_detective4 = User()
     junior_detective4.id = "4"
     junior_detective4.name = "Junior4"
-    user_handler.create_user(junior_detective4, True, session)
+    user_handler.create_user(junior_detective4, session)
 
     junior_detective5 = User()
     junior_detective5.id = "5"
     junior_detective5.name = "Junior5"
-    user_handler.create_user(junior_detective5, True, session)
+    user_handler.create_user(junior_detective5, session)
 
-    # Create 4 level-2-detectives
+    # Create 5 level-2-detectives
     senior_detective1 = User()
     senior_detective1.id = "11"
     senior_detective1.name = "Senior1"
-    senior_detective1 = user_handler.create_user(
-        senior_detective1, True, session)
+    senior_detective1 = user_handler.create_user(senior_detective1, session)
     senior_detective1.level_id = 2
     senior_detective1.experience_points = 5
 
     senior_detective2 = User()
     senior_detective2.id = "12"
     senior_detective2.name = "Senior2"
-    senior_detective2 = user_handler.create_user(
-        senior_detective2, True, session)
+    senior_detective2 = user_handler.create_user(senior_detective2, session)
     senior_detective2.level_id = 2
     senior_detective2.experience_points = 5
 
     senior_detective3 = User()
     senior_detective3.id = "13"
     senior_detective3.name = "Senior3"
-    senior_detective3 = user_handler.create_user(
-        senior_detective3, True, session)
+    senior_detective3 = user_handler.create_user(senior_detective3, session)
     senior_detective3.level_id = 2
     senior_detective3.experience_points = 5
 
     senior_detective4 = User()
     senior_detective4.id = "14"
     senior_detective4.name = "Senior4"
-    senior_detective4 = user_handler.create_user(
-        senior_detective4, True, session)
+    senior_detective4 = user_handler.create_user(senior_detective4, session)
     senior_detective4.level_id = 2
     senior_detective4.experience_points = 5
 
     senior_detective5 = User()
     senior_detective5.id = "15"
     senior_detective5.name = "Senior5"
-    senior_detective5 = user_handler.create_user(
-        senior_detective5, True, session)
+    senior_detective5 = user_handler.create_user(senior_detective5, session)
     senior_detective5.level_id = 2
-    senior_detective5.experience_points = 5
+    senior_detective5.experience_points = 5    
 
     session.merge(senior_detective1)
     session.merge(senior_detective2)
@@ -187,7 +178,7 @@ def create_levels_junior_and_senior_detectives(session):
     session.commit()
 
     return session
-
+    
 
 def create_questions(session):
 
