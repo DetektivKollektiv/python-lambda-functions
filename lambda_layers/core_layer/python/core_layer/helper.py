@@ -7,17 +7,17 @@ from botocore.config import Config  # remove later
 from botocore.exceptions import ClientError
 from sqlalchemy import func
 
-from core_layer.connection_handler import get_db_session
+is_test = 'TESTMODE' not in os.environ
 
 
-def get_date_time_now(is_test=True):
+def get_date_time_now():
     return func.now()
     # TODO: Remove this method. Use func.now() and set create_time in model
     # https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
     # TODO: Update to newer version of Sqlalchemy Aurora Library and adapt datemanagement accordingly
 
 
-def get_date_time_one_hour_ago(is_test):
+def get_date_time_one_hour_ago():
     dt = datetime.now() + timedelta(hours=-1)
     if is_test:
         return dt
@@ -25,7 +25,7 @@ def get_date_time_one_hour_ago(is_test):
         return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def get_date_time(dt, is_test):
+def get_date_time(dt):
     if is_test:
         return dt
     else:
@@ -39,7 +39,7 @@ def get_date_time_str(dt):
         return dt
 
 
-def set_cors(response, event, is_test):
+def set_cors(response, event):
     """Adds a CORS header to a response according to the headers found in the event.
 
     Parameters
@@ -178,11 +178,11 @@ def get_secret(secret_name, region_name="eu-central-1"):
             return decoded_binary_secret
 
 
-def get_text_response(status_code: int, text: str, event, is_test):
+def get_text_response(status_code: int, text: str, event):
     response = {
         "statusCode": status_code,
         'headers': {"content-type": "application/json; charset=utf-8"},
         "body": text
     }
-    response = set_cors(response, event, is_test)
+    response = set_cors(response, event)
     return response

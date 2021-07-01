@@ -1,7 +1,6 @@
 import pytest
-from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.handler import review_handler
-from helper import review_answer_creator
+from core_layer.handler.tests.unit.helper import review_answer_creator
 
 answers = [
     (1, 1, 1, 1, 1, 1, 1, 1),

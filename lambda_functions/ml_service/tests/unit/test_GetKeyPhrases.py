@@ -1,5 +1,4 @@
 from ml_service import GetKeyPhrases
-import pytest
 import os
 
 

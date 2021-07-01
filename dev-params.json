@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "TESTMODE": 0,
     "STAGE": "dev",
     "DBNAME": "development_db",
     "CorsAllowOrigin": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org",

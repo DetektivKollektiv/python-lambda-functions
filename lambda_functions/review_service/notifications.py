@@ -4,12 +4,11 @@ import requests
 import json
 import logging
 import boto3
-import base64
 from botocore.exceptions import ClientError
-from botocore.config import Config
+
 # Helper imports
-from core_layer import helper
-from core_layer.connection_handler import get_db_session, update_object
+from core_layer.db_handler import Session, update_object
+
 # Handler imports
 from core_layer.handler import submission_handler
 
@@ -69,21 +68,16 @@ def get_telegram_token():
         raise TelegramNotificationError
 
 
-def notify_users(is_test, session, item):
+def notify_users(session, item):
     """Notify user(s) about a closed item.
 
     Parameters
     ----------
-    is_test: boolean
-        If this method is called from a test
     session: session
         The session
     item: Item
         The closed item
     """
-
-    if session == None:
-        session = get_db_session(False, None)
 
     # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
     rating = round(item.result_score, 1)
@@ -96,16 +90,14 @@ def notify_users(is_test, session, item):
         rating_text = "vertrauenswürdig"
 
     # get all submissions for the item
-    submissions = submission_handler.get_submissions_by_item_id(
-        item.id, is_test, session)
+    submissions = submission_handler.get_submissions_by_item_id(item.id, session)
 
     notifications_successful = True
 
     for submission in submissions:
         if submission.telegram_id:
             try:
-                notify_telegram_user(
-                    is_test, submission.telegram_id, item, rating, rating_text)
+                notify_telegram_user(submission.telegram_id, item, rating, rating_text)
                 submission.telegram_id = None
             except Exception:
                 notifications_successful = False
@@ -122,13 +114,13 @@ def notify_users(is_test, session, item):
     if notifications_successful:
         logger.info(
             "User(s) notified. Check logs to see if mail and/or telegram notifications were successful.")
-        update_object(submission, is_test, session)
+        update_object(submission, session)
     else:
         logger.exception(
             "An error occurred during closed item user notification. Please check logs.")
 
 
-def notify_telegram_user(is_test, telegram_id, item, rating, rating_text):
+def notify_telegram_user(telegram_id, item, rating, rating_text):
     """Notifies a telegram user via their telegram_id (= chat_id).
 
     Parameters

@@ -1,11 +1,11 @@
 import pytest
 import json
 from uuid import uuid4
-from sqlalchemy.orm import Session
+from core_layer.db_handler import Session
 
 from core_layer.model import Item, ItemType
-from core_layer.connection_handler import get_db_session
 from ...get_items import get_items
+
 
 
 @pytest.fixture
@@ -42,17 +42,6 @@ def item_with_type(test_item_type: ItemType):
     return item
 
 
-@pytest.fixture
-def session(test_item_type, item1, item2, item_with_type):
-    session = get_db_session(True, None)
-    session.add(test_item_type)
-    session.add(item1)
-    session.add(item2)
-    session.add(item_with_type)
-    session.commit()
-    return session
-
-
 def get_event(attribute, value):
     return {
         'queryStringParameters': {
@@ -61,22 +50,31 @@ def get_event(attribute, value):
     }
 
 
-def test_get_items(session):
-    event = {}
-    response_body = json.loads(get_items(event, None, True, session)['body'])
-    assert len(response_body) == 3
-    assert all('test' in i['item_type']['name'] for i in response_body)
+def test_get_items(test_item_type, item1, item2, item_with_type):
+    
+    with Session() as session:
+        
+        session.add(test_item_type)
+        session.add(item1)
+        session.add(item2)
+        session.add(item_with_type)
+        session.commit()
+        
+        event = {}
+        response_body = json.loads(get_items(event, None)['body'])
+        assert len(response_body) == 3
+        assert all('test' in i['item_type']['name'] for i in response_body)
 
-    event = {'queryStringParameters': None}
-    response_body = json.loads(get_items(event, None, True, session)['body'])
-    assert len(response_body) == 3
-    assert all('test' in i['item_type']['name'] for i in response_body)
+        event = {'queryStringParameters': None}
+        response_body = json.loads(get_items(event, None)['body'])
+        assert len(response_body) == 3
+        assert all('test' in i['item_type']['name'] for i in response_body)
 
-    event = get_event('status', 'open')
-    response_body = json.loads(get_items(event, None, True, session)['body'])
-    assert len(response_body) == 2
-    assert all('test' in i['item_type']['name'] for i in response_body)
+        event = get_event('status', 'open')
+        response_body = json.loads(get_items(event, None)['body'])
+        assert len(response_body) == 2
+        assert all('test' in i['item_type']['name'] for i in response_body)
 
-    event = get_event('NotAnAttribute', 'open')
-    response = get_items(event, None, True, session)
-    assert response['statusCode'] == 400
+        event = get_event('NotAnAttribute', 'open')
+        response = get_items(event, None)
+        assert response['statusCode'] == 400

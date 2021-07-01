@@ -1,7 +1,4 @@
-import json
-from core_layer.model.review_answer_model import ReviewAnswer
 from core_layer.model.review_model import Review
-from core_layer.handler import review_answer_handler
 
 
 def get_create_review_answer_event(review_answer):
@@ -67,7 +64,7 @@ def get_next_question_event(review_id, previous_question_id=None):
     return event
 
 
-def get_review_event(review: Review, item_id, status, user_id, score, session):
+def get_review_event(review: Review, item_id, status, user_id, score):
 
     questions = []
     for answer in review.review_answers:
