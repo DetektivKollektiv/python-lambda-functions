@@ -3,6 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: "SAM template for the core lambda layer of the DK backend"
 
 Parameters:
+  DEPLOYMENT_MODE:
+    Type: String
   STAGE:
     Type: String
 

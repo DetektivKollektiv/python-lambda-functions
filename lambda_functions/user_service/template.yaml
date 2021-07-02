@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENT_MODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
@@ -70,6 +72,7 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
   DeleteUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -127,6 +130,7 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+        
   GetUserRankingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:

@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENT_MODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
