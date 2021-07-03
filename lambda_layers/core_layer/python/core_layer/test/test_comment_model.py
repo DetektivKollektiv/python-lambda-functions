@@ -7,6 +7,8 @@ from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
 from core_layer.model.submission_model import Submission
 from core_layer.model.issue_model import Issue
+from core_layer.handler import comment_handler
+from datetime import datetime
 
 
 @pytest.fixture
@@ -15,10 +17,6 @@ def item_id():
 
 @pytest.fixture
 def submission_id():
-    return str(uuid4())
-
-@pytest.fixture
-def existing_comment_id():
     return str(uuid4())
 
 @pytest.fixture
@@ -52,21 +50,21 @@ def session(item_id, user1_id, user2_id, submission_id):
     return session
 
 
-def test_comment_model(event, item_id, user1_id, user2_id, session, submission_id, existing_comment_id):
+def test_comment_model(event, item_id, user1_id, user2_id, session, submission_id):
 
 
     """
     Test comment on item
     """
     body = event['body']
-    # Save qualitative_comment
-    comments_obj_on_item = Comment(id = existing_comment_id,
-                                   user_id = user1_id,
-                                   comment = body['qualitative_comment'],
-                                   item_id = item_id
-                                  )
-    session.add(comments_obj_on_item)
-    session.commit()
+    # Save qualitative_comment 
+    comment_handler.create_comment(comment = body['qualitative_comment'], 
+                                   user_id = user1_id, 
+                                   parent_type = 'item', 
+                                   parent_id = item_id, 
+                                   is_test = True, 
+                                   session = session
+                                   )
     # Asserts
     comment_on_item = session.query(Comment).filter(Comment.item_id.isnot(None)).first()
     assert comment_on_item.comment == 'Comment from event'
@@ -80,13 +78,13 @@ def test_comment_model(event, item_id, user1_id, user2_id, session, submission_i
     Test comment on submission
     """
     # Save qualitative_comment
-    comment_obj_on_submission = Comment(id = str(uuid4()),
-                                        user_id = user1_id,
-                                        comment = 'Comment on submission',
-                                        submission_id = submission_id
-                                       )
-    session.add(comment_obj_on_submission)
-    session.commit()
+    comment_handler.create_comment(comment = 'Comment on submission',
+                                   user_id = user1_id, 
+                                   parent_type = 'submission', 
+                                   parent_id = submission_id, 
+                                   is_test = True, 
+                                   session = session
+                                   )
     # Asserts
     comment_on_submission = session.query(Comment).filter(Comment.submission_id.isnot(None)).first()
     assert comment_on_submission.comment == 'Comment on submission'
@@ -99,17 +97,18 @@ def test_comment_model(event, item_id, user1_id, user2_id, session, submission_i
     Test comment on comment
     """
     # Save qualitative_comment on first comment ('Comment from event')
-    comment_obj_on_comment = Comment(id = str(uuid4()),
-                                     user_id = user2_id,
-                                     comment = 'Comment on comment',
-                                     parent_comment_id = existing_comment_id
-                                    )
-    session.add(comment_obj_on_comment)
-    session.commit()
+    first_comment_id = session.query(Comment).first().id
+    comment_handler.create_comment(comment = 'Comment on comment',
+                                   user_id = user2_id, 
+                                   parent_type = 'comment', 
+                                   parent_id = first_comment_id, 
+                                   is_test = True, 
+                                   session = session
+                                   )
     # Asserts
     comment_on_comment = session.query(Comment).filter(Comment.parent_comment_id.isnot(None)).first()
     assert comment_on_comment.comment == 'Comment on comment'
-    assert comment_on_comment.parent_comment_id == existing_comment_id
+    assert comment_on_comment.parent_comment_id == first_comment_id
     assert comment_on_comment.user_id == user2_id
     assert comment_on_comment.parent_comment.comment == 'Comment from event'
 
@@ -121,24 +120,24 @@ def test_comment_model(event, item_id, user1_id, user2_id, session, submission_i
     sentiment_obj = CommentSentiment(id = str(uuid4()),
                                      type = 'like',
                                      user_id = user2_id,
-                                     comment_id = existing_comment_id
+                                     comment_id = first_comment_id
                                     )
     session.add(sentiment_obj)
     session.commit()   
     sentiment = session.query(CommentSentiment).first()
     assert sentiment.type == 'like'
     assert sentiment.user_id == user2_id
-    assert sentiment.comment_id == existing_comment_id
+    assert sentiment.comment_id == first_comment_id
     assert session.query(Comment).first().comment_sentiments[0].type == 'like'
 
 
     """
     Test issue about comment
     """
-    # Save issue on on first comment ('Comment from event')
+    # Create issue on on first comment ('Comment from event')
     issue_obj = Issue(category = 'Beleidigung',
                       message = 'der hat mich Blödmann genannt',
-                      comment_id = existing_comment_id
+                      comment_id = first_comment_id
                      )
     session.add(issue_obj)
     session.commit()
