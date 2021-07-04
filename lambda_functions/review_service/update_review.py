@@ -1,11 +1,9 @@
 import logging
 import json
 import traceback
-from uuid import uuid4
 from core_layer import helper
 from core_layer import connection_handler
-from core_layer.model.comment_model import Comment
-from core_layer.handler import user_handler, review_handler, review_answer_handler
+from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler
 import notifications
 
 
@@ -51,13 +49,12 @@ def update_review(event, context, is_test=False, session=None):
     # Save qualitative_comment
     if 'qualitative_comment' in body:
         try:
-            comments_obj = Comment(id = str(uuid4()), 
-                                   user_id = body['user_id'],
-                                   comment = body['qualitative_comment'],
-                                   item_id = body['item_id']
-                                   )
-            session.add(comments_obj)
-            session.commit()
+            comment_handler.create_comment(comment = body['qualitative_comment'],
+                                           user_id = body['user_id'],
+                                           parent_type = 'item',
+                                           parent_id = body['item_id'],
+                                           session = session
+                                           )
         except:
             return helper.get_text_response(404, "No qualitative comment found.", event, is_test)
 
