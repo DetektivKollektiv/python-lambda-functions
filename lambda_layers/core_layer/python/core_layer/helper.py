@@ -7,7 +7,7 @@ from botocore.config import Config  # remove later
 from botocore.exceptions import ClientError
 from sqlalchemy import func
 
-is_test = 'DEPLOYMENT_MODE' not in os.environ
+is_test = 'DEPLOYMENTMODE' not in os.environ
 
 
 def get_date_time_now():

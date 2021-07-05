@@ -7,7 +7,7 @@ Globals:
     Timeout: 30
 
 Parameters:
-  DEPLOYMENT_MODE:
+  DEPLOYMENTMODE:
     Type: String
   STAGE:
     Type: String
