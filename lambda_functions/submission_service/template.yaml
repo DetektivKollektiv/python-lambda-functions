@@ -78,6 +78,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -112,6 +114,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -146,6 +150,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -177,6 +183,8 @@ Resources:
             Schedule: rate(1 hour)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
       Layers:

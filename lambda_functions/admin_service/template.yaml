@@ -73,6 +73,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -110,6 +112,8 @@ Resources:
                   Caching: false
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:

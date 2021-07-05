@@ -66,6 +66,8 @@ Resources:
       Tracing: Active
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -95,6 +97,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -124,6 +128,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -153,6 +159,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:

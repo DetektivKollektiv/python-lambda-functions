@@ -76,6 +76,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
