@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "TESTMODE": 0,
+    "DEPLOYMENTMODE": "pipeline",
     "STAGE": "prod",
     "DBNAME": "prod_db",
     "CorsAllowOrigin": "https://codetekt.org,https://www.codetekt.org",
