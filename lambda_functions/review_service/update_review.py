@@ -52,7 +52,7 @@ def update_review(event, context):
     # If review is set closed
     if 'status' in body and body['status'] == 'closed':
         try:
-            review = review_handler.close_review(review, is_test, session)
+            review = review_handler.close_review(review, session)
 
             if review.item.status == 'closed':
                 EventPublisher().publish_event('codetekt.review_service',
