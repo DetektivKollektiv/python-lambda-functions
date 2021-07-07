@@ -5,7 +5,7 @@ from core_layer import connection_handler
 from core_layer.handler import comment_handler, item_handler
 
 
-def post_comment_on_item(event, is_test = False, session = None):
+def post_comment_on_item(event, context = None, is_test = False, session = None):
     """
     Creates comment on item from archive
     """

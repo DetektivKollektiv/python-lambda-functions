@@ -79,3 +79,35 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  PostCommentOnItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-archive_api-post_comment_on_item-${STAGE}"
+      CodeUri: .
+      Handler: post_comment_on_item.post_comment_on_item
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /comments
+            Method: post
+            RestApiId:
+              Ref: Api
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
