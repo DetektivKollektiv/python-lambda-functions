@@ -1,114 +1,112 @@
 # External imports
 import logging
 import json
-from uuid import uuid4
+
 # Helper imports
 from core_layer import helper
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from core_layer.handler import tag_handler
 import SearchFactChecks, UpdateFactChecks
 
 import boto3
 import os
-import tarfile
-import csv
-from urllib.parse import unquote_plus
 
 s3_client = boto3.client('s3')
 
 
-def get_tags_for_item(event, context, is_test=False, session=None):
+def get_tags_for_item(event, context):
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Get tags by item id", event, logger)
-
-    if session is None:
-        session = get_db_session(is_test, None)
-
-    try:
-        # get id (str) from path
-        id = event['pathParameters']['item_id']
+    
+    with Session() as session:
 
         try:
-            tag_objects = tag_handler.get_tags_by_itemid(id, is_test, session)
+            # get id (str) from path
+            id = event['pathParameters']['item_id']
 
-            tags = []
-            for obj in tag_objects:
-                tags.append(obj.to_dict()['tag'])
+            try:
+                tag_objects = tag_handler.get_tags_by_itemid(id, session)
+
+                tags = []
+                for obj in tag_objects:
+                    tags.append(obj.to_dict()['tag'])
+            except Exception as e:
+                response = {
+                    "statusCode": 404,
+                    "body": "No tags found. Exception: {}".format(e)
+                }
         except Exception as e:
             response = {
-                "statusCode": 404,
-                "body": "No tags found. Exception: {}".format(e)
+                "statusCode": 400,
+                "body": "Could not get item ID. Check HTTP GET payload. Exception: {}".format(e)
             }
-    except Exception as e:
+        body_json = {"Tags": tags}
         response = {
-            "statusCode": 400,
-            "body": "Could not get item ID. Check HTTP GET payload. Exception: {}".format(e)
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": json.dumps(body_json)
         }
-    body_json = {"Tags": tags}
-    response = {
-        "statusCode": 200,
-        'headers': {"content-type": "application/json; charset=utf-8"},
-        "body": json.dumps(body_json)
-    }
 
-    response_cors = helper.set_cors(response, event, is_test)
+    response_cors = helper.set_cors(response, event)
     return response_cors
 
-def post_tags_for_item(event, context, is_test=False, session=None):
+
+def post_tags_for_item(event, context):
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Post tags by item id", event, logger)
 
-    if session is None:
-        session = get_db_session(is_test, None)
+    
+    with Session() as session:
 
-    # get list of existing tags
-    tags_existing = []
-    try:
-        # get id (str) from path
-        id = event['pathParameters']['item_id']
+        # get list of existing tags
+        tags_existing = []
+        try:
+            # get id (str) from path
+            id = event['pathParameters']['item_id']
 
-        tag_objects = tag_handler.get_tags_by_itemid(id, is_test, session)
+            tag_objects = tag_handler.get_tags_by_itemid(id, session)
 
-        for obj in tag_objects:
-            tags_existing.append(obj.to_dict()['tag'])
-    except Exception as e:
+            for obj in tag_objects:
+                tags_existing.append(obj.to_dict()['tag'])
+        except Exception as e:
+            response = {
+                "statusCode": 400,
+                "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
+            }
+
+        # get list of posted tags
+        body = event['body']
+
+        if isinstance(body, str):
+            body_dict = json.loads(body)
+        else:
+            body_dict = body
+        if 'tags' in body_dict:
+            tags_posted = body_dict['tags']
+        else:
+            tags_posted = []        
+
+        # save tags
+        if tags_posted != []:
+            for str_tag in tags_posted:
+                tag_handler.store_tag_for_item(id, str_tag, session)
+
+        # create response
+        tags_new = list(set(tags_posted)-set(tags_existing))
+        tags_counter_increased = list(set(tags_posted)-set(tags_new))
         response = {
-            "statusCode": 400,
-            "body": "Could not get item ID. Check HTTP POST payload. Exception: {}".format(e)
+            "statusCode": 200,
+            'headers': {"content-type": "application/json; charset=utf-8"},
+            "body": json.dumps({"added new tags": tags_new,"increased tag counter": tags_counter_increased})
         }
 
-    # get list of posted tags
-    body = event['body']
-
-    if isinstance(body, str):
-        body_dict = json.loads(body)
-    else:
-        body_dict = body
-    if 'tags' in body_dict:
-        tags_posted = body_dict['tags']
-    else:
-        tags_posted = []        
-
-    # save tags
-    if tags_posted != []:
-        for str_tag in tags_posted:
-            tag_handler.store_tag_for_item(id, str_tag, is_test, session)
-
-    # create response
-    tags_new = list(set(tags_posted)-set(tags_existing))
-    tags_counter_increased = list(set(tags_posted)-set(tags_new))
-    response = {
-        "statusCode": 200,
-        'headers': {"content-type": "application/json; charset=utf-8"},
-        "body": json.dumps({"added new tags": tags_new,"increased tag counter": tags_counter_increased})
-    }
-
-    response_cors = helper.set_cors(response, event, is_test)
+    response_cors = helper.set_cors(response, event)
     return response_cors
+
 
 def download_taxonomy(LanguageCode):
     logger = logging.getLogger()
@@ -131,6 +129,7 @@ def download_taxonomy(LanguageCode):
 
     return taxonomy_json
 
+
 def upload_tagreport(tagreport_json, LanguageCode):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -151,7 +150,8 @@ def upload_tagreport(tagreport_json, LanguageCode):
     # upload tag-terms json file
     s3_client.upload_file(tagreport_file_name, bucket, key)
 
-def predict_tags(event, context, is_test=False, session=None):
+
+def predict_tags(event, context):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Predict tags for claim", event, logger)
@@ -225,16 +225,19 @@ def predict_tags(event, context, is_test=False, session=None):
         logger.error('DocSim error: {}.'.format(e))
     return tags
 
+
 # report which tags are in the database but not considered in the taxonomy
-def create_tagreport(event, context, is_test=False, session=None):
+def create_tagreport(event, context):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Report tags not considered in taxonomy", event, logger)
 
+    
     # list with tags in the database but not covered by the taxonomy
     terms_new = []
-    # read all tags from database
-    tag_list = tag_handler.get_all_tags(is_test, session)
+    with Session() as session:
+        # read all tags from database
+        tag_list = tag_handler.get_all_tags(session)
 
     for LanguageCode in UpdateFactChecks.model_languages:
         logger.info("LanguageCode: {}".format(LanguageCode))

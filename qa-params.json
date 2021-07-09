@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "DEPLOYMENTMODE": "pipeline",
     "STAGE": "qa",
     "DBNAME": "qa_db",
     "CorsAllowOrigin": "https://qa.codetekt.org,https://www.qa.codetekt.org",

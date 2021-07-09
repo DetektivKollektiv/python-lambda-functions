@@ -1,8 +1,9 @@
 import time
 import os
+import json
 from ml_service import SearchFactChecks
 from ml_service import UpdateFactChecks
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from submission_service import submit_item
 
 
@@ -93,22 +94,27 @@ class TestSearchFactChecks:
         assert ret[0]['claimReview'][0]['title'] == 'Größtenteils falsch. Obama hat das Labor in Wuhan nicht mit 3,7 Millionen US-Dollar unterstützt.'
         assert elapsed < 3
 
-class TestStepfunction:
-    def test_stepfunction_1(self, monkeypatch):
-        monkeypatch.setenv("DBNAME", "Test")
-        os.environ["STAGE"] = "dev"
 
-        session = get_db_session(True, None)
+class TestStepfunction:
+    def test_stepfunction_1(self):
+        os.environ["STAGE"] = "dev"
 
         event = {
             "body": {
                 "content": "Manche Corona-Tests brauchen keine externe Qualitätskontrolle",
                 "type": "claim"
+            },
+            "requestContext": {
+                "identity": {
+                    "sourceIp": '2.3.4.5'
+                }
             }
         }
         context = ""
-        response = submit_item.submit_item(event, context, True, session)
-        assert response['body']['item_id'] is not None
+        response = submit_item.submit_item(event, context)
+        body = json.loads(response['body'])
+        assert body['id'] is not None
+
 
 class TestUpdateModels:
     def test_update_factchecker_1(self):
@@ -129,7 +135,7 @@ class TestUpdateModels:
     def test_update_factchecker_2(self):
         event = ""
         context = ""
-        os.environ["STAGE"] = "qa"
+        os.environ["STAGE"] = "dev"
         UpdateFactChecks.update_factcheck_models(event, context)
         df_factchecks = UpdateFactChecks.read_df(UpdateFactChecks.factchecks_prefix+"de.csv")
         qm_exists = False
@@ -137,4 +143,4 @@ class TestUpdateModels:
             if fc['claim_text'].find("\"") > -1:
                 qm_exists = True
                 break
-        assert qm_exists == False
+        assert qm_exists == False        

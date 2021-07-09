@@ -1,27 +1,24 @@
 import random
 import statistics
 import logging
+from typing import List
+from typing import Dict
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
-from sqlalchemy.orm import Session
-from core_layer.connection_handler import get_db_session
-from core_layer import helper
 from core_layer.handler import review_pair_handler, review_handler
 from uuid import uuid4
 
 
-def get_all_items(is_test, session, params: dict = {}) -> [Item]:
+def get_all_items(session, params: dict = {}) -> List[Item]:
     """Returns all items filtered by the provided params
 
     Args:
-        is_test (bool): True, if the function is run from a test
         session (Session): An SQLAlchemy Session
         params (dict, optional): A dictionary consisting of key-value pairs for filtering. Defaults to an empty dict.
 
     Returns:
         [Item]: A list of item objects
     """
-    session = get_db_session(is_test, session)
 
     query = session.query(Item)
     if not params:
@@ -32,7 +29,7 @@ def get_all_items(is_test, session, params: dict = {}) -> [Item]:
     return query.all()
 
 
-def get_all_closed_items(is_test, session):
+def get_all_closed_items(session):
     """Gets all closed items
 
     Returns
@@ -41,13 +38,11 @@ def get_all_closed_items(is_test, session):
         The closed items
     """
 
-    session = get_db_session(is_test, session)
-
     items = session.query(Item).filter(Item.status == 'closed').all()
     return items
 
 
-def get_item_by_content(content, is_test, session):
+def get_item_by_content(content, session):
     """Returns an item with the specified content from the database
 
         Returns
@@ -56,14 +51,13 @@ def get_item_by_content(content, is_test, session):
             The item
         Null, if no item was found
         """
-    session = get_db_session(is_test, session)
     item = session.query(Item).filter(Item.content == content).first()
     if item is None:
         raise Exception("No item found.")
     return item
 
 
-def create_item(item, is_test, session):
+def create_item(item, session):
     """Inserts a new item into the database
 
     Parameters
@@ -76,7 +70,6 @@ def create_item(item, is_test, session):
     item: Item
         The inserted item
     """
-    session = get_db_session(is_test, session)
 
     item.id = str(uuid4())
     session.add(item)
@@ -85,20 +78,19 @@ def create_item(item, is_test, session):
     return item
 
 
-def get_item_by_id(id, is_test, session) -> Item:
-    """Returns an item by its id
+def get_item_by_id(id, session) -> Item:
+    """Returns an item by its id.
 
     Parameters
     ----------
     id: str, required
-        The id of the item
 
     Returns
     ------
     item: Item
-        The item
+
     """
-    session = get_db_session(is_test, session)
+
     try:
         item = session.query(Item).get(id)
         return item
@@ -107,10 +99,10 @@ def get_item_by_id(id, is_test, session) -> Item:
         logging.exception('Could not get item by id.')
         return None
     # Uncomment to test telegram user notification
-    # notifications.notify_telegram_users(is_test, session, item)
+    # notifications.notify_telegram_users(is_test, session, item) 
 
 
-def get_open_items_for_user(user, num_items, is_test, session) -> {'items': [Item], 'is_open_review': bool}:
+def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool] :
     """Retreives a list of open items (in random order) to be reviewed by a user.
 
     Parameters
@@ -128,7 +120,6 @@ def get_open_items_for_user(user, num_items, is_test, session) -> {'items': [Ite
         True, if an open review was found. False, if no open review was found 
     """
 
-    session = get_db_session(is_test, session)
     items = []
 
     # If review in progress exists for user, return the corresponding item(s)
@@ -137,7 +128,7 @@ def get_open_items_for_user(user, num_items, is_test, session) -> {'items': [Ite
     if result.count() > 0:
         for rip in result:
             item_id = rip.item_id
-            item = get_item_by_id(item_id, is_test, session)
+            item = get_item_by_id(item_id, session)
             items.append(item)
         # shuffle list order
         random.shuffle(items)
@@ -170,12 +161,12 @@ def get_open_items_for_user(user, num_items, is_test, session) -> {'items': [Ite
     for item in result:
         items.append(item)
     random.shuffle(items)
+ 
     return {'items': items, 'is_open_review': False}
 
 
-def compute_item_result_score(item_id, is_test, session):
-    pairs = review_pair_handler.get_review_pairs_by_item(
-        item_id, is_test, session)
+def compute_item_result_score(item_id, session):
+    pairs = review_pair_handler.get_review_pairs_by_item(item_id, session)
 
     average_scores = []
     for pair in list(filter(lambda p: p.is_good, pairs)):

@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENTMODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
@@ -72,6 +74,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -102,6 +106,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -132,6 +138,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -162,6 +170,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -191,6 +201,8 @@ Resources:
             Schedule: rate(10 minutes)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
       Layers:

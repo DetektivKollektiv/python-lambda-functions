@@ -7,7 +7,7 @@ def test_set_cors_header_no_origin(monkeypatch):
     event = {'headers': None}
     response = {}
 
-    response = set_cors(response, event, False)
+    response = set_cors(response, event)
 
 
 def test_set_cors_header_simple(monkeypatch):
@@ -18,7 +18,7 @@ def test_set_cors_header_simple(monkeypatch):
     event = {'headers': {'Origin': origin}}
     response = {}
 
-    response = set_cors(response, event, False)
+    response = set_cors(response, event)
 
     assert response['headers']['Access-Control-Allow-Origin'] == origin
 
@@ -31,7 +31,7 @@ def test_set_cors_header_non_capital(monkeypatch):
     event = {'headers': {'origin': origin}}
     response = {}
 
-    response = set_cors(response, event, False)
+    response = set_cors(response, event)
 
     assert response['headers']['Access-Control-Allow-Origin'] == origin
 
@@ -45,13 +45,13 @@ def test_set_cors_header_multiple_allowed(monkeypatch):
     event = {'headers': {'origin': origin}}
     response = {}
 
-    response = set_cors(response, event, False)
+    response = set_cors(response, event)
 
     assert response['headers']['Access-Control-Allow-Origin'] == origin
 
     event2 = {'headers': {'origin': origin2}}
     response2 = {}
 
-    response2 = set_cors(response2, event2, False)
+    response2 = set_cors(response2, event2)
 
     assert response2['headers']['Access-Control-Allow-Origin'] == origin2

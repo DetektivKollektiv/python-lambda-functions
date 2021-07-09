@@ -1,9 +1,8 @@
 import pytest
 from core_layer.model.review_pair_model import ReviewPair
 from core_layer.model.review_model import Review
-from core_layer.model.review_answer_model import ReviewAnswer
 
-from helper import review_answer_creator
+from core_layer.handler.tests.unit.helper import review_answer_creator
 from core_layer.handler import review_pair_handler
 
 data = [

@@ -1,9 +1,8 @@
-from uuid import uuid4
-from sqlalchemy.orm import Session
+from core_layer.db_handler import update_object
 from sqlalchemy import func
 import boto3
+from typing import List
 from datetime import date, datetime, timedelta
-from core_layer.connection_handler import get_db_session, update_object
 from core_layer import helper
 
 from core_layer.model.user_model import User
@@ -11,7 +10,7 @@ from core_layer.model.level_model import Level
 from core_layer.model.review_model import Review
 
 
-def get_user_by_id(id, is_test, session):
+def get_user_by_id(id, session):
     """Returns a user by their id
 
     Parameters
@@ -25,12 +24,11 @@ def get_user_by_id(id, is_test, session):
         The user
     """
 
-    session = get_db_session(is_test, session)
     user = session.query(User).filter(User.id == id).one()
     return user
 
 
-def delete_user(event, is_test, session):
+def delete_user(event, session):
     """Deletes a user from the database.
 
     Parameters
@@ -42,9 +40,7 @@ def delete_user(event, is_test, session):
     ------
     nothing
     """
-    if session is None:
-        session = get_db_session(is_test, session)
-
+   
     user_id = helper.cognito_id_from_event(event)
     user = session.query(User).get(user_id)
 
@@ -63,7 +59,7 @@ def delete_user(event, is_test, session):
     session.commit()
 
 
-def create_user(user, is_test, session):
+def create_user(user, session):
     """Inserts a new user into the database
 
     Parameters
@@ -76,17 +72,15 @@ def create_user(user, is_test, session):
     user: User
         The inserted user
     """
-    if session == None:
-        session = get_db_session(is_test, session)
-
+    
     session.add(user)
     session.commit()
 
     return user
 
 
-def give_experience_point(user_id, is_test, session):
-    user = get_user_by_id(user_id, is_test, session)
+def give_experience_point(user_id, session):
+    user = get_user_by_id(user_id, session)
     user.experience_points = user.experience_points + 1
     new_level = session.query(Level) \
         .filter(Level.required_experience_points <= user.experience_points) \
@@ -95,10 +89,10 @@ def give_experience_point(user_id, is_test, session):
 
     if new_level.id != user.level_id:
         user.level_id = new_level.id
-    update_object(user, is_test, session)
+    update_object(user, session)
 
 
-def get_top_users(n, attr, descending, is_test, session) -> [User]:
+def get_top_users(n, attr, descending, session) -> List[User]:
     """
     Returns the top "n" users as sorted by "attr" in descending or ascending order as set by "descending". 
 
@@ -110,8 +104,6 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
         the column on the users table to sort by
     descending: bool, required
         which order to sort the rows by column 'attr' in False = ASC or True =DESC
-    is_test: bool, required
-        is this code being run as part of the tests or in production
     session: Session??, required
         a database session
     Returns
@@ -120,9 +112,6 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
         A list including the top n user objects as ordered by attr, desc
     """
 
-    if session == None:
-        session = get_db_session(is_test, session)
-
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -130,7 +119,7 @@ def get_top_users(n, attr, descending, is_test, session) -> [User]:
     return users
 
 
-def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
+def get_top_users_by_period(n, p, attr, descending, session) -> List[User]:
     """
     Returns the top "n" users in a period (1 week)
     sorted by "attr" in descending or ascending order as set by "descending"
@@ -145,8 +134,6 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
         the column on the users table to sort by
     descending: bool, required
         which order to sort the rows by column 'attr' in False = ASC or True =DESC
-    is_test: bool, required
-        is this code being run as part of the tests or in production
     session: Session??, required
         a database session
     Returns
@@ -155,11 +142,7 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
         A list including the top n user objects as ordered by attr, desc
     """
 
-    if session == None:
-        session = get_db_session(is_test, session)
-
-    compare_timestamp = helper.get_date_time(
-        datetime.now() - timedelta(weeks=p), is_test)
+    compare_timestamp = helper.get_date_time(datetime.now() - timedelta(weeks=p))
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -170,7 +153,7 @@ def get_top_users_by_period(n, p, attr, descending, is_test, session) -> [User]:
     return users
 
 
-def get_top_users_by_level(user_level, n, attr, descending, is_test, session) -> [User]:
+def get_top_users_by_level(user_level, n, attr, descending, session) -> List[User]:
     """
     Returns the top "n" users on the user's level
     sorted by "attr" in descending or ascending order as set by "descending"
@@ -185,8 +168,6 @@ def get_top_users_by_level(user_level, n, attr, descending, is_test, session) ->
         the column on the users table to sort by
     descending: bool, required
         which order to sort the rows by column 'attr' in False = ASC or True =DESC
-    is_test: bool, required
-        is this code being run as part of the tests or in production
     session: Session??, required
         a database session
     Returns
@@ -194,9 +175,7 @@ def get_top_users_by_level(user_level, n, attr, descending, is_test, session) ->
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-    if session == None:
-        session = get_db_session(is_test, session)
-
+    
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -207,7 +186,7 @@ def get_top_users_by_level(user_level, n, attr, descending, is_test, session) ->
     return users
 
 
-def get_all_users(is_test, session) -> [User]:
+def get_all_users(session) -> List[User]:
     """Returns a user by their id
 
     Parameters
@@ -219,12 +198,11 @@ def get_all_users(is_test, session) -> [User]:
         A list including all user objects
     """
 
-    session = get_db_session(is_test, session)
     users = session.query(User).all()
     return users
 
 
-def get_user_progress(user: User, is_test, session) -> int:
+def get_user_progress(user: User, session) -> int:
     """Returns the users progress towards the next level
 
     Parameters
@@ -237,6 +215,7 @@ def get_user_progress(user: User, is_test, session) -> int:
     progress: int
         Progress cast to an int value (between 0 and 100)
     """
+
     current_level = session.query(Level).filter(
         Level.id == user.level_id).one()
     next_level = session.query(Level).filter(
@@ -252,7 +231,7 @@ def get_user_progress(user: User, is_test, session) -> int:
     return progress
 
 
-def get_needed_exp(user: User, is_test, session) -> int:
+def get_needed_exp(user: User, session) -> int:
     """Returns how many exp are needed for the user to level up
 
     Parameters
@@ -274,7 +253,7 @@ def get_needed_exp(user: User, is_test, session) -> int:
     return exp_difference
 
 
-def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> int:
+def get_user_rank(user: User, level_rank: bool, session) -> int:
     """Returns the users rank.
 
     Parameters
@@ -327,7 +306,7 @@ def get_user_rank(user: User, level_rank: bool, is_test, session: Session) -> in
     raise Exception("Could not get rank for user")
 
 
-def get_solved_cases(user: User, today: bool, is_test, session: Session) -> int:
+def get_solved_cases(user: User, today: bool, session) -> int:
     """Returns the amount of cases a user solved.
 
     Parameters

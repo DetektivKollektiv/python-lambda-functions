@@ -1,11 +1,11 @@
 import logging
 import traceback
 from core_layer import helper
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from core_layer.handler import user_handler
 
 
-def delete_user(event, context, is_test=False, session=None):
+def delete_user(event, context):
     """Deletes a user from DB and Cognito.
 
     Parameters
@@ -29,21 +29,20 @@ def delete_user(event, context, is_test=False, session=None):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     helper.log_method_initiated("Delete user", event, logger)
-    try:
-        if session == None:
-            session = get_db_session(is_test, session)
 
-        user_handler.delete_user(event, is_test, session)
+    with Session() as session:
+        try:
+            user_handler.delete_user(event, session)
 
-        response = {
-            "statusCode": 200
-        }
+            response = {
+                "statusCode": 200
+            }
 
-    except Exception:
-        response = {
-            "statusCode": 500,
-            "body": "User could not be deleted. Exception: {}".format(traceback.format_exc())
-        }
+        except Exception:
+            response = {
+                "statusCode": 500,
+                "body": "User could not be deleted. Exception: {}".format(traceback.format_exc())
+            }
 
-    response_cors = helper.set_cors(response, event, is_test)
-    return response_cors
+        response_cors = helper.set_cors(response, event)
+        return response_cors
