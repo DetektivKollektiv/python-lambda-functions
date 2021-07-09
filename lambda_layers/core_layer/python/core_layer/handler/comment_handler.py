@@ -1,10 +1,10 @@
 from uuid import uuid4
 import logging
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from core_layer.model.comment_model import Comment
 
 
-def create_comment(comment, user_id, parent_type, parent_id, session, is_test = False, timestamp = None, status = None):
+def create_comment(comment, user_id, parent_type, parent_id, timestamp = None, status = None):
     """
     Creates comment
 
@@ -21,28 +21,28 @@ def create_comment(comment, user_id, parent_type, parent_id, session, is_test = 
             status (str)
     """
 
-    session = get_db_session(is_test, session)
+    with Session() as session:
+        
+        comment_obj = Comment()
 
-    comment_obj = Comment()
+        comment_obj.id = str(uuid4())
+        comment_obj.comment = comment
+        comment_obj.user_id = user_id
+        if timestamp:
+            comment_obj.timestamp = timestamp
+        if status:
+            comment_obj.status = status
 
-    comment_obj.id = str(uuid4())
-    comment_obj.comment = comment
-    comment_obj.user_id = user_id
-    if timestamp:
-        comment_obj.timestamp = timestamp
-    if status:
-        comment_obj.status = status
+        if parent_type == 'item':
+            comment_obj.item_id = parent_id
+        elif parent_type == 'submission':
+            comment_obj.submission_id = parent_id
+        elif parent_type == 'review_answer':
+            comment_obj.review_answer_id = parent_id
+        elif parent_type == 'comment':
+            comment_obj.parent_comment_id = parent_id
+        else:
+            logging.exception('unknown parent type.')
 
-    if parent_type == 'item':
-        comment_obj.item_id = parent_id
-    elif parent_type == 'submission':
-        comment_obj.submission_id = parent_id
-    elif parent_type == 'review_answer':
-        comment_obj.review_answer_id = parent_id
-    elif parent_type == 'comment':
-        comment_obj.parent_comment_id = parent_id
-    else:
-        logging.exception('unknown parent type.')
-
-    session.add(comment_obj)
-    session.commit()
+        session.add(comment_obj)
+        session.commit()
