@@ -2,20 +2,18 @@ import logging
 import json
 import traceback
 from core_layer import helper
-from core_layer import connection_handler
+from core_layer.db_handler import Session
 from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler
-import notifications
+from review_service import notifications
 
 
-def update_review(event, context, is_test=False, session=None):
+def update_review(event, context):
     """Updates an existing review
 
     Args:
         event: AWS API Gateway event
-        context ([type]): [description]
-        is_test (bool, optional): Whether the function is executed in test mode. Defaults to False.
-        session (optional): An sql alchemy session. Defaults to None.
-
+        context ([type]): [description].
+       
     Returns
     ------
     - Status code 200, 400, 404 or 500 (Created)
@@ -26,25 +24,22 @@ def update_review(event, context, is_test=False, session=None):
 
     helper.log_method_initiated("Create Review", event, logger)
 
-    if session == None:
-        session = connection_handler.get_db_session(False, None)
-
     try:
         user_id = helper.cognito_id_from_event(event)
-        body = json.loads(event['body']) if isinstance(
-            event['body'], str) else event['body']
-
+        body = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
     except:
-        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
+        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
 
     if 'id' not in body:
-        return helper.get_text_response(400, "Malformed request. Please provide a review id.", event, is_test)
+        return helper.get_text_response(400, "Malformed request. Please provide a review id.", event)   
+
+
+    session = Session()
 
     try:
-        review = review_handler.get_review_by_id(
-            body['id'], is_test, session)
+        review = review_handler.get_review_by_id(body['id'], session)
     except:
-        return helper.get_text_response(404, "No review found", event, is_test)
+        return helper.get_text_response(404, "No review found", event)
 
     # Save qualitative_comment
     if 'qualitative_comment' in body:
@@ -52,68 +47,66 @@ def update_review(event, context, is_test=False, session=None):
             comment_handler.create_comment(comment = body['qualitative_comment'],
                                            user_id = body['user_id'],
                                            parent_type = 'item',
-                                           parent_id = body['item_id'],
-                                           session = session
+                                           parent_id = body['item_id']
                                            )
         except:
-            return helper.get_text_response(404, "No qualitative comment found.", event, is_test)
+            return helper.get_text_response(404, "No qualitative comment found.", event)
 
     try:
-        user = user_handler.get_user_by_id(user_id, is_test, session)
+        user = user_handler.get_user_by_id(user_id, session)
     except:
-        return helper.get_text_response(404, "No user found.", event, is_test)
+        return helper.get_text_response(404, "No user found.", event)
 
     if review.user_id != user.id:
-        return helper.get_text_response(403, "Forbidden.", event, is_test)
+        return helper.get_text_response(403, "Forbidden.", event)
 
     # If review is set closed
-    if 'status' in body and body['status'] == 'closed':
+    if 'status' in body and body['status'] == 'closed':            
         try:
-            review = review_handler.close_review(review, is_test, session)
+            review = review_handler.close_review(review, session)               
             if review.item.status == 'closed':
-                notifications.notify_users(is_test, session, review.item)
+                notifications.notify_users(session, review.item)                
             response = {
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
-            response_cors = helper.set_cors(response, event, is_test)
+            response_cors = helper.set_cors(response, event)
             return response_cors
         except:
-            return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
+            return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
 
     # If answers are appended
     elif 'questions' in body:
         if not isinstance(body['questions'], list):
-            return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
-        for question in body['questions']:
+            return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
+        for question in body['questions']:            
             if 'answer_value' in question:
                 answer_value = question['answer_value']
             else:
-                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
-
+                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)                
+            
             if answer_value is not None:
                 # Check if conditionality is met
                 if question['parent_question_id'] is not None:
                     for q in body['questions']:
                         if q['question_id'] == question['parent_question_id']:
                             parent_question = q
-                    parent_answer = review_answer_handler.get_parent_answer(
-                        question['answer_id'], is_test, session)
+                    parent_answer = review_answer_handler.get_parent_answer(question['answer_id'], session)
                     if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
-                        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
-                # Update answer in db
+                        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
+                # Update answer in db                
                 try:
-                    review_answer_handler.set_answer_value(
-                        question['answer_id'], question['answer_value'], is_test, session)
+                    review_answer_handler.set_answer_value(question['answer_id'], question['answer_value'], session)
                 except:
-                    return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
+                    return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+            
 
         response = {
             "statusCode": 200,
             "body": json.dumps(review.to_dict_with_questions_and_answers())
         }
-        response_cors = helper.set_cors(response, event, is_test)
+        response_cors = helper.set_cors(response, event)
         return response_cors
 
     else:
-        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
+        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)    

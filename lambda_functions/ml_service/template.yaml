@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENTMODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
@@ -77,6 +79,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -100,6 +104,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           STAGE:
             Ref: STAGE
 
@@ -127,6 +133,8 @@ Resources:
             Schedule: rate(1 day)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           STAGE:
             Ref: STAGE
 
@@ -157,6 +165,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           STAGE:
             Ref: STAGE
 
@@ -202,6 +212,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           STAGE:
             Ref: STAGE
 
@@ -229,6 +241,8 @@ Resources:
             Schedule: rate(14 days)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           STAGE:
             Ref: STAGE
           DBNAME:
@@ -258,6 +272,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -287,6 +303,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -336,6 +354,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -355,6 +375,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -374,6 +396,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -393,6 +417,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -412,6 +438,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -431,6 +459,8 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
 
@@ -450,5 +480,7 @@ Resources:
           - Arn
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME

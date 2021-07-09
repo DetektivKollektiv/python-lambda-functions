@@ -1,47 +1,36 @@
-import pytest
-# import json
-from sqlalchemy.orm import Session
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 
-from core_layer.model.user_model import User
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.review_answer_model import AnswerOption
-from core_layer.model.item_model import Item
 
-from core_layer.handler import user_handler
+def test_questions_and_answers():
+    with Session() as session:
 
-from ..helper import event_creator, setup_scenarios
+        q1 = ReviewQuestion()
+        q1.id = "1"
+        q1.content = "Es ist eine Quelle angegeben."
 
+        q2 = ReviewQuestion()
+        q2.id = "2"
+        q2.content = "Die Rechtschreibung ist korrekt."
 
-def test_questions_and_answers(monkeypatch):
-    monkeypatch.setenv("DBNAME", "Test")
-    session = get_db_session(True, None)
+        o1 = AnswerOption()
+        o1.id = "1"
+        o1.text = "Stimme zu"
+        o1.value = 4
 
-    q1 = ReviewQuestion()
-    q1.id = "1"
-    q1.content = "Es ist eine Quelle angegeben."
+        q1.options = [o1]
 
-    q2 = ReviewQuestion()
-    q2.id = "2"
-    q2.content = "Die Rechtschreibung ist korrekt."
+        assert len(q1.options) == 1
+        assert len(o1.questions) == 1
 
-    o1 = AnswerOption()
-    o1.id = "1"
-    o1.text = "Stimme zu"
-    o1.value = 4
+        q2.options = [o1]
 
-    q1.options = [o1]
+        assert len(q1.options) == 1
+        assert len(o1.questions) == 2
 
-    assert len(q1.options) == 1
-    assert len(o1.questions) == 1
-
-    q2.options = [o1]
-
-    assert len(q1.options) == 1
-    assert len(o1.questions) == 2
-
-    session.add(q1)
-    session.add(q2)
-    session.add(o1)
-    options = session.query(AnswerOption).all()
-    assert len(options) == 1
+        session.add(q1)
+        session.add(q2)
+        session.add(o1)
+        options = session.query(AnswerOption).all()
+        assert len(options) == 1
