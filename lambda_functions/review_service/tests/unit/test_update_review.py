@@ -5,7 +5,6 @@ from review_service import create_review
 from review_service import update_review
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
-from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.comment_model import Comment
 from ....tests.helper import event_creator, setup_scenarios
 
@@ -59,8 +58,5 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
 
         event = event_creator.get_review_event(review, item_id, "in progress", junior_user_id, 1)
         
-        """
-        THIS PART DOESN'T WORK -> NEEDS TO BE FIXED
-        """
-        # response = update_review.update_review(event, None)
-        # assert response['statusCode'] == 200
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200

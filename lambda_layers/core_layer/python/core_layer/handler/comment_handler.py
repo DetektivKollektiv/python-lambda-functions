@@ -21,28 +21,29 @@ def create_comment(comment, user_id, parent_type, parent_id, timestamp = None, s
             status (str)
     """
 
-    with Session() as session:
-        
-        comment_obj = Comment()
+  
+    session = Session()
 
-        comment_obj.id = str(uuid4())
-        comment_obj.comment = comment
-        comment_obj.user_id = user_id
-        if timestamp:
-            comment_obj.timestamp = timestamp
-        if status:
-            comment_obj.status = status
+    comment_obj = Comment()
 
-        if parent_type == 'item':
-            comment_obj.item_id = parent_id
-        elif parent_type == 'submission':
-            comment_obj.submission_id = parent_id
-        elif parent_type == 'review_answer':
-            comment_obj.review_answer_id = parent_id
-        elif parent_type == 'comment':
-            comment_obj.parent_comment_id = parent_id
-        else:
-            logging.exception('unknown parent type.')
+    comment_obj.id = str(uuid4())
+    comment_obj.comment = comment
+    comment_obj.user_id = user_id
+    if timestamp:
+        comment_obj.timestamp = timestamp
+    if status:
+        comment_obj.status = status
 
-        session.add(comment_obj)
-        session.commit()
+    if parent_type == 'item':
+        comment_obj.item_id = parent_id
+    elif parent_type == 'submission':
+        comment_obj.submission_id = parent_id
+    elif parent_type == 'review_answer':
+        comment_obj.review_answer_id = parent_id
+    elif parent_type == 'comment':
+        comment_obj.parent_comment_id = parent_id
+    else:
+        logging.exception('unknown parent type.')
+
+    session.add(comment_obj)
+    session.commit()
