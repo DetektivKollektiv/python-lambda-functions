@@ -2,8 +2,7 @@ import json
 import os
 from typing import List
 
-from core_layer.handler.notification_template_handler import NotificationTemplateHandlerBase
-from core_layer.model.notification_model import NotificationTemplate
+from core_layer.handler.notification_template_handler import NotificationTemplateHandlerBase, NotificationTemplate
 
 
 class MockNotificationTemplateHandler(NotificationTemplateHandlerBase):

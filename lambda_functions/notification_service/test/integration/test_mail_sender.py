@@ -7,8 +7,7 @@ from notification_service.test.mocks.mock_notification_template_handler import M
 # awslocal ses verify-email-identity --email-address no-reply@codetekt.org
 
 
-def test(monkeypatch):
-    monkeypatch.setenv("STAGE", "test")
+def test():
 
     template_handler = MockNotificationTemplateHandler()
     mail_sender = MailSender(template_handler)

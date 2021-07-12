@@ -1,9 +1,13 @@
 import os
 
-from core_layer.connection_handler import get_db_session
-from core_layer.model.notification_model import NotificationTemplate
-
 from core_layer.boto_client_provider import BotoClientProvider
+
+
+class NotificationTemplate:
+    message_type: str
+    content_type: str
+    language: str
+    content: str
 
 
 class NotificationTemplateHandlerBase:

@@ -1,10 +1,11 @@
 import pytest
 
-from ..src import item_closed_handler
+from notification_service.src import item_closed_handler
 
 
 def test_no_item_id(monkeypatch):
-    monkeypatch.setenv("STAGE", "test")
+
+    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "")
 
     event = {}
 
@@ -14,7 +15,8 @@ def test_no_item_id(monkeypatch):
 
 
 def test_wrong_item_id(monkeypatch):
-    monkeypatch.setenv("STAGE", "test")
+
+    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "")
 
     event = {"item_id": "123123"}
 
