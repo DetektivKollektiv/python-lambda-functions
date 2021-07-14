@@ -3,7 +3,7 @@ import logging
 from botocore.exceptions import ClientError
 from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 
-from notification_service.src.sender.notification_sender import NotificationSender
+from .notification_sender import NotificationSender
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

@@ -1,13 +1,12 @@
 import logging
-from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 import requests
 import os
 import boto3
 import json
 
 from botocore.exceptions import ClientError
-
-from notification_service.src.sender.notification_sender import NotificationSender
+from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
+from .notification_sender import NotificationSender
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
