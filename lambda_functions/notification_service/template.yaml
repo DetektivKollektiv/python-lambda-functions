@@ -32,6 +32,7 @@ Resources:
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonSESFullAccess
+        - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
 
   NotifyItemClosed: # Change for each lambda
     Type: AWS::Serverless::Function

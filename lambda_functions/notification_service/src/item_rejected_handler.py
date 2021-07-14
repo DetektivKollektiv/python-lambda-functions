@@ -1,13 +1,12 @@
 import logging
-import os
 
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
 from core_layer.responses import BadRequest, InternalError, Success
 from core_layer.handler import item_handler
-from notification_service.src.sender.mail_sender import MailSender
-from notification_service.src.sender.telegram_sender import TelegramSender
+from .sender.mail_sender import MailSender
+from .sender.telegram_sender import TelegramSender
 
 
 logger = logging.getLogger()
