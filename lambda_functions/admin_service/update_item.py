@@ -1,17 +1,16 @@
+from core_layer.handler import item_handler
+from core_layer.event_publisher import EventPublisher
+from core_layer import helper
+from core_layer.db_handler import Session, update_object
+from core_layer.helper import log_method_initiated, set_cors
 import logging
 import json
-# Helper imports
-from core_layer.helper import log_method_initiated, set_cors
-from core_layer.db_handler import Session, update_object
-
-# Handler imports
-from core_layer.handler import item_handler
 
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
- 
+
 def update_item(event, context):
     """Updates an item.
 
@@ -20,7 +19,7 @@ def update_item(event, context):
     event: dict, required
         API Gateway Lambda Proxy Input Format
 
-        #api-gateway-simple-proxy-for-lambda-input-format
+        # api-gateway-simple-proxy-for-lambda-input-format
         Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
 
     context: object, required
@@ -34,11 +33,11 @@ def update_item(event, context):
 
         Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
-    
+
     log_method_initiated("Update item", event, logger)
 
     item_id = event['pathParameters']['item_id']
-    
+
     with Session() as session:
 
         item = item_handler.get_item_by_id(item_id, session)
@@ -50,7 +49,7 @@ def update_item(event, context):
             }
             response_cors = set_cors(response, event)
             return response_cors
-        
+
         body = event['body']
         body = json.loads(body) if isinstance(body, str) else body
         for key in body:
@@ -64,19 +63,24 @@ def update_item(event, context):
                 }
                 response_cors = set_cors(response, event)
                 return response_cors
-        
+
         item = update_object(item, session)
-        if item is None:
-            response = {
-                "statusCode": 500,
-                "body": "Could not write changes to db. Event id: {}".format(event['requestContext']['requestId'])
-            }
-            response_cors = set_cors(response, event)
-            return response_cors
+
+    if(item.status == 'rejected'):
+        EventPublisher().publish_event(
+            'codetekt.admin_service', 'item_rejected', {'item_id': item.id})
+
+    if item is None:
+        response = {
+            "statusCode": 500,
+            "body": "Could not write changes to db. Event id: {}".format(event['requestContext']['requestId'])
+        }
+        response_cors = helper.set_cors(response, event)
+        return response_cors
 
     response = {
         "statusCode": 200,
         "body": json.dumps(item.to_dict())
     }
-    response_cors = set_cors(response, event)    
+    response_cors = set_cors(response, event)
     return response_cors
