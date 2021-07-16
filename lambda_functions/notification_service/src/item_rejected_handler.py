@@ -24,7 +24,7 @@ def handle_item_rejected(event, context):
         with Session() as session:
             helper.log_method_initiated("Handle item rejected", event, logger)
 
-            if "item_id" not in event:
+            if "detail" not in event and "item_id" not in event["detail"]:
                 return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
 
             item_id = event["item_id"]

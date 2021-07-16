@@ -22,11 +22,11 @@ def handle_item_closed(event, context):
     try:
         helper.log_method_initiated("Send notification", event, logger)
 
-        if "item_id" not in event:
+        if "detail" not in event and "item_id" not in event["detail"]:
             return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
 
         with Session() as session:
-            item_id = event["item_id"]
+            item_id = event["detail"]["item_id"]
             item = item_handler.get_item_by_id(item_id, session)
 
             if item is None:
