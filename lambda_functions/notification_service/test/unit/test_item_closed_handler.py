@@ -1,28 +1,23 @@
 import pytest
+import json
 
 from notification_service.src import item_closed_handler
 
 
 def test_no_item_id(monkeypatch):
-
-    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "")
-
     event = {}
 
     response = item_closed_handler.handle_item_closed(event, None)
-
-    assert response.statusCode == 400
+    response_dict = json.loads(response)
+    assert response_dict['statusCode'] == 400
 
 
 def test_wrong_item_id(monkeypatch):
-
-    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "")
-
     event = {"item_id": "123123"}
 
     response = item_closed_handler.handle_item_closed(event, None)
-
-    assert response.statusCode == 400
+    response_dict = json.loads(response)
+    assert response_dict['statusCode'] == 400
 
 
 testdata = [

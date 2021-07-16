@@ -23,7 +23,7 @@ def handle_item_closed(event, context):
         helper.log_method_initiated("Send notification", event, logger)
 
         if "item_id" not in event:
-            return BadRequest(event, "Event contains no item_id.")
+            return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
 
         with Session() as session:
             item_id = event["item_id"]
@@ -31,7 +31,7 @@ def handle_item_closed(event, context):
 
             if item is None:
                 return BadRequest(event,
-                                  f"No item was found with the given item_id [{item_id}].")
+                                  f"No item was found with the given item_id [{item_id}].", add_cors_headers=False).to_json_string()
 
             # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
             rating = round(item.result_score, 1)
@@ -56,10 +56,10 @@ def handle_item_closed(event, context):
                     except Exception as e:
                         logger.exception(e)
 
-            return Success(event)
+            return Success(event, add_cors_headers=False).to_json_string()
 
     except Exception as e:
-        return InternalError(event, "Error sending notification", e)
+        return InternalError(event, "Error sending notification", e, add_cors_headers=False).to_json_string()
 
 
 def get_rating_text(rating: float) -> str:
