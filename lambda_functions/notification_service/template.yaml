@@ -14,6 +14,11 @@ Parameters:
   NotificationTemplateBucket:
     Type: String
     Default: codetekt-notification-templates-dev
+  DBNAME:
+    Type: String
+    Default: development_db
+  DEPLOYMENTMODE:
+    Type: String
 
 Resources:
   LambdaExecutionRole:
@@ -33,6 +38,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonSESFullAccess
         - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
 
   NotifyItemClosed: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -58,6 +64,10 @@ Resources:
                 - item_closed
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
           NOTIFICATION_TEMPLATE_BUCKET:
             Ref: NotificationTemplateBucket
       Layers:
@@ -87,6 +97,10 @@ Resources:
                 - item_rejected
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
           NOTIFICATION_TEMPLATE_BUCKET:
             Ref: NotificationTemplateBucket
       Layers:

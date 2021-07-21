@@ -321,8 +321,8 @@ class TestGetFactChecks:
                 factcheck = json.loads(body)
             else:
                 factcheck = body
-            assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/11/23/nein-christian-drosten-hat-2014-nicht-gesagt-dass-er-pcr-tests-fuer-untauglich-halte/'
-            assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
+            assert factcheck['url'] == 'https://dpa-factchecking.com/germany/201022-99-42791'
+            assert factcheck['title'] == 'Vortrag über die PCR-Methode enthält mehrere falsche oder ...'
             assert elapsed < 3            
 
 

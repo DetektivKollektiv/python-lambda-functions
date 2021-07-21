@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Any
 
 
@@ -8,29 +9,33 @@ class ResponseBase:
     body: Any
     headers: dict
 
-    def __init__(self, event) -> None:
+    def __init__(self, event, add_cors_headers: bool) -> None:
 
         self.statusCode = 0
         self.body = None
         self.headers = {}
 
-        source_origin = None
-        allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
+        if(add_cors_headers):
+            source_origin = None
+            allowed_origins = os.environ['CORS_ALLOW_ORIGIN'].split(',')
 
-        if 'headers' in event and event['headers'] is not None:
-            if 'Origin' in event['headers']:
-                source_origin = event['headers']['Origin']
-            if 'origin' in event['headers']:
-                source_origin = event['headers']['origin']
+            if 'headers' in event and event['headers'] is not None:
+                if 'Origin' in event['headers']:
+                    source_origin = event['headers']['Origin']
+                if 'origin' in event['headers']:
+                    source_origin = event['headers']['origin']
 
-            if source_origin and source_origin in allowed_origins:
-                self.headers['Access-Control-Allow-Origin'] = source_origin
+                if source_origin and source_origin in allowed_origins:
+                    self.headers['Access-Control-Allow-Origin'] = source_origin
+
+    def to_json_string(self):
+        return json.dumps(self.__dict__)
 
 
 class InternalError(ResponseBase):
 
-    def __init__(self, event, message: str = None, exception: Exception = None):
-        super().__init__(event)
+    def __init__(self, event, message: str = None, exception: Exception = None, add_cors_headers: bool = True):
+        super().__init__(event, add_cors_headers)
 
         self.statusCode = 500
 
@@ -52,8 +57,8 @@ class InternalError(ResponseBase):
 
 
 class BadRequest(ResponseBase):
-    def __init__(self, event, message: str = None):
-        super().__init__(event)
+    def __init__(self, event, message: str = None, add_cors_headers: bool = True):
+        super().__init__(event, add_cors_headers)
 
         self.statusCode = 400
 
@@ -63,8 +68,8 @@ class BadRequest(ResponseBase):
 
 
 class Success(ResponseBase):
-    def __init__(self, event, content=None, message: str = None):
-        super().__init__(event)
+    def __init__(self, event, content=None, message: str = None, add_cors_headers: bool = True):
+        super().__init__(event, add_cors_headers)
 
         self.statusCode = 200
 
@@ -77,8 +82,8 @@ class Success(ResponseBase):
 
 
 class Created(ResponseBase):
-    def __init__(self, event, content=None, message: str = None):
-        super().__init__(event)
+    def __init__(self, event, content=None, message: str = None, add_cors_headers: bool = True):
+        super().__init__(event, add_cors_headers)
 
         self.statusCode = 201
 
@@ -91,8 +96,8 @@ class Created(ResponseBase):
 
 
 class NoContent(ResponseBase):
-    def __init__(self, event, message: str = None):
-        super().__init__(event)
+    def __init__(self, event, message: str = None, add_cors_headers: bool = True):
+        super().__init__(event, add_cors_headers)
 
         self.statusCode = 204
 

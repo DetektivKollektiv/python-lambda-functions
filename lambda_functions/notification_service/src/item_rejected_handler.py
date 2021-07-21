@@ -1,4 +1,5 @@
 import logging
+import json
 
 from core_layer import helper
 from core_layer.db_handler import Session
@@ -23,14 +24,14 @@ def handle_item_rejected(event, context):
         with Session() as session:
             helper.log_method_initiated("Handle item rejected", event, logger)
 
-            if "item_id" not in event:
-                return BadRequest(event, "Event contains no item_id.")
+            if "detail" not in event and "item_id" not in event["detail"]:
+                return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
 
             item_id = event["item_id"]
             item = item_handler.get_item_by_id(item_id, session)
 
             if item is None:
-                return BadRequest(event, f"No item was found with the given item_id [{item_id}].")
+                return BadRequest(event, f"No item was found with the given item_id [{item_id}].", add_cors_headers=False).to_json_string()
 
             parameters = dict(
                 content=item.content
@@ -51,6 +52,6 @@ def handle_item_rejected(event, context):
                     except Exception as e:
                         logger.exception(e)
 
-            return Success(event)
+            return Success(event, add_cors_headers=False).to_json_string()
     except Exception as e:
-        return InternalError(event, "Error sending notification", e)
+        return InternalError(event, "Error sending notification", e, add_cors_headers=False).to_json_string()
