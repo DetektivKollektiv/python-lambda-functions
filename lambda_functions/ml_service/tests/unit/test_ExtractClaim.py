@@ -152,15 +152,3 @@ class TestExtractClaim:
         context = ""
         resp = ExtractClaim.extract_claim(event, context)
         assert resp["concatenation"]["Text"] == ' \nItalien: Studie belegt stark erhöhten CO2-Wert unter der Maske - 2020 NEWS '
-
-    def test_extract_claim_12(self):
-        event = {
-            "item": {
-                "content": "https://www.wahrheiten.org/blog/klimaluege/",
-                "id": "123456",
-                "language": ""
-            }
-        }
-        context = ""
-        resp = ExtractClaim.extract_claim(event, context)
-        assert resp["concatenation"]["Text"] == ' \nItalien: Studie belegt stark erhöhten CO2-Wert unter der Maske - 2020 NEWS '
