@@ -4,7 +4,7 @@ from core_layer.db_handler import Session
 from core_layer.model.comment_model import Comment
 
 
-def create_comment(comment, user_id, parent_type, parent_id, timestamp = None, status = None):
+def create_comment(comment, user_id, parent_type, parent_id, is_review_comment=False, timestamp=None, status=None):
     """
     Creates comment
 
@@ -21,7 +21,6 @@ def create_comment(comment, user_id, parent_type, parent_id, timestamp = None, s
             status (str)
     """
 
-  
     session = Session()
 
     comment_obj = Comment()
@@ -29,10 +28,9 @@ def create_comment(comment, user_id, parent_type, parent_id, timestamp = None, s
     comment_obj.id = str(uuid4())
     comment_obj.comment = comment
     comment_obj.user_id = user_id
-    if timestamp:
-        comment_obj.timestamp = timestamp
-    if status:
-        comment_obj.status = status
+    comment_obj.is_review_comment = is_review_comment
+    comment_obj.timestamp = timestamp
+    comment_obj.status = status
 
     if parent_type == 'item':
         comment_obj.item_id = parent_id

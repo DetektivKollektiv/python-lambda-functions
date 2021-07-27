@@ -11,9 +11,11 @@ from archive_service.post_comment_on_item import post_comment_on_item
 def item_id():
     return str(uuid4())
 
+
 @pytest.fixture
 def user_id():
     return str(uuid4())
+
 
 @pytest.fixture
 def event(item_id, user_id):
@@ -21,7 +23,7 @@ def event(item_id, user_id):
         "body": {
             "user_id": user_id,
             "item_id": item_id,
-            "qualitative_comment": "Comment from event"
+            "comment": "Comment from event"
         }
     }
 
@@ -30,11 +32,15 @@ def test_post_comment_on_item(event, item_id, user_id):
 
     with Session() as session:
 
-        item_obj = Item(id = item_id)
-        user_obj = User(id = user_id)
-        level_1_obj = Level(id = 1)
+        item_obj = Item(id=item_id)
+        user_obj = User(id=user_id)
+        level_1_obj = Level(id=1)
         session.add_all([item_obj, level_1_obj, user_obj])
         session.commit()
 
         post_comment_on_item(event)
-        assert session.query(Item).all()[0].comments[0].comment == "Comment from event"
+        comment = session.query(Item).all()[
+            0].comments[0]
+        assert comment.comment == "Comment from event"
+        assert comment.is_review_comment == False
+        assert comment.status == "published"

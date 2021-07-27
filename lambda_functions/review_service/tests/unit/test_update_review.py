@@ -25,11 +25,12 @@ def senior_user_id():
 
 
 def test_update_review(item_id, junior_user_id, senior_user_id):
-    
+
     with Session() as session:
-        
+
         session = setup_scenarios.create_questions(session)
-        session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
+        session = setup_scenarios.create_levels_junior_and_senior_detectives(
+            session)
         item = Item(id=item_id, item_type_id="Type1")
         session.add(item)
         session.commit()
@@ -44,8 +45,9 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         review = reviews[0]
 
         # Test 403
-        event = event_creator.get_review_event(review, item_id, "in progress", senior_user_id, 1)
-        
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", senior_user_id, 1)
+
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 403
 
@@ -55,8 +57,10 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         assert comments.item_id == item_id
         assert comments.user_id == senior_user_id
         assert comments.status == "published"
+        assert comments.is_review_comment == True
 
-        event = event_creator.get_review_event(review, item_id, "in progress", junior_user_id, 1)
-        
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", junior_user_id, 1)
+
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 200

@@ -64,7 +64,7 @@ def get_next_question_event(review_id, previous_question_id=None):
     return event
 
 
-def get_review_event(review: Review, item_id, status, user_id, score, qualitative_comment = "Test comment"):
+def get_review_event(review: Review, item_id, status, user_id, score, comment="Test comment"):
 
     questions = []
     for answer in review.review_answers:
@@ -119,7 +119,7 @@ def get_review_event(review: Review, item_id, status, user_id, score, qualitativ
             "id": review.id,
             "item_id": item_id,
             "user_id": user_id,
-            "qualitative_comment": qualitative_comment,
+            "comment": comment,
             "status": status
         },
         "requestContext": {

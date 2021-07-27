@@ -5,7 +5,7 @@ from core_layer.db_handler import Session
 from core_layer.handler import comment_handler, item_handler
 
 
-def post_comment_on_item(event, context = None):
+def post_comment_on_item(event, context=None):
     """
     Creates comment on item from archive
     """
@@ -29,14 +29,13 @@ def post_comment_on_item(event, context = None):
         except:
             return helper.get_text_response(404, "Item not found", event)
 
-
         # Save qualitative_comment
-        if 'qualitative_comment' in body:
+        if 'comment' in body:
             try:
-                comment_handler.create_comment(comment = body['qualitative_comment'],
-                                            user_id = body['user_id'],
-                                            parent_type = 'item',
-                                            parent_id = item.id
-                                            )
+                comment_handler.create_comment(comment=body['comment'],
+                                               user_id=body['user_id'],
+                                               parent_type='item',
+                                               parent_id=item.id
+                                               )
             except:
                 return helper.get_text_response(404, "No qualitative comment found.", event)

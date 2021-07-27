@@ -42,12 +42,13 @@ def update_review(event, context):
         return helper.get_text_response(404, "No review found", event)
 
     # Save qualitative_comment
-    if 'qualitative_comment' in body:
+    if 'comment' in body:
         try:
-            comment_handler.create_comment(comment=body['qualitative_comment'],
+            comment_handler.create_comment(comment=body['comment'],
                                            user_id=body['user_id'],
                                            parent_type='item',
-                                           parent_id=body['item_id']
+                                           parent_id=body['item_id'],
+                                           is_review_comment=True
                                            )
         except:
             return helper.get_text_response(404, "No qualitative comment found.", event)
@@ -94,8 +95,6 @@ def update_review(event, context):
                     for q in body['questions']:
                         if q['question_id'] == question['parent_question_id']:
                             parent_question = q
-                    parent_answer = review_answer_handler.get_parent_answer(
-                        question['answer_id'], session)
                     if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
                         return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
                 # Update answer in db
