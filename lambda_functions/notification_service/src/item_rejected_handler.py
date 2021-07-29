@@ -21,13 +21,14 @@ telegram_sender = TelegramSender(notification_template_handler)
 
 def handle_item_rejected(event, context):
     try:
+        helper.log_method_initiated("Handle item rejected", event, logger)
+
+        if "detail" not in event or "item_id" not in event["detail"]:
+            return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
+
         with Session() as session:
-            helper.log_method_initiated("Handle item rejected", event, logger)
 
-            if "detail" not in event and "item_id" not in event["detail"]:
-                return BadRequest(event, "Event contains no item_id.", add_cors_headers=False).to_json_string()
-
-            item_id = event["item_id"]
+            item_id = event["detail"]["item_id"]
             item = item_handler.get_item_by_id(item_id, session)
 
             if item is None:
@@ -54,4 +55,8 @@ def handle_item_rejected(event, context):
 
             return Success(event, add_cors_headers=False).to_json_string()
     except Exception as e:
-        return InternalError(event, "Error sending notification", e, add_cors_headers=False).to_json_string()
+        response = InternalError(
+            event, "Error sending notification", e, add_cors_headers=False).to_json_string()
+        logger.error(response)
+
+        return response
