@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 from typing import Any
 
 
@@ -48,12 +49,14 @@ class InternalError(ResponseBase):
             return
 
         if(message is None and exception is not None):
-            self.body = exception
+            self.body = traceback.format_exception_only(
+                type(exception), exception)  # exception
             return
 
         self.body = {}
         self.body['message'] = message
-        self.body['exception'] = exception
+        self.body['exception'] = traceback.format_exception_only(
+            type(exception), exception)
 
 
 class BadRequest(ResponseBase):
