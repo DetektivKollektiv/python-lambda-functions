@@ -51,16 +51,16 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 403
 
-        # Test comments
-        comments = session.query(Comment).all()[0]
-        assert comments.comment == "Test comment"
-        assert comments.item_id == item_id
-        assert comments.user_id == senior_user_id
-        assert comments.status == "published"
-        assert comments.is_review_comment == True
-
         event = event_creator.get_review_event(
             review, item_id, "in progress", junior_user_id, 1)
 
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 200
+
+        # Test comments
+        comments = session.query(Comment).all()[0]
+        assert comments.comment == "Test comment"
+        assert comments.item_id == item_id
+        assert comments.user_id == junior_user_id
+        assert comments.status == "published"
+        assert comments.is_review_comment == True

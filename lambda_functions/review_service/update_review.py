@@ -41,18 +41,6 @@ def update_review(event, context):
     except:
         return helper.get_text_response(404, "No review found", event)
 
-    # Save qualitative_comment
-    if 'comment' in body:
-        try:
-            comment_handler.create_comment(comment=body['comment'],
-                                           user_id=body['user_id'],
-                                           parent_type='item',
-                                           parent_id=body['item_id'],
-                                           is_review_comment=True
-                                           )
-        except:
-            return helper.get_text_response(404, "No qualitative comment found.", event)
-
     try:
         user = user_handler.get_user_by_id(user_id, session)
     except:
@@ -103,6 +91,18 @@ def update_review(event, context):
                         question['answer_id'], question['answer_value'], session)
                 except:
                     return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+
+        # Save qualitative_comment
+        if 'comment' in body:
+            try:
+                comment_handler.create_comment(comment=body['comment'],
+                                               user_id=body['user_id'],
+                                               parent_type='item',
+                                               parent_id=body['item_id'],
+                                               is_review_comment=True
+                                               )
+            except:
+                return helper.get_text_response(404, "No qualitative comment found.", event)
 
         response = {
             "statusCode": 200,
