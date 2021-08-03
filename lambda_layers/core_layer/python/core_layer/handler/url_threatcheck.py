@@ -1,54 +1,63 @@
-import os
 import requests
-import logging
-import json
-import traceback
-from core_layer import helper
-from core_layer import connection_handler
-from core_layer.handler import url_handler
+
 from ml_service.SearchFactChecks import get_secret
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
+API_URL_GOOGLE = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
+THREAT_PREFIX_GOOGLE = "GOOGLE:"
 
 def threatcheck(url):
+    """ Checks the URL for various threats
+     Parameters
+    ----------
+     url:
+        string
+    Returns
+    ------
+        threat or None
+    """
     result = get_googleapi_safebrowsing_threat(url)
     return result
 
-
-# Call Google API for checking ussafe urls
 def get_googleapi_safebrowsing_threat(url):
+    """ Calls Google API for checking unsafe urls
+    Parameters
+    ----------
+    url:
+        string, required
+    Returns
+    ------
+        for threat urls:
+            'GOOGLE:' followed by threat type (e.g. GOOGLE:MALWARE).
+        in case of failing API call:
+            GOOGLE:N/A
+        for no threat urls:
+            None
+    """
     body = {
         "client": {
             "clientId": "codetect",
             "clientVersion": "1.5.2"
         },
         "threatInfo": {
-            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "THREAT_TYPE_UNSPECIFIED", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "THREAT_TYPE_UNSPECIFIED",
+                            "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
             "platformTypes": ["ANY_PLATFORM"],
             "threatEntryTypes": ["URL"],
             "threatEntries": [{"url": url}]
         }
     }
 
-    if 'DBNAME' not in os.environ:
-        # todo fill key before execute the test
-        key = ""
-    else:
-        key = get_secret();
+    key = get_secret()
 
-
-    response = requests.post("https://safebrowsing.googleapis.com/v4/threatMatches:find?key=" + key, None, body)
+    response = requests.post(API_URL_GOOGLE + "?key=" + key, None, body)
 
     if response.status_code == 200:
-        resultJson = response.json()
-        if 'matches' in resultJson:
-            threat = "GOOGLE:" + resultJson['matches'][0]['threatType']
+        result_json = response.json()
+        if 'matches' in result_json:
+            threat = THREAT_PREFIX_GOOGLE + result_json['matches'][0]['threatType']
         else:
             threat = None
     else:
-        # todo@cba what to do?
-        threat = "GOOGLE:N/A"
+        threat = THREAT_PREFIX_GOOGLE + "N/A"
 
     return threat

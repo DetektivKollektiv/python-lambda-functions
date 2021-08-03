@@ -1,11 +1,8 @@
-import pytest
 from core_layer.handler import url_threatcheck
-
-## Google API Key must be configured in url_threatcheck.py for local testing
 
 def test_safe_item():
     result = url_threatcheck.threatcheck("https://codetekt.org")
-    assert result == None
+    assert result is None
 
 def test_unsafe_malware_item():
     result = url_threatcheck.threatcheck("http://testsafebrowsing.appspot.com/s/malware.html")
@@ -21,4 +18,4 @@ def test_with_no_url_item():
 
 def test_with_not_valid_url_item():
     result = url_threatcheck.threatcheck("blabla")
-    assert result == None
+    assert result is None
