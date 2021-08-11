@@ -41,7 +41,7 @@ class Comment(Base):
 class CommentSentiment(Base):
     __tablename__ = 'comment_sentiments'
     id = Column(String(36), primary_key=True)
-    type = Column(String)  # e.g. like, dislike, ...
+    type = Column(String(100))  # e.g. like, dislike, ...
 
     # Relationships
     user_id = Column(String(36), ForeignKey('users.id'))
