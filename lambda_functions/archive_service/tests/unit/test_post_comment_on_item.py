@@ -20,8 +20,12 @@ def user_id():
 @pytest.fixture
 def event(item_id, user_id):
     return {
+        "requestContext": {
+            "identity": {
+                "cognitoAuthenticationProvider": "...CognitoSignIn:{}".format(user_id)
+            }
+        },
         "body": {
-            "user_id": user_id,
             "item_id": item_id,
             "comment": "Comment from event"
         }

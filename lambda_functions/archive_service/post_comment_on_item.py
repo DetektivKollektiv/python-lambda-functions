@@ -21,6 +21,13 @@ def post_comment_on_item(event, context=None):
         except:
             return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
 
+        try:
+            user_id = helper.cognito_id_from_event(event)
+            body = json.loads(event['body']) if isinstance(
+                event['body'], str) else event['body']
+        except:
+            return helper.get_text_response(400, "Malformed request. Could not read user_id from context data.", event)
+
         if 'item_id' not in body:
             return helper.get_text_response(400, "Malformed request. Please provide an item_id.", event)
 
@@ -33,7 +40,7 @@ def post_comment_on_item(event, context=None):
         if 'comment' in body:
             try:
                 comment_handler.create_comment(comment=body['comment'],
-                                               user_id=body['user_id'],
+                                               user_id=user_id,
                                                parent_type='item',
                                                parent_id=item.id
                                                )
