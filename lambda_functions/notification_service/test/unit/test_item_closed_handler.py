@@ -13,7 +13,7 @@ def test_no_item_id(monkeypatch):
 
 
 def test_wrong_item_id(monkeypatch):
-    event = {"item_id": "123123"}
+    event = {"detail": {"item_id": "e9e376b5-0444-4eff-a7af-a3189ba2291e"}}
 
     response = item_closed_handler.handle_item_closed(event, None)
     response_dict = json.loads(response)
