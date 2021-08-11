@@ -3,6 +3,7 @@ from ....tests.helper import event_creator, setup_scenarios
 from core_layer.db_handler import Session
 from core_layer.model.item_model import Item
 from review_service.update_review import update_review
+from review_service import create_review
 from ...get_open_items import get_open_items
 
 from core_layer.handler import user_handler, item_handler, review_handler
@@ -162,6 +163,11 @@ class TestGetOpenItems:
             response = update_review(event, None)
             assert response['statusCode'] == 200
             
+            # Accepting closed item again should not create a new review
+            event = event_creator.get_create_review_event(senior_detective1.id, item3.id)
+            response = create_review.create_review(event, None)
+            assert response['statusCode'] == 500
+
             open_items_for_senior = item_handler.get_open_items_for_user(senior_detective1, 5, session)['items']
             assert len(open_items_for_senior) == 3
 

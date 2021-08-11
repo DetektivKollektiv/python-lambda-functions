@@ -22,7 +22,7 @@ def update_review(event, context):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
-    helper.log_method_initiated("Create Review", event, logger)
+    helper.log_method_initiated("Update Review", event, logger)
 
     try:
         user_id = helper.cognito_id_from_event(event)
@@ -39,7 +39,7 @@ def update_review(event, context):
     try:
         review = review_handler.get_review_by_id(body['id'], session)
     except:
-        return helper.get_text_response(404, "No review found", event)
+        return helper.get_text_response(404, "No review found. Stacktrace: {}".format(traceback.format_exc()), event)
 
     try:
         user = user_handler.get_user_by_id(user_id, session)

@@ -64,3 +64,11 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         assert comments.user_id == junior_user_id
         assert comments.status == "published"
         assert comments.is_review_comment == True
+        # Test not existing review
+        fake_review = review
+        fake_review.id = "fake"
+        event = event_creator.get_review_event(
+            fake_review, item_id, "in progress", junior_user_id, 1)
+
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 404
