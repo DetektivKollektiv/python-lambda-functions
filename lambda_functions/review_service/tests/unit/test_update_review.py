@@ -5,6 +5,7 @@ from review_service import create_review
 from review_service import update_review
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
+from core_layer.model.comment_model import Comment
 from ....tests.helper import event_creator, setup_scenarios
 
 
@@ -24,11 +25,12 @@ def senior_user_id():
 
 
 def test_update_review(item_id, junior_user_id, senior_user_id):
-    
+
     with Session() as session:
-        
+
         session = setup_scenarios.create_questions(session)
-        session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
+        session = setup_scenarios.create_levels_junior_and_senior_detectives(
+            session)
         item = Item(id=item_id, item_type_id="Type1")
         session.add(item)
         session.commit()
@@ -43,20 +45,30 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         review = reviews[0]
 
         # Test 403
-        event = event_creator.get_review_event(review, item_id, "in progress", senior_user_id, 1)
-        
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", senior_user_id, 1)
+
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 403
-    
-        event = event_creator.get_review_event(review, item_id, "in progress", junior_user_id, 1)
-        
+
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", junior_user_id, 1)
+
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 200
 
+        # Test comments
+        comments = session.query(Comment).all()[0]
+        assert comments.comment == "Test comment"
+        assert comments.item_id == item_id
+        assert comments.user_id == junior_user_id
+        assert comments.status == "published"
+        assert comments.is_review_comment == True
         # Test not existing review
         fake_review = review
         fake_review.id = "fake"
-        event = event_creator.get_review_event(fake_review, item_id, "in progress", junior_user_id, 1)
-        
+        event = event_creator.get_review_event(
+            fake_review, item_id, "in progress", junior_user_id, 1)
+
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 404

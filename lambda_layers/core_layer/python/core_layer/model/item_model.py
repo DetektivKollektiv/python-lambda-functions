@@ -38,6 +38,7 @@ class Item(Base):
     reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
+    comments = relationship("Comment", back_populates="item")
 
     def to_dict(self, with_tags=False, include_type=False, with_urls=False):
         item_dict = {

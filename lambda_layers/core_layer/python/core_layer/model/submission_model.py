@@ -18,6 +18,7 @@ class Submission(Base):
     status = Column(String(100), default='unconfirmed')
     item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")
+    comments = relationship("Comment", back_populates="submission")
 
     def to_dict(self):
         return {
