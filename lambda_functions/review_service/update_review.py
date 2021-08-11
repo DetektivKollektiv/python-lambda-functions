@@ -1,10 +1,10 @@
 from core_layer.event_publisher import EventPublisher
-from core_layer.handler import user_handler, review_handler, review_answer_handler
+from core_layer import helper
 from core_layer.db_handler import Session
+from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler
 import logging
 import json
 import traceback
-from core_layer import helper
 
 
 def update_review(event, context):
@@ -83,8 +83,6 @@ def update_review(event, context):
                     for q in body['questions']:
                         if q['question_id'] == question['parent_question_id']:
                             parent_question = q
-                    parent_answer = review_answer_handler.get_parent_answer(
-                        question['answer_id'], session)
                     if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
                         return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
                 # Update answer in db
@@ -93,6 +91,18 @@ def update_review(event, context):
                         question['answer_id'], question['answer_value'], session)
                 except:
                     return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+
+        # Save qualitative_comment
+        if 'comment' in body:
+            try:
+                comment_handler.create_comment(comment=body['comment'],
+                                               user_id=body['user_id'],
+                                               parent_type='item',
+                                               parent_id=body['item_id'],
+                                               is_review_comment=True
+                                               )
+            except:
+                return helper.get_text_response(404, "No qualitative comment found.", event)
 
         response = {
             "statusCode": 200,
