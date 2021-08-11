@@ -58,6 +58,13 @@ def create_review(user, item, session) -> Review:
     except:   
         pass
     
+    # If a closed review exists for the user, raise an exception
+    reviews = session.query(Review).filter(
+        Review.user_id == user.id, Review.item_id == item.id)
+    if reviews.count() > 0:
+        raise Exception(
+            'Item cannot be accepted as there is already a closed review from this user.')
+
     # If the amount of reviews in progress equals the amount of reviews needed, raise an error
     if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
         
