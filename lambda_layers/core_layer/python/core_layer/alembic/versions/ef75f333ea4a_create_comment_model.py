@@ -21,8 +21,8 @@ def upgrade():
     op.create_table('comments',
                     sa.Column('id', sa.String(length=36), nullable=False),
                     sa.Column('timestamp', sa.DateTime(), nullable=True),
-                    sa.Column('status', sa.String(), nullable=True),
-                    sa.Column('comment', sa.String(), nullable=True),
+                    sa.Column('status', sa.String(length=100), nullable=True),
+                    sa.Column('comment', sa.Text(), nullable=True),
                     sa.Column('is_review_comment',
                               sa.Boolean(), nullable=True),
                     sa.Column('user_id', sa.String(length=36), nullable=True),
@@ -45,7 +45,7 @@ def upgrade():
                     )
     op.create_table('comment_sentiments',
                     sa.Column('id', sa.String(length=36), nullable=False),
-                    sa.Column('type', sa.String(), nullable=True),
+                    sa.Column('type', sa.String(length=100), nullable=True),
                     sa.Column('user_id', sa.String(length=36), nullable=True),
                     sa.Column('comment_id', sa.String(
                         length=36), nullable=True),

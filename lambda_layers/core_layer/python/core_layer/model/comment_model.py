@@ -1,7 +1,7 @@
 from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import Boolean
+from sqlalchemy.sql.sqltypes import Boolean, Text
 from .model_base import Base
 from sqlalchemy.sql import func
 
@@ -11,8 +11,8 @@ class Comment(Base):
     id = Column(String(36), primary_key=True)
     timestamp = Column(DateTime, server_default=func.now())
     # e.g. published, flagged, cleared, removed
-    status = Column(String, default="published")
-    comment = Column(String)
+    status = Column(String(100), default="published")
+    comment = Column(Text)
     is_review_comment = Column(Boolean)
 
     # Relationships
@@ -41,7 +41,7 @@ class Comment(Base):
 class CommentSentiment(Base):
     __tablename__ = 'comment_sentiments'
     id = Column(String(36), primary_key=True)
-    type = Column(String)  # e.g. like, dislike, ...
+    type = Column(String(100))  # e.g. like, dislike, ...
 
     # Relationships
     user_id = Column(String(36), ForeignKey('users.id'))
