@@ -9,18 +9,19 @@ from core_layer.handler import user_handler, item_handler, review_handler, revie
 from ..helper import event_creator, setup_scenarios
 from ...review_service.create_review import create_review
 from ...review_service.update_review import update_review
-from moto import mock_ses
+from moto import mock_ses, mock_events
 import boto3
 
 
-@mock_ses
+@mock_events
 def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("STAGE", "dev")
-    conn = boto3.client("ses", region_name="eu-central-1")
-    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
+    monkeypatch.setenv("MOTO", "1")
+    event_conn = boto3.client('events', region_name="eu-central-1")
 
     with Session() as session:
-        session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
+        session = setup_scenarios.create_levels_junior_and_senior_detectives(
+            session)
         session = setup_scenarios.create_questions(session)
 
         junior_detective1 = user_handler.get_user_by_id("1", session)
@@ -104,21 +105,21 @@ def test_verification_process_best_case(monkeypatch):
 
         pairs = review_pair_handler.get_review_pairs_by_item(item.id, session)
         assert len(pairs) == 4
-        
+
         # Detectives reviewing item
         reviews = [jr1, jr2, jr3, jr4, sr1, sr2, sr3, sr4]
-        
+
         for review in reviews:
             event = event_creator.get_review_event(
                 review, item.id, "in progress", review.user_id, 1)
             response = update_review(event, None)
-            assert response['statusCode'] == 200            
+            assert response['statusCode'] == 200
             session.refresh(review)
             event = event_creator.get_review_event(
                 review, item.id, "closed", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
-        
+
         assert item.status == 'closed'
         assert item.in_progress_reviews_level_1 == 0
         assert item.in_progress_reviews_level_2 == 0
@@ -126,20 +127,15 @@ def test_verification_process_best_case(monkeypatch):
         assert item.open_reviews_level_2 == 0
         assert item.open_reviews == 0
         assert item.close_timestamp is not None
-        
-        send_quota = conn.get_send_quota()
-        sent_count = int(send_quota["SentLast24Hours"])
-        assert sent_count == 1
-        session.refresh(submission)
-        assert not submission.mail
 
         session.expire_all()
-        
+
 
 def test_verification_process_worst_case():
 
     with Session() as session:
-        session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
+        session = setup_scenarios.create_levels_junior_and_senior_detectives(
+            session)
         session = setup_scenarios.create_questions(session)
 
         junior_detective1 = user_handler.get_user_by_id("1", session)
@@ -240,24 +236,25 @@ def test_verification_process_worst_case():
         assert item.in_progress_reviews_level_2 == 0
         assert item.open_reviews_level_1 == 4
         assert item.open_reviews_level_2 == 4
-        assert item.open_reviews == 4  
+        assert item.open_reviews == 4
 
-        session.expire_all()      
+        session.expire_all()
 
 
 def test_create_review():
 
     with Session() as session:
-        session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
+        session = setup_scenarios.create_levels_junior_and_senior_detectives(
+            session)
 
         junior_detective1 = user_handler.get_user_by_id("1", session)
-        junior_detective2 = user_handler.get_user_by_id("2", session)        
+        junior_detective2 = user_handler.get_user_by_id("2", session)
 
-        senior_detective1 = user_handler.get_user_by_id("11", session)      
+        senior_detective1 = user_handler.get_user_by_id("11", session)
 
         users = user_handler.get_all_users(session)
         assert len(users) == 10
-        
+
         # Creating an item
         item = Item()
         item.content = "This item needs to be checked"
@@ -265,14 +262,15 @@ def test_create_review():
 
         items = item_handler.get_all_items(session)
         assert len(items) == 1
-        
+
         reviews = session.query(Review).all()
         review_pairs = session.query(ReviewPair).all()
         assert len(reviews) == 0
         assert len(review_pairs) == 0
-        
+
         # Junior detectives accepting item
-        event = event_creator.get_create_review_event(junior_detective1.id, item.id)
+        event = event_creator.get_create_review_event(
+            junior_detective1.id, item.id)
         response = create_review(event, None)
         assert response['statusCode'] == 201
         item = item_handler.get_item_by_id(item.id, session)
@@ -283,7 +281,8 @@ def test_create_review():
         assert len(reviews) == 1
         assert len(review_pairs) == 1
 
-        event = event_creator.get_create_review_event(junior_detective2.id, item.id)
+        event = event_creator.get_create_review_event(
+            junior_detective2.id, item.id)
         create_review(event, None)
         item = item_handler.get_item_by_id(item.id, session)
         assert item.open_reviews_level_1 == 4
@@ -294,7 +293,8 @@ def test_create_review():
         assert len(review_pairs) == 2
 
         # Senior detective accepting item
-        event = event_creator.get_create_review_event(senior_detective1.id, item.id)
+        event = event_creator.get_create_review_event(
+            senior_detective1.id, item.id)
         create_review(event, None)
         item = item_handler.get_item_by_id(item.id, session)
         assert item.open_reviews_level_1 == 4

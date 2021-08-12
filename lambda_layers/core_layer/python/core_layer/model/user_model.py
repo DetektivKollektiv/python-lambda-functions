@@ -10,11 +10,14 @@ class User(Base):
     name = Column(String(100))
     score = Column(Integer, default=0)
     experience_points = Column(Integer, default=0)
-    level_id = Column(Integer, ForeignKey('levels.id'), default=1)
     sign_up_timestamp = Column(DateTime, server_default=func.now())
 
+    # Relationships
+    level_id = Column(Integer, ForeignKey('levels.id'), default=1)
     level = relationship("Level", back_populates="users")
     reviews = relationship("Review", backref="user")
+    comments = relationship("Comment", back_populates="user")
+    comment_sentiments = relationship("CommentSentiment", back_populates = "user")
 
     def to_dict(self):
         return {

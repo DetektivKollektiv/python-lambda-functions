@@ -14,10 +14,13 @@ class Issue(Base):
     category = Column(String(100), nullable=False)
     message = Column(String(1000), nullable=False)
     ip_address = Column(String(15))
+
+    # Entity to which the issue refers to (only one of them may be filled)
     item_id = Column(String(36), ForeignKey('items.id',
                                             ondelete='SET NULL', onupdate='CASCADE'))
-
     item = relationship('Item')
+    comment_id = Column(String(36), ForeignKey("comments.id"))
+    comment = relationship("Comment", back_populates = "issues")
 
     def to_dict(self):
         return {

@@ -16,6 +16,7 @@ class ReviewAnswer(Base):
         'review_questions.id', ondelete='SET NULL', onupdate='CASCADE'))
     answer = Column(Integer)
     comment = Column(Text)
+    comments = relationship("Comment", back_populates="review_anser") 
 
     review_question = relationship(
         ReviewQuestion, back_populates="review_answers")
