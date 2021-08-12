@@ -6,7 +6,7 @@ import traceback
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.handler import item_handler, entity_handler, keyphrase_handler
-import SearchFactChecks
+from . import SearchFactChecks
    
 
 def get_online_factcheck(event, context):

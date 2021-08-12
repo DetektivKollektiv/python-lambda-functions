@@ -2,12 +2,18 @@ import re
 import logging
 import requests
 from bs4 import BeautifulSoup
+from core_layer.handler import item_handler
+from core_layer.db_handler import Session
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-
 def extract_claim(event, context):
+    with Session() as session:
+        extract_claim(event, context, session)
+
+## Session must be provided from test class
+def extract_claim(event, context, session):
     """extracts claim from item content
     Parameters
     ----------
@@ -17,7 +23,6 @@ def extract_claim(event, context):
         Lambda Context runtime methods and attributes
     Returns
     ------
-    urls: list of urls in item, first entry is "" for item content
     titles: list of url titles, first entry is "" for item content
     text: list of url paragraphs, first entry is item content
     concatenation: Text: concatenation of all paragraphs
@@ -36,35 +41,34 @@ def extract_claim(event, context):
         if 'id' not in event['item']:
             logger.error("The item has no ID!")
             raise Exception('Please provide an item with an ID!')
+        else:
+            # extract item
+            item_id = event['item']['id']
+            item = item_handler.get_item_by_id(item_id, session)
+            if item is None:
+                raise Exception('Couldn\'t load item with id: ' + item_id)
     else:
         logger.error("There is no item!")
         raise Exception('Please provide an item!')
 
-    # extract all urls from item_content
-    urls = re.findall(
-        'http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item_content)
     # remove urls from item_content
-    for url in urls:
-        item_content = item_content.replace(url, '')
+    for itemUrl in item.urls:
+        item_content = item_content.replace(itemUrl.url.url, '')
 
     # titles contains as first entry a placeholder for item_content
     # titles = ["", ]
     title = ""
     # text contains as first entry a placeholder for item_content
     # text = [item_content, ]
-    allText = item_content+' '
+    allText = item_content
 
-    # open all urls and extract the paragraphs
-    for url in urls:
-        # do not accept urls referencing localhost
-        try:
-            if re.search('127\.', url) or re.search('localhost', url, re.IGNORECASE):
-                continue
-        except (AttributeError, TypeError):
-            continue
+    # open all urls and extract the paragraphs+
+    first_title = ""
+    for itemUrl in item.urls:
+        url = itemUrl.url.url
         # set headers for a web browser
         headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9", 
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         }
         resp = requests.get(url, headers=headers)
@@ -72,12 +76,12 @@ def extract_claim(event, context):
         read_content_hidden = read_content.replace(b'<!--', b'<!')
         soup = BeautifulSoup(read_content_hidden, 'html.parser')
         # get the title of the web page
-        titles = soup.find_all('title')  
+        titles = soup.find_all('title')
         title = ""
         if len(titles) > 0:
             title = '{} '.format(titles[0].text)
         # get the description of the web page
-        description = soup.find("meta",  {"name":"description"})
+        description = soup.find("meta", {"name": "description"})
         page_description = ""
         if description:
             page_description = description["content"]
@@ -92,10 +96,14 @@ def extract_claim(event, context):
             # main article
             if len(paragraphs) > 50:
                 break
+
+        # use the title of the first URL as "title" attribute later
+        if first_title == "":
+            first_title = title
         # use only title as claim, maybe this enhances the quality of entities and phrases
-        allText += "\n" + title 
+        allText += "\n" + title
         if len(allText) < 50:
-            allText +=  "\n" + page_description
+            allText += "\n" + page_description
         if len(allText) < 50:
             allText += "\n" + paragraphs
 
@@ -103,8 +111,7 @@ def extract_claim(event, context):
         allText = allText[:4799]
 
     return {
-        "urls": urls,
-        "title": title,
+        "title": first_title,
         # "text": text,
         "concatenation": {
             "Text": allText

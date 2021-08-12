@@ -1,12 +1,12 @@
 import json
-from ....tests.helper import event_creator, setup_scenarios
+from uuid import uuid4
 from core_layer.db_handler import Session
 from core_layer.model.item_model import Item
+from core_layer.model.url_model import URL, ItemURL
+from core_layer.handler import user_handler, item_handler, review_handler
 from review_service.update_review import update_review
 from ...get_open_items import get_open_items
-
-from core_layer.handler import user_handler, item_handler, review_handler
-
+from ....tests.helper import event_creator, setup_scenarios
 
 class TestGetOpenItems:
     def test_get_open_items_for_user(self):
@@ -15,7 +15,7 @@ class TestGetOpenItems:
 
             session = setup_scenarios.create_levels_junior_and_senior_detectives(session)
             session = setup_scenarios.create_questions(session)
-            
+
             junior_detective1 = user_handler.get_user_by_id("1", session)            
             junior_detective2 = user_handler.get_user_by_id("2", session)
             junior_detective3 = user_handler.get_user_by_id("3", session)
@@ -31,7 +31,18 @@ class TestGetOpenItems:
             item1.status = "open"
             item1.item_type_id = "Type1"
             item1 = item_handler.create_item(item1, session)
-            
+
+            url = URL()
+            url.id = str(uuid4())
+            url.url = 'www.test.com'
+
+            item_url = ItemURL()
+            item_url.id = str(uuid4())
+            item_url.item_id = item1.id
+            item_url.url_id = url.id
+
+            session.add_all([url, item_url])
+
             item2 = Item()
             item2.content = "Item 2"
             item2.status = "open"
@@ -177,5 +188,5 @@ class TestGetOpenItems:
             # assert response['headers']['is_open_review'] == "False"
             body = json.loads(response['body'])
             assert 'is_open_review' in body
-            assert body['is_open_review'] == False
+            assert body['is_open_review'] is False
             assert len(body['items']) == 3
