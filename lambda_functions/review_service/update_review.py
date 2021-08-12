@@ -63,6 +63,7 @@ def update_review(event, context):
                 "body": json.dumps(review.to_dict_with_questions_and_answers())
             }
             response_cors = helper.set_cors(response, event)
+            session.close()
             return response_cors
         except:
             return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
