@@ -6,7 +6,8 @@ import json
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.handler import tag_handler
-import SearchFactChecks, UpdateFactChecks
+import SearchFactChecks
+import UpdateFactChecks
 
 import boto3
 import os

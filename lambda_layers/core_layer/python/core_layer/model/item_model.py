@@ -69,9 +69,7 @@ class Item(Base):
             for item_url in self.urls:
                 url_dict = {
                     'url': item_url.url.url,
-                    # TODO: Replace with is_safe variable, once available
-                    'is_safe': True
-                    # 'is_safe': item_url.url.is_safe
+                    'is_safe': item_url.url.unsafe is None
                 }
                 url_list.append(url_dict)
             item_dict["urls"] = url_list
