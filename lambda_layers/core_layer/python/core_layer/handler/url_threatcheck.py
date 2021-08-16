@@ -48,8 +48,10 @@ def get_googleapi_safebrowsing_threat(url):
     }
 
     ## first check if google api key is stored in environment parameter
-    key = os.environ["UNITTEST_GOOGLE_API_KEY"]
-    if key is None:
+    key = None
+    if "UNITTEST_GOOGLE_API_KEY" in os.environ:
+        key = os.environ["UNITTEST_GOOGLE_API_KEY"]
+    else:
         key = get_secret()
 
     response = requests.post(API_URL_GOOGLE + "?key=" + key, None, body)
