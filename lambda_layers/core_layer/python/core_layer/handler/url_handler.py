@@ -115,7 +115,6 @@ def prepare_and_store_urls(item: Item, urls:[], session):
             itemurl.id = str(uuid4())
             itemurl.item_id = item.id
             itemurl.url_id = url.id
-            itemurl.unsafe = url.unsafe
             try:
                 update_object(itemurl, session)
             except Exception as e:

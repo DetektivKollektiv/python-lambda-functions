@@ -20,4 +20,3 @@ class ItemURL(Base):
     item = relationship("Item", back_populates="urls")
     url_id = Column(String(36), ForeignKey('urls.id'))
     url = relationship("URL", back_populates="items")
-    unsafe = Column(String(50))
