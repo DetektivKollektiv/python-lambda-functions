@@ -4,8 +4,8 @@ import boto3
 from core_layer.model.submission_model import Submission
 from core_layer.model.item_model import Item
 from core_layer.db_handler import Session
+from core_layer.helper import get_google_api_key
 from submission_service.submit_item import submit_item
-from ml_service.SearchFactChecks import get_secret
 from ....tests.helper import setup_scenarios
 
 
@@ -30,7 +30,7 @@ def create_event3():
 # the get_secret() for receiving the GOOGLE API KEY would return 'None'.                     #
 # Solution: get_secret() is called in advance and the key is exposed as an environment value #
 ##############################################################################################
-os.environ["UNITTEST_GOOGLE_API_KEY"] = get_secret()
+os.environ["UNITTEST_GOOGLE_API_KEY"] = get_google_api_key()
 
 def test_submit_safe_item(monkeypatch):
     # Set environment variable

@@ -1,6 +1,6 @@
 import os
 import requests
-from ml_service.SearchFactChecks import get_secret
+from core_layer.helper import get_google_api_key
 
 API_URL_GOOGLE = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 THREAT_PREFIX_GOOGLE = "GOOGLE:"
@@ -52,7 +52,7 @@ def get_googleapi_safebrowsing_threat(url):
     if "UNITTEST_GOOGLE_API_KEY" in os.environ:
         key = os.environ["UNITTEST_GOOGLE_API_KEY"]
     else:
-        key = get_secret()
+        key = get_google_api_key()
 
     response = requests.post(API_URL_GOOGLE + "?key=" + key, None, body)
 
