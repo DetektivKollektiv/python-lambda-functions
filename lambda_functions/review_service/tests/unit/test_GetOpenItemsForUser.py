@@ -125,6 +125,8 @@ class TestGetOpenItems:
             assert len(open_items_after_other_review) == 5
 
             # 4 Junior Detectives reviewing Item 2
+            # reload object as another session was started and closed in update_review
+            item2 = item_handler.get_item_by_id(item2.id, session)
 
             jr1 = review_handler.create_review(
                 junior_detective1, item2, session)
@@ -137,6 +139,8 @@ class TestGetOpenItems:
 
             reviews = [jr1, jr2, jr3, jr4]
             for review in reviews:
+                # reload object as another session was started and closed in update_review
+                review = review_handler.get_review_by_id(review.id, session)
                 event = event_creator.get_review_event(
                     review, item2.id, "in progress", review.user_id, 1)
                 response = update_review(event, None)
@@ -157,6 +161,8 @@ class TestGetOpenItems:
             assert len(open_items_for_senior) == 5
 
             # Senior detective accepting item 1
+            # reload object as another session was started and closed in update_review
+            item1 = item_handler.get_item_by_id(item1.id, session)
             sr1 = review_handler.create_review(
                 senior_detective1, item1, session)
 
@@ -180,6 +186,8 @@ class TestGetOpenItems:
             assert len(open_items_after_submission) == 4
 
             # SeniorDetective 1 accepting item 3
+            # reload object as another session was started and closed in update_review
+            item3 = item_handler.get_item_by_id(item3.id, session)
             sr1 = review_handler.create_review(
                 senior_detective1, item3, session)
             open_item_after_accept = item_handler.get_open_items_for_user(
