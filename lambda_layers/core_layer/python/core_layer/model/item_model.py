@@ -40,7 +40,7 @@ class Item(Base):
     item_type = relationship("ItemType", back_populates="items")
     comments = relationship("Comment", back_populates="item")
 
-    def to_dict(self, with_tags=False, include_type=False, with_urls=False):
+    def to_dict(self, with_tags=False, include_type=False, with_urls=False, with_reviews=False):
         item_dict = {
             "id": self.id,
             "item_type_id": self.item_type_id,
@@ -76,5 +76,9 @@ class Item(Base):
 
         if include_type and self.item_type:
             item_dict["item_type"] = self.item_type.to_dict()
+
+        if with_reviews:
+            item_dict['reviews'] = [review.to_dict(True, True)
+                                    for review in self.reviews]
 
         return item_dict

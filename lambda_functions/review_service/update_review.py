@@ -60,7 +60,7 @@ def update_review(event, context):
 
             response = {
                 "statusCode": 200,
-                "body": json.dumps(review.to_dict_with_questions_and_answers())
+                "body": json.dumps(review.to_dict(with_questions_and_answers=True))
             }
             response_cors = helper.set_cors(response, event)
             session.close()
@@ -107,7 +107,7 @@ def update_review(event, context):
 
         response = {
             "statusCode": 200,
-            "body": json.dumps(review.to_dict_with_questions_and_answers())
+            "body": json.dumps(review.to_dict(with_questions_and_answers=True))
         }
         response_cors = helper.set_cors(response, event)
         return response_cors
