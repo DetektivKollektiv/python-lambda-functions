@@ -36,7 +36,7 @@ class Item(Base):
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
-    review_pairs = relationship("ReviewPair", back_populates="item")
+    review_pairs = relationship("ReviewPair", back_populates="item", lazy="joined")
     item_type = relationship("ItemType", back_populates="items")
     comments = relationship("Comment", back_populates="item")
 

@@ -18,7 +18,7 @@ class Review(Base):
     status = Column(String(100))
 
     review_answers = relationship(
-        "ReviewAnswer", back_populates="review")
+        "ReviewAnswer", back_populates="review", lazy="joined")
     item = relationship("Item", back_populates="reviews")
     last_question = relationship('ReviewQuestion')
 

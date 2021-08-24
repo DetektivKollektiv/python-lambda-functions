@@ -39,7 +39,8 @@ def post_comment_on_item(event, context=None):
         # Save qualitative_comment
         if 'comment' in body:
             try:
-                comment_handler.create_comment(comment=body['comment'],
+                comment_handler.create_comment(session,
+                                               comment=body['comment'],
                                                user_id=user_id,
                                                parent_type='item',
                                                parent_id=item.id

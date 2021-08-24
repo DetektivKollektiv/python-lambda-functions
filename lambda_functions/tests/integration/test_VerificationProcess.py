@@ -9,15 +9,13 @@ from core_layer.handler import user_handler, item_handler, review_handler, revie
 from ..helper import event_creator, setup_scenarios
 from ...review_service.create_review import create_review
 from ...review_service.update_review import update_review
-from moto import mock_ses, mock_events
-import boto3
+from moto import mock_events
 
 
 @mock_events
 def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("MOTO", "1")
-    event_conn = boto3.client('events', region_name="eu-central-1")
 
     with Session() as session:
         session = setup_scenarios.create_levels_junior_and_senior_detectives(
@@ -114,11 +112,13 @@ def test_verification_process_best_case(monkeypatch):
                 review, item.id, "in progress", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
-            session.refresh(review)
             event = event_creator.get_review_event(
                 review, item.id, "closed", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
+        
+        # reload object instead of refreshing the session
+        item = item_handler.get_item_by_id(item.id, session)
 
         assert item.status == 'closed'
         assert item.in_progress_reviews_level_1 == 0
@@ -214,7 +214,6 @@ def test_verification_process_worst_case():
                 review, item.id, "in progress", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
-            session.refresh(review)
             event = event_creator.get_review_event(
                 review, item.id, "closed", review.user_id, 1)
             response = update_review(event, None)
@@ -225,11 +224,13 @@ def test_verification_process_worst_case():
                 review, item.id, "in progress", review.user_id, 4)
             response = update_review(event, None)
             assert response['statusCode'] == 200
-            session.refresh(review)
             event = event_creator.get_review_event(
                 review, item.id, "closed", review.user_id, 4)
             response = update_review(event, None)
             assert response['statusCode'] == 200
+        
+        # reload object instead of refreshing the session
+        item = item_handler.get_item_by_id(item.id, session)
 
         assert item.status == 'open'
         assert item.in_progress_reviews_level_1 == 0

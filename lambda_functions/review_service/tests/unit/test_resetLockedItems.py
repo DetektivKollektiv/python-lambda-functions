@@ -7,7 +7,7 @@ from core_layer.db_handler import Session
 from core_layer.model import Review
 from core_layer.model import ReviewPair
 from core_layer.model import Item
-from core_layer.handler import item_handler
+from core_layer.handler import item_handler, review_pair_handler
 from ...reset_locked_items import reset_locked_items
 
 
@@ -73,7 +73,9 @@ def test_reset_locked_items(item, pair, old_junior_review, new_senior_review):
         item = item_handler.get_item_by_id(item.id, session)
         assert item.in_progress_reviews_level_2 == 1
         assert item.in_progress_reviews_level_1 == 0
-        
-        session.refresh(pair)        
+     
+        # reload object instead of refreshing the session
+        pair = session.query(ReviewPair).one()
+
         assert pair.junior_review_id == None        
         assert pair.senior_review_id == new_senior_review.id

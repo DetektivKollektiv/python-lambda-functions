@@ -58,7 +58,8 @@ def test_comment_model(event, item_id, user1_id, user2_id, submission_id):
         """
         body = event['body']
         # Save qualitative_comment
-        comment_handler.create_comment(comment=body['comment'],
+        comment_handler.create_comment(session,
+                                       comment=body['comment'],
                                        user_id=user1_id,
                                        parent_type='item',
                                        parent_id=item_id
@@ -77,7 +78,8 @@ def test_comment_model(event, item_id, user1_id, user2_id, submission_id):
         Test comment on submission
         """
         # Save qualitative_comment
-        comment_handler.create_comment(comment='Comment on submission',
+        comment_handler.create_comment(session,
+                                       comment='Comment on submission',
                                        user_id=user1_id,
                                        parent_type='submission',
                                        parent_id=submission_id
@@ -96,7 +98,8 @@ def test_comment_model(event, item_id, user1_id, user2_id, submission_id):
         """
         # Save qualitative_comment on first comment ('Comment from event')
         first_comment_id = session.query(Comment).first().id
-        comment_handler.create_comment(comment='Comment on comment',
+        comment_handler.create_comment(session,
+                                       comment='Comment on comment',
                                        user_id=user2_id,
                                        parent_type='comment',
                                        parent_id=first_comment_id
