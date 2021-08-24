@@ -1,8 +1,11 @@
+import uuid
 from core_layer.db_handler import Session
 from core_layer.model import Item, ReviewQuestion, ReviewAnswer, Review, User, Level
 from archive_service import get_item
 import json
 import os
+from core_layer.model import comment_model
+from core_layer.model.comment_model import Comment
 import pytest
 from uuid import uuid4
 
@@ -27,6 +30,11 @@ def review_answer_id():
     return str(uuid4())
 
 
+@pytest.fixture
+def comment_id():
+    return str(uuid4())
+
+
 def get_event(item_id):
     return {
         'pathParameters': {
@@ -35,7 +43,7 @@ def get_event(item_id):
     }
 
 
-def test_get_closed_items(item_id, review_id, review_answer_id, user_id):
+def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment_id):
     os.environ["STAGE"] = "dev"
 
     with Session() as session:
@@ -47,8 +55,10 @@ def test_get_closed_items(item_id, review_id, review_answer_id, user_id):
             id=review_answer_id, review_id=review_id, review_question_id=review_question.id)
         user = User(id=user_id, name='User')
         level = Level(id=1)
+        comment = Comment(id=comment_id, comment='testcomment',
+                          is_review_comment=True, user_id=user_id, item_id=item_id)
         session.add_all([item, review, review_question,
-                        review_answer, user, level])
+                        review_answer, user, level, comment])
         session.commit()
 
         # Test no query param

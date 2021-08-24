@@ -27,6 +27,6 @@ def get_item(event, context):
         response = {
             "statusCode": 200,
             'headers': {"content-type": "application/json; charset=utf-8"},
-            "body": json.dumps(item.to_dict(True, True, True, True))
+            "body": json.dumps(item.to_dict(True, True, True, True, True))
         }
         return helper.set_cors(response, event)
