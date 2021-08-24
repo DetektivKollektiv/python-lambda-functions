@@ -1,3 +1,4 @@
+from datetime import datetime
 from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey
 from sqlalchemy.orm import relationship
@@ -36,6 +37,14 @@ class Comment(Base):
     parent_comment_id = Column(String(36), ForeignKey('comments.id'))
     # self-referential relationship
     parent_comment = relationship("Comment", remote_side=[id])
+
+    def to_dict(self) -> dict:
+        return {
+            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.timestamp, datetime) else self.timestamp,
+            'comment': self.comment,
+            'is_review_comment': str(self.is_review_comment),
+            'user': self.user.name
+        }
 
 
 class CommentSentiment(Base):
