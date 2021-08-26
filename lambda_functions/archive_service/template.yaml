@@ -87,7 +87,7 @@ Resources:
   GetItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "detektivkollektiv-archive_api-get_all_item-${STAGE}"
+      FunctionName: !Sub "detektivkollektiv-archive_api-get_item-${STAGE}"
       CodeUri: .
       Handler: get_item.get_item
       Runtime: python3.8
@@ -101,7 +101,7 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /item/{item_id}
+            Path: /items/{item_id}
             Method: get
             RestApiId:
               Ref: Api
