@@ -35,5 +35,5 @@ class Review(Base):
             return_dict['questions'] = [review_answer.to_dict_with_questions_and_answers()
                                         for review_answer in self.review_answers]
         if with_user:
-            return_dict['user'] = self.user.name
+            return_dict['user'] = self.user.name if self.user else 'deleted'
         return return_dict
