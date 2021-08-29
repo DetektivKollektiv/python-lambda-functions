@@ -88,6 +88,8 @@ Resources:
             Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
+
 
   GetItemTypesFunction: # Change for each lambda
     Type: AWS::Serverless::Function
