@@ -97,9 +97,9 @@ def update_review(event, context):
         if 'comment' in body:
             try:
                 comment_handler.create_comment(comment=body['comment'],
-                                               user_id=body['user_id'],
+                                               user_id=user_id,
                                                parent_type='item',
-                                               parent_id=body['item_id'],
+                                               parent_id=review.item_id,
                                                is_review_comment=True
                                                )
             except:
