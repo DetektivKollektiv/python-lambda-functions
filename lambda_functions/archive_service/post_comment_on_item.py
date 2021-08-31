@@ -39,10 +39,17 @@ def post_comment_on_item(event, context=None):
         # Save qualitative_comment
         if 'comment' in body:
             try:
-                comment_handler.create_comment(comment=body['comment'],
-                                               user_id=user_id,
-                                               parent_type='item',
-                                               parent_id=item.id
-                                               )
+                comment = comment_handler.create_comment(comment=body['comment'],
+                                                         user_id=user_id,
+                                                         parent_type='item',
+                                                         parent_id=item.id
+                                                         )
+                response = {
+                    "statusCode": 201,
+                    'headers': {"content-type": "application/json; charset=utf-8"},
+                    "body": json.dumps(comment.to_dict())
+                }
+                return helper.set_cors(response, event)
+
             except:
                 return helper.get_text_response(404, "No qualitative comment found.", event)
