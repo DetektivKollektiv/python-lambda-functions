@@ -1,3 +1,4 @@
+import json
 import pytest
 from uuid import uuid4
 from core_layer.db_handler import Session
@@ -37,14 +38,19 @@ def test_post_comment_on_item(event, item_id, user_id):
     with Session() as session:
 
         item_obj = Item(id=item_id)
-        user_obj = User(id=user_id)
+        user_obj = User(id=user_id, name='Testuser')
         level_1_obj = Level(id=1)
         session.add_all([item_obj, level_1_obj, user_obj])
         session.commit()
 
-        post_comment_on_item(event)
+        response = post_comment_on_item(event)
+
+        body = json.loads(response['body'])
+        assert body['user'] == 'Testuser'
+
         comment = session.query(Item).all()[
             0].comments[0]
+
         assert comment.comment == "Comment from event"
         assert comment.is_review_comment == False
         assert comment.status == "published"
