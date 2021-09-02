@@ -1,7 +1,6 @@
 from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from .model_base import Base
-from sqlalchemy.sql import func
 
 
 class User(Base):
@@ -17,7 +16,8 @@ class User(Base):
     level = relationship("Level", back_populates="users")
     reviews = relationship("Review", backref="user")
     comments = relationship("Comment", back_populates="user")
-    comment_sentiments = relationship("CommentSentiment", back_populates = "user")
+    comment_sentiments = relationship(
+        "CommentSentiment", back_populates="user")
 
     def to_dict(self):
         return {
