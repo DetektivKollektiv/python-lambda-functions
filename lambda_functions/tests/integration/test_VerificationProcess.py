@@ -114,12 +114,12 @@ def test_verification_process_best_case(monkeypatch):
                 review, item.id, "in progress", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
-            session.refresh(review)
             event = event_creator.get_review_event(
                 review, item.id, "closed", review.user_id, 1)
             response = update_review(event, None)
             assert response['statusCode'] == 200
 
+        item = item_handler.get_item_by_id(item.id, session)
         assert item.status == 'closed'
         assert item.in_progress_reviews_level_1 == 0
         assert item.in_progress_reviews_level_2 == 0
@@ -128,6 +128,9 @@ def test_verification_process_best_case(monkeypatch):
         assert item.open_reviews == 0
         assert item.close_timestamp is not None
 
+        item_dict = item.to_dict(with_warnings=True, session=session)
+        assert 'warning_tags' in item_dict
+        assert len(item_dict['warning_tags']) > 0
         session.expire_all()
 
 

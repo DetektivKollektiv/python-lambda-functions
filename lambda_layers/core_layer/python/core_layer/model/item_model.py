@@ -36,11 +36,12 @@ class Item(Base):
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
-    review_pairs = relationship("ReviewPair", back_populates="item")
+    review_pairs = relationship(
+        "ReviewPair", back_populates="item", lazy="joined")
     item_type = relationship("ItemType", back_populates="items")
     comments = relationship("Comment", back_populates="item")
 
-    def to_dict(self, with_tags=False, include_type=False, with_urls=False, with_reviews=False, with_comments=False):
+    def to_dict(self, with_tags=False, include_type=False, with_urls=False, with_reviews=False, with_comments=False, with_warnings=False):
         item_dict = {
             "id": self.id,
             "item_type_id": self.item_type_id,
@@ -86,4 +87,31 @@ class Item(Base):
             for comment in self.comments:
                 item_dict['comments'].append(comment.to_dict())
 
+        if with_warnings:
+            item_dict['warning_tags'] = []
+            questions = []
+            for review in self.reviews:
+                for answer in review.review_answers:
+                    question_included = False
+                    for q in questions:
+                        if q.id == answer.review_question_id:
+                            question_included = True
+                    if question_included == False:
+                        questions.append(answer.review_question)
+
+            for q in questions:
+                answer_ints: list(Integer) = []
+                for review in self.reviews:
+                    for answer in review.review_answers:
+                        if answer.review_question_id == q.id:
+                            if answer.answer is not None and answer.answer > 0:
+                                answer_ints.append(answer.answer)
+                if len(answer_ints) > 2:
+                    if sum(answer_ints) / len(answer_ints) <= 2:
+                        tag_included = False
+                        for tag in item_dict['warning_tags']:
+                            if tag == q.warning_tag:
+                                tag_included = True
+                        if tag_included == False:
+                            item_dict['warning_tags'].append(q.warning_tag)
         return item_dict

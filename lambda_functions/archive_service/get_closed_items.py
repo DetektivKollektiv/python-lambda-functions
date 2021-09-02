@@ -29,8 +29,9 @@ def get_closed_items(event, context):
                 items_list = []
 
                 for item in items:
-                    items_list.append(item.to_dict(with_tags=True))
-                                
+                    items_list.append(item.to_dict(
+                        with_tags=True, with_warnings=True))
+
                 response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},
