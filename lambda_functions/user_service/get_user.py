@@ -24,8 +24,10 @@ def get_user(event, context):
                 progress = user_handler.get_user_progress(user, session)
                 total_rank = user_handler.get_user_rank(user, False, session)
                 level_rank = user_handler.get_user_rank(user, True, session)
-                solved_cases_total = user_handler.get_solved_cases(user, False, session)
-                solved_cases_today = user_handler.get_solved_cases(user, True, session)
+                solved_cases_total = user_handler.get_solved_cases(
+                    user, False, session)
+                solved_cases_today = user_handler.get_solved_cases(
+                    user, True, session)
                 exp_needed = user_handler.get_needed_exp(user, session)
                 user_dict['progress'] = progress
                 user_dict['total_rank'] = total_rank
@@ -33,6 +35,8 @@ def get_user(event, context):
                 user_dict['solved_cases_total'] = solved_cases_total
                 user_dict['solved_cases_today'] = solved_cases_today
                 user_dict['exp_needed'] = exp_needed
+                user_dict['closed_items'] = [
+                    review.item.to_dict(with_tags=True) for review in user.reviews if review.item.status == "closed"]
                 response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},
