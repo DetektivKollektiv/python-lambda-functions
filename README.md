@@ -4,9 +4,9 @@
 
 # codetekt Backend
 
-AWS SAM based backend for the [codetekt](https://codetekt.org) website.
-
 [![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+
+AWS SAM based backend for the [codetekt](https://codetekt.org) website.
 
 ---
 
