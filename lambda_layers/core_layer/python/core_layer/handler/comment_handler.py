@@ -29,7 +29,8 @@ def create_comment(comment, user_id, parent_type, parent_id, is_review_comment=F
     comment_obj.comment = comment
     comment_obj.user_id = user_id
     comment_obj.is_review_comment = is_review_comment
-    comment_obj.timestamp = timestamp
+    if timestamp is not None:
+        comment_obj.timestamp = timestamp
     comment_obj.status = status
 
     if parent_type == 'item':
