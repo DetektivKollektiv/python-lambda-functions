@@ -31,15 +31,16 @@ class Item(Base):
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
     # One to Many Relation: one Item has many ItemTags
-    tags = relationship("ItemTag", order_by = "desc(ItemTag.count)")
+    tags = relationship("ItemTag", order_by="desc(ItemTag.count)")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
     review_pairs = relationship("ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
+    comments = relationship("Comment", back_populates="item")
 
-    def to_dict(self, with_tags=False, include_type=False):
+    def to_dict(self, with_tags=False, include_type=False, with_urls=False, with_reviews=False, with_comments=False):
         item_dict = {
             "id": self.id,
             "item_type_id": self.item_type_id,
@@ -63,7 +64,26 @@ class Item(Base):
                 tags_list.append(item_tag.tag.tag)
             item_dict["tags"] = tags_list
 
+        if with_urls:
+            url_list = []
+            for item_url in self.urls:
+                url_dict = {
+                    'url': item_url.url.url,
+                    'is_safe': item_url.url.unsafe is None
+                }
+                url_list.append(url_dict)
+            item_dict["urls"] = url_list
+
         if include_type and self.item_type:
             item_dict["item_type"] = self.item_type.to_dict()
+
+        if with_reviews:
+            item_dict['reviews'] = [review.to_dict(True, True)
+                                    for review in self.reviews]
+
+        if with_comments:
+            item_dict['comments'] = []
+            for comment in self.comments:
+                item_dict['comments'].append(comment.to_dict())
 
         return item_dict

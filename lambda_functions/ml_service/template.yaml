@@ -380,27 +380,6 @@ Resources:
           DBNAME:
             Ref: DBNAME
 
-  StoreItemURL:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemURL-${STAGE}"
-      CodeUri: .
-      Handler: EnrichItem.store_itemurl
-      Runtime: python3.8
-      MemorySize: 832
-      Layers:
-        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Environment:
-        Variables:
-          DEPLOYMENTMODE:
-            Ref: DEPLOYMENTMODE
-          DBNAME:
-            Ref: DBNAME
-
   StoreItemEntityFunction:
     Type: AWS::Serverless::Function
     Properties:

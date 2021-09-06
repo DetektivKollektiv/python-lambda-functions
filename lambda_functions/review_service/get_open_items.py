@@ -12,7 +12,7 @@ def get_open_items(event, context):
     logger.setLevel(logging.INFO)
 
     helper.log_method_initiated("Get open items for user", event, logger)
-    
+
     with Session() as session:
 
         try:
@@ -26,7 +26,8 @@ def get_open_items(event, context):
                 num_items = 5
 
             user = user_handler.get_user_by_id(id, session)
-            response = item_handler.get_open_items_for_user(user, num_items, session)
+            response = item_handler.get_open_items_for_user(
+                user, num_items, session)
             items = response['items']
 
             if len(items) < 1:
@@ -38,7 +39,8 @@ def get_open_items(event, context):
                 # Transform each item into dict
                 items_dict = []
                 for item in items:
-                    items_dict.append(item.to_dict())
+                    items_dict.append(item.to_dict(
+                        with_tags=True, include_type=True, with_urls=True))
                 body = {"items": items_dict,
                         "is_open_review": response['is_open_review']}
                 response = {

@@ -24,14 +24,14 @@ def get_review(event, context):
     logger.setLevel(logging.INFO)
 
     helper.log_method_initiated("Get Review", event, logger)
-    
+
     try:
         # get review id from url query params
         review_id = event['pathParameters']['review_id']
         # get cognito id
         user_id = helper.cognito_id_from_event(event)
     except:
-        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)        
+        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
 
     with Session() as session:
 
@@ -40,7 +40,7 @@ def get_review(event, context):
             user = user_handler.get_user_by_id(user_id, session)
         except:
             return helper.get_text_response(404, "No user found.", event)
-            
+
         try:
             # Try to receive review
             review = review_handler.get_review_by_id(review_id, session)
@@ -52,7 +52,7 @@ def get_review(event, context):
                 response = {
                     "statusCode": 200,
                     'headers': {"content-type": "application/json; charset=utf-8"},
-                    "body": json.dumps(review.to_dict_with_questions_and_answers())
+                    "body": json.dumps(review.to_dict(with_questions_and_answers=True))
                 }
             else:
                 return helper.get_text_response(403, "Forbidden", event)

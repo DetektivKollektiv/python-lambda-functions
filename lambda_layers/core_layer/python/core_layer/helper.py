@@ -177,6 +177,15 @@ def get_secret(secret_name, region_name="eu-central-1"):
                 get_secret_value_response['SecretBinary'])
             return decoded_binary_secret
 
+# If you need more information about configurations or implementing the sample code, visit the AWS docs:
+# https://aws.amazon.com/developers/getting-started/python/
+def get_google_api_key():
+    secret_name = "google/api_key"
+    region_name = "eu-central-1"
+
+    secret = get_secret(secret_name, region_name)
+    return json.loads(secret)['Google_API_KEY']
+
 
 def get_text_response(status_code: int, text: str, event):
     response = {

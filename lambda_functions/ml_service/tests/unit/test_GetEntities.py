@@ -4,6 +4,7 @@ from core_layer.model.item_model import Item
 from core_layer.handler import item_handler
 import os
 import random
+import time
 
 
 class TestGetEntities:    
@@ -283,7 +284,9 @@ class TestGetTags:
             item.content = "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition "
             item.language = "de"
             item = item_handler.create_item(item, session)
-            list_tags = ['Corona-Maßnahmen', 'Senkung der Treibhausgasemissionen', 'Kanzlerkandidatur', 'sars-cov-2', '#verunglimpft', 'g.co/privacytools', 'Gregor Gysi', 'Bundestagswahl2021', '19', '-', 'Statistik falsch interpretiert', 'Bild.de', 'JF', 'MdB Hansjörg Müller (AFD)', '100 Tage', 'Gruene', '#notwendige Polizeimaßnahmen', 'Sonne']
+            list_tags = ['Corona-Maßnahmen', 'Senkung der Treibhausgasemissionen', 'China', 'Film', 'Menschen', 'Kanzlerkandidatur', 'sars-cov-2', '#verunglimpft', 'g.co/privacytools', 'Gregor Gysi', 'Bundestagswahl2021', '19', '-', 'Statistik falsch interpretiert', 'Bild.de', 'JF', 'MdB Hansjörg Müller (AFD)', '100 Tage', 'Gruene', '#notwendige Polizeimaßnahmen', 'Sonne']
+            for _ in range(200):
+                list_tags.append(random.choice(list_tags)+"-"+random.choice(list_tags))
             # store tags
             event = {
                 "item": item.to_dict(),
@@ -294,4 +297,7 @@ class TestGetTags:
 
             event = ""
             context = ""
+            s = time.perf_counter()
             GetTags.create_tagreport(event, context)
+            elapsed = time.perf_counter() - s
+            assert elapsed < 30

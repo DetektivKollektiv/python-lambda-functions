@@ -6,7 +6,8 @@ import json
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.handler import tag_handler
-import SearchFactChecks, UpdateFactChecks
+import SearchFactChecks
+import UpdateFactChecks
 
 import boto3
 import os
@@ -261,24 +262,33 @@ def create_tagreport(event, context):
                     if term not in term_list:
                         term_list.append(term)
         tagreport_json = {"additional_tags": []}
+        # Create list with tags not considered in taxonomy
+        sim_input = []
         for tag in tag_list:
             tag = str.lower(tag.tag)
             if (tag not in term_list) and (tag not in terms_new):
                 # test if the tag is in the model vocabulary
-                payload = "\""+term_test+"\"" + ",\""+tag+"\""
-                # call sagemaker endpoint for similarity prediction
-                try:
-                    response = SearchFactChecks.post_DocSim(LanguageCode, payload)
-                    if not response.ok:
-                        raise Exception('Received status code {}.'.format(response.status_code))
-                    result = response.text
-                    scores = json.loads(result)
-                    if scores[0] == '0.00':
-                        continue # tag is not in vocabulary
-                    terms_new.append(tag)
-                    tagreport_json["additional_tags"].append(tag)
-                    logger.info("Taxonomy does not consider tag {}".format(tag))
-                except Exception as e:
-                    logger.error('DocSim error: {}.'.format(e))
-                    continue
+                sim_input.append("\""+term_test+"\"" + ",\""+tag+"\"")
+                terms_new.append(tag)
+        # call sagemaker endpoint for similarity prediction to verify if tags are in vocabulary
+        while (len(sim_input))>0:
+            # do similarity prediction for 100 tags at most
+            payload_list = sim_input[0:100]
+            payload = '\n'.join(payload_list)
+            try:
+                response = SearchFactChecks.post_DocSim(LanguageCode, payload)
+                if not response.ok:
+                    raise Exception('Received status code {}.'.format(response.status_code))
+                result = response.text
+                scores = json.loads(result)
+                for score in scores:
+                    tag = terms_new.pop(0)
+                    sim_input.pop(0)
+                    # Is tag in vocabulary?
+                    if score != '0.00':
+                        tagreport_json["additional_tags"].append(tag)
+                        logger.info("Taxonomy does not consider tag {}".format(tag))
+            except Exception as e:
+                logger.error('DocSim error: {}.'.format(e))
+                continue
         upload_tagreport(tagreport_json, LanguageCode)

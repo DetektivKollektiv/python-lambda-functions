@@ -54,7 +54,7 @@ def create_review(event, context):
             response = {
                 "statusCode": 201,
                 'headers': {"content-type": "application/json; charset=utf-8"},
-                "body": json.dumps(review.to_dict_with_questions_and_answers())
+                "body": json.dumps(review.to_dict(with_questions_and_answers=True))
             }
             response_cors = helper.set_cors(response, event)
             return response_cors

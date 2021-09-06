@@ -10,6 +10,7 @@ class URL(Base):
     items = relationship("ItemURL")
     claimant_id = Column(String(36), ForeignKey('claimants.id'))
     claimant = relationship("Claimant", back_populates="url")
+    unsafe = Column(String(50))
 
 
 class ItemURL(Base):

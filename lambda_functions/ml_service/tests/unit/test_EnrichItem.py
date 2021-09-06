@@ -1,12 +1,10 @@
-from core_layer.db_handler import Session
-
-from core_layer.model.item_model import Item
-from ml_service import EnrichItem, get_online_factcheck, GetTags
-from core_layer.handler import item_handler, external_factcheck_handler, url_handler, claimant_handler, tag_handler
 import json
 import time
 import os
-
+from core_layer.db_handler import Session
+from core_layer.model.item_model import Item
+from core_layer.handler import item_handler, external_factcheck_handler, tag_handler
+from ml_service import EnrichItem, get_online_factcheck, GetTags
 
 class TestGetFactChecks:    
     def test_get_factchecks_by_itemid_db(self):
@@ -321,8 +319,8 @@ class TestGetFactChecks:
                 factcheck = json.loads(body)
             else:
                 factcheck = body
-            assert factcheck['url'] == 'https://correctiv.org/faktencheck/2020/11/23/nein-christian-drosten-hat-2014-nicht-gesagt-dass-er-pcr-tests-fuer-untauglich-halte/'
-            assert factcheck['title'] == 'Fehlender Kontext. Drosten sagte nicht, PCR-Tests seien „untauglich“ – er kritisierte die Teststrategie 2014 in der MERS-Epidemie. Seine Aussagen lassen sich nicht auf die heutige Coronavirus-Pandemie übertragen.'
+            assert factcheck['url'] == 'https://dpa-factchecking.com/germany/201022-99-42791'
+            assert factcheck['title'] == 'Vortrag über die PCR-Methode enthält mehrere falsche oder ...'
             assert elapsed < 3            
 
 
@@ -350,42 +348,6 @@ class TestStoreFactChecks:
             context = ""
             EnrichItem.store_factchecks(event, context)
             assert 1 == 1
-
-
-class TestStoreURLs:
-    def test_store_itemurl(self):
-        from urllib.parse import urlparse
-
-        with Session() as session:
-
-            str_url = "https://smopo.ch/zehntausende-als-falsche-coronatote-deklariert/"
-            # creating items
-            item = Item()
-            item.content = str_url
-            item = item_handler.create_item(item, session)
-
-            # store a url
-            event = {
-                "item": item.to_dict(),
-                "Claim": {
-                    "urls": [
-                        str_url
-                    ]
-                }
-            }
-            context = ""
-            EnrichItem.store_itemurl(event, context)
-
-            url = url_handler.get_url_by_content(str_url, session)
-            itemurl = url_handler.get_itemurl_by_url_and_item_id(url.id, item.id, session)
-            domain = urlparse(str_url).hostname
-            claimant = claimant_handler.get_claimant_by_name(domain, session)
-
-            assert url.url == str_url
-            assert itemurl.id is not None
-            assert claimant.claimant == domain
-            assert url.claimant_id is not None
-
 
 class TestStoreTags:
     def test_store_itemtag(self):
