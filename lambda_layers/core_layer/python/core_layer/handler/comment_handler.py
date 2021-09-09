@@ -4,7 +4,7 @@ from core_layer.db_handler import Session
 from core_layer.model.comment_model import Comment
 
 
-def create_comment(comment, user_id, parent_type, parent_id, is_review_comment=False, timestamp=None, status=None) -> Comment:
+def create_comment(session, comment, user_id, parent_type, parent_id, is_review_comment=False, timestamp=None, status=None) -> Comment:
     """
     Creates comment
 
@@ -20,8 +20,6 @@ def create_comment(comment, user_id, parent_type, parent_id, is_review_comment=F
             timestamp (DateTime)
             status (str)
     """
-
-    session = Session()
 
     comment_obj = Comment()
 
