@@ -123,6 +123,26 @@ def cognito_id_from_event(event):
     return user_id
 
 
+def get_cognito_identity_from_event(event):
+    """Extracts the current Cognito identity ID from the event.
+
+    Parameters
+    ----------
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    cognito_identity_id: str
+        The Cognito identity ID
+    """
+
+    cognito_identity_id = str(
+        event['requestContext']['identity']['cognitoIdentityId'])
+
+    return cognito_identity_id
+
+
 def log_method_initiated(method_name, event, logger):
     logger.info("Method {} initiated".format(method_name))
     logger.info("Event: {}".format(event))
@@ -179,6 +199,8 @@ def get_secret(secret_name, region_name="eu-central-1"):
 
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
+
+
 def get_google_api_key():
     secret_name = "google/api_key"
     region_name = "eu-central-1"
