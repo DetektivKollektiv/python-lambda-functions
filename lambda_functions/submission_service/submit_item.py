@@ -53,10 +53,7 @@ def submit_item(event, context):
                 item_type_id = None
 
             if "item" in body_dict:
-                item_from_submission = body_dict["item"]
                 del body_dict["item"]
-            else:
-                item_from_submission = None
 
             submission = Submission()
             helper.body_to_object(body_dict, submission)
@@ -86,17 +83,6 @@ def submit_item(event, context):
                 submission.item_id = item.id
                 submission.status = item.status
 
-                ## start SearchFactChecks only for safe items
-                if item.status != 'Unsafe':
-                    stage = os.environ['STAGE']
-                    client.start_execution(
-                        stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-' + stage,
-                        name='SFC_' + item.id,
-                        input="{\"item\":{"
-                              "\"id\":\"" + item.id + "\","
-                                                      "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
-                    )
-
             # Create submission
             submission_handler.create_submission_db(submission, session)
             if submission.mail:
@@ -124,8 +110,19 @@ def submit_item(event, context):
                 "body": "Could not create item and/or submission. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
             }
 
-        response_cors = helper.set_cors(response, event)
-        return response_cors
+    ## start SearchFactChecks only for safe items
+    if (item.status != 'Unsafe') and (new_item_created == True):
+        stage = os.environ['STAGE']
+        client.start_execution(
+            stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-' + stage,
+            name='SFC_' + item.id,
+            input="{\"item\":{"
+                    "\"id\":\"" + item.id + "\","
+                                          "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
+        )
+
+    response_cors = helper.set_cors(response, event)
+    return response_cors
 
 
 def send_confirmation_mail(submission: Submission):
