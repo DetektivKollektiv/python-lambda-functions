@@ -9,7 +9,6 @@ logger.setLevel(logging.INFO)
 
 
 def extract_claim(event, context):
-
     """extracts claim from item content
     Parameters
     ----------
@@ -70,8 +69,8 @@ def extract_claim(event, context):
             }
             resp = requests.get(url, headers=headers)
             read_content = resp.content
-            read_content_hidden = read_content.replace(b'<!--', b'<!')
-            soup = BeautifulSoup(read_content_hidden, 'html.parser')
+            # read_content_hidden = read_content.replace(b'<!--', b'<!')
+            soup = BeautifulSoup(read_content, 'html.parser')
             # get the title of the web page
             titles = soup.find_all('title')
             title = ""

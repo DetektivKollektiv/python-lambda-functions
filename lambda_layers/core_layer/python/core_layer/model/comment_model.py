@@ -1,10 +1,9 @@
 from datetime import datetime
 from core_layer.model.submission_model import Submission
-from sqlalchemy import Column, DateTime, String, ForeignKey
+from sqlalchemy import Column, DateTime, String, ForeignKey, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean, Text
 from .model_base import Base
-from sqlalchemy.sql import func
 
 
 class Comment(Base):
