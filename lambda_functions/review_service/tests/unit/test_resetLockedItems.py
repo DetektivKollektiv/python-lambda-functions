@@ -74,6 +74,7 @@ def test_reset_locked_items(item, pair, old_junior_review, new_senior_review):
         assert item.in_progress_reviews_level_2 == 1
         assert item.in_progress_reviews_level_1 == 0
         
-        session.refresh(pair)        
+        # reload object instead of refreshing the session
+        pair = session.query(ReviewPair).one()
         assert pair.junior_review_id == None        
         assert pair.senior_review_id == new_senior_review.id

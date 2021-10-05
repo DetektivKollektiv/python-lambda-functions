@@ -34,83 +34,83 @@ def update_review(event, context):
     if 'id' not in body:
         return helper.get_text_response(400, "Malformed request. Please provide a review id.", event)
 
-    session = Session()
+    with Session() as session:
 
-    try:
-        review = review_handler.get_review_by_id(body['id'], session)
-    except:
-        return helper.get_text_response(404, "No review found. Stacktrace: {}".format(traceback.format_exc()), event)
-
-    try:
-        user = user_handler.get_user_by_id(user_id, session)
-    except:
-        return helper.get_text_response(404, "No user found.", event)
-
-    if review.user_id != user.id:
-        return helper.get_text_response(403, "Forbidden.", event)
-
-    # If review is set closed
-    if 'status' in body and body['status'] == 'closed':
         try:
-            review = review_handler.close_review(review, session)
+            review = review_handler.get_review_by_id(body['id'], session)
+        except:
+            return helper.get_text_response(404, "No review found. Stacktrace: {}".format(traceback.format_exc()), event)
 
-            if review.item.status == 'closed':
-                EventPublisher().publish_event('codetekt.review_service',
-                                               'item_closed', {'item_id': review.item.id})
+        try:
+            user = user_handler.get_user_by_id(user_id, session)
+        except:
+            return helper.get_text_response(404, "No user found.", event)
+
+        if review.user_id != user.id:
+            return helper.get_text_response(403, "Forbidden.", event)
+
+        # If review is set closed
+        if 'status' in body and body['status'] == 'closed':
+            try:
+                review = review_handler.close_review(review, session)
+
+                if review.item.status == 'closed':
+                    EventPublisher().publish_event('codetekt.review_service',
+                                                'item_closed', {'item_id': review.item.id})
+
+                response = {
+                    "statusCode": 200,
+                    "body": json.dumps(review.to_dict(with_questions_and_answers=True))
+                }
+                response_cors = helper.set_cors(response, event)
+                return response_cors
+            except:
+                return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+
+        # If answers are appended
+        elif 'questions' in body:
+            if not isinstance(body['questions'], list):
+                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
+            for question in body['questions']:
+                if 'answer_value' in question:
+                    answer_value = question['answer_value']
+                else:
+                    return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
+
+                if answer_value is not None:
+                    # Check if conditionality is met
+                    if question['parent_question_id'] is not None:
+                        for q in body['questions']:
+                            if q['question_id'] == question['parent_question_id']:
+                                parent_question = q
+                        if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
+                            return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
+                    # Update answer in db
+                    try:
+                        review_answer_handler.set_answer_value(
+                            question['answer_id'], question['answer_value'], session)
+                    except:
+                        return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+
+            # Save qualitative_comment
+            if 'comment' in body:
+                try:
+                    comment_handler.create_comment(session, 
+                                                comment=body['comment'],
+                                                user_id=user_id,
+                                                parent_type='item',
+                                                parent_id=review.item_id,
+                                                is_review_comment=True
+                                                )
+                except:
+                    return helper.get_text_response(404, "No qualitative comment found.", event)
 
             response = {
                 "statusCode": 200,
                 "body": json.dumps(review.to_dict(with_questions_and_answers=True))
             }
             response_cors = helper.set_cors(response, event)
-            session.close()
             return response_cors
-        except:
-            return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
 
-    # If answers are appended
-    elif 'questions' in body:
-        if not isinstance(body['questions'], list):
-            return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
-        for question in body['questions']:
-            if 'answer_value' in question:
-                answer_value = question['answer_value']
-            else:
-                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event)
-
-            if answer_value is not None:
-                # Check if conditionality is met
-                if question['parent_question_id'] is not None:
-                    for q in body['questions']:
-                        if q['question_id'] == question['parent_question_id']:
-                            parent_question = q
-                    if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
-                        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
-                # Update answer in db
-                try:
-                    review_answer_handler.set_answer_value(
-                        question['answer_id'], question['answer_value'], session)
-                except:
-                    return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
-
-        # Save qualitative_comment
-        if 'comment' in body:
-            try:
-                comment_handler.create_comment(comment=body['comment'],
-                                               user_id=user_id,
-                                               parent_type='item',
-                                               parent_id=review.item_id,
-                                               is_review_comment=True
-                                               )
-            except:
-                return helper.get_text_response(404, "No qualitative comment found.", event)
-
-        response = {
-            "statusCode": 200,
-            "body": json.dumps(review.to_dict(with_questions_and_answers=True))
-        }
-        response_cors = helper.set_cors(response, event)
-        return response_cors
-
-    else:
-        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
+        else:
+            return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event)
