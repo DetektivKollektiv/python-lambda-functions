@@ -1,6 +1,7 @@
 from datetime import datetime
 from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey, func
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean, Text
 from .model_base import Base
@@ -9,7 +10,8 @@ from .model_base import Base
 class Comment(Base):
     __tablename__ = 'comments'
     id = Column(String(36), primary_key=True)
-    timestamp = Column(DateTime, server_default=func.now())
+    timestamp = Column(
+        DateTime, server_default=func.now(), nullable=False)
     # e.g. published, flagged, cleared, removed
     status = Column(String(100), default="published")
     comment = Column(Text)
