@@ -66,5 +66,5 @@ def test_item_model_to_dict_with_reviews(item_id, review_id, review_answer_id, u
         session.delete(user)
         session.expire_all()
         item_dict = item.to_dict(with_reviews=True, with_comments=True)
-        assert item_dict['comments'][0]['user'] == 'deleted'
-        assert item_dict['reviews'][0]['user'] == 'deleted'
+        assert item_dict['comments'][0]['user'] == None
+        assert item_dict['reviews'][0]['user'] == None

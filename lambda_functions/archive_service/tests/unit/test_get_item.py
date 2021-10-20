@@ -77,7 +77,15 @@ def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment
 
         item.status = 'closed'
         session.merge(item)
+        session.commit()
         response = get_item.get_item(event, None)
         assert response['statusCode'] == 200
         body = json.loads(response['body'])
         assert body['id'] == item.id
+
+        session.delete(user)
+        session.expire_all()
+        response = get_item.get_item(event, None)
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert body['users'][0] is None
