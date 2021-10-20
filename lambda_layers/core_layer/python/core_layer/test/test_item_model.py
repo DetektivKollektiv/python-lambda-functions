@@ -39,7 +39,7 @@ def test_item_model_to_dict_with_reviews(item_id, review_id, review_answer_id, u
         review_answer = ReviewAnswer(
             id=review_answer_id, review_id=review_id, review_question_id=review_question.id)
         user = User(id=user_id, name='testuser')
-        level = Level(id=1)
+        level = Level(id=1, description='beginner')
         comment = Comment(id=comment_id, comment='testcomment',
                           is_review_comment=True, user_id=user_id, item_id=item_id)
         session.add_all([item, review, review_question,
@@ -59,9 +59,12 @@ def test_item_model_to_dict_with_reviews(item_id, review_id, review_answer_id, u
         assert len(item_dict['comments']) == 1
         assert item_dict['comments'][0]['comment'] == 'testcomment'
         assert item_dict['comments'][0]['user'] == user.name
+        assert len(item_dict['users']) == 1
+        assert item_dict['users'][0]['username'] == 'testuser'
+        assert item_dict['users'][0]['level_description'] == 'beginner'
 
         session.delete(user)
         session.expire_all()
         item_dict = item.to_dict(with_reviews=True, with_comments=True)
-        assert item_dict['comments'][0]['user'] == 'deleted'
-        assert item_dict['reviews'][0]['user'] == 'deleted'
+        assert item_dict['comments'][0]['user'] == None
+        assert item_dict['reviews'][0]['user'] == None

@@ -54,7 +54,7 @@ def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment
         review_answer = ReviewAnswer(
             id=review_answer_id, review_id=review_id, review_question_id=review_question.id)
         user = User(id=user_id, name='User')
-        level = Level(id=1)
+        level = Level(id=1, description='beginner')
         comment = Comment(id=comment_id, comment='testcomment',
                           is_review_comment=True, user_id=user_id, item_id=item_id)
         session.add_all([item, review, review_question,
@@ -77,7 +77,15 @@ def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment
 
         item.status = 'closed'
         session.merge(item)
+        session.commit()
         response = get_item.get_item(event, None)
         assert response['statusCode'] == 200
         body = json.loads(response['body'])
         assert body['id'] == item.id
+
+        session.delete(user)
+        session.expire_all()
+        response = get_item.get_item(event, None)
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert body['users'][0] is None
