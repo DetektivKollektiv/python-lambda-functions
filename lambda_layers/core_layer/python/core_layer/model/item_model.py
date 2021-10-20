@@ -78,9 +78,17 @@ class Item(Base):
         if include_type and self.item_type:
             item_dict["item_type"] = self.item_type.to_dict()
 
+        # Provide a list of all reviews on the item AND a separate list of all users including their lvl description
         if with_reviews:
-            item_dict['reviews'] = [review.to_dict(True, True)
-                                    for review in self.reviews]
+            item_dict['reviews'] = []
+            item_dict['users'] = []
+            for review in self.reviews:
+                item_dict['reviews'].append(review.to_dict(True, True))
+                if review.user and review.user.level:
+                    item_dict['users'].append(
+                        {'username': review.user.name, 'level_description': review.user.level.description})
+                else:
+                    item_dict['users'].append(None)
 
         if with_comments:
             item_dict['comments'] = []

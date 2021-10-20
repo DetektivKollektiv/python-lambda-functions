@@ -54,7 +54,7 @@ def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment
         review_answer = ReviewAnswer(
             id=review_answer_id, review_id=review_id, review_question_id=review_question.id)
         user = User(id=user_id, name='User')
-        level = Level(id=1)
+        level = Level(id=1, description='beginner')
         comment = Comment(id=comment_id, comment='testcomment',
                           is_review_comment=True, user_id=user_id, item_id=item_id)
         session.add_all([item, review, review_question,
