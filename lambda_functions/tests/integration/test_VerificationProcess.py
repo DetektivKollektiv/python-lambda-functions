@@ -130,6 +130,8 @@ def test_verification_process_best_case(monkeypatch):
         item_dict = item.to_dict(with_warnings=True)
         assert 'warning_tags' in item_dict
         assert len(item_dict['warning_tags']) > 0
+        assert 'text' in item_dict['warning_tags'][0]
+        assert 'icon' in item_dict['warning_tags'][0]
         session.expire_all()
 
 

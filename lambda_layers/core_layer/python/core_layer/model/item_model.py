@@ -121,5 +121,6 @@ class Item(Base):
                             if tag == q.warning_tag:
                                 tag_included = True
                         if tag_included == False:
-                            item_dict['warning_tags'].append(q.warning_tag)
+                            item_dict['warning_tags'].append(
+                                {'text': q.warning_tag, 'icon': q.warning_tag_icon_code})
         return item_dict
