@@ -30,7 +30,7 @@ class ResponseBase:
                     self.headers['Access-Control-Allow-Origin'] = source_origin
 
     def to_json_string(self):
-        return json.dumps(self.__dict__)
+        return self.__dict__
 
 
 class InternalError(ResponseBase):
