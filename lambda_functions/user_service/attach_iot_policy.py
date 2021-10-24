@@ -13,13 +13,20 @@ policy_document = {
     "Statement": [
         {
             "Effect": "Allow",
-            "Action": "iot:Subscribe",
+            "Action": "iot:*",
             "Resource": ""
         }
     ]
 }
 
 POLICY_DOCUMENT_STRING_FORMAT = "arn:aws:iot:eu-central-1:891514678401:{0}"
+
+
+ERROR_MSG_IDENTIY_ID_MISSING = "Cognito identity ID was not found in event."
+ERROR_MSG_USER_ID_MISSING = "User ID was not found in event."
+ERROR_MSG_EXCEPTION = "Error attaching IoT policy."
+INFO_MSG_POLICY_ALREADY_ATTACHED = "IoT policy is already attached to the current identity."
+INFO_MSG_POLICY_ATTACHED = "Successfully attached IoT policy to identity."
 
 
 def attach_iot_policy(event, context):
@@ -29,12 +36,14 @@ def attach_iot_policy(event, context):
         try:
             cognito_identity = helper.get_cognito_identity_from_event(event)
         except Exception:
-            return BadRequest(event, "Cognito identity ID was not found in event.").to_json_string()
+            logger.error(ERROR_MSG_IDENTIY_ID_MISSING)
+            return BadRequest(event, ERROR_MSG_IDENTIY_ID_MISSING).to_json_string()
 
         try:
             user_id = helper.cognito_id_from_event(event)
         except Exception:
-            return BadRequest(event, "User ID was not found in event.").to_json_string()
+            logger.error(ERROR_MSG_USER_ID_MISSING)
+            return BadRequest(event, ERROR_MSG_USER_ID_MISSING).to_json_string()
 
         client = BotoClientProvider().get_client('iot')
 
@@ -44,7 +53,7 @@ def attach_iot_policy(event, context):
         except client.exceptions.ResourceNotFoundException as e:
             resource = POLICY_DOCUMENT_STRING_FORMAT.format(user_id)
 
-            policy_document["Statement"][0]["Resource"] = resource
+            policy_document['Statement'][0]['Resource'] = resource
 
             policy = client.create_policy(
                 policyName=user_id, policyDocument=json.dumps(policy_document))
@@ -54,12 +63,15 @@ def attach_iot_policy(event, context):
 
         # If the policy is already attached to the current identity return
         if(policy['policyName'] in [attached_policy['policyName'] for attached_policy in attached_policies['policies']]):
+            logger.info(INFO_MSG_POLICY_ALREADY_ATTACHED)
             return Success(event).to_json_string()
 
         client.attach_policy(
             policyName=policy['policyName'], target=cognito_identity)
 
+        logger.info(INFO_MSG_POLICY_ATTACHED)
         return Success(event).to_json_string()
 
     except Exception as e:
-        return InternalError(event, "Error attaching IoT policy.", e).to_json_string()
+        logger.exception(ERROR_MSG_EXCEPTION)
+        return InternalError(event, ERROR_MSG_EXCEPTION, e).to_json_string()
