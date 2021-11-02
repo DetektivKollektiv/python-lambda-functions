@@ -67,13 +67,12 @@ def store_tag_for_item(item_id, str_tag, session, review_id=None):
     update_object(itemtag, session)
 
 
-def delete_itemtag_by_tag_and_item_id(tag_id, item_id, session):
+def delete_itemtag_by_tag_and_item_id(tag: str, item_id: str, session):
     """
     Deletes the itemtag for an item and tag
     """
-
-    itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
-                                            ItemTag.item_id == item_id).first()
+    itemtag = session.query(ItemTag).join(Tag).filter(Tag.tag == tag,
+                                                      ItemTag.item_id == item_id).one()
     if itemtag != None:
         session.delete(itemtag)
         session.commit()
@@ -88,3 +87,13 @@ def get_all_tags(session):
 
     query = session.query(Tag)
     return query.all()
+
+
+def get_item_tags_by_review_id(review_id: str, session):
+    """Returns all tags that belong to the review with the specified id
+
+    Args:
+        review_id (str): The review id
+        session ([type]): An SQL Alchemy session object
+    """
+    return session.query(ItemTag).filter(ItemTag.review_id == review_id).all()

@@ -1,3 +1,4 @@
+from typing import List
 from core_layer.model.review_model import Review
 
 
@@ -64,7 +65,7 @@ def get_next_question_event(review_id, previous_question_id=None):
     return event
 
 
-def get_review_event(review: Review, item_id, status, user_id, score, comment="Test comment"):
+def get_review_event(review: Review, item_id, status, user_id, score, comment="Test comment", tags: List[str] = []):
 
     questions = []
     for answer in review.review_answers:
@@ -120,7 +121,8 @@ def get_review_event(review: Review, item_id, status, user_id, score, comment="T
             "item_id": item_id,
             "user_id": user_id,
             "comment": comment,
-            "status": status
+            "status": status,
+            "tags": tags
         },
         "requestContext": {
             "identity": {
