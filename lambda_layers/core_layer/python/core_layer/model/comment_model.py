@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey, func
 from sqlalchemy.sql import func
@@ -33,6 +34,8 @@ class Comment(Base):
     item = relationship("Item", back_populates="comments")
     submission_id = Column(String(36), ForeignKey('submissions.id'))
     submission = relationship("Submission", back_populates="comments")
+    review_id = Column(String(36), ForeignKey('reviews.id'))
+    review = relationship("Review", back_populates='comment')
     review_answer_id = Column(String(36), ForeignKey('review_answers.id'))
     review_anser = relationship("ReviewAnswer", back_populates="comments")
     parent_comment_id = Column(String(36), ForeignKey('comments.id'))

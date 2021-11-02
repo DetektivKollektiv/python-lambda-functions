@@ -93,9 +93,14 @@ class Item(Base):
                     item_dict['users'].append(None)
 
         if with_comments:
-            item_dict['comments'] = []
+            item_dict['review_comments'] = []
+            for review in self.reviews:
+                if review.comment is not None:
+                    item_dict['review_comments'].append(
+                        review.comment.to_dict())
+            item_dict['discussion_comments'] = []
             for comment in self.comments:
-                item_dict['comments'].append(comment.to_dict())
+                item_dict['discussion_comments'].append(comment.to_dict())
 
         if with_warnings:
             item_dict['warning_tags'] = []

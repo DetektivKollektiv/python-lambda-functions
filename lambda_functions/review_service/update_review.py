@@ -99,8 +99,8 @@ def update_review(event, context):
                     comment_handler.create_comment(session,
                                                    comment=body['comment'],
                                                    user_id=user_id,
-                                                   parent_type='item',
-                                                   parent_id=review.item_id,
+                                                   parent_type='review',
+                                                   parent_id=review.id,
                                                    is_review_comment=True
                                                    )
                 except:

@@ -8,6 +8,7 @@ from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
 from core_layer.model.tag_model import Tag, ItemTag
+from core_layer.model.comment_model import Comment
 
 from review_service.get_review import get_review
 
@@ -77,6 +78,9 @@ def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, ite
         item_tag = ItemTag(id=item_tag_id, item_id=item_id,
                            tag_id=tag_id, review_id=review_id)
 
+        comment = Comment(id='comment_id', comment='testcomment',
+                          review_id=review_id, is_review_comment=True)
+
         review_question = ReviewQuestion()
         review_question.id = review_question_id
         review_question.content = "Question content"
@@ -116,7 +120,7 @@ def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, ite
         session.add(user)
         session.add(level)
         session.add(review_question)
-        session.add_all([tag, item_tag])
+        session.add_all([tag, item_tag, comment])
         # referenced ReviewAnswers are stored as well
         session.add(review)
 
@@ -149,3 +153,6 @@ def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, ite
         assert 'tags' in body
         assert len(body['tags']) == 1
         assert body['tags'][0] == 'test'
+
+        assert 'comment' in body
+        assert body['comment'] == 'testcomment'

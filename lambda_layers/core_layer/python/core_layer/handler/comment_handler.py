@@ -37,6 +37,8 @@ def create_comment(session, comment, user_id, parent_type, parent_id, is_review_
         comment_obj.submission_id = parent_id
     elif parent_type == 'review_answer':
         comment_obj.review_answer_id = parent_id
+    elif parent_type == 'review':
+        comment_obj.review_id = parent_id
     elif parent_type == 'comment':
         comment_obj.parent_comment_id = parent_id
     else:
