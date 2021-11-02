@@ -70,6 +70,16 @@ class BadRequest(ResponseBase):
             return
 
 
+class NotFound(ResponseBase):
+    def __init__(self, event, message: str = None, add_cors_headers: bool = True) -> None:
+        super().__init__(event, add_cors_headers)
+
+        self.statusCode = 404
+        if(message is not None):
+            self.body = message
+            return
+
+
 class Success(ResponseBase):
     def __init__(self, event, content=None, message: str = None, add_cors_headers: bool = True):
         super().__init__(event, add_cors_headers)

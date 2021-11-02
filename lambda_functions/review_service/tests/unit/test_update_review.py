@@ -25,8 +25,9 @@ def senior_user_id():
     return "11"
 
 
-def test_update_review(item_id, junior_user_id, senior_user_id):
+def test_update_review(item_id, junior_user_id, senior_user_id, monkeypatch):
 
+    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
     with Session() as session:
 
         session = setup_scenarios.create_questions(session)
@@ -61,7 +62,7 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         # Test comments
         comments = session.query(Comment).all()[0]
         assert comments.comment == "Test comment"
-        assert comments.item_id == item_id
+        assert comments.review_id == review.id
         assert comments.user_id == junior_user_id
         assert comments.status == "published"
         assert comments.is_review_comment == True
