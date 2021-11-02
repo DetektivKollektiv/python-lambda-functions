@@ -50,14 +50,14 @@ def create_review(user, item, session) -> Review:
     item: Item
         The case to be assigned to the user
     """
-    # If a ReviewInProgress exists for the user, return    
-    try:    
+    # If a ReviewInProgress exists for the user, return
+    try:
         review = session.query(Review).filter(
             Review.user_id == user.id, Review.status == "in_progress", Review.item_id == item.id).one()
         return review
-    except:   
+    except:
         pass
-    
+
     # If a closed review exists for the user, raise an exception
     reviews = session.query(Review).filter(
         Review.user_id == user.id, Review.item_id == item.id)
@@ -67,7 +67,7 @@ def create_review(user, item, session) -> Review:
 
     # If the amount of reviews in progress equals the amount of reviews needed, raise an error
     if item.in_progress_reviews_level_1 >= item.open_reviews_level_1:
-        
+
         if user.level_id > 1:
             if item.in_progress_reviews_level_2 >= item.open_reviews_level_2:
                 raise Exception(
@@ -75,7 +75,7 @@ def create_review(user, item, session) -> Review:
         else:
             raise Exception(
                 'Item cannot be accepted since enough other detecitves are already working on the case')
-    
+
     # Create a new ReviewInProgress
     rip = Review()
     rip.id = str(uuid4())
@@ -85,10 +85,10 @@ def create_review(user, item, session) -> Review:
     rip.status = "in_progress"
     session.add(rip)
     session.commit()
-        
+
     # If a user is a senior, the review will by default be a senior review,
     # except if no senior reviews are needed
-    if user.level_id > 1 and item.open_reviews_level_2 > item.in_progress_reviews_level_2:        
+    if user.level_id > 1 and item.open_reviews_level_2 > item.in_progress_reviews_level_2:
         rip.is_peer_review = True
         item.in_progress_reviews_level_2 += 1
 
@@ -114,9 +114,9 @@ def create_review(user, item, session) -> Review:
         rip.is_peer_review = False
         item.in_progress_reviews_level_1 += 1
         # Check if a pair with open junior review exists
-        pair_found = False        
-        
-        for pair in item.review_pairs:            
+        pair_found = False
+
+        for pair in item.review_pairs:
             if pair.junior_review_id == None:
                 pair.junior_review_id = rip.id
                 pair_found = True
@@ -189,7 +189,8 @@ def create_answers_for_review(review: Review, session):
                 session.add(answer)
     else:
         item_type_id = review.item.item_type_id
-        questions = review_question_handler.get_all_parent_questions(item_type_id, session)
+        questions = review_question_handler.get_all_parent_questions(
+            item_type_id, session)
         random.shuffle(questions)
         for question in questions[:6]:
             answer = ReviewAnswer()
@@ -198,7 +199,8 @@ def create_answers_for_review(review: Review, session):
             answer.review = review
             session.add(answer)
             if question.max_children > 0:
-                child_questions = review_question_handler.get_all_child_questions(question.id, session)
+                child_questions = review_question_handler.get_all_child_questions(
+                    question.id, session)
                 for child_question in child_questions:
                     answer = ReviewAnswer()
                     answer.id = str(uuid4())
@@ -232,15 +234,22 @@ def close_review(review: Review, session) -> Review:
             review.item.open_reviews_level_1 -= 1
             review.item.open_reviews_level_2 -= 1
 
-        pairs = review_pair_handler.get_review_pairs_by_item(pair.item_id, session)
+        pairs = review_pair_handler.get_review_pairs_by_item(
+            pair.item_id, session)
 
         if(len(list(filter(lambda p: p.is_good, pairs))) >= 4):
             review.item.status = "closed"
             review.item.close_timestamp = review.finish_timestamp
-            review.item.result_score = item_handler.compute_item_result_score(review.item_id, session)
+            review.item.result_score = item_handler.compute_item_result_score(
+                review.item_id, session)
 
     update_object(review, session)
     update_object(pair, session)
     update_object(review.item, session)
 
     return review
+
+
+def get_open_review(user_id: str, session) -> Review:
+    # Returns a review, which is in progress or NONE if no review in progress exists
+    return session.query(Review).filter(Review.user_id == user_id, Review.status == 'in_progress').first()
