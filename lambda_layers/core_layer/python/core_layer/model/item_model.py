@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from .model_base import Base
 from sqlalchemy.sql import func
 from datetime import datetime
+import collections
 
 
 class Item(Base):
@@ -31,7 +32,7 @@ class Item(Base):
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
     # One to Many Relation: one Item has many ItemTags
-    tags = relationship("ItemTag", order_by="desc(ItemTag.count)")
+    tags = relationship("ItemTag")
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
@@ -63,7 +64,8 @@ class Item(Base):
             tags_list = []
             for item_tag in self.tags:
                 tags_list.append(item_tag.tag.tag)
-            item_dict["tags"] = tags_list
+            sorted_list = collections.Counter(tags_list).most_common()
+            item_dict["tags"] = [entry[0] for entry in sorted_list]
 
         if with_urls:
             url_list = []
@@ -104,7 +106,7 @@ class Item(Base):
                     for q in questions:
                         if q.id == answer.review_question_id:
                             question_included = True
-                    if question_included == False:
+                    if question_included is False:
                         questions.append(answer.review_question)
 
             for q in questions:
@@ -120,7 +122,7 @@ class Item(Base):
                         for tag in item_dict['warning_tags']:
                             if tag == q.warning_tag:
                                 tag_included = True
-                        if tag_included == False:
+                        if tag_included is False:
                             item_dict['warning_tags'].append(
                                 {'text': q.warning_tag, 'icon': q.warning_tag_icon_code})
         return item_dict
