@@ -90,16 +90,20 @@ def update_review(event, context):
         # Save qualitative_comment
         if 'comment' in body:
             if body['comment']:
-                try:
-                    comment_handler.create_comment(session,
-                                                   comment=body['comment'],
-                                                   user_id=user_id,
-                                                   parent_type='review',
-                                                   parent_id=review.id,
-                                                   is_review_comment=True
-                                                   )
-                except Exception as e:
-                    return responses.InternalError(event, "Could not create tags for item", e, False).to_json_string()
+                if review.comment is None:
+                    try:
+                        comment_handler.create_comment(session,
+                                                       comment=body['comment'],
+                                                       user_id=user_id,
+                                                       parent_type='review',
+                                                       parent_id=review.id,
+                                                       is_review_comment=True
+                                                       )
+                    except Exception as e:
+                        return responses.InternalError(event, "Could not create tags for item", e, False).to_json_string()
+                elif review.comment.comment != body['comment']:
+                    review.comment.comment = body['comment']
+                    session.merge(review)
 
         if 'tags' in body:
             if isinstance(body['tags'], list) and len(body['tags']) > 0:
