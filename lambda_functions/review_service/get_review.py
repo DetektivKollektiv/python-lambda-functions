@@ -48,7 +48,7 @@ def get_review(event, context):
             return responses.NoContent(event, 'No review in progress found for current user.').to_json_string()
         try:
             if review.user_id == user.id:
-                return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True))).to_json_string()
+                return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()
             else:
                 return responses.Forbidden(event, 'User is not allowed to access review').to_json_string()
         except Exception as e:

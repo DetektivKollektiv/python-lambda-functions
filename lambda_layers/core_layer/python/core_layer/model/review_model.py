@@ -23,7 +23,7 @@ class Review(Base):
     last_question = relationship('ReviewQuestion')
     tags = relationship('ItemTag', back_populates="review")
 
-    def to_dict(self, with_questions_and_answers=False, with_user=False):
+    def to_dict(self, with_questions_and_answers=False, with_user=False, with_tags=False):
         return_dict = {
             "id": self.id,
             "is_peer_review": self.is_peer_review,
@@ -37,4 +37,6 @@ class Review(Base):
                                         for review_answer in self.review_answers]
         if with_user:
             return_dict['user'] = self.user.name if self.user else None
+        if with_tags:
+            return_dict['tags'] = [item_tag.tag.tag for item_tag in self.tags]
         return return_dict

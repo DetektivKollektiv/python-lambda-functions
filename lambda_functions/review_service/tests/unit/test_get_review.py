@@ -7,6 +7,7 @@ from core_layer.model.review_model import Review
 from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
+from core_layer.model.tag_model import Tag, ItemTag
 
 from review_service.get_review import get_review
 
@@ -36,11 +37,21 @@ def user_id():
     return str(uuid4())
 
 
+@pytest.fixture
+def tag_id():
+    return str(uuid4())
+
+
+@pytest.fixture
+def item_tag_id():
+    return str(uuid4())
+
+
 def generate_review_answer(answer, review_id, review_question_id):
     return ReviewAnswer(id=str(uuid4()), review_id=review_id, review_question_id=review_question_id, answer=answer, comment='Test Review Answer')
 
 
-def test_get_review(item_id, review_id, review_question_id, user_id, monkeypatch):
+def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, item_tag_id, monkeypatch):
     """
     Gets a simple Review
     """
@@ -61,6 +72,10 @@ def test_get_review(item_id, review_id, review_question_id, user_id, monkeypatch
         review.item_id = item.id
         review.user_id = user.id
         review.status = 'in_progress'
+
+        tag = Tag(tag='test', id=tag_id)
+        item_tag = ItemTag(id=item_tag_id, item_id=item_id,
+                           tag_id=tag_id, review_id=review_id)
 
         review_question = ReviewQuestion()
         review_question.id = review_question_id
@@ -101,7 +116,8 @@ def test_get_review(item_id, review_id, review_question_id, user_id, monkeypatch
         session.add(user)
         session.add(level)
         session.add(review_question)
-        # refernenced ReviewAnswers are stored as well
+        session.add_all([tag, item_tag])
+        # referenced ReviewAnswers are stored as well
         session.add(review)
 
         session.commit()
@@ -129,3 +145,7 @@ def test_get_review(item_id, review_id, review_question_id, user_id, monkeypatch
         assert body["questions"][0]["options"][0]["text"] != None
         assert body["questions"][0]["options"][0]["value"] == 0
         assert body["questions"][0]["options"][1]["tooltip"] != None
+
+        assert 'tags' in body
+        assert len(body['tags']) == 1
+        assert body['tags'][0] == 'test'
