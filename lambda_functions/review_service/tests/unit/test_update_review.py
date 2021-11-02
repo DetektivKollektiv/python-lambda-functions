@@ -1,3 +1,4 @@
+from core_layer.model.tag_model import ItemTag
 import pytest
 from uuid import uuid4
 from core_layer.db_handler import Session
@@ -52,7 +53,7 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         assert response['statusCode'] == 403
 
         event = event_creator.get_review_event(
-            review, item_id, "in progress", junior_user_id, 1)
+            review, item_id, "in progress", junior_user_id, 1, tags=['test', 'tag'])
 
         response = update_review.update_review(event, None)
         assert response['statusCode'] == 200
@@ -64,6 +65,25 @@ def test_update_review(item_id, junior_user_id, senior_user_id):
         assert comments.user_id == junior_user_id
         assert comments.status == "published"
         assert comments.is_review_comment == True
+
+        # Test tags
+        item_tags = session.query(ItemTag).all()
+        assert len(item_tags) == 2
+        for item_tag in item_tags:
+            assert item_tag.item_id == item.id
+            assert item_tag.review_id == review.id
+            assert item_tag.tag.tag in ['test', 'tag']
+
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", junior_user_id, 1, tags=['test'])
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200
+        item_tags = session.query(ItemTag).all()
+        assert len(item_tags) == 1
+        assert item_tags[0].item_id == item.id
+        assert item_tags[0].review_id == review.id
+        assert item_tags[0].tag.tag == 'test'
+
         # Test not existing review
         fake_review = review
         fake_review.id = "fake"

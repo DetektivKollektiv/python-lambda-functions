@@ -44,11 +44,11 @@ def get_itemtag_by_tag_and_item_id(tag_id, item_id, session):
     """
 
     itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
-                                                  ItemTag.item_id == item_id).first()
+                                            ItemTag.item_id == item_id).first()
     return itemtag
 
 
-def store_tag_for_item(item_id, str_tag, session):
+def store_tag_for_item(item_id, str_tag, session, review_id=None):
     # search for tag in database
     tag = get_tag_by_content(str_tag, session)
     if tag is None:
@@ -57,27 +57,22 @@ def store_tag_for_item(item_id, str_tag, session):
         tag.id = str(uuid4())
         tag.tag = str_tag
         update_object(tag, session)
-    # item tag already exists?
-    itemtag = get_itemtag_by_tag_and_item_id(tag.id, item_id, session)
-    if itemtag is None:
-        # store item tag in database
-        itemtag = ItemTag()
-        itemtag.id = str(uuid4())
-        itemtag.item_id = item_id
-        itemtag.tag_id = tag.id
-        update_object(itemtag, session)
-    else:
-        # increase tag counter
-        itemtag.count += 1
-        update_object(itemtag, session)
+    # store item tag in database
+    itemtag = ItemTag()
+    itemtag.id = str(uuid4())
+    itemtag.item_id = item_id
+    itemtag.tag_id = tag.id
+    if review_id is not None:
+        itemtag.review_id = review_id
+    update_object(itemtag, session)
 
 
-def delete_itemtag_by_tag_and_item_id(tag_id, item_id, session):
-    """Deletes the itemtag for an item and tag
+def delete_itemtag_by_tag_and_item_id(tag: str, item_id: str, session):
     """
-
-    itemtag = session.query(ItemTag).filter(ItemTag.tag_id == tag_id,
-                                                  ItemTag.item_id == item_id).first()
+    Deletes the itemtag for an item and tag
+    """
+    itemtag = session.query(ItemTag).join(Tag).filter(Tag.tag == tag,
+                                                      ItemTag.item_id == item_id).one()
     if itemtag != None:
         session.delete(itemtag)
         session.commit()
@@ -92,3 +87,13 @@ def get_all_tags(session):
 
     query = session.query(Tag)
     return query.all()
+
+
+def get_item_tags_by_review_id(review_id: str, session):
+    """Returns all tags that belong to the review with the specified id
+
+    Args:
+        review_id (str): The review id
+        session ([type]): An SQL Alchemy session object
+    """
+    return session.query(ItemTag).filter(ItemTag.review_id == review_id).all()

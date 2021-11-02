@@ -1,7 +1,8 @@
 from core_layer.event_publisher import EventPublisher
 from core_layer import helper
 from core_layer.db_handler import Session
-from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler
+from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler, tag_handler
+from core_layer import responses
 import logging
 import json
 import traceback
@@ -56,7 +57,7 @@ def update_review(event, context):
 
                 if review.item.status == 'closed':
                     EventPublisher().publish_event('codetekt.review_service',
-                                                'item_closed', {'item_id': review.item.id})
+                                                   'item_closed', {'item_id': review.item.id})
 
                 response = {
                     "statusCode": 200,
@@ -95,15 +96,32 @@ def update_review(event, context):
             # Save qualitative_comment
             if 'comment' in body:
                 try:
-                    comment_handler.create_comment(session, 
-                                                comment=body['comment'],
-                                                user_id=user_id,
-                                                parent_type='item',
-                                                parent_id=review.item_id,
-                                                is_review_comment=True
-                                                )
+                    comment_handler.create_comment(session,
+                                                   comment=body['comment'],
+                                                   user_id=user_id,
+                                                   parent_type='review',
+                                                   parent_id=review.id,
+                                                   is_review_comment=True
+                                                   )
                 except:
                     return helper.get_text_response(404, "No qualitative comment found.", event)
+
+            if 'tags' in body:
+                try:
+                    db_tags = [
+                        item_tag.tag.tag for item_tag in tag_handler.get_item_tags_by_review_id(review.id, session)]
+                    tags_to_add = list(set(body['tags']) - set(db_tags))
+                    tags_to_delete = list(set(db_tags) - set(body['tags']))
+
+                    for tag in tags_to_add:
+                        tag_handler.store_tag_for_item(
+                            review.item_id, tag, session, review.id)
+
+                    for tag in tags_to_delete:
+                        tag_handler.delete_itemtag_by_tag_and_item_id(
+                            tag, review.item_id, session)
+                except Exception as e:
+                    return responses.InternalError(event, "Could not create tags for item", e, False)
 
             response = {
                 "statusCode": 200,
