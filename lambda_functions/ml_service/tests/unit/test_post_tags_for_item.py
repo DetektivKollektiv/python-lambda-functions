@@ -1,6 +1,6 @@
 from core_layer.db_handler import Session
 from core_layer.model.item_model import Item
-from core_layer.model.tag_model import Tag
+from core_layer.model.tag_model import ItemTag, Tag
 from ml_service import EnrichItem, GetTags
 from core_layer.handler import item_handler
 import json
@@ -16,7 +16,7 @@ def test_post_tags_for_item():
         # create item
         item = Item()
         item.content = "https://corona-transition.org/rki-bestatigt-covid-19-sterblichkeitsrate-von-0-01-prozent-in" \
-                        "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
+            "-deutschland?fbclid=IwAR2vLIkW_3EejFaeC5_wC_410uKhN_WMpWDMAcI-dF9TTsZ43MwaHeSl4n8%22 "
         item.language = "de"
         item = item_handler.create_item(item, session)
 
@@ -69,9 +69,14 @@ def test_post_tags_for_item():
         body = response['body']
         tags = json.loads(body)['Tags']
         assert tags == ['RKI', 'Covid', 'Corona Transition', 'Covid-19']
+        assert tags != ['Covid', 'Corona Transition', 'Covid-19', 'RKI']
 
         # Check counts: RKI posted twice, all other once
-        assert session.query(Tag).filter_by(tag = 'RKI').first().items[0].count == 2
-        assert session.query(Tag).filter_by(tag = 'Covid').first().items[0].count == 1
-        assert session.query(Tag).filter_by(tag = 'Corona Transition').first().items[0].count == 1
-        assert session.query(Tag).filter_by(tag = 'Covid-19').first().items[0].count == 1
+        assert session.query(ItemTag).join(Tag).filter(
+            Tag.tag == 'RKI').count() == 2
+        assert session.query(ItemTag).join(Tag).filter(
+            Tag.tag == 'Covid').count() == 1
+        assert session.query(ItemTag).join(Tag).filter(
+            Tag.tag == 'Corona Transition').count() == 1
+        assert session.query(ItemTag).join(Tag).filter(
+            Tag.tag == 'Covid-19').count() == 1

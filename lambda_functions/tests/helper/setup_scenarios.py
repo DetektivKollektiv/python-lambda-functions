@@ -99,14 +99,14 @@ def create_levels_junior_and_senior_detectives(session):
     """
 
     # Create three levels
-    
+
     level1 = create_level(1, "Junior", 0)
     level2 = create_level(2, "Senior", 5)
     level3 = create_level(3, "Master", 10)
 
     session.add(level1)
     session.add(level2)
-    session.add(level3)    
+    session.add(level3)
 
     # Create 5 level-1-detectives
     junior_detective1 = User()
@@ -168,7 +168,7 @@ def create_levels_junior_and_senior_detectives(session):
     senior_detective5.name = "Senior5"
     senior_detective5 = user_handler.create_user(senior_detective5, session)
     senior_detective5.level_id = 2
-    senior_detective5.experience_points = 5    
+    senior_detective5.experience_points = 5
 
     session.merge(senior_detective1)
     session.merge(senior_detective2)
@@ -178,7 +178,7 @@ def create_levels_junior_and_senior_detectives(session):
     session.commit()
 
     return session
-    
+
 
 def create_questions(session):
 
@@ -193,6 +193,8 @@ def create_questions(session):
     parentquestion1.info = "1"
     parentquestion1.max_children = 2
     parentquestion1.item_type = item_type1
+    parentquestion1.warning_tag = 'PQ1 warning'
+    parentquestion1.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1a = ReviewQuestion()
     childquestion1a.id = "1a"
@@ -202,6 +204,8 @@ def create_questions(session):
     childquestion1a.lower_bound = 3
     childquestion1a.max_children = 0
     childquestion1a.item_type = item_type1
+    childquestion1a.warning_tag = 'CQ1a warning'
+    childquestion1a.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1b = ReviewQuestion()
     childquestion1b.id = "1b"
@@ -211,6 +215,8 @@ def create_questions(session):
     childquestion1b.lower_bound = 1
     childquestion1b.max_children = 0
     childquestion1b.item_type = item_type1
+    childquestion1b.warning_tag = 'CQ1b warning'
+    childquestion1b.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1c = ReviewQuestion()
     childquestion1c.id = "1c"
@@ -220,12 +226,16 @@ def create_questions(session):
     childquestion1c.lower_bound = 2
     childquestion1c.max_children = 0
     childquestion1c.item_type = item_type1
+    childquestion1c.warning_tag = 'CQ1c warning'
+    childquestion1c.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion2 = ReviewQuestion()
     parentquestion2.id = "2"
     parentquestion2.info = "2"
     parentquestion2.max_children = 1
     parentquestion2.item_type = item_type1
+    parentquestion2.warning_tag = 'PQ2 warning'
+    parentquestion2.warning_tag_icon_code = 'fas fa-link'
 
     childquestion2a = ReviewQuestion()
     childquestion2a.id = "2a"
@@ -235,6 +245,8 @@ def create_questions(session):
     childquestion2a.lower_bound = 3
     childquestion2a.max_children = 0
     childquestion2a.item_type = item_type1
+    childquestion2a.warning_tag = 'CQ2a warning'
+    childquestion2a.warning_tag_icon_code = 'fas fa-link'
 
     childquestion2b = ReviewQuestion()
     childquestion2b.id = "2b"
@@ -244,54 +256,72 @@ def create_questions(session):
     childquestion2b.lower_bound = 1
     childquestion2b.max_children = 0
     childquestion2b.item_type = item_type1
+    childquestion2b.warning_tag = 'CQ2b warning'
+    childquestion2b.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion3 = ReviewQuestion()
     parentquestion3.id = "3"
     parentquestion3.info = "3"
     parentquestion3.max_children = 0
     parentquestion3.item_type = item_type1
+    parentquestion3.warning_tag = 'PQ3 warning'
+    parentquestion3.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion4 = ReviewQuestion()
     parentquestion4.id = "4"
     parentquestion4.info = "4"
     parentquestion4.max_children = 0
     parentquestion4.item_type = item_type1
+    parentquestion4.warning_tag = 'PQ4 warning'
+    parentquestion4.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion5 = ReviewQuestion()
     parentquestion5.id = "5"
     parentquestion5.info = "5"
     parentquestion5.max_children = 0
     parentquestion5.item_type = item_type1
+    parentquestion5.warning_tag = 'PQ5 warning'
+    parentquestion5.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion6 = ReviewQuestion()
     parentquestion6.id = "6"
     parentquestion6.info = "6"
     parentquestion6.max_children = 0
     parentquestion6.item_type = item_type1
+    parentquestion6.warning_tag = 'PQ6 warning'
+    parentquestion6.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion7 = ReviewQuestion()
     parentquestion7.id = "7"
     parentquestion7.info = "7"
     parentquestion7.max_children = 0
     parentquestion7.item_type = item_type1
+    parentquestion7.warning_tag = 'PQ7 warning'
+    parentquestion7.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion8 = ReviewQuestion()
     parentquestion8.id = "8"
     parentquestion8.info = "8"
     parentquestion8.max_children = 0
     parentquestion8.item_type = item_type1
+    parentquestion8.warning_tag = 'PQ8 warning'
+    parentquestion8.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion9 = ReviewQuestion()
     parentquestion9.id = "9"
     parentquestion9.info = "9"
     parentquestion9.max_children = 0
     parentquestion9.item_type = item_type1
+    parentquestion9.warning_tag = 'PQ9 warning'
+    parentquestion9.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion10 = ReviewQuestion()
     parentquestion10.id = "10"
     parentquestion10.info = "10"
     parentquestion10.max_children = 0
     parentquestion10.item_type = item_type1
+    parentquestion10.warning_tag = 'PQ10 warning'
+    parentquestion10.warning_tag_icon_code = 'fas fa-link'
 
     other_type_question = ReviewQuestion()
     other_type_question.id = "other_type"

@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 import traceback
@@ -30,7 +31,9 @@ class ResponseBase:
                     self.headers['Access-Control-Allow-Origin'] = source_origin
 
     def to_json_string(self):
-        return json.dumps(self.__dict__)
+        logging.info("Returning response:")
+        logging.info(self.__dict__)
+        return self.__dict__
 
 
 class InternalError(ResponseBase):
@@ -65,6 +68,16 @@ class BadRequest(ResponseBase):
 
         self.statusCode = 400
 
+        if(message is not None):
+            self.body = message
+            return
+
+
+class NotFound(ResponseBase):
+    def __init__(self, event, message: str = None, add_cors_headers: bool = True) -> None:
+        super().__init__(event, add_cors_headers)
+
+        self.statusCode = 404
         if(message is not None):
             self.body = message
             return
@@ -107,3 +120,13 @@ class NoContent(ResponseBase):
         if(message is not None):
             self.body = message
             return
+
+
+class Forbidden(ResponseBase):
+    def __init__(self, event, message: str = None, add_cors_headers: bool = True) -> None:
+        super().__init__(event, add_cors_headers)
+
+        self.statusCode = 403
+
+        if message is not None:
+            self.body = message

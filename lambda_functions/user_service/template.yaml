@@ -51,6 +51,25 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
 
+
+  LambdaIoTExecutionPolicy:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "detektivkollektiv-user_api-iot-policy-execution-user-service-${STAGE}" # Change for each Role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonRDSDataFullAccess
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+        - arn:aws:iam::aws:policy/AWSIoTFullAccess
+
   CreatUserFunction: # Change for each lambda
     Type: AWS::Serverless::Function
     Properties:
@@ -136,7 +155,7 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
-        
+
   GetUserRankingFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -163,6 +182,35 @@ Resources:
             Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  AttachIoTPolicyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-user_api-attach_iot_policy-${STAGE}"
+      CodeUri: .
+      Handler: attach_iot_policy.attach_iot_policy
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaIoTExecutionPolicy
+          - Arn
+      Events:
+        Echo:
+          Type: Api
+          Properties:
+            Path: /iot-policy
+            Method: post
+            RestApiId:
+              Ref: Api
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
       Layers:

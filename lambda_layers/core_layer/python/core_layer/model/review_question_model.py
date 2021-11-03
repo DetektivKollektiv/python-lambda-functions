@@ -22,6 +22,8 @@ class ReviewQuestion(Base):
     lower_bound = Column(Integer)
     upper_bound = Column(Integer)
     max_children = Column(Integer)
+    warning_tag = Column(String(50))
+    warning_tag_icon_code = Column(String(50))
 
     item_type_id = Column(String(36), ForeignKey(
         'item_types.id', ondelete='SET NULL', onupdate='CASCADE'))
