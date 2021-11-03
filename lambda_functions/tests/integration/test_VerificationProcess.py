@@ -16,6 +16,7 @@ from moto import mock_events
 def test_verification_process_best_case(monkeypatch):
     monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("MOTO", "1")
+    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
     with Session() as session:
         session = setup_scenarios.create_levels_junior_and_senior_detectives(
@@ -135,7 +136,8 @@ def test_verification_process_best_case(monkeypatch):
         session.expire_all()
 
 
-def test_verification_process_worst_case():
+def test_verification_process_worst_case(monkeypatch):
+    monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
     with Session() as session:
         session = setup_scenarios.create_levels_junior_and_senior_detectives(
