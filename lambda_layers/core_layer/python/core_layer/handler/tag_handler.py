@@ -67,12 +67,12 @@ def store_tag_for_item(item_id, str_tag, session, review_id=None):
     update_object(itemtag, session)
 
 
-def delete_itemtag_by_tag_and_item_id(tag: str, item_id: str, session):
+def delete_itemtag_by_tag_and_review_id(tag: str, review_id: str, session):
     """
     Deletes the itemtag for an item and tag
     """
     itemtag = session.query(ItemTag).join(Tag).filter(Tag.tag == tag,
-                                                      ItemTag.item_id == item_id).one()
+                                                      ItemTag.review_id == review_id).one()
     if itemtag != None:
         session.delete(itemtag)
         session.commit()

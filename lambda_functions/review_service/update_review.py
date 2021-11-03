@@ -1,4 +1,3 @@
-from typing import List
 from core_layer.event_publisher import EventPublisher
 from core_layer import helper
 from core_layer.db_handler import Session
@@ -100,7 +99,7 @@ def update_review(event, context):
                                                        is_review_comment=True
                                                        )
                     except Exception as e:
-                        return responses.InternalError(event, "Could not create tags for item", e, False).to_json_string()
+                        return responses.InternalError(event, "Could not create comment for item", e).to_json_string()
                 elif review.comment.comment != body['comment']:
                     review.comment.comment = body['comment']
                     session.merge(review)
@@ -118,8 +117,8 @@ def update_review(event, context):
                             review.item_id, tag, session, review.id)
 
                     for tag in tags_to_delete:
-                        tag_handler.delete_itemtag_by_tag_and_item_id(
-                            tag, review.item_id, session)
+                        tag_handler.delete_itemtag_by_tag_and_review_id(
+                            tag, review.id, session)
                 except Exception as e:
-                    return responses.InternalError(event, "Could not create tags for item", e, False).to_json_string()
+                    return responses.InternalError(event, "Could not create tags for item", e).to_json_string()
         return responses.Success(event, review.to_dict(with_questions_and_answers=True, with_tags=True)).to_json_string()

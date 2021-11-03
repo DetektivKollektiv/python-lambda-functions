@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 import traceback
@@ -30,6 +31,8 @@ class ResponseBase:
                     self.headers['Access-Control-Allow-Origin'] = source_origin
 
     def to_json_string(self):
+        logging.info("Returning response:")
+        logging.info(self.__dict__)
         return self.__dict__
 
 
