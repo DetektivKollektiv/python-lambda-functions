@@ -40,5 +40,6 @@ class Review(Base):
         if with_user:
             return_dict['user'] = self.user.name if self.user else None
         if with_tags:
-            return_dict['tags'] = [item_tag.tag.tag for item_tag in self.tags]
+            return_dict['tags'] = [
+                item_tag.tag.tag for item_tag in self.tags] if self.tags else []
         return return_dict

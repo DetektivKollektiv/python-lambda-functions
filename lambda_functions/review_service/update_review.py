@@ -109,8 +109,14 @@ def update_review(event, context):
                 try:
                     db_tags = [
                         item_tag.tag.tag for item_tag in tag_handler.get_item_tags_by_review_id(review.id, session)]
-                    tags_to_add = list(set(body['tags']) - set(db_tags))
-                    tags_to_delete = list(set(db_tags) - set(body['tags']))
+                    body_tags_upper = [tag.upper() for tag in body['tags']]
+                    db_tags_upper = [tag.upper() for tag in db_tags]
+                    tags_to_add = [tag for tag in body['tags']
+                                   if tag.upper() not in db_tags_upper]
+                    tags_to_delete = [
+                        tag for tag in db_tags if tag.upper() not in body_tags_upper]
+                    # tags_to_add = list(set(body['tags']) - set(db_tags))
+                    # tags_to_delete = list(set(db_tags) - set(body['tags']))
 
                     for tag in tags_to_add:
                         tag_handler.store_tag_for_item(
