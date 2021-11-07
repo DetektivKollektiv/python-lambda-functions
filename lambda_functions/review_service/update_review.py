@@ -115,9 +115,6 @@ def update_review(event, context):
                                    if tag.upper() not in db_tags_upper]
                     tags_to_delete = [
                         tag for tag in db_tags if tag.upper() not in body_tags_upper]
-                    # tags_to_add = list(set(body['tags']) - set(db_tags))
-                    # tags_to_delete = list(set(db_tags) - set(body['tags']))
-
                     for tag in tags_to_add:
                         tag_handler.store_tag_for_item(
                             review.item_id, tag, session, review.id)
