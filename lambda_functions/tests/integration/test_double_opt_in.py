@@ -89,7 +89,7 @@ def test_mail_confirmation(submission_id, item, monkeypatch):
         
         submission = session.query(Submission).filter(
             Submission.id == submission_id).one()
-        # Add you mail adress here in local testing mode
+        # Add your mail address here in local testing mode
         submission.mail = "test@test.de"
         
         session.merge(submission)

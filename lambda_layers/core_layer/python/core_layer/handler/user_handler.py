@@ -8,6 +8,7 @@ from core_layer import helper
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
 from core_layer.model.review_model import Review
+from core_layer.model.mail_model import Mail
 
 
 def get_user_by_id(id, session):
@@ -335,3 +336,33 @@ def get_solved_cases(user: User, today: bool, session) -> int:
         ).count()
 
     return count
+
+
+def confirm_mail_subscription(user_id, session):
+    """Set mail status in mail_model to 'confirmed'
+
+    Parameters
+    ----------
+    user_id: required
+        The user_id whose mail status it to set to confirmed
+    """
+    
+    mail_obj = session.query(Mail).filter(Mail.user_id == user_id).one()
+    mail_obj.status = 'confirmed'
+
+    update_object(mail_obj, session)
+
+
+def unsubscribe_mail(user_id, session):
+    """Set mail status in mail_model to 'unsubscribed'
+
+    Parameters
+    ----------
+    user_id: required
+        The user_id to be unsubscribed
+    """
+    
+    mail_obj = session.query(Mail).filter(Mail.user_id == user_id).one()
+    mail_obj.status = 'unsubscribed'
+
+    update_object(mail_obj, session)
