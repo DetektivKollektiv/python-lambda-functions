@@ -106,6 +106,11 @@ def test_update_review(item_id, junior_user_id, senior_user_id, monkeypatch):
         assert 'tags' in response_body
         assert len(response_body['tags']) == 0
 
+        event = event_creator.get_review_event(
+            review, item_id, "closed", junior_user_id, 1, tags=None)
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200
+
         # Test not existing review
         fake_review = review
         fake_review.id = "fake"

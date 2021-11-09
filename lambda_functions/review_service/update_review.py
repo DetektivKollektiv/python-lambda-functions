@@ -57,7 +57,7 @@ def update_review(event, context):
                 if review.item.status == 'closed':
                     EventPublisher().publish_event('codetekt.review_service',
                                                    'item_closed', {'item_id': review.item.id})
-                return responses.Success(event, review.to_dict(with_questions_and_answers=True, with_tags=True)).to_json_string()
+                return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()
             except:
                 return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
 
