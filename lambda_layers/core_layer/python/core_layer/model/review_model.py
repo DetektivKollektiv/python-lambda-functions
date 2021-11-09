@@ -33,7 +33,7 @@ class Review(Base):
             "start_timestamp": str(self.start_timestamp),
             "finish_timestamp": str(self.finish_timestamp)
         }
-        return_dict['comment'] = self.comment.comment if self.comment is not None else None
+        return_dict['comment'] = self.comment.comment if self.comment else None
         if with_questions_and_answers:
             return_dict['questions'] = [review_answer.to_dict_with_questions_and_answers()
                                         for review_answer in self.review_answers]

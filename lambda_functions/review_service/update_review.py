@@ -105,7 +105,9 @@ def update_review(event, context):
                     session.merge(review)
 
         if 'tags' in body:
-            if isinstance(body['tags'], list) and len(body['tags']) > 0:
+            if body['tags'] is None:
+                body['tags'] = []
+            if isinstance(body['tags'], list):
                 try:
                     db_tags = [
                         item_tag.tag.tag for item_tag in tag_handler.get_item_tags_by_review_id(review.id, session)]
