@@ -33,8 +33,7 @@ def handle_item_closed(event, context):
                 return BadRequest(event,
                                   f"No item was found with the given item_id [{item_id}].", add_cors_headers=False).to_json_string()
 
-            # TODO: This implementation is not ideal: 1.55 is rounded to 1.5. However, 1.56 is correctly rounded to 1.6.
-            rating = round(item.result_score, 1)
+            rating = int(item.result_score * 25)
             rating_text = get_rating_text(rating)
 
             parameters = dict(
@@ -62,12 +61,12 @@ def handle_item_closed(event, context):
         return InternalError(event, "Error sending notification", e, add_cors_headers=False).to_json_string()
 
 
-def get_rating_text(rating: float) -> str:
-    if 2 <= rating < 3:
+def get_rating_text(rating: int) -> str:
+    if 34 <= rating < 67:
         return "eher nicht vertrauenswürdig"
-    elif 3 <= rating < 3.5:
+    elif 67 <= rating < 84:
         return "eher vertrauenswürdig"
-    elif rating >= 3.5:
+    elif rating >= 84:
         return "vertrauenswürdig"
     else:
         return "nicht vertrauenswürdig"
