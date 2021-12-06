@@ -11,8 +11,8 @@ class Mail(Base):
     __tablename__ = 'mails'
     id = Column(String(36), primary_key = True)
     timestamp = Column(DateTime, server_default = func.now())
-    email = Column(String)
-    status = Column(String, default = 'unconfirmed') # e.g. unconfirmed, confirmed, unsubscribed
+    email = Column(String(100))
+    status = Column(String(100), default = 'unconfirmed') # e.g. unconfirmed, confirmed, unsubscribed
 
     # Relationships
     # one-to-one
