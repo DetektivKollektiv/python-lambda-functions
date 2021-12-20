@@ -366,3 +366,18 @@ def unsubscribe_mail(user_id, session):
     mail_obj.status = 'unsubscribed'
 
     update_object(mail_obj, session)
+
+
+def delete_unconfirmed_mails(session):
+
+    two_days_ago = helper.get_date_time(datetime.now() - timedelta(days=2))
+    mails = session.query(Mail).filter(
+        Mail.status == 'unconfirmed', Mail.timestamp < two_days_ago).all()
+    counter = 0
+    for mail in mails:
+        session.delete(mail)
+        session.commit
+        counter += 1
+
+    session.commit()
+    return counter
