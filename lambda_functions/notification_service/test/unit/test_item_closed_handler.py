@@ -8,23 +8,22 @@ def test_no_item_id(monkeypatch):
     event = {}
 
     response = item_closed_handler.handle_item_closed(event, None)
-    response_dict = json.loads(response)
-    assert response_dict['statusCode'] == 400
+    # response_dict = json.loads(response)
+    assert response['statusCode'] == 400
 
 
 def test_wrong_item_id(monkeypatch):
     event = {"detail": {"item_id": "e9e376b5-0444-4eff-a7af-a3189ba2291e"}}
 
     response = item_closed_handler.handle_item_closed(event, None)
-    response_dict = json.loads(response)
-    assert response_dict['statusCode'] == 400
+    assert response['statusCode'] == 400
 
 
 testdata = [
     (1, "nicht vertrauenswürdig"),
-    (2, "eher nicht vertrauenswürdig"),
-    (3, "eher vertrauenswürdig"),
-    (4, "vertrauenswürdig")
+    (40, "eher nicht vertrauenswürdig"),
+    (83, "eher vertrauenswürdig"),
+    (84, "vertrauenswürdig")
 ]
 
 
