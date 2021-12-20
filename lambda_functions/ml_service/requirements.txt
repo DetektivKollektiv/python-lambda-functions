@@ -59,7 +59,7 @@ soupsieve==2.1
     #   beautifulsoup4
 typing-extensions==3.7.4.3
     # via aiohttp
-urllib3==1.25.11
+urllib3==1.26.6
     # via
     #   -r requirements.in
     #   requests

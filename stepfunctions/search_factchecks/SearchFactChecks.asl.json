@@ -1,6 +1,6 @@
           {
             "Comment": "A simple AWS Step Functions state machine that enriches an item with additional information about the content to support the detectives.",
-            "Comment": "This Step Function expects an item as input in the event, e.g.: { item: {id: 1234, content: At the university...}}",
+            "Comment": "This Step Function expects a stored item as input and the content in the event, e.g.: { item: {id: 1234, content: At the university...}}",
             "Comment": "At the university hospital in Toulouse, France, there are four very critical cases of coronavirus in [young people] who do not have any health problems. Their problem is that when they all appeared to have symptoms, they all took painkillers like ibuprofen",
             "StartAt": "Extract Claim",
             "States": {
@@ -16,24 +16,6 @@
                   }
                 ],
                 "ResultPath": "$.Claim",
-                "Next": "Store Item URL"
-              },
-              "Store Item URL": {
-                "Type": "Task",
-                "Resource": "arn:aws:lambda:eu-central-1:891514678401:function:detektivkollektiv-ml_api-StoreItemURL-${STAGE}",
-                "Catch": [
-                  {
-                    "ErrorEquals": [
-                      "States.TaskFailed"
-                    ],
-                    "Next": "EnrichmentFailed"
-                  }
-                ],
-                "Parameters": {
-                  "item.$": "$.item",
-                  "Claim.$": "$.Claim"
-                },
-                "ResultPath": null,
                 "Next": "Detect Dominant Language"
               },
               "Detect Dominant Language": {

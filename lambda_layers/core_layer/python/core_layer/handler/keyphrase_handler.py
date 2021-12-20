@@ -1,8 +1,7 @@
-from core_layer.connection_handler import get_db_session
 from core_layer.model.keyphrase_model import Keyphrase, ItemKeyphrase
 
 
-def get_phrases_by_itemid_db(item_id, is_test, session):
+def get_phrases_by_itemid_db(item_id, session):
     """Returns the key phrases for an item
 
         Returns
@@ -10,7 +9,7 @@ def get_phrases_by_itemid_db(item_id, is_test, session):
         phrases: Keyphrase[]
         Null, if no entity was found
     """
-    session = get_db_session(is_test, session)
+
     phrases = session.query(Keyphrase).\
         join(ItemKeyphrase).\
         filter(ItemKeyphrase.item_id == item_id).\
@@ -19,7 +18,7 @@ def get_phrases_by_itemid_db(item_id, is_test, session):
     return phrases
 
 
-def get_phrase_by_content(content, is_test, session):
+def get_phrase_by_content(content, session):
     """Returns a keyphrase with the specified content from the database
 
         Returns
@@ -28,7 +27,7 @@ def get_phrase_by_content(content, is_test, session):
             A key phrase of an item
         Null, if no key phrase was found
         """
-    session = get_db_session(is_test, session)
+
     phrase = session.query(Keyphrase).filter(
         Keyphrase.phrase == content).first()
     if phrase is None:
@@ -36,7 +35,7 @@ def get_phrase_by_content(content, is_test, session):
     return phrase
 
 
-def get_itemphrase_by_phrase_and_item_id(phrase_id, item_id, is_test, session):
+def get_itemphrase_by_phrase_and_item_id(phrase_id, item_id, session):
     """Returns the itemkeyphrase for an item and keyphrase
 
         Returns
@@ -44,20 +43,20 @@ def get_itemphrase_by_phrase_and_item_id(phrase_id, item_id, is_test, session):
         itemphrase: ItemKeyphrase
         Null, if no itemphrase was found
     """
-    session = get_db_session(is_test, session)
+
     itemphrase = session.query(ItemKeyphrase).filter(ItemKeyphrase.keyphrase_id == phrase_id,
                                                      ItemKeyphrase.item_id == item_id).first()
     if itemphrase is None:
         raise Exception("No ItemKeyphrase found.")
     return itemphrase
 
-def get_all_keyphrases(is_test, session):
+
+def get_all_keyphrases(session):
     """Returns all keyphrases
 
     Returns:
         [Keyphrase]: A list of Keyphrase objects
     """
-    session = get_db_session(is_test, session)
 
     query = session.query(Keyphrase)
     return query.all()

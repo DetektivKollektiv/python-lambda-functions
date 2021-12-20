@@ -1,15 +1,9 @@
 from core_layer.model.user_model import User
-from core_layer.model.item_model import Item
 from core_layer.model.level_model import Level
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.item_type_model import ItemType
 from core_layer.handler import user_handler
-
-import pytest
 from datetime import datetime, timedelta
-from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, Session, sessionmaker
-from ..helper import event_creator
 
 # TODO: extract functions to create entities (e.g. create_level) - maybe move them to separate file
 
@@ -18,6 +12,7 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
     """
     Creates a level object
     """
+
     level = Level()
     level.id = id
     level.description = desc
@@ -26,7 +21,7 @@ def create_level(id: int, desc: str, req_exp: int) -> Level:
     return level
 
 
-def create_users_for_ranking(session) -> Session:
+def create_users_for_ranking(session):
     """ 
     Creates My Detective looking up ranking and his own position
     3 different Levels (Junior, Senior, Master)
@@ -53,7 +48,7 @@ def create_users_for_ranking(session) -> Session:
     my_detective = User()
     my_detective.id = "999"
     my_detective.name = "MyDetektiv"
-    user_handler.create_user(my_detective, True, session)
+    user_handler.create_user(my_detective, session)
     my_detective.level_id = 2
     my_detective.experience_points = 35
     my_detective.sign_up_timestamp = datetime.today()
@@ -63,7 +58,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(1, 21):
         junior_user = User()
         junior_user.id = str(i)
-        junior_user = user_handler.create_user(junior_user, True, session)
+        junior_user = user_handler.create_user(junior_user, session)
         junior_user.name = "JuniorUser" + str(i)
         junior_user.level_id = level1_id
         junior_user.experience_points = i
@@ -72,7 +67,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(21, 41):
         senior_user = User()
         senior_user.id = str(i)
-        senior_user = user_handler.create_user(senior_user, True, session)
+        senior_user = user_handler.create_user(senior_user, session)
         senior_user.name = "SeniorUser" + str(i)
         senior_user.level_id = level2_id
         senior_user.experience_points = i
@@ -81,7 +76,7 @@ def create_users_for_ranking(session) -> Session:
     for i in range(41, 61):
         master_user = User()
         master_user.id = str(i)
-        master_user = user_handler.create_user(master_user, True, session)
+        master_user = user_handler.create_user(master_user, session)
         master_user.name = "MasterUser" + str(i)
         master_user.level_id = level3_id
         master_user.experience_points = i
@@ -104,78 +99,74 @@ def create_levels_junior_and_senior_detectives(session):
     """
 
     # Create three levels
+
     level1 = create_level(1, "Junior", 0)
     level2 = create_level(2, "Senior", 5)
-    level3 = create_level(3, "master", 10)
+    level3 = create_level(3, "Master", 10)
 
     session.add(level1)
     session.add(level2)
     session.add(level3)
 
-    # Create 4 level-1-detectives
+    # Create 5 level-1-detectives
     junior_detective1 = User()
     junior_detective1.id = "1"
     junior_detective1.name = "Junior1"
-    user_handler.create_user(junior_detective1, True, session)
+    user_handler.create_user(junior_detective1, session)
 
     junior_detective2 = User()
     junior_detective2.id = "2"
     junior_detective2.name = "Junior2"
-    user_handler.create_user(junior_detective2, True, session)
+    user_handler.create_user(junior_detective2, session)
 
     junior_detective3 = User()
     junior_detective3.id = "3"
     junior_detective3.name = "Junior3"
-    user_handler.create_user(junior_detective3, True, session)
+    user_handler.create_user(junior_detective3, session)
 
     junior_detective4 = User()
     junior_detective4.id = "4"
     junior_detective4.name = "Junior4"
-    user_handler.create_user(junior_detective4, True, session)
+    user_handler.create_user(junior_detective4, session)
 
     junior_detective5 = User()
     junior_detective5.id = "5"
     junior_detective5.name = "Junior5"
-    user_handler.create_user(junior_detective5, True, session)
+    user_handler.create_user(junior_detective5, session)
 
-    # Create 4 level-2-detectives
+    # Create 5 level-2-detectives
     senior_detective1 = User()
     senior_detective1.id = "11"
     senior_detective1.name = "Senior1"
-    senior_detective1 = user_handler.create_user(
-        senior_detective1, True, session)
+    senior_detective1 = user_handler.create_user(senior_detective1, session)
     senior_detective1.level_id = 2
     senior_detective1.experience_points = 5
 
     senior_detective2 = User()
     senior_detective2.id = "12"
     senior_detective2.name = "Senior2"
-    senior_detective2 = user_handler.create_user(
-        senior_detective2, True, session)
+    senior_detective2 = user_handler.create_user(senior_detective2, session)
     senior_detective2.level_id = 2
     senior_detective2.experience_points = 5
 
     senior_detective3 = User()
     senior_detective3.id = "13"
     senior_detective3.name = "Senior3"
-    senior_detective3 = user_handler.create_user(
-        senior_detective3, True, session)
+    senior_detective3 = user_handler.create_user(senior_detective3, session)
     senior_detective3.level_id = 2
     senior_detective3.experience_points = 5
 
     senior_detective4 = User()
     senior_detective4.id = "14"
     senior_detective4.name = "Senior4"
-    senior_detective4 = user_handler.create_user(
-        senior_detective4, True, session)
+    senior_detective4 = user_handler.create_user(senior_detective4, session)
     senior_detective4.level_id = 2
     senior_detective4.experience_points = 5
 
     senior_detective5 = User()
     senior_detective5.id = "15"
     senior_detective5.name = "Senior5"
-    senior_detective5 = user_handler.create_user(
-        senior_detective5, True, session)
+    senior_detective5 = user_handler.create_user(senior_detective5, session)
     senior_detective5.level_id = 2
     senior_detective5.experience_points = 5
 
@@ -202,6 +193,8 @@ def create_questions(session):
     parentquestion1.info = "1"
     parentquestion1.max_children = 2
     parentquestion1.item_type = item_type1
+    parentquestion1.warning_tag = 'PQ1 warning'
+    parentquestion1.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1a = ReviewQuestion()
     childquestion1a.id = "1a"
@@ -211,6 +204,8 @@ def create_questions(session):
     childquestion1a.lower_bound = 3
     childquestion1a.max_children = 0
     childquestion1a.item_type = item_type1
+    childquestion1a.warning_tag = 'CQ1a warning'
+    childquestion1a.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1b = ReviewQuestion()
     childquestion1b.id = "1b"
@@ -220,6 +215,8 @@ def create_questions(session):
     childquestion1b.lower_bound = 1
     childquestion1b.max_children = 0
     childquestion1b.item_type = item_type1
+    childquestion1b.warning_tag = 'CQ1b warning'
+    childquestion1b.warning_tag_icon_code = 'fas fa-link'
 
     childquestion1c = ReviewQuestion()
     childquestion1c.id = "1c"
@@ -229,12 +226,16 @@ def create_questions(session):
     childquestion1c.lower_bound = 2
     childquestion1c.max_children = 0
     childquestion1c.item_type = item_type1
+    childquestion1c.warning_tag = 'CQ1c warning'
+    childquestion1c.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion2 = ReviewQuestion()
     parentquestion2.id = "2"
     parentquestion2.info = "2"
     parentquestion2.max_children = 1
     parentquestion2.item_type = item_type1
+    parentquestion2.warning_tag = 'PQ2 warning'
+    parentquestion2.warning_tag_icon_code = 'fas fa-link'
 
     childquestion2a = ReviewQuestion()
     childquestion2a.id = "2a"
@@ -244,6 +245,8 @@ def create_questions(session):
     childquestion2a.lower_bound = 3
     childquestion2a.max_children = 0
     childquestion2a.item_type = item_type1
+    childquestion2a.warning_tag = 'CQ2a warning'
+    childquestion2a.warning_tag_icon_code = 'fas fa-link'
 
     childquestion2b = ReviewQuestion()
     childquestion2b.id = "2b"
@@ -253,54 +256,72 @@ def create_questions(session):
     childquestion2b.lower_bound = 1
     childquestion2b.max_children = 0
     childquestion2b.item_type = item_type1
+    childquestion2b.warning_tag = 'CQ2b warning'
+    childquestion2b.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion3 = ReviewQuestion()
     parentquestion3.id = "3"
     parentquestion3.info = "3"
     parentquestion3.max_children = 0
     parentquestion3.item_type = item_type1
+    parentquestion3.warning_tag = 'PQ3 warning'
+    parentquestion3.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion4 = ReviewQuestion()
     parentquestion4.id = "4"
     parentquestion4.info = "4"
     parentquestion4.max_children = 0
     parentquestion4.item_type = item_type1
+    parentquestion4.warning_tag = 'PQ4 warning'
+    parentquestion4.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion5 = ReviewQuestion()
     parentquestion5.id = "5"
     parentquestion5.info = "5"
     parentquestion5.max_children = 0
     parentquestion5.item_type = item_type1
+    parentquestion5.warning_tag = 'PQ5 warning'
+    parentquestion5.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion6 = ReviewQuestion()
     parentquestion6.id = "6"
     parentquestion6.info = "6"
     parentquestion6.max_children = 0
     parentquestion6.item_type = item_type1
+    parentquestion6.warning_tag = 'PQ6 warning'
+    parentquestion6.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion7 = ReviewQuestion()
     parentquestion7.id = "7"
     parentquestion7.info = "7"
     parentquestion7.max_children = 0
     parentquestion7.item_type = item_type1
+    parentquestion7.warning_tag = 'PQ7 warning'
+    parentquestion7.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion8 = ReviewQuestion()
     parentquestion8.id = "8"
     parentquestion8.info = "8"
     parentquestion8.max_children = 0
     parentquestion8.item_type = item_type1
+    parentquestion8.warning_tag = 'PQ8 warning'
+    parentquestion8.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion9 = ReviewQuestion()
     parentquestion9.id = "9"
     parentquestion9.info = "9"
     parentquestion9.max_children = 0
     parentquestion9.item_type = item_type1
+    parentquestion9.warning_tag = 'PQ9 warning'
+    parentquestion9.warning_tag_icon_code = 'fas fa-link'
 
     parentquestion10 = ReviewQuestion()
     parentquestion10.id = "10"
     parentquestion10.info = "10"
     parentquestion10.max_children = 0
     parentquestion10.item_type = item_type1
+    parentquestion10.warning_tag = 'PQ10 warning'
+    parentquestion10.warning_tag_icon_code = 'fas fa-link'
 
     other_type_question = ReviewQuestion()
     other_type_question.id = "other_type"

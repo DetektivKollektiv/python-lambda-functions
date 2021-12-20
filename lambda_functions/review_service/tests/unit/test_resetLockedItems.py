@@ -1,22 +1,14 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session, sessionmaker
-
-from core_layer.model.review_model import Review
-from core_layer.model.item_model import Item
-
-import pytest
-from core_layer.handler import user_handler, item_handler
-from core_layer import helper
-
 from datetime import datetime, timedelta
-from ...reset_locked_items import reset_locked_items
+
+from core_layer.db_handler import Session
 
 from core_layer.model import Review
 from core_layer.model import ReviewPair
 from core_layer.model import Item
-
-from core_layer.connection_handler import get_db_session, update_object
+from core_layer.handler import item_handler
+from ...reset_locked_items import reset_locked_items
 
 
 @pytest.fixture
@@ -59,33 +51,30 @@ def pair(old_junior_review, new_senior_review):
     return pair
 
 
-@pytest.fixture
-def session(item, pair, old_junior_review, new_senior_review):
-    session = get_db_session(True, None)
-    session.add(item)
-    session.add(old_junior_review)
-    session.add(new_senior_review)
-    session.add(pair)
-    session.commit()
+def test_reset_locked_items(item, pair, old_junior_review, new_senior_review):
 
-    return session
+    with Session() as session:
 
+        session.add(item)
+        session.add(old_junior_review)
+        session.add(new_senior_review)
+        session.add(pair)
+        session.commit()
+        
+        rips = session.query(Review).all()
+        assert len(rips) == 2
+        
+        response = reset_locked_items(None, None)
+        assert response['statusCode'] == 200
+        assert "1" in response['body']        
 
-def test_reset_locked_items(session, item, pair, old_junior_review, new_senior_review):
-
-    rips = session.query(Review).all()
-    assert len(rips) == 2
-
-    response = reset_locked_items(None, None, True, session)
-    assert response['statusCode'] == 200
-    assert "1" in response['body']
-
-    rips = session.query(Review).all()
-    assert len(rips) == 1
-    item = item_handler.get_item_by_id(item.id, True, session)
-    assert item.in_progress_reviews_level_2 == 1
-    assert item.in_progress_reviews_level_1 == 0
-
-    session.refresh(pair)
-    assert pair.junior_review_id == None
-    assert pair.senior_review_id == new_senior_review.id
+        rips = session.query(Review).all()
+        assert len(rips) == 1        
+        item = item_handler.get_item_by_id(item.id, session)
+        assert item.in_progress_reviews_level_2 == 1
+        assert item.in_progress_reviews_level_1 == 0
+        
+        # reload object instead of refreshing the session
+        pair = session.query(ReviewPair).one()
+        assert pair.junior_review_id == None        
+        assert pair.senior_review_id == new_senior_review.id

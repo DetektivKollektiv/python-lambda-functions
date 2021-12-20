@@ -1,14 +1,13 @@
 import logging
 import json
-import time
 import boto3
-import base64
 import re
 from botocore.exceptions import ClientError
 from uuid import uuid4
 import os
 import requests
 from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
+from core_layer.helper import get_google_api_key
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -21,60 +20,7 @@ bucket_prefix = "factchecks-"
 newfactchecks_folder = "new/"
 
 
-# If you need more information about configurations or implementing the sample code, visit the AWS docs:
-# https://aws.amazon.com/developers/getting-started/python/
-def get_secret():
-    secret_name = "google/api_key"
-    region_name = "eu-central-1"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
-    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-    # We rethrow the exception by default.
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'DecryptionFailureException':
-            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
-            # An error occurred on the server side.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InvalidParameterException':
-            # You provided an invalid value for a parameter.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InvalidRequestException':
-            # You provided a parameter value that is not valid for the current state of the resource.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
-            # We can't find the resource that you asked for.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-    else:
-        # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
-        if 'SecretString' in get_secret_value_response:
-            secret = get_secret_value_response['SecretString']
-            return json.loads(secret)['Google_API_KEY']
-        else:
-            decoded_binary_secret = base64.b64decode(
-                get_secret_value_response['SecretBinary'])
-            return decoded_binary_secret
-
 # return bucket name for storing factchecks and models
-
 
 def get_factcheckBucketName():
     bucket_name = bucket_prefix+os.environ['STAGE']
@@ -95,7 +41,7 @@ async def call_googleapi(session, search_terms, language_code):
         # query += "\"" + term + "\" "
         query += term + " "
     parameters = {"query": query, "languageCode": language_code,
-                  "pageSize": pageSize, "key": get_secret()}
+                  "pageSize": pageSize, "key": get_google_api_key()}
     response = await session.get("https://factchecktools.googleapis.com/v1alpha1/claims:search", params=parameters)
 
     return await response.json(), search_terms

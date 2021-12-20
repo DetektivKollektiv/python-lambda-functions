@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENTMODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
@@ -76,6 +78,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -84,6 +88,8 @@ Resources:
             Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
+
 
   GetItemTypesFunction: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -110,6 +116,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -144,6 +152,8 @@ Resources:
               Authorizer: NONE
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -175,6 +185,8 @@ Resources:
             Schedule: rate(1 hour)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
       Layers:

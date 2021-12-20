@@ -1,13 +1,13 @@
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from ml_service import GetEntities, GetTags, UpdateFactChecks, EnrichItem
 from core_layer.model.item_model import Item
 from core_layer.handler import item_handler
-import pytest
 import os
 import random
+import time
 
 
-class TestGetEntities:
+class TestGetEntities:    
     def test_get_entities_1(self):
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
@@ -18,7 +18,7 @@ class TestGetEntities:
         context = ""
         ret = GetEntities.get_entities(event, context)
         assert ret == ['Toulouse, France', 'four very critical cases']
-
+    
     def test_get_entities_2(self):
         event = {
             "Text": "At the university hospital in Toulouse, France, there are four very critical cases of "
@@ -164,7 +164,7 @@ class TestGetEntities:
         assert ret == ['26. Juni 2020', 'Deutschland', '0,01 Prozent']
 
 
-class TestGetTags:
+class TestGetTags:    
     def test_get_tags_1(self):
         event = {
             "Text": "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition ",
@@ -172,7 +172,7 @@ class TestGetTags:
         }
         context = ""
         ret = GetEntities.get_tags(event, context)
-        assert ret == ['RKI', 'Covid', 'Corona Transition']
+        assert ret == ['RKI', 'Covid', 'Corona Transition']    
 
     def test_predict_tags_1(self):
         os.environ["STAGE"] = "dev"
@@ -186,7 +186,7 @@ class TestGetTags:
             context = ""
             ret = GetTags.predict_tags(event, context)
             assert ret != []
-        
+
     def test_predict_tags_2(self):
         os.environ["STAGE"] = "dev"
         LanguageCode = "de"
@@ -222,7 +222,7 @@ class TestGetTags:
         assert ret == ["Masken"]
 
     def test_predict_tags_4(self):
-        os.environ["STAGE"] = "dev"
+        os.environ["STAGE"] = "qa"
         LanguageCode = "de"
         taxonomy_json = GetTags.download_taxonomy(LanguageCode)
         df_factchecks = UpdateFactChecks.read_df("factchecks_de.csv")
@@ -274,26 +274,30 @@ class TestGetTags:
         ret = GetTags.predict_tags(event, context)
         assert ret == []
 
-    def test_create_tagreport_1(self, monkeypatch):
-        monkeypatch.setenv("DBNAME", "Test")
+    def test_create_tagreport_1(self):
         os.environ["STAGE"] = "dev"
 
-        session = get_db_session(True, None)
+        with Session() as session:
 
-        # creating items
-        item = Item()
-        item.content = "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition "
-        item.language = "de"
-        item = item_handler.create_item(item, True, session)
-        list_tags = ['Corona-Maßnahmen', 'Senkung der Treibhausgasemissionen', 'Kanzlerkandidatur', 'sars-cov-2', '#verunglimpft', 'g.co/privacytools', 'Gregor Gysi', 'Bundestagswahl2021', '19', '-', 'Statistik falsch interpretiert', 'Bild.de', 'JF', 'MdB Hansjörg Müller (AFD)', '100 Tage', 'Gruene', '#notwendige Polizeimaßnahmen', 'Sonne']
-        # store tags
-        event = {
-            "item": item.to_dict(),
-            "Tags": list_tags
-        }
-        context = ""
-        EnrichItem.store_itemtags(event, context, True, session)
+            # creating items
+            item = Item()
+            item.content = "RKI bestätigt Covid-19 Sterblichkeitsrate von 0,01 Prozent in (...) - Corona Transition "
+            item.language = "de"
+            item = item_handler.create_item(item, session)
+            list_tags = ['Corona-Maßnahmen', 'Senkung der Treibhausgasemissionen', 'China', 'Film', 'Menschen', 'Kanzlerkandidatur', 'sars-cov-2', '#verunglimpft', 'g.co/privacytools', 'Gregor Gysi', 'Bundestagswahl2021', '19', '-', 'Statistik falsch interpretiert', 'Bild.de', 'JF', 'MdB Hansjörg Müller (AFD)', '100 Tage', 'Gruene', '#notwendige Polizeimaßnahmen', 'Sonne']
+            for _ in range(200):
+                list_tags.append(random.choice(list_tags)+"-"+random.choice(list_tags))
+            # store tags
+            event = {
+                "item": item.to_dict(),
+                "Tags": list_tags
+            }
+            context = ""
+            EnrichItem.store_itemtags(event, context)
 
-        event = ""
-        context = ""
-        GetTags.create_tagreport(event, context, True, session)
+            event = ""
+            context = ""
+            s = time.perf_counter()
+            GetTags.create_tagreport(event, context)
+            elapsed = time.perf_counter() - s
+            assert elapsed < 30

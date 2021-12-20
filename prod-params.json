@@ -1,8 +1,10 @@
 {
   "Parameters": {
+    "DEPLOYMENTMODE": "pipeline",
     "STAGE": "prod",
     "DBNAME": "prod_db",
     "CorsAllowOrigin": "https://codetekt.org,https://www.codetekt.org",
-    "CorsAllowOriginAdmin": "https://codetekt.org,https://www.codetekt.org,https://admin.codetekt.org,https://www.admin.codetekt.org"
+    "CorsAllowOriginAdmin": "https://codetekt.org,https://www.codetekt.org,https://admin.codetekt.org,https://www.admin.codetekt.org",
+    "NotificationTemplateBucket": "codetekt-notification-templates-prod"
   }
 }

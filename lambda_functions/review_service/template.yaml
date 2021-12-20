@@ -9,6 +9,8 @@ Globals:
     OpenApiVersion: 3.0.1
 
 Parameters:
+  DEPLOYMENTMODE:
+    Type: String
   STAGE:
     Type: String
   CorsAllowOrigin:
@@ -48,6 +50,7 @@ Resources:
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonSESFullAccess
+        - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
 
   GetOpenItemsFunction: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -72,6 +75,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -102,6 +107,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -132,6 +139,8 @@ Resources:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -156,12 +165,14 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /reviews/{review_id} # Change for each lambda
+            Path: /review # Change for each lambda
             Method: get # Change for each lambda
             RestApiId:
               Ref: Api
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
           CORS_ALLOW_ORIGIN:
@@ -191,6 +202,8 @@ Resources:
             Schedule: rate(10 minutes)
       Environment:
         Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
           DBNAME:
             Ref: DBNAME
       Layers:

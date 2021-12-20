@@ -4,14 +4,14 @@ from uuid import uuid4
 from sqlalchemy import func
 from datetime import timedelta, datetime
 from submission_service.anonymize_unconfirmed_submissions import anonymize_unconfirmed_submissions
-from core_layer.connection_handler import get_db_session
+from core_layer.db_handler import Session
 from core_layer import helper
 
 
 @pytest.fixture
 def submission1():
     three_days_ago = helper.get_date_time(
-        datetime.now() - timedelta(days=3), True)
+        datetime.now() - timedelta(days=3))
 
     submission = Submission()
     submission.id = str(uuid4())
@@ -29,20 +29,18 @@ def submission2():
     return submission
 
 
-@pytest.fixture
-def session(submission1, submission2):
-    session = get_db_session(True, None)
-    session.add(submission1)
-    session.add(submission2)
-    session.commit()
-    return session
+def test_mail_anonymization(submission1, submission2):
 
+    with Session() as session:
 
-def test_mail_anonymization(session):
-    submissions = session.query(Submission).filter(
-        Submission.mail == None).all()
-    assert len(submissions) == 0
-    anonymize_unconfirmed_submissions(None, None, True, session)
-    submissions = session.query(Submission).filter(
-        Submission.mail == None).all()
-    assert len(submissions) == 1
+        session.add(submission1)
+        session.add(submission2)
+        session.commit()
+
+        submissions = session.query(Submission).filter(
+            Submission.mail == None).all()
+        assert len(submissions) == 0
+        anonymize_unconfirmed_submissions(None, None)
+        submissions = session.query(Submission).filter(
+            Submission.mail == None).all()
+        assert len(submissions) == 1

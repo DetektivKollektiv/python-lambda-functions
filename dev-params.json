@@ -1,8 +1,10 @@
 {
   "Parameters": {
+    "DEPLOYMENTMODE": "pipeline",
     "STAGE": "dev",
     "DBNAME": "development_db",
     "CorsAllowOrigin": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org",
-    "CorsAllowOriginAdmin": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org,https://dev.admin.codetekt.org,https://www.dev.admin.codetekt.org"
+    "CorsAllowOriginAdmin": "http://localhost:4200,https://dev.codetekt.org,https://www.dev.codetekt.org,https://dev.admin.codetekt.org,https://www.dev.admin.codetekt.org",
+    "NotificationTemplateBucket": "codetekt-notification-templates-dev"
   }
 }

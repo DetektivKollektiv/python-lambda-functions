@@ -1,20 +1,19 @@
+from core_layer.event_publisher import EventPublisher
+from core_layer import helper
+from core_layer.db_handler import Session
+from core_layer.handler import user_handler, review_handler, review_answer_handler, comment_handler, tag_handler
+from core_layer import responses
 import logging
 import json
 import traceback
-from core_layer import helper
-from core_layer import connection_handler
-from core_layer.handler import user_handler, item_handler, review_handler, review_answer_handler
-import notifications
 
 
-def update_review(event, context, is_test=False, session=None):
+def update_review(event, context):
     """Updates an existing review
 
     Args:
         event: AWS API Gateway event
-        context ([type]): [description]
-        is_test (bool, optional): Whether the function is executed in test mode. Defaults to False.
-        session (optional): An sql alchemy session. Defaults to None.
+        context ([type]): [description].
 
     Returns
     ------
@@ -24,84 +23,107 @@ def update_review(event, context, is_test=False, session=None):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
-    helper.log_method_initiated("Create Review", event, logger)
-
-    if session == None:
-        session = connection_handler.get_db_session(False, None)
+    helper.log_method_initiated("Update Review", event, logger)
 
     try:
         user_id = helper.cognito_id_from_event(event)
         body = json.loads(event['body']) if isinstance(
             event['body'], str) else event['body']
-
     except:
-        return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
+        return responses.BadRequest(event, "Malformed request. Please provide a valid request.").to_json_string()
 
     if 'id' not in body:
-        return helper.get_text_response(400, "Malformed request. Please provide a review id.", event, is_test)
+        return responses.BadRequest(event, "Malformed request. Please provide a review id.").to_json_string()
 
-    try:
-        review = review_handler.get_review_by_id(
-            body['id'], is_test, session)
-    except:
-        return helper.get_text_response(404, "No review found", event, is_test)
+    with Session() as session:
 
-    try:
-        user = user_handler.get_user_by_id(user_id, is_test, session)
-    except:
-        return helper.get_text_response(404, "No user found.", event, is_test)
-
-    if review.user_id != user.id:
-        return helper.get_text_response(403, "Forbidden.", event, is_test)
-
-        # If review is set closed
-    if 'status' in body and body['status'] == 'closed':
         try:
-            review = review_handler.close_review(review, is_test, session)
-            if review.item.status == 'closed':
-                notifications.notify_users(is_test, session, review.item)
-            response = {
-                "statusCode": 200,
-                "body": json.dumps(review.to_dict_with_questions_and_answers())
-            }
-            response_cors = helper.set_cors(response, event, is_test)
-            return response_cors
+            review = review_handler.get_review_by_id(body['id'], session)
         except:
-            return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
+            return responses.NotFound(event, "No review found.").to_json_string()
 
-    # If answers are appended
-    elif 'questions' in body:
-        if not isinstance(body['questions'], list):
-            return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
-        for question in body['questions']:
-            if 'answer_value' in question:
-                answer_value = question['answer_value']
-            else:
-                return helper.get_text_response(400, "Malformed request. Please provide a valid request.", event, is_test)
+        try:
+            user = user_handler.get_user_by_id(user_id, session)
+        except:
+            return responses.NotFound(event, "No user found.").to_json_string()
 
-            if answer_value is not None:
-                # Check if conditionality is met
-                if question['parent_question_id'] is not None:
-                    for q in body['questions']:
-                        if q['question_id'] == question['parent_question_id']:
-                            parent_question = q
-                    parent_answer = review_answer_handler.get_parent_answer(
-                        question['answer_id'], is_test, session)
-                    if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
-                        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
-                # Update answer in db
+        if review.user_id != user.id:
+            return responses.Forbidden(event).to_json_string()
+        # If review is set closed
+        if 'status' in body and body['status'] == 'closed':
+            try:
+                review = review_handler.close_review(review, session)
+
+                if review.item.status == 'closed':
+                    EventPublisher().publish_event('codetekt.review_service',
+                                                   'item_closed', {'item_id': review.item.id})
+                return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()
+            except:
+                return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
+
+        # If answers are appended
+        if 'questions' in body:
+            if not isinstance(body['questions'], list):
+                return responses.BadRequest(event, "Malformed request. Please provide a valid request.").to_json_string()
+            for question in body['questions']:
+                if 'answer_value' in question:
+                    answer_value = question['answer_value']
+                else:
+                    return responses.BadRequest(event, "Malformed request. Please provide a valid request.").to_json_string()
+
+                if answer_value is not None:
+                    # Check if conditionality is met
+                    if question['parent_question_id'] is not None:
+                        for q in body['questions']:
+                            if q['question_id'] == question['parent_question_id']:
+                                parent_question = q
+                        if parent_question['answer_value'] > question['upper_bound'] or parent_question['answer_value'] < question['lower_bound']:
+                            return responses.BadRequest(event, "Bad request. Please adhere to conditionality of questions.").to_json_string()
+                    # Update answer in db
+                    try:
+                        review_answer_handler.set_answer_value(
+                            question['answer_id'], question['answer_value'], session)
+                    except Exception as e:
+                        return responses.InternalError(event, exception=e).to_json_string()
+
+        # Save qualitative_comment
+        if 'comment' in body:
+            if body['comment']:
+                if review.comment is None:
+                    try:
+                        comment_handler.create_comment(session,
+                                                       comment=body['comment'],
+                                                       user_id=user_id,
+                                                       parent_type='review',
+                                                       parent_id=review.id,
+                                                       is_review_comment=True
+                                                       )
+                    except Exception as e:
+                        return responses.InternalError(event, "Could not create comment for item", e).to_json_string()
+                elif review.comment.comment != body['comment']:
+                    review.comment.comment = body['comment']
+                    session.merge(review)
+
+        if 'tags' in body:
+            if body['tags'] is None:
+                body['tags'] = []
+            if isinstance(body['tags'], list):
                 try:
-                    review_answer_handler.set_answer_value(
-                        question['answer_id'], question['answer_value'], is_test, session)
-                except:
-                    return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event, is_test)
+                    db_tags = [
+                        item_tag.tag.tag for item_tag in tag_handler.get_item_tags_by_review_id(review.id, session)]
+                    body_tags_upper = [tag.upper() for tag in body['tags']]
+                    db_tags_upper = [tag.upper() for tag in db_tags]
+                    tags_to_add = [tag for tag in body['tags']
+                                   if tag.upper() not in db_tags_upper]
+                    tags_to_delete = [
+                        tag for tag in db_tags if tag.upper() not in body_tags_upper]
+                    for tag in tags_to_add:
+                        tag_handler.store_tag_for_item(
+                            review.item_id, tag, session, review.id)
 
-        response = {
-            "statusCode": 200,
-            "body": json.dumps(review.to_dict_with_questions_and_answers())
-        }
-        response_cors = helper.set_cors(response, event, is_test)
-        return response_cors
-
-    else:
-        return helper.get_text_response(400, "Bad request. Please adhere to conditionality of questions.", event, is_test)
+                    for tag in tags_to_delete:
+                        tag_handler.delete_itemtag_by_tag_and_review_id(
+                            tag, review.id, session)
+                except Exception as e:
+                    return responses.InternalError(event, "Could not create tags for item", e).to_json_string()
+        return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()

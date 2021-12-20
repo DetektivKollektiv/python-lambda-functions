@@ -13,6 +13,6 @@ def create_review(id: int, item_id: str, user_id: str=None, status: str=None, fi
     if finish_time == None:
         review.finish_timestamp = get_date_time_now()
     else:
-        review.finish_timestamp = get_date_time(finish_time, True)
+        review.finish_timestamp = get_date_time(finish_time)
         
     return review
