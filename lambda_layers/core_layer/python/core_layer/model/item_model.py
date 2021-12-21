@@ -107,22 +107,25 @@ class Item(Base):
             answer_dict = {}
             for review in self.reviews:
                 for answer in review.review_answers:
-                    if answer.answer is not None:
-                        if answer.review_question_id not in answer_dict:
-                            answer_dict[answer.review_question_id] = {
-                                'question': answer.review_question,
-                                'answers': [answer.answer]
-                            }
-                        else:
-                            answer_dict[answer.review_question_id]['answers'].append(
-                                answer.answer)
+                    if answer.answer is None:
+                        continue
+                    if answer.review_question_id not in answer_dict:
+                        answer_dict[answer.review_question_id] = {
+                            'question': answer.review_question,
+                            'answers': [answer.answer]
+                        }
+                    else:
+                        answer_dict[answer.review_question_id]['answers'].append(
+                            answer.answer)
             for key in answer_dict:
                 answers = answer_dict[key]['answers']
                 question = answer_dict[key]['question']
-                if len(answers) > 2:
-                    if sum(answers) / len(answers) <= 2:
-                        if question not in questions_with_warning_tags:
-                            questions_with_warning_tags.append(question)
+                if len(answers) <= 2:
+                    continue
+                if sum(answers) / len(answers) > 2:
+                    continue
+                questions_with_warning_tags.append(question)
+
             item_dict['warning_tags'] = []
             for q in questions_with_warning_tags:
                 item_dict['warning_tags'].append(
