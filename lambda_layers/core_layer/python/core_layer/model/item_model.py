@@ -36,7 +36,7 @@ class Item(Base):
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
-    reviews = relationship("Review", back_populates="item")
+    reviews = relationship("Review", back_populates="item", lazy="joined")
     review_pairs = relationship(
         "ReviewPair", back_populates="item", lazy="joined")
     item_type = relationship("ItemType", back_populates="items")
@@ -103,31 +103,28 @@ class Item(Base):
                 item_dict['discussion_comments'].append(comment.to_dict())
 
         if with_warnings:
-            item_dict['warning_tags'] = []
-            questions = []
+            questions_with_warning_tags = []
+            answer_dict = {}
             for review in self.reviews:
                 for answer in review.review_answers:
-                    question_included = False
-                    for q in questions:
-                        if q.id == answer.review_question_id:
-                            question_included = True
-                    if question_included is False:
-                        questions.append(answer.review_question)
-
-            for q in questions:
-                answer_ints: list(Integer) = []
-                for review in self.reviews:
-                    for answer in review.review_answers:
-                        if answer.review_question_id == q.id:
-                            if answer.answer is not None and answer.answer > 0:
-                                answer_ints.append(answer.answer)
-                if len(answer_ints) > 2:
-                    if sum(answer_ints) / len(answer_ints) <= 2:
-                        tag_included = False
-                        for tag in item_dict['warning_tags']:
-                            if tag == q.warning_tag:
-                                tag_included = True
-                        if tag_included is False:
-                            item_dict['warning_tags'].append(
-                                {'text': q.warning_tag, 'icon': q.warning_tag_icon_code})
+                    if answer.answer is not None:
+                        if answer.review_question_id not in answer_dict:
+                            answer_dict[answer.review_question_id] = {
+                                'question': answer.review_question,
+                                'answers': [answer.answer]
+                            }
+                        else:
+                            answer_dict[answer.review_question_id]['answers'].append(
+                                answer.answer)
+            for key in answer_dict:
+                answers = answer_dict[key]['answers']
+                question = answer_dict[key]['question']
+                if len(answers) > 2:
+                    if sum(answers) / len(answers) <= 2:
+                        if question not in questions_with_warning_tags:
+                            questions_with_warning_tags.append(question)
+            item_dict['warning_tags'] = []
+            for q in questions_with_warning_tags:
+                item_dict['warning_tags'].append(
+                    {'text': q.warning_tag, 'icon': q.warning_tag_icon_code})
         return item_dict
