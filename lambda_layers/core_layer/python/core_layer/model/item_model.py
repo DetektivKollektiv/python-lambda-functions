@@ -32,13 +32,13 @@ class Item(Base):
     factchecks = relationship("ExternalFactCheck")
     entities = relationship("ItemEntity")
     # One to Many Relation: one Item has many ItemTags
-    tags = relationship("ItemTag")
+    tags = relationship("ItemTag", lazy='selectin')
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
     reviews = relationship("Review", back_populates="item")
     review_pairs = relationship(
-        "ReviewPair", back_populates="item", lazy="joined")
+        "ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
     comments = relationship("Comment", back_populates="item")
 
