@@ -21,7 +21,7 @@ class Review(Base):
         "ReviewAnswer", back_populates="review", lazy="joined")
     item = relationship("Item", back_populates="reviews")
     last_question = relationship('ReviewQuestion')
-    tags = relationship('ItemTag', back_populates="review", lazy="joined")
+    tags = relationship('ItemTag', back_populates="review")
     comment = relationship('Comment', back_populates='review', uselist=False)
 
     def to_dict(self, with_questions_and_answers=False, with_user=False, with_tags=False):
