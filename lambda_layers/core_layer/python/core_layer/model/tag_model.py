@@ -20,6 +20,6 @@ class ItemTag(Base):
     item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="tags")
     tag_id = Column(String(36), ForeignKey('tags.id'))
-    tag = relationship("Tag", back_populates="items")
+    tag = relationship("Tag", back_populates="items", lazy='joined')
     review_id = Column(String(36), ForeignKey('reviews.id'))
     review = relationship("Review", back_populates="tags")
