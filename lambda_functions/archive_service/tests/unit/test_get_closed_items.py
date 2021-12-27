@@ -93,19 +93,27 @@ def test_get_items_by_url():
         session.add_all([url, item_url])
         session.commit()
 
-        # Testing get_items with url query param 204
-        response = get_closed_items(get_url_event("SinnloseUrl"), None)
-        assert response['statusCode'] == 204
+        # Testing get_items without url query param 204
+        response = get_closed_items(None, None)
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert len(body) == 2
 
-        # Testing get_items with url query param 204
+        # Testing get_items with url query param 200
         response = get_closed_items(get_url_event(url.url), None)
         assert response['statusCode'] == 200
         body = json.loads(response['body'])
         assert len(body) == 1
         assert body[0]['id'] == item.id
 
-        # Testing get_items without url query param 204
-        response = get_closed_items(None, None)
-        assert response['statusCode'] == 200
-        body = json.loads(response['body'])
-        assert len(body) == 2
+        # Testing get_items with url query param 204 - no item with url
+        response = get_closed_items(get_url_event("SinnloseUrl"), None)
+        assert response['statusCode'] == 204
+
+        # Testing get_items with url query param 204 - item not closed
+        item.status = "open"
+        session.merge(item)
+        session.commit()
+
+        response = get_closed_items(get_url_event(url.url), None)
+        assert response['statusCode'] == 204
