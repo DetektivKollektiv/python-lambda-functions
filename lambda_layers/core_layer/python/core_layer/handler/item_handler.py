@@ -5,6 +5,7 @@ from typing import List
 from typing import Dict
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
+from core_layer.model.url_model import URL, ItemURL
 from core_layer.handler import review_pair_handler, review_handler
 from uuid import uuid4
 
@@ -99,10 +100,10 @@ def get_item_by_id(id, session) -> Item:
         logging.exception('Could not get item by id.')
         return None
     # Uncomment to test telegram user notification
-    # notifications.notify_telegram_users(is_test, session, item) 
+    # notifications.notify_telegram_users(is_test, session, item)
 
 
-def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool] :
+def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
     """Retreives a list of open items (in random order) to be reviewed by a user.
 
     Parameters
@@ -161,7 +162,7 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool] 
     for item in result:
         items.append(item)
     random.shuffle(items)
- 
+
     return {'items': items, 'is_open_review': False}
 
 
@@ -176,3 +177,9 @@ def compute_item_result_score(item_id, session):
             pair.senior_review.review_answers))
     result = statistics.median(average_scores)
     return result
+
+
+def get_items_by_url(url, session) -> List[Item]:
+    items = session.query(Item).join(Item.urls).join(
+        ItemURL.url).filter_by(url=url).all()
+    return items

@@ -1,11 +1,22 @@
 from core_layer.db_handler import Session
 from core_layer.model.item_model import Item
+from core_layer.model.url_model import URL, ItemURL
 from ml_service import GetTags
 from core_layer.handler import item_handler
 import json
 import os
-
+from datetime import date, datetime
 from archive_service.get_closed_items import get_closed_items
+import logging
+
+
+def get_url_event(url):
+    return {
+        "queryStringParameters": {
+            "url": url
+        }
+    }
+
 
 def test_get_closed_items():
 
@@ -53,3 +64,48 @@ def test_get_closed_items():
         body = response['body']
         tags = json.loads(body)[0]['tags']
         assert tags in [['B', 'C', 'A', 'D'], ['B', 'C', 'D', 'A']]
+
+
+def test_get_items_by_url():
+    os.environ["STAGE"] = "dev"
+    with Session() as session:
+        item = Item()
+        item.content = "Test content"
+        item.language = "de"
+        item.status = "closed"
+        item = item_handler.create_item(item, session)
+
+        item2 = Item()
+        item2.content = "Test content2"
+        item2.language = "de"
+        item2.status = "closed"
+        item2 = item_handler.create_item(item2, session)
+
+        url = URL()
+        url.id = "url_id"
+        url.url = "www.test.de"
+
+        item_url = ItemURL()
+        item_url.id = "item_url_id"
+        item_url.item_id = item.id
+        item_url.url_id = url.id
+
+        session.add_all([url, item_url])
+        session.commit()
+
+        # Testing get_items with url query param 204
+        response = get_closed_items(get_url_event("SinnloseUrl"), None)
+        assert response['statusCode'] == 204
+
+        # Testing get_items with url query param 204
+        response = get_closed_items(get_url_event(url.url), None)
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert len(body) == 1
+        assert body[0]['id'] == item.id
+
+        # Testing get_items without url query param 204
+        response = get_closed_items(None, None)
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert len(body) == 2
