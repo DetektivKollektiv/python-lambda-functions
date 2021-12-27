@@ -179,7 +179,7 @@ def compute_item_result_score(item_id, session):
     return result
 
 
-def get_items_by_url(url, session) -> List[Item]:
-    items = session.query(Item).join(Item.urls).join(
+def get_closed_items_by_url(url, session) -> List[Item]:
+    items = session.query(Item).filter(Item.status == "closed").join(Item.urls).join(
         ItemURL.url).filter_by(url=url).all()
     return items

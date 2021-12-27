@@ -28,7 +28,7 @@ def get_closed_items(event, context):
             print("\n \n \n Getting items \n \n \n")
 
             if url:
-                items = item_handler.get_items_by_url(url, session)
+                items = item_handler.get_closed_items_by_url(url, session)
             else:
                 items = item_handler.get_all_closed_items(session)
 
