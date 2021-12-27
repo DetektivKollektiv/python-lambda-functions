@@ -15,10 +15,22 @@ def get_closed_items(event, context):
     helper.log_method_initiated("Get all closed items", event, logger)
 
     with Session() as session:
+        try:
+            url = event["queryStringParameters"]['url']
+            logger.info("Found url in queryparams")
+        except:
+            url = None
+            logger.info("No url found in queryparams")
+            pass
 
         try:
             # Get all closed items
-            items = item_handler.get_all_closed_items(session)
+            print("\n \n \n Getting items \n \n \n")
+
+            if url:
+                items = item_handler.get_items_by_url(url, session)
+            else:
+                items = item_handler.get_all_closed_items(session)
 
             if len(items) == 0:
                 response = {
@@ -27,7 +39,6 @@ def get_closed_items(event, context):
                 }
             else:
                 items_list = []
-
                 for item in items:
                     items_list.append(item.to_dict(
                         with_tags=True, with_warnings=True))
