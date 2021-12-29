@@ -15,20 +15,16 @@ def get_closed_items(event, context):
     helper.log_method_initiated("Get all closed items", event, logger)
 
     with Session() as session:
-        try:
-            url = event["queryStringParameters"]['url']
-            logger.info("Found url in queryparams")
-        except:
-            url = None
-            logger.info("No url found in queryparams")
-            pass
 
         try:
             # Get all closed items
             print("\n \n \n Getting items \n \n \n")
+            allow_all_origins = False
 
-            if url:
-                items = item_handler.get_closed_items_by_url(url, session)
+            if 'queryStringParameters' in event and 'url' in event['queryStringParameters']:
+                items = item_handler.get_closed_items_by_url(
+                    event['queryStringParameters']['url'], session)
+                allow_all_origins = True
             else:
                 items = item_handler.get_all_closed_items(session)
 
@@ -55,5 +51,5 @@ def get_closed_items(event, context):
                 "body": "Could not get closed items. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    response_cors = helper.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, allow_all_origins)
     return response_cors
