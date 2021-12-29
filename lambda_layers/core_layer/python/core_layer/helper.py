@@ -39,7 +39,7 @@ def get_date_time_str(dt):
         return dt
 
 
-def set_cors(response, event):
+def set_cors(response, event, plugin_call=False):
     """Adds a CORS header to a response according to the headers found in the event.
 
     Parameters
@@ -66,7 +66,7 @@ def set_cors(response, event):
         if 'origin' in event['headers']:
             source_origin = event['headers']['origin']
 
-        if source_origin and source_origin in allowed_origins:
+        if source_origin and (source_origin in allowed_origins or plugin_call):
             if 'headers' not in response:
                 response['headers'] = {}
 
