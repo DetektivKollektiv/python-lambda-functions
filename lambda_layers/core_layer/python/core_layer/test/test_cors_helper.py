@@ -7,7 +7,7 @@ def set_deployment_mode(monkeypatch):
     monkeypatch.setattr('core_layer.helper.is_test', False)
 
 
-def test_set_cors_header_no_origin(monkeypatch, mock_deployment):
+def test_set_cors_header_no_origin(monkeypatch, set_deployment_mode):
 
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
     event = {'headers': None}
