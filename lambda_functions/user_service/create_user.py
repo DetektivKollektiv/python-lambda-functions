@@ -1,14 +1,16 @@
 import boto3
 import logging
+from uuid import uuid4
 
 from core_layer import helper
 from core_layer.db_handler import Session
 
 from core_layer.model.user_model import User
+from core_layer.model.mail_model import Mail
 from core_layer.handler import user_handler
 
 
-def create_user(event, context):
+def create_user(event):
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -29,5 +31,14 @@ def create_user(event, context):
                 Username=user.name,
                 GroupName='Detective'
             )
+
+            # Add mail address if submitted
+            try:
+                mail = Mail()
+                mail.id = str(uuid4())
+                mail.email = ['request']['userAttributes']['email']
+                mail.user_id = user.id
+            except:
+                pass
 
         return event
