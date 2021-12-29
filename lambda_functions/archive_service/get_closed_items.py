@@ -15,9 +15,11 @@ def get_closed_items(event, context):
     helper.log_method_initiated("Get all closed items", event, logger)
 
     with Session() as session:
+        plugin_call = False
         try:
             url = event["queryStringParameters"]['url']
             logger.info("Found url in queryparams")
+            plugin_call = True
         except:
             url = None
             logger.info("No url found in queryparams")
@@ -55,5 +57,5 @@ def get_closed_items(event, context):
                 "body": "Could not get closed items. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    response_cors = helper.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, plugin_call)
     return response_cors
