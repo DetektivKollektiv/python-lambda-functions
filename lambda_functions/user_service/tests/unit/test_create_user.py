@@ -9,7 +9,7 @@ from user_service.delete_unconfirmed_mails import delete_unconfirmed_mails
 from user_service.create_user import create_user
 from core_layer.model.level_model import Level
 
-from moto import mock_ses
+from moto import mock_ses, mock_cognitoidp
 from moto.ses import ses_backend
 import boto3
 import pytest
@@ -55,11 +55,13 @@ def event(user_id, mail_address):
     return event
  
 @mock_ses
+@mock_cognitoidp
 def test_create_user(event, mail_address, user_id, monkeypatch):
 
     monkeypatch.setenv("STAGE", "dev")
 
-    boto3.client("ses", region_name = "eu-central-1")
+    conn = boto3.client("ses", region_name = "eu-central-1")
+    conn.verify_email_identity(EmailAddress = "no-reply@codetekt.org")
 
     with Session() as session:
 

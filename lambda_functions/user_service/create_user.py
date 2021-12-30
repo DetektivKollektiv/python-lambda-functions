@@ -25,11 +25,11 @@ def create_user(event):
             if user.id == None or user.name == None:
                 raise Exception("Something went wrong!")
             user = user_handler.create_user(user, session)
-            client = boto3.client('cognito-idp')
+            client = boto3.client('cognito-idp', region_name = "eu-central-1")
             client.admin_add_user_to_group(
-                UserPoolId=event['userPoolId'],
-                Username=user.name,
-                GroupName='Detective'
+                UserPoolId = event['userPoolId'],
+                Username = user.name,
+                GroupName = 'Detective'
             )
 
             # Add mail address if submitted
