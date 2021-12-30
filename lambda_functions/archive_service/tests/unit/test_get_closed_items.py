@@ -94,10 +94,11 @@ def test_get_items_by_url():
         session.commit()
 
         # Testing get_items without url query param 204
-        response = get_closed_items({}, None)
-        assert response['statusCode'] == 200
-        body = json.loads(response['body'])
-        assert len(body) == 2
+        for event in [{}, {"queryStringParameters": None}]:
+            response = get_closed_items(event, None)
+            assert response['statusCode'] == 200
+            body = json.loads(response['body'])
+            assert len(body) == 2
 
         # Testing get_items with url query param 200
         response = get_closed_items(get_url_event(url.url), None)
