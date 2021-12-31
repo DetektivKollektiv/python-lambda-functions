@@ -21,7 +21,7 @@ def get_closed_items(event, context):
             print("\n \n \n Getting items \n \n \n")
             allow_all_origins = False
 
-            if 'queryStringParameters' in event and 'url' in event['queryStringParameters']:
+            if 'queryStringParameters' in event and isinstance(event['queryStringParameters'], dict) and 'url' in event['queryStringParameters']:
                 items = item_handler.get_closed_items_by_url(
                     event['queryStringParameters']['url'], session)
                 allow_all_origins = True
