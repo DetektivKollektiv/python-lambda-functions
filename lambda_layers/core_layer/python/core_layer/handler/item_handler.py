@@ -190,7 +190,7 @@ def get_closed_items_by_url(url, session) -> List[Item]:
 
 def get_items_to_calculate_warning_tags(session) -> List[Item]:
     items = session.query(Item).filter(
-        Item.warning_tags_calculated == False).all()
+        Item.warning_tags_calculated != True).all()
     return items
 
 
