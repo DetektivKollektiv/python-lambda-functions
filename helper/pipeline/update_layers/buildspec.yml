@@ -17,4 +17,9 @@ phases:
 
   build:
     commands:
+      # Update layers for each lambda
       - python helper/pipeline/update_layers/update_lambdas.py
+      # Call lambda function to update data
+            # Run data update functions
+      - aws lambda invoke --function-name detektivkollektiv-archive_api-update-warning-tags-${STAGE}
+
