@@ -154,25 +154,3 @@ Resources:
             Ref: CorsAllowOrigin
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
-
-  UpdateWarningTagsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "detektivkollektiv-archive_api-update-warning-tags-${STAGE}"
-      CodeUri: .
-      Handler: update_warning_tags.update_warning_tags
-      Runtime: python3.8
-      MemorySize: 832
-      Role:
-        Fn::GetAtt:
-          - LambdaExecutionRole
-          - Arn
-      Tracing: Active
-      Environment:
-        Variables:
-          DEPLOYMENTMODE:
-            Ref: DEPLOYMENTMODE
-          DBNAME:
-            Ref: DBNAME
-      Layers:
-        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

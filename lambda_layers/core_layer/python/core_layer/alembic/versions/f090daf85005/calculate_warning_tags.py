@@ -1,8 +1,8 @@
-from core_layer.handler import item_handler, review_question_handler
-from core_layer.db_handler import Session, update_object
+from core_layer.handler import item_handler
+from core_layer.db_handler import Session
 
 
-def update_warning_tags(event, context):
+def calculate_warning_tags():
     with Session() as session:
         items_to_update = item_handler.get_items_to_calculate_warning_tags(
             session)
