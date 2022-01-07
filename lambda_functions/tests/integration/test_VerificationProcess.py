@@ -1,4 +1,3 @@
-from archive_service.update_warning_tags import update_warning_tags
 import pytest
 from core_layer.db_handler import Session
 
@@ -119,9 +118,9 @@ def test_verification_process_best_case(monkeypatch):
             response = update_review(event, None)
             assert response['statusCode'] == 200
 
-        update_warning_tags(None, None)
         # reload object instead of refreshing the session
         item = item_handler.get_item_by_id(item.id, session)
+        item = item_handler.update_item_warning_tags(item, session)
         assert item.status == 'closed'
         assert item.in_progress_reviews_level_1 == 0
         assert item.in_progress_reviews_level_2 == 0
