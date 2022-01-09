@@ -50,7 +50,7 @@ class Item(Base):
             "language": self.language,
             "status": self.status,
             "variance": self.variance,
-            "result_score": self.result_score,
+            "result_score": round((self.result_score - 1) * 33.33) if self.result_score else None,
             "open_reviews_level_1": self.open_reviews_level_1,
             "open_reviews_level_2": self.open_reviews_level_2,
             "open_reviews": self.open_reviews,
