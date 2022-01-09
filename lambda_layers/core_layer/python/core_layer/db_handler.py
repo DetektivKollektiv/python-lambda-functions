@@ -35,14 +35,6 @@ session_factory = sessionmaker(bind=db, expire_on_commit=False, autoflush=True)
 Session = scoped_session(session_factory)
 
 
-def substring(column, delimeter, session):
-    if session.bind.dialect.name == 'sqlite':
-        return func.iif(func.instr(column, delimeter) > 0, func.substr(
-            column, 1, func.instr(column, delimeter)-1), column)
-    elif session.bind.dialect.name == 'mysql+auroradataapi':
-        return func.substring_index(column, delimeter, 1)
-
-
 def update_object(obj, session):
     """Updates an existing item in the database.
 
