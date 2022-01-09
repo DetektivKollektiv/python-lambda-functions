@@ -188,12 +188,6 @@ def get_closed_items_by_url(url, session) -> List[Item]:
     return items
 
 
-def get_items_to_calculate_warning_tags(session) -> List[Item]:
-    items = session.query(Item).filter(
-        Item.warning_tags_calculated != True).all()
-    return items
-
-
 def update_item_warning_tags(item: Item, session) -> Item:
     questions_with_warning_tags = []
     answer_dict = {}
