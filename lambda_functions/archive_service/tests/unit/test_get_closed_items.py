@@ -83,7 +83,7 @@ def test_get_items_by_url():
 
         url = URL()
         url.id = "url_id"
-        url.url = "www.test.de"
+        url.url = "www.test.de/artikel1"
 
         item_url = ItemURL()
         item_url.id = "item_url_id"
@@ -101,20 +101,22 @@ def test_get_items_by_url():
             assert len(body) == 2
 
         # Testing get_items with url query param 200
-        response = get_closed_items(get_url_event(url.url), None)
-        assert response['statusCode'] == 200
-        body = json.loads(response['body'])
-        assert len(body) == 1
-        assert body[0]['id'] == item.id
+        for url in [url.url, url.url+'?queryparam=shouldbeignored']:
+            response = get_closed_items(get_url_event(url), None)
+            assert response['statusCode'] == 200
+            body = json.loads(response['body'])
+            assert len(body) == 1
+            assert body[0]['id'] == item.id
 
         # Testing get_items with url query param 204 - no item with url
-        response = get_closed_items(get_url_event("SinnloseUrl"), None)
-        assert response['statusCode'] == 204
+        for url in ['sinnloseUrl', 'www.test.de/artikel2', 'www.test.de']:
+            response = get_closed_items(get_url_event(url), None)
+            assert response['statusCode'] == 204
 
         # Testing get_items with url query param 204 - item not closed
         item.status = "open"
         session.merge(item)
         session.commit()
-
-        response = get_closed_items(get_url_event(url.url), None)
+        response = get_closed_items(
+            get_url_event("www.test.de/artikel1"), None)
         assert response['statusCode'] == 204

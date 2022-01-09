@@ -8,6 +8,7 @@ from core_layer.model.review_model import Review
 from core_layer.model.url_model import URL, ItemURL
 from core_layer.handler import review_pair_handler, review_handler
 from uuid import uuid4
+from core_layer import db_helper
 
 
 def get_all_items(session, params: dict = {}) -> List[Item]:
@@ -181,5 +182,5 @@ def compute_item_result_score(item_id, session):
 
 def get_closed_items_by_url(url, session) -> List[Item]:
     items = session.query(Item).filter(Item.status == "closed").join(Item.urls).join(
-        ItemURL.url).filter_by(url=url).all()
+        ItemURL.url).filter(db_helper.substring(URL.url, '?', session) == url).all()
     return items
