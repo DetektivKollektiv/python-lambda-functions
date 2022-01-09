@@ -2,13 +2,14 @@ import logging
 import sqlite3
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.sql.expression import case
 from .model.model_base import Base
 
 """Initializes a Database Session."""
 
-logger = logging.getLogger() 
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 logger.info('New DB Session initiated')
@@ -19,13 +20,12 @@ secret_arn = "arn:aws:secretsmanager:eu-central-1:891514678401:secret:Serverless
 if 'DBNAME' in os.environ:
     database_name = os.environ['DBNAME']
     db = create_engine('mysql+auroradataapi://:@/{0}'.format(database_name),
-                        echo=True,
-                        connect_args=dict(aurora_cluster_arn=cluster_arn, secret_arn=secret_arn))
+                       echo=True,
+                       connect_args=dict(aurora_cluster_arn=cluster_arn, secret_arn=secret_arn))
 else:
     def creator(): return sqlite3.connect(
-            'file::memory:?cache=shared', uri=True, check_same_thread=False)
+        'file::memory:?cache=shared', uri=True, check_same_thread=False)
     db = create_engine('sqlite://', creator=creator)
-
 
     Base.metadata.create_all(db)
     db.execute('pragma foreign_keys=on')
