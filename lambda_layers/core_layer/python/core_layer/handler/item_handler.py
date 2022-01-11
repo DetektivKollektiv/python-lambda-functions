@@ -3,11 +3,13 @@ import statistics
 import logging
 from typing import List
 from typing import Dict
+from uuid import uuid4
+
 from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
 from core_layer.model.url_model import URL, ItemURL
+from core_layer.model.review_question_model import ItemCriticalQuestion
 from core_layer.handler import review_pair_handler, review_handler
-from uuid import uuid4
 from core_layer import db_helper
 
 
@@ -184,3 +186,37 @@ def get_closed_items_by_url(url, session) -> List[Item]:
     items = session.query(Item).filter(Item.status == "closed").join(Item.urls).join(
         ItemURL.url).filter(db_helper.substring(URL.url, '?', session) == url).all()
     return items
+
+
+def update_item_warning_tags(item: Item, session) -> Item:
+    questions_with_warning_tags = []
+    answer_dict = {}
+    for review in item.reviews:
+        for answer in review.review_answers:
+            if answer.answer is None:
+                continue
+            if answer.review_question_id not in answer_dict:
+                answer_dict[answer.review_question_id] = {
+                    'question': answer.review_question,
+                    'answers': [answer.answer]
+                }
+            else:
+                answer_dict[answer.review_question_id]['answers'].append(
+                    answer.answer)
+    for key in answer_dict:
+        answers = answer_dict[key]['answers']
+        question = answer_dict[key]['question']
+        if len(answers) <= 2:
+            continue
+        if sum(answers) / len(answers) > 2:
+            continue
+        questions_with_warning_tags.append(question)
+    for question in questions_with_warning_tags:
+        icq = ItemCriticalQuestion(
+            id=str(uuid4()), item_id=item.id, review_question_id=question.id)
+        session.add(icq)
+
+    item.warning_tags_calculated = True
+    session.merge(item)
+    session.commit()
+    return item

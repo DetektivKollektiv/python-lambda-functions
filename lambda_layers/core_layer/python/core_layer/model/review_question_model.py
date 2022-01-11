@@ -40,6 +40,8 @@ class ReviewQuestion(Base):
         "ReviewQuestion", back_populates="parent_question")
 
     item_type = relationship("ItemType", back_populates="questions")
+    item_critical_questions = relationship(
+        'ItemCriticalQuestion', back_populates='review_question')
 
     def to_dict(self):
         return {
@@ -57,3 +59,16 @@ class ReviewQuestion(Base):
             "hint": self.hint,
             "options": [option.to_dict() for option in self.options]
         }
+
+
+class ItemCriticalQuestion(Base):
+    __tablename__ = 'item_critical_questions'
+    id = Column(String(36), primary_key=True)
+    item_id = Column(String(36), ForeignKey(
+        'items.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    review_question_id = Column(String(36), ForeignKey(
+        'review_questions.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+
+    item = relationship('Item', back_populates='item_critical_questions')
+    review_question = relationship(
+        'ReviewQuestion', back_populates='item_critical_questions')
