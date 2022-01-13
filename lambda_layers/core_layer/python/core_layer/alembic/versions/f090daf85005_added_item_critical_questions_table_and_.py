@@ -8,7 +8,7 @@ Create Date: 2022-01-03 16:48:48.719695
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from core_layer.alembic.versions.f090daf85005 import calculate_warning_tags
+from .f090daf85005.calculate_warning_tags import calculate_warning_tags
 # revision identifiers, used by Alembic.
 revision = 'f090daf85005'
 down_revision = '3e9cccff4d86'
@@ -31,7 +31,7 @@ def upgrade():
                     )
     op.add_column('items', sa.Column(
         'warning_tags_calculated', sa.Boolean(), nullable=True))
-    calculate_warning_tags.calculate_warning_tags()
+    calculate_warning_tags()
     # ### end Alembic commands ###
 
 
