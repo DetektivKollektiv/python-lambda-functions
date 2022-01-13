@@ -8,7 +8,8 @@ Create Date: 2022-01-03 16:48:48.719695
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from .f090daf85005.calculate_warning_tags import calculate_warning_tags
+from core_layer.alembic.versions.f090daf85005.calculate_warning_tags import calculate_warning_tags
+
 # revision identifiers, used by Alembic.
 revision = 'f090daf85005'
 down_revision = '3e9cccff4d86'
