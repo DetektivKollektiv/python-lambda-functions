@@ -28,10 +28,10 @@ def handle_item_closed(event, context):
         with Session() as session:
             item_id = event["detail"]["item_id"]
             item = item_handler.get_item_by_id(item_id, session)
-
             if item is None:
                 return BadRequest(event,
                                   f"No item was found with the given item_id [{item_id}].", add_cors_headers=False).to_json_string()
+            item = item_handler.update_item_warning_tags(item, session)
 
             rating = int(item.result_score * 25)
             rating_text = get_rating_text(rating)

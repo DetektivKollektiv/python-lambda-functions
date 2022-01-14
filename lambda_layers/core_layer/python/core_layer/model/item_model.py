@@ -24,6 +24,7 @@ class Item(Base):
         DateTime, server_default=func.now(), nullable=False)
     close_timestamp = Column(DateTime)
     verification_process_version = Column(Integer)
+    warning_tags_calculated = Column(Boolean, default=False)
 
     item_type_id = Column(String(36), ForeignKey(
         'item_types.id', ondelete='SET NULL', onupdate='CASCADE'))
@@ -41,6 +42,8 @@ class Item(Base):
         "ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
     comments = relationship("Comment", back_populates="item")
+    item_critical_questions = relationship(
+        'ItemCriticalQuestion', back_populates='item')
 
     def to_dict(self, with_tags=False, include_type=False, with_urls=False, with_reviews=False, with_comments=False, with_warnings=False):
         item_dict = {
@@ -50,7 +53,7 @@ class Item(Base):
             "language": self.language,
             "status": self.status,
             "variance": self.variance,
-            "result_score": self.result_score,
+            "result_score": round((self.result_score - 1) * 33.33) if self.result_score else None,
             "open_reviews_level_1": self.open_reviews_level_1,
             "open_reviews_level_2": self.open_reviews_level_2,
             "open_reviews": self.open_reviews,
@@ -103,31 +106,9 @@ class Item(Base):
                 item_dict['discussion_comments'].append(comment.to_dict())
 
         if with_warnings:
-            questions_with_warning_tags = []
-            answer_dict = {}
-            for review in self.reviews:
-                for answer in review.review_answers:
-                    if answer.answer is None:
-                        continue
-                    if answer.review_question_id not in answer_dict:
-                        answer_dict[answer.review_question_id] = {
-                            'question': answer.review_question,
-                            'answers': [answer.answer]
-                        }
-                    else:
-                        answer_dict[answer.review_question_id]['answers'].append(
-                            answer.answer)
-            for key in answer_dict:
-                answers = answer_dict[key]['answers']
-                question = answer_dict[key]['question']
-                if len(answers) <= 2:
-                    continue
-                if sum(answers) / len(answers) > 2:
-                    continue
-                questions_with_warning_tags.append(question)
-
             item_dict['warning_tags'] = []
-            for q in questions_with_warning_tags:
+            for icq in self.item_critical_questions:
+                q = icq.review_question
                 item_dict['warning_tags'].append(
                     {'text': q.warning_tag, 'icon': q.warning_tag_icon_code})
         return item_dict

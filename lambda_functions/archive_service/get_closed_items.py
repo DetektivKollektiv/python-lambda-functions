@@ -18,7 +18,17 @@ def get_closed_items(event, context):
 
         try:
             # Get all closed items
-            items = item_handler.get_all_closed_items(session)
+            print("\n \n \n Getting items \n \n \n")
+            allow_all_origins = False
+
+            if 'queryStringParameters' in event and isinstance(event['queryStringParameters'], dict) and 'url' in event['queryStringParameters']:
+                url_without_query_params = event['queryStringParameters']['url'].split('?')[
+                    0]
+                items = item_handler.get_closed_items_by_url(
+                    url_without_query_params, session)
+                allow_all_origins = True
+            else:
+                items = item_handler.get_all_closed_items(session)
 
             if len(items) == 0:
                 response = {
@@ -27,7 +37,6 @@ def get_closed_items(event, context):
                 }
             else:
                 items_list = []
-
                 for item in items:
                     items_list.append(item.to_dict(
                         with_tags=True, with_warnings=True))
@@ -44,5 +53,5 @@ def get_closed_items(event, context):
                 "body": "Could not get closed items. Stacktrace: {}".format(traceback.format_exc())
             }
 
-    response_cors = helper.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, allow_all_origins)
     return response_cors
