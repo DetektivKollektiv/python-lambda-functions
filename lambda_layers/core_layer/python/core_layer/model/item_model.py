@@ -37,7 +37,7 @@ class Item(Base):
     urls = relationship("ItemURL")
     sentiments = relationship("ItemSentiment")
     keyphrases = relationship("ItemKeyphrase")
-    reviews = relationship("Review", back_populates="item", lazy='selectin')
+    reviews = relationship("Review", back_populates="item")
     review_pairs = relationship(
         "ReviewPair", back_populates="item")
     item_type = relationship("ItemType", back_populates="items")
