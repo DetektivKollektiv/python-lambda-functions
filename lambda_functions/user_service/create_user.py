@@ -36,8 +36,10 @@ def create_user(event):
             try:
                 mail = Mail()
                 mail.id = str(uuid4())
-                mail.email = ['request']['userAttributes']['email']
+                mail.email = event['request']['userAttributes']['email']
                 mail.user_id = user.id
+                session.add(mail)
+                session.commit()
             except:
                 pass
 
