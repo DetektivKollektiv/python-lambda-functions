@@ -287,3 +287,32 @@ Resources:
             Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  DeleteUnconfirmedMailsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-user_api-delete-unconfirmed-mails-${STAGE}"
+      CodeUri: .
+      Handler: delete_unconfirmed_mails.delete_unconfirmed_mails
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-delete-unconfirmed-mails-${STAGE}"
+            Description: Schdule for starting deletion of unconfirmed mails every hour
+            Enabled: True
+            Schedule: rate(1 hour)
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
