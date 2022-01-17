@@ -39,7 +39,7 @@ def get_date_time_str(dt):
         return dt
 
 
-def set_cors(response, event):
+def set_cors(response, event, allow_all_origins=False):
     """Adds a CORS header to a response according to the headers found in the event.
 
     Parameters
@@ -48,6 +48,9 @@ def set_cors(response, event):
         The response to be modified
     event: dict
         The Lambda event
+    allow_all_origins: bool, default False
+        If this param is set True, the check for the 'CORS_ALLOW_ORIGIN' environment variable 
+        will be omitted and the header will be set for any origin
 
     Returns
     ------
@@ -66,7 +69,7 @@ def set_cors(response, event):
         if 'origin' in event['headers']:
             source_origin = event['headers']['origin']
 
-        if source_origin and source_origin in allowed_origins:
+        if source_origin and (source_origin in allowed_origins or allow_all_origins):
             if 'headers' not in response:
                 response['headers'] = {}
 

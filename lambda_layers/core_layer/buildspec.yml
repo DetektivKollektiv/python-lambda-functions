@@ -28,7 +28,7 @@ phases:
 
       # Install requirements
       - pip install -r "lambda_layers/core_layer/requirements.txt" --target lambda_layers/core_layer/python/lib/python3.8/site-packages/
-      - pip install alembic sqlalchemy mysqlclient
+      - pip install alembic sqlalchemy mysqlclient sqlalchemy-aurora-data-api
 
   pre_build:
     commands:

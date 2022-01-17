@@ -57,7 +57,7 @@ def update_review(event, context):
                 if review.item.status == 'closed':
                     EventPublisher().publish_event('codetekt.review_service',
                                                    'item_closed', {'item_id': review.item.id})
-                return responses.Success(event, review.to_dict(with_questions_and_answers=True, with_tags=True)).to_json_string()
+                return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()
             except:
                 return helper.get_text_response(500, "Internal server error. Stacktrace: {}".format(traceback.format_exc()), event)
 
@@ -105,13 +105,18 @@ def update_review(event, context):
                     session.merge(review)
 
         if 'tags' in body:
-            if isinstance(body['tags'], list) and len(body['tags']) > 0:
+            if body['tags'] is None:
+                body['tags'] = []
+            if isinstance(body['tags'], list):
                 try:
                     db_tags = [
                         item_tag.tag.tag for item_tag in tag_handler.get_item_tags_by_review_id(review.id, session)]
-                    tags_to_add = list(set(body['tags']) - set(db_tags))
-                    tags_to_delete = list(set(db_tags) - set(body['tags']))
-
+                    body_tags_upper = [tag.upper() for tag in body['tags']]
+                    db_tags_upper = [tag.upper() for tag in db_tags]
+                    tags_to_add = [tag for tag in body['tags']
+                                   if tag.upper() not in db_tags_upper]
+                    tags_to_delete = [
+                        tag for tag in db_tags if tag.upper() not in body_tags_upper]
                     for tag in tags_to_add:
                         tag_handler.store_tag_for_item(
                             review.item_id, tag, session, review.id)
@@ -121,4 +126,4 @@ def update_review(event, context):
                             tag, review.id, session)
                 except Exception as e:
                     return responses.InternalError(event, "Could not create tags for item", e).to_json_string()
-        return responses.Success(event, review.to_dict(with_questions_and_answers=True, with_tags=True)).to_json_string()
+        return responses.Success(event, json.dumps(review.to_dict(with_questions_and_answers=True, with_tags=True))).to_json_string()

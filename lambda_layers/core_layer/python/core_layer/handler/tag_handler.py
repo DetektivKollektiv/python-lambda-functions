@@ -73,7 +73,7 @@ def delete_itemtag_by_tag_and_review_id(tag: str, review_id: str, session):
     """
     itemtag = session.query(ItemTag).join(Tag).filter(Tag.tag == tag,
                                                       ItemTag.review_id == review_id).one()
-    if itemtag != None:
+    if itemtag is not None:
         session.delete(itemtag)
         session.commit()
 

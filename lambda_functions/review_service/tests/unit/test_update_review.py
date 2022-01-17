@@ -1,3 +1,4 @@
+import json
 from core_layer.model.tag_model import ItemTag
 import pytest
 from uuid import uuid4
@@ -84,6 +85,31 @@ def test_update_review(item_id, junior_user_id, senior_user_id, monkeypatch):
         assert item_tags[0].item_id == item.id
         assert item_tags[0].review_id == review.id
         assert item_tags[0].tag.tag == 'test'
+        response_body = json.loads(response['body'])
+        assert 'tags' in response_body
+        assert len(response_body['tags']) == 1
+        assert response_body['tags'][0] == 'test'
+
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", junior_user_id, 1, tags=[])
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200
+        response_body = json.loads(response['body'])
+        assert 'tags' in response_body
+        assert len(response_body['tags']) == 0
+
+        event = event_creator.get_review_event(
+            review, item_id, "in progress", junior_user_id, 1, tags=None)
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200
+        response_body = json.loads(response['body'])
+        assert 'tags' in response_body
+        assert len(response_body['tags']) == 0
+
+        event = event_creator.get_review_event(
+            review, item_id, "closed", junior_user_id, 1, tags=None)
+        response = update_review.update_review(event, None)
+        assert response['statusCode'] == 200
 
         # Test not existing review
         fake_review = review
