@@ -55,7 +55,7 @@ Resources:
   LambdaIoTExecutionPolicy:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-user_api-iot-policy-execution-user-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "codetekt-user_api-iot-policy-execution-user-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
