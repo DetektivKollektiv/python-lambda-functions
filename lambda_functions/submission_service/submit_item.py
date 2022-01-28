@@ -55,6 +55,10 @@ def submit_item(event, context):
             if "item" in body_dict:
                 del body_dict["item"]
 
+            if "mail" in body_dict:
+                email_address = body_dict["mail"]
+                del body_dict["mail"]
+
             submission = Submission()
             helper.body_to_object(body_dict, submission)
             # add ip address
@@ -84,18 +88,20 @@ def submit_item(event, context):
                 submission.status = item.status
 
             # Create submission
-            submission_handler.create_submission_db(submission, session)
+            submission = submission_handler.create_submission_db(submission, session)
 
-            # Create email and send confirmation mail
-            if "mail" in body_dict:
-                email_address = body_dict["mail"]
+            # Create email, link it to submission and send confirmation mail
+            if email_address:
                 mail = mail_handler.get_mail_by_email_address(email_address, session)
                 if mail == None: # only create if not already exists
                     mail = Mail()
                     mail.email = email_address
                     mail = mail_handler.create_mail(mail, session)
                     
-                    mail_handler.send_confirmation_mail(mail)
+                mail_handler.send_confirmation_mail(mail)
+                submission.mail_id = mail.id
+                session.add(submission)
+                session.commit()
 
             # Create response
             if item.status == 'Unsafe':

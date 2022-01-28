@@ -14,7 +14,12 @@ def event1():
         'body': {
             "content": "Test item",
             "item_type_id": "Type1",
-            "mail": "test1@test.de"
+            "mail": "test1@test.de",
+            "item": {
+                "content": "Test item",
+                "id": "122212",
+                "language": ""
+            }
 
         },
         'requestContext': {
@@ -31,7 +36,12 @@ def event2():
         'body': {
             "content": "Test item",
             "item_type_id": "Type1",
-            "mail": "test2@test.de"
+            "mail": "test2@test.de",
+            "item": {
+                "content": "Test item",
+                "id": "122212",
+                "language": ""
+            }
         },
         'requestContext': {
             'identity': {
@@ -72,6 +82,7 @@ def test_submit_item(event1, event2, monkeypatch):
             assert session.query(Item).count() == 1
             assert session.query(Submission).count() == 1
             assert session.query(Submission.ip_address).first()[0] == '1.2.3.4'
+            assert session.query(Submission).first().mail.email == 'test1@test.de'
 
             # Submit second item with same content as first one
             submit_item(event2, None)

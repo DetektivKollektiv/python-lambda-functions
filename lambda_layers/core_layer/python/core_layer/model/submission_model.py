@@ -16,6 +16,8 @@ class Submission(Base):
     ip_address = Column(String(15))
     item_id = Column(String(36), ForeignKey('items.id'))
     item = relationship("Item", back_populates="submissions")
+    mail_id = Column(String(36), ForeignKey('mails.id'))
+    mail = relationship('Mail', back_populates = 'submissions')
     comments = relationship("Comment", back_populates="submission")
 
     def to_dict(self):
@@ -27,5 +29,6 @@ class Submission(Base):
             "source": self.source,
             "frequency": self.frequency,
             "received_date": self.received_date,
-            "item_id": self.item_id
+            "item_id": self.item_id,
+            "mail_id": self.mail_id
         }
