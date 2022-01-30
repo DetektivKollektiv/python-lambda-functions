@@ -14,7 +14,7 @@ def confirm_mail_subscription(event):
 
     helper.log_method_initiated("Confirm mail subscription", event, logger)
 
-    user_id = event['pathParameters']['user_id']
+    mail_id = event['pathParameters']['mail_id']
 
     stage = os.environ['STAGE']
     if stage == 'prod':
@@ -28,8 +28,7 @@ def confirm_mail_subscription(event):
     with Session() as session:                                 
 
         try:
-            mail = mail_handler.get_mail_by_user_id(user_id, session)
-            user_handler.confirm_mail_subscription(mail.id, session)
+            user_handler.confirm_mail_subscription(mail_id, session)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},
@@ -49,7 +48,7 @@ def unsubscribe_mail(event):
 
     helper.log_method_initiated("Unsubscribe mail", event, logger)
 
-    user_id = event['pathParameters']['user_id']
+    mail_id = event['pathParameters']['mail_id']
 
     stage = os.environ['STAGE']
     if stage == 'prod':
@@ -63,8 +62,7 @@ def unsubscribe_mail(event):
     with Session() as session:                                 
 
         try:
-            mail = mail_handler.get_mail_by_user_id(user_id, session)
-            user_handler.unsubscribe_mail(mail.id, session)
+            user_handler.unsubscribe_mail(mail_id, session)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},
