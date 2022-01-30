@@ -1,5 +1,6 @@
 import pytest
 import boto3
+from moto import mock_ses, mock_stepfunctions
 from core_layer.model.submission_model import Submission
 from ....tests.helper import setup_scenarios
 from core_layer.model.item_model import Item
@@ -56,7 +57,6 @@ def test_submit_item(event1, event2, monkeypatch):
     # Set environment variable
     monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("MOTO_ACCOUNT_ID", '891514678401')
-    from moto import mock_ses, mock_stepfunctions
     with mock_stepfunctions(), mock_ses():
         # Initialize mock clients
         sf_client = boto3.client('stepfunctions', region_name="eu-central-1")
@@ -102,6 +102,9 @@ def test_submit_item(event1, event2, monkeypatch):
             send_quota = ses_client.get_send_quota()
             sent_count = int(send_quota["SentLast24Hours"])
             assert sent_count == 2
+            from moto.ses import ses_backend
+            for message_id, sent_message in enumerate(ses_backend.sent_messages):
+                assert session.query(Mail).all()[message_id].id in sent_message.body
 
 def test_remove_control_characters_1():
     from submission_service.submit_item import remove_control_characters

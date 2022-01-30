@@ -3,13 +3,10 @@ from uuid import uuid4
 from core_layer.db_handler import Session
 from user_service.create_user import create_user
 from core_layer.model.level_model import Level
-from moto import mock_cognitoidp
-import boto3
-import pytest
-from uuid import uuid4
-from core_layer.db_handler import Session
 from core_layer.model.mail_model import Mail
 from core_layer.model.user_model import User
+from moto import mock_cognitoidp, mock_ses
+import boto3
 
 
 @pytest.fixture
@@ -40,11 +37,18 @@ def event(user_id, user_name, mail_address):
     return event
 
 
+@mock_ses
 @mock_cognitoidp
-def test_create_user(event, user_name, mail_address):
+def test_create_user(event, user_name, mail_address, monkeypatch):
 
 
-    # mocking stuff that's required
+    # mock required stuff
+
+    monkeypatch.setenv("STAGE", "dev")
+
+    conn = boto3.client("ses", region_name="eu-central-1")
+    conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
+
     cognitoidp = boto3.client("cognito-idp", region_name = "eu-central-1")
 
     response = cognitoidp.create_user_pool(PoolName = "PoolNameString")

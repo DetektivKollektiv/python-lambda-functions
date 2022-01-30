@@ -85,7 +85,6 @@ def submit_item(event, context):
                     url_handler.prepare_and_store_urls(item, str_urls, session)
 
                 submission.item_id = item.id
-                submission.status = item.status
 
             # Create submission
             submission = submission_handler.create_submission_db(submission, session)

@@ -1,13 +1,10 @@
 import boto3
 import logging
-from uuid import uuid4
-
 from core_layer import helper
 from core_layer.db_handler import Session
-
 from core_layer.model.user_model import User
 from core_layer.model.mail_model import Mail
-from core_layer.handler import user_handler
+from core_layer.handler import user_handler, mail_handler
 
 
 def create_user(event):
@@ -33,14 +30,11 @@ def create_user(event):
             )
 
             # Add mail address if submitted
-            try:
+            if 'email' in event['request']['userAttributes']:
                 mail = Mail()
-                mail.id = str(uuid4())
                 mail.email = event['request']['userAttributes']['email']
                 mail.user_id = user.id
-                session.add(mail)
-                session.commit()
-            except:
-                pass
+                mail_handler.create_mail(mail, session)
+                mail_handler.send_confirmation_mail(mail)
 
         return event
