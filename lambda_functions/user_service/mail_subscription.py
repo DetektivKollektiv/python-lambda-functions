@@ -4,7 +4,7 @@ import logging
 import traceback
 from core_layer import helper
 from core_layer.db_handler import Session
-from core_layer.handler import user_handler
+from core_layer.handler import user_handler, mail_handler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -28,7 +28,8 @@ def confirm_mail_subscription(event):
     with Session() as session:                                 
 
         try:
-            user_handler.confirm_mail_subscription(user_id, session)
+            mail = mail_handler.get_mail_by_user_id(user_id, session)
+            user_handler.confirm_mail_subscription(mail.id, session)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},
@@ -62,7 +63,8 @@ def unsubscribe_mail(event):
     with Session() as session:                                 
 
         try:
-            user_handler.unsubscribe_mail(user_id, session)
+            mail = mail_handler.get_mail_by_user_id(user_id, session)
+            user_handler.unsubscribe_mail(mail.id, session)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},

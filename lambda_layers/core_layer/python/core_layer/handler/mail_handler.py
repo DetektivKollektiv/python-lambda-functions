@@ -38,6 +38,32 @@ def get_mail_by_email_address(email, session):
     return mail
 
 
+def get_mail_by_mail_id(mail_id, session):
+    """
+    Returns Mail object by given mail_id
+
+    Parameters
+    ----------
+    mail_id: string
+    """
+    
+    mail = session.query(Mail).filter(Mail.id == mail_id).first()
+    return mail
+
+
+def get_mail_by_user_id(user_id, session):
+    """
+    Returns Mail object by given user_id
+
+    Parameters
+    ----------
+    user_id: string
+    """
+    
+    mail = session.query(Mail).filter(Mail.user_id == user_id).first()
+    return mail
+
+
 def send_confirmation_mail(mail):
 
     logger = logging.getLogger()

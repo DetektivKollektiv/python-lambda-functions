@@ -223,9 +223,9 @@ def test_mail_subscription(fixtures, user_id_1, mail_id):
         assert session.query(Mail).first().status == "unconfirmed"
 
         # Check mail confirmation
-        user_handler.confirm_mail_subscription(user_id_1, session)
+        user_handler.confirm_mail_subscription(mail_id, session)
         assert session.query(Mail).first().status == "confirmed"
 
         # Check mail unsubscription
-        user_handler.unsubscribe_mail(user_id_1, session)
+        user_handler.unsubscribe_mail(mail_id, session)
         assert session.query(Mail).first().status == "unsubscribed"
