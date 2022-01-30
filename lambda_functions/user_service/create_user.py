@@ -35,6 +35,7 @@ def create_user(event):
                 mail.email = event['request']['userAttributes']['email']
                 mail.user_id = user.id
                 mail_handler.create_mail(mail, session)
-                mail_handler.send_confirmation_mail(mail)
+                if mail.status is not 'confirmed':
+                    mail_handler.send_confirmation_mail(mail)
 
         return event
