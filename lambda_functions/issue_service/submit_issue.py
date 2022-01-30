@@ -17,9 +17,9 @@ def submit_issue(event, context):
 
     helper.log_method_initiated("Submit issue", event, logger)
 
-    issue = Issue() #create object from issue_model.py (DB table: issues)
-    issue = helper.body_to_object(event['body'], issue) 
-    
+    issue = Issue()  # create object from issue_model.py (DB table: issues)
+    issue = helper.body_to_object(event['body'], issue)
+
     # add ip address
     try:
         ip_address = event['requestContext']['identity']['sourceIp']
@@ -28,7 +28,7 @@ def submit_issue(event, context):
         response = {
             "statusCode": 400,
             "body": "Could not read/add ip address. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
-        }        
+        }
 
     with Session() as session:
         issue = add_object(issue, session)
@@ -80,10 +80,7 @@ def send_issue_notification(issue: Issue) -> bool:
     </html>
     '''
 
-    if issue.item_id is None:
-        body_text = body_text.format(issue.category, issue.message, '')
-        body_html = body_html.format(issue.category, issue.message, '')
-    else:
+    if issue.item_id is not None:
         item_text = ''' \n
         Item Id: {} \n
         Item content: {} \n
@@ -93,9 +90,30 @@ def send_issue_notification(issue: Issue) -> bool:
         <p>{}</p>
         <h1 style="color: #ffcc00;">Item content:</h1>
         <p>{}</p>'''.format(issue.item_id, issue.item.content)
-
         body_text = body_text.format(issue.category, issue.message, item_text)
         body_html = body_html.format(issue.category, issue.message, item_html)
+
+    elif issue.comment_id is not None:
+        comment_text = ''' \n
+        Comment Id: {} \n
+        Comment: {} \n
+        Comment user: {} \n
+        '''.format(issue.comment.id, issue.comment.comment, issue.comment.user.name)
+        comment_html = '''
+        <h1 style="color: #ffcc00;">Comment Id:</h1>
+        <p>{}</p>
+        <h1 style="color: #ffcc00;">Comment:</h1>
+        <p>{}</p>
+        <h1 style="color: #ffcc00;">Comment user:</h1>
+        <p>{}</p>
+        '''.format(issue.comment.id, issue.comment.comment, issue.comment.user.name)
+        body_text = body_text.format(
+            issue.category, issue.message, comment_text)
+        body_html = body_html.format(
+            issue.category, issue.message, comment_html)
+    else:
+        body_text = body_text.format(issue.category, issue.message, '')
+        body_html = body_html.format(issue.category, issue.message, '')
 
     charset = "UTF-8"
 
