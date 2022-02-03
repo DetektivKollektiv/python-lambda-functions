@@ -32,7 +32,7 @@ def get_open_items(event, context):
 
             if len(items) < 1:
                 response = {
-                    "statusCode": 404,
+                    "statusCode": 204,
                     "body": "There are currently no open items for this user."
                 }
             else:
