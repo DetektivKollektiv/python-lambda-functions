@@ -1,0 +1,15 @@
+Dein Fall wurde gelöst!
+Der Vertrauensindex beträgt *{rating} von 4*. Damit ist dein Fall *{rating_text}*
+
+1: nicht vertrauenswürdig
+2: eher nicht vertrauenswürdig
+3: eher vertrauenswürdig\n4: vertrauenswürdig
+
+
+Mehr Details zu deinem Fall findest du in unserem [Archiv](https://codetekt.org/archive?id={item_id}).
+
+Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!
+
+Dein Fall lautete:
+
+{content}

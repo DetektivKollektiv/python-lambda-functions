@@ -1,0 +1,2 @@
+Unsere Detektiv*innen haben deinen Fall gelöst.
+Der Vertrauensindex beträgt {rating}. Damit ist dein Fall {rating_text}.
