@@ -12,4 +12,5 @@
 <p>Mehr Details zu deinem Fall findest du in unserem <a href="https://codetekt.org/archive/{item_id}">Archiv</a>.<br /><br />Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!</p>
 <p>Dein Fall lautete: <br />{content}</p>
 <p>Antworten auf diese Mail werden nicht gelesen.</p>
+<p><a href="{mail_unsubscribe_link}">Keine E-mails mehr erhalten</a>.</p>
 </html>

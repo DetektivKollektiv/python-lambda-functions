@@ -8,7 +8,6 @@ from core_layer.model.mail_model import Mail
 
 from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 from notification_service.src.sender.mail_sender import MailSender
-from core_layer.responses import InternalError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -70,24 +69,52 @@ def get_mail_by_user_id(user_id, session):
     return mail
 
 
-def send_confirmation_mail(mail):
+def get_confirmation_link(mail_id):
+    """
+    Returns mail confirmation link by by given mail_id
+
+    Parameters
+    ----------
+    mail_id: string
+    """
 
     stage = os.environ['STAGE']
     if stage == 'prod':
-        confirmation_link = 'https://api.codetekt.org/user_service/mails/{}/confirm'.format(
-            mail.id)
+        confirmation_link = f'https://api.codetekt.org/user_service/mails/{mail_id}/confirm'
     else:
-        confirmation_link = 'https://api.{}.codetekt.org/user_service/mails/{}/confirm'.format(
-            stage, mail.id)
+        confirmation_link = f'https://api.{stage}.codetekt.org/user_service/mails/{mail_id}/confirm'
+
+    return confirmation_link
+
+
+def get_unsubscribe_link(mail_id):
+    """
+    Returns mail confirmation link by by given mail_id
+
+    Parameters
+    ----------
+    mail_id: string
+    """
+
+    stage = os.environ['STAGE']
+    if stage == 'prod':
+        unsubscribe_link = f'https://api.codetekt.org/user_service/mails/{mail_id}/unsubscribe'
+    else:
+        unsubscribe_link = f'https://api.{stage}.codetekt.org/user_service/mails/{mail_id}/unsubscribe'
+
+    return unsubscribe_link
+
+
+def send_confirmation_mail(mail):
 
     notification_template_handler = NotificationTemplateHandler()
     mail_sender = MailSender(notification_template_handler)
 
-    parameters = dict(mail_confirmation_link = confirmation_link)
+    parameters = dict(mail_confirmation_link = get_confirmation_link(mail.id))
 
     try: 
         mail_sender.send_notification("mail_confirmation", mail = mail.email, replacements = parameters)
-        logger.info("Confirmation email sent for mail with ID: {}".format(mail.id))
+        logger.info(f"Confirmation email sent for mail with ID: {mail.id}")
 
-    except Exception as e:
-        return InternalError(f"Error sending confirmation mail with mail_id {mail.id}", e, add_cors_headers = False).to_json_string()
+    except:
+        logger.info(f"Error sending confirmation mail with ID: {mail.id}")

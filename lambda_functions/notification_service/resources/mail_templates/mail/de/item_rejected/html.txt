@@ -12,4 +12,5 @@
 <p>Prüfe deinen Fall nochmal und reiche ihn dann nochmals ein.</p>
 <p>Dein Fall lautete: <br />{content}</p>
 <p>Antworten auf diese Mail werden nicht gelesen.</p>
+<p><a href="{mail_unsubscribe_link}">Keine E-mails mehr erhalten</a>.</p>
 </html>

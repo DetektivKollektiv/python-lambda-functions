@@ -104,7 +104,9 @@ def test_submit_item(event1, event2, monkeypatch):
             assert sent_count == 2
             from moto.ses import ses_backend
             for message_id, sent_message in enumerate(ses_backend.sent_messages):
-                assert session.query(Mail).all()[message_id].id in sent_message.body
+                mail_id = session.query(Mail).all()[message_id].id
+                assert mail_id in sent_message.body
+                assert f"https://api.dev.codetekt.org/user_service/mails/{mail_id}/confirm" in sent_message.body
                 assert "Bestätige deine Mail-Adresse" in sent_message.body
 
 def test_remove_control_characters_1():

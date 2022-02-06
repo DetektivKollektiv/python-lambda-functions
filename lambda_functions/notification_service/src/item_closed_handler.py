@@ -1,10 +1,9 @@
 import logging
-
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 from core_layer.responses import BadRequest, InternalError, Success
-from core_layer.handler import item_handler
+from core_layer.handler import item_handler, mail_handler
 from .sender.mail_sender import MailSender
 from .sender.telegram_sender import TelegramSender
 
@@ -42,6 +41,7 @@ def handle_item_closed(event, context):
 
             for submission in item.submissions:
                 if submission.mail is not None:
+                    parameters['mail_unsubscribe_link'] = mail_handler.get_unsubscribe_link(submission.mail.id)
                     try:
                         mail_sender.send_notification(
                             "item_closed", mail=submission.mail.email, replacements=parameters)

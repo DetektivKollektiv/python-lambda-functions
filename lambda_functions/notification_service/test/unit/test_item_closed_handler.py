@@ -49,6 +49,7 @@ def event(item_id):
 def test_item_closed(item, mail, submission, event, monkeypatch):
 
     # Set environment variable
+    monkeypatch.setenv("STAGE", "dev")
     os.environ["MOTO"] = ""
     with mock_stepfunctions(), mock_ses():
         # Initialize mock clients
@@ -70,6 +71,7 @@ def test_item_closed(item, mail, submission, event, monkeypatch):
             sent_messages = ses_backend.sent_messages
             item.id in sent_messages[0].body
             "Dein Fall wurde gelöst!" in sent_messages[0].body
+            assert f"https://api.dev.codetekt.org/user_service/mails/{submission.mail.id}/unsubscribe" in sent_messages[0].body
 
 
 def test_no_item_id(monkeypatch):
