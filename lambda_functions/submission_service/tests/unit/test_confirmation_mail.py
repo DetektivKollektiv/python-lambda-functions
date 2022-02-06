@@ -1,7 +1,6 @@
-import pytest
 from moto import mock_ses
 from moto.ses import ses_backend
-import boto3
+import pytest, boto3, os
 from uuid import uuid4
 from sqlalchemy import func
 from core_layer.db_handler import Session
@@ -33,6 +32,7 @@ def submission(mail_id):
 def test_confirmation_mail(submission, mail, monkeypatch):
     
     monkeypatch.setenv("STAGE", "dev")
+    os.environ["MOTO"] = ""
 
     conn = boto3.client("ses", region_name="eu-central-1")
     conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")

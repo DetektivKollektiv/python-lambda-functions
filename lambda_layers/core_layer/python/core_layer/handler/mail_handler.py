@@ -1,11 +1,17 @@
 # External imports
 from uuid import uuid4
-import boto3, io, logging, os
+import logging, os
 # Helper imports
 from core_layer import helper
 # Model imports
 from core_layer.model.mail_model import Mail
 
+from core_layer.handler.notification_template_handler import NotificationTemplateHandler
+from notification_service.src.sender.mail_sender import MailSender
+from core_layer.responses import InternalError
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def create_mail(mail, session):
     """
@@ -66,9 +72,6 @@ def get_mail_by_user_id(user_id, session):
 
 def send_confirmation_mail(mail):
 
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
     stage = os.environ['STAGE']
     if stage == 'prod':
         confirmation_link = 'https://api.codetekt.org/user_service/mails/{}/confirm'.format(
@@ -77,45 +80,14 @@ def send_confirmation_mail(mail):
         confirmation_link = 'https://api.{}.codetekt.org/user_service/mails/{}/confirm'.format(
             stage, mail.id)
 
-    recipient = mail.email
-    sender = "codetekt <no-reply@codetekt.org>"
-    subject = 'Bestätige deine Mail-Adresse'
+    notification_template_handler = NotificationTemplateHandler()
+    mail_sender = MailSender(notification_template_handler)
 
-    body_text = "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(confirmation_link)
-    body_html = io.open(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../..', 'lambda_functions/user_service/resources',
-                                     'confirmation_file_body.html')), mode='r', encoding='utf-8').read().format(confirmation_link)
+    parameters = dict(mail_confirmation_link = confirmation_link)
 
-    charset = "UTF-8"
-    client = boto3.client('ses', region_name = 'eu-central-1')
-    try:
-        response = client.send_email(
-            Destination = {
-                'ToAddresses': [
-                    recipient,
-                ],
-            },
-            Message = {
-                'Body': {
-                    'Html': {
-                        'Charset': charset,
-                        'Data': body_html,
-                    },
-                    'Text': {
-                        'Charset': charset,
-                        'Data': body_text,
-                    },
-                },
-                'Subject': {
-                    'Charset': charset,
-                    'Data': subject,
-                },
-            },
-            Source = sender,
-        )
-        logger.info("Confirmation email sent for mail with ID: {}. SES Message ID: {}".format(
-            mail.id, response['MessageId']))
+    try: 
+        mail_sender.send_notification("mail_confirmation", mail = mail.email, replacements = parameters)
+        logger.info("Confirmation email sent for mail with ID: {}".format(mail.id))
 
-    except ClientError as e:
-        logging.exception("Could not send confirmation mail for mail with ID: {}. SNS Error: {}".format(
-            mail.id, e.response['Error']['Message']))
-        pass
+    except Exception as e:
+        return InternalError(f"Error sending confirmation mail with mail_id {mail.id}", e, add_cors_headers = False).to_json_string()

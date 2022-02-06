@@ -1,9 +1,8 @@
-import pytest
+import pytest, boto3, os
 from core_layer.db_handler import Session
 from user_service import mail_subscription
 from core_layer.model.mail_model import Mail
 from moto import mock_ses
-import boto3
 from core_layer.handler import mail_handler
 
 
@@ -17,6 +16,7 @@ def test_double_opt_in(mail_address, monkeypatch):
 
     # mock required stuff
     monkeypatch.setenv("STAGE", "dev")
+    os.environ["MOTO"] = ""
     conn = boto3.client("ses", region_name="eu-central-1")
     conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
