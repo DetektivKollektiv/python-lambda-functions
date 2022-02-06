@@ -1,7 +1,7 @@
 import logging
 
 from botocore.exceptions import ClientError
-from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
+from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 
 from .notification_sender import NotificationSender
 
@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 
 
 class MailSender(NotificationSender):
-    def __init__(self, notification_template_handler: S3NotificationTemplateHandler) -> None:
+    def __init__(self, notification_template_handler: NotificationTemplateHandler) -> None:
         super().__init__(notification_template_handler)
 
         self._message_type = "mail"
