@@ -6,7 +6,7 @@ from .model_base import Base
 class Submission(Base):
     __tablename__ = 'submissions'
     id = Column(String(36), primary_key=True)
-    submission_date = Column(DateTime)
+    submission_date = Column(DateTime, server_default=func.now())
     mail = Column(String(100))
     telegram_id = Column(String(100))
     phone = Column(String(36))

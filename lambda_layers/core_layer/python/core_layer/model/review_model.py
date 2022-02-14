@@ -13,9 +13,9 @@ class Review(Base):
     user_id = Column(String(36), ForeignKey('users.id'))
     item_id = Column(String(36), ForeignKey('items.id',
                                             ondelete='CASCADE', onupdate='CASCADE'))
-    start_timestamp = Column(DateTime)
+    start_timestamp = Column(DateTime, server_default=func.now())
     finish_timestamp = Column(DateTime)
-    status = Column(String(100))
+    status = Column(String(100), default="in_progress")
 
     review_answers = relationship(
         "ReviewAnswer", back_populates="review", lazy="joined")
