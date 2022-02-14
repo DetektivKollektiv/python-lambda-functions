@@ -45,7 +45,7 @@ class Comment(Base):
     def to_dict(self) -> dict:
         return {
             "id": self.id,
-            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.timestamp, datetime) else self.timestamp,
+            "timestamp": self.timestamp.isoformat(),
             'comment': self.comment,
             'is_review_comment': str(self.is_review_comment),
             'user': self.user.name if self.user else None
