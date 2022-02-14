@@ -59,8 +59,8 @@ class Item(Base):
             "open_reviews": self.open_reviews,
             "in_progress_reviews_level_1": self.in_progress_reviews_level_1,
             "in_progress_reviews_level_2": self.in_progress_reviews_level_2,
-            "open_timestamp": self.open_timestamp.isoformat(),
-            "close_timestamp": self.close_timestamp.isoformat()
+            "open_timestamp": self.open_timestamp.isoformat() if self.open_timestamp else "",
+            "close_timestamp": self.close_timestamp.isoformat() if self.close_timestamp else ""
         }
 
         if with_tags:

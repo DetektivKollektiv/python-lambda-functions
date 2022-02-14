@@ -30,8 +30,8 @@ class Review(Base):
             "is_peer_review": self.is_peer_review,
             "belongs_to_good_pair": self.belongs_to_good_pair,
             "user_id": self.user_id,
-            "start_timestamp": self.start_timestamp.isoformat(),
-            "finish_timestamp": self.finish_timestamp.isoformat()
+            "start_timestamp": self.start_timestamp.isoformat() if self.start_timestamp else "",
+            "finish_timestamp": self.finish_timestamp.isoformat() if self.finish_timestamp else ""
         }
         return_dict['comment'] = self.comment.comment if self.comment else None
         if with_questions_and_answers:

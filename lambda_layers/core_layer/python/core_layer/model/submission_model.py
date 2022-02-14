@@ -23,13 +23,13 @@ class Submission(Base):
     def to_dict(self):
         return {
             "id": self.id,
-            "submission_date": self.submission_date.isoformat(),
+            "submission_date": self.submission_date.isoformat() if self.submission_date else "",
             "mail": self.mail,
             "telegram_id": self.telegram_id,
             "phone": self.phone,
             "source": self.source,
             "frequency": self.frequency,
-            "received_date": self.received_date.isoformat(),
+            "received_date": self.received_date.isoformat() if self.received_date else "",
             "item_id": self.item_id,
             "status": self.status
         }
