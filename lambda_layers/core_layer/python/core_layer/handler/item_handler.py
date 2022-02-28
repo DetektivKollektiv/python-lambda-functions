@@ -1,3 +1,4 @@
+import math
 import random
 import statistics
 import logging
@@ -11,6 +12,7 @@ from core_layer.model.url_model import URL, ItemURL
 from core_layer.model.review_question_model import ItemCriticalQuestion
 from core_layer.handler import review_pair_handler, review_handler
 from core_layer import db_helper
+from sqlalchemy import select
 
 
 def get_all_items(session, params: dict = {}) -> List[Item]:
@@ -140,12 +142,19 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
 
     if user.level_id > 1:
         # Get open items for senior review
-        result = session.query(Item) \
+        query_base = session.query(Item) \
             .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
             .filter(~Item.reviews.any(Review.user_id == user.id)) \
-            .filter(Item.status == "open") \
-            .order_by(Item.open_timestamp.asc()) \
-            .limit(num_items).all()
+            .filter(Item.status == "open")
+
+        oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
+            .limit(math.floor(num_items/2 + 1)).all()
+
+        latest_items = query_base.order_by(Item.open_timestamp.desc()) \
+            .limit(math.floor(num_items/2)).all()
+        to_add = list(set(oldest_items) - set(latest_items))
+        result = latest_items + to_add
+        # result = latest_items + oldest_items
 
         # If open items are available, return them
         if len(result) > 0:
@@ -155,12 +164,18 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
             return {'items': items, 'is_open_review': False}
 
     # Get open items for junior review and return them
-    result = session.query(Item) \
+    query_base = session.query(Item) \
         .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
         .filter(~Item.reviews.any(Review.user_id == user.id)) \
-        .filter(Item.status == "open") \
-        .order_by(Item.open_timestamp.asc()) \
-        .limit(num_items).all()
+        .filter(Item.status == "open")
+
+    oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
+        .limit(math.floor(num_items/2 + 1)).all()
+
+    latest_items = query_base.order_by(Item.open_timestamp.desc()) \
+        .limit(math.floor(num_items/2)).all()
+
+    result = latest_items + list(set(oldest_items) - set(latest_items))
 
     for item in result:
         items.append(item)
