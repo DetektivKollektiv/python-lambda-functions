@@ -152,9 +152,7 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
 
         latest_items = query_base.order_by(Item.open_timestamp.desc()) \
             .limit(math.floor(num_items/2)).all()
-        to_add = list(set(oldest_items) - set(latest_items))
-        result = latest_items + to_add
-        # result = latest_items + oldest_items
+        result = latest_items + list(set(oldest_items) - set(latest_items))
 
         # If open items are available, return them
         if len(result) > 0:
