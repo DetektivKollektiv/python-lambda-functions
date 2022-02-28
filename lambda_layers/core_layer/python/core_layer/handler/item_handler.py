@@ -12,7 +12,6 @@ from core_layer.model.url_model import URL, ItemURL
 from core_layer.model.review_question_model import ItemCriticalQuestion
 from core_layer.handler import review_pair_handler, review_handler
 from core_layer import db_helper
-from sqlalchemy import select
 
 
 def get_all_items(session, params: dict = {}) -> List[Item]:
