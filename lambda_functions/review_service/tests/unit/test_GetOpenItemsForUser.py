@@ -131,9 +131,8 @@ class TestGetOpenItems:
             open_items_after_other_review = item_handler.get_open_items_for_user(
                 junior_detective4, 5, session)['items']
             assert len(open_items_after_other_review) == 5
-
             # 4 Junior Detectives reviewing Item 2
-
+            item2 = item_handler.get_item_by_id(item2.id, session)
             jr1 = review_handler.create_review(
                 junior_detective1, item2, session)
             jr2 = review_handler.create_review(
@@ -188,6 +187,7 @@ class TestGetOpenItems:
             assert len(open_items_after_submission) == 4
 
             # SeniorDetective 1 accepting item 3
+            item3 = item_handler.get_item_by_id(item3.id, session)
             sr1 = review_handler.create_review(
                 senior_detective1, item3, session)
             open_item_after_accept = item_handler.get_open_items_for_user(
