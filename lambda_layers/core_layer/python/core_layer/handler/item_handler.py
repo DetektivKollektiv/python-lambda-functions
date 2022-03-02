@@ -147,10 +147,14 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
             .filter(Item.status == "open")
 
         oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
-            .limit(math.floor(num_items/2 + 1)).all()
+            .limit(math.floor(num_items/2)).all()
 
         latest_items = query_base.order_by(Item.open_timestamp.desc()) \
-            .limit(math.floor(num_items/2)).all()
+            .limit(15) \
+            .from_self() \
+            .order_by(Item.open_reviews_level_2.asc(), Item.open_timestamp.desc()) \
+            .limit(math.floor(num_items/2 + 1)) \
+            .all()
         result = latest_items + list(set(oldest_items) - set(latest_items))
 
         # If open items are available, return them
@@ -167,10 +171,14 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
         .filter(Item.status == "open")
 
     oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
-        .limit(math.floor(num_items/2 + 1)).all()
+        .limit(math.floor(num_items/2)).all()
 
     latest_items = query_base.order_by(Item.open_timestamp.desc()) \
-        .limit(math.floor(num_items/2)).all()
+        .limit(15) \
+        .from_self() \
+        .order_by(Item.open_reviews_level_1.asc(), Item.open_timestamp.desc()) \
+        .limit(math.floor(num_items/2 + 1)) \
+        .all()
 
     result = latest_items + list(set(oldest_items) - set(latest_items))
 

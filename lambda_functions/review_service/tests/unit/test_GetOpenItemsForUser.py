@@ -352,6 +352,23 @@ class TestGetOpenItems:
                 senior_detective1, 5, session)['items']
             assert len(open_items_for_senior) == 5
             assert all(x in open_items_for_senior for x in [
+                       item1, item2, item4, item5, item6])
+
+            open_items_for_junior = item_handler.get_open_items_for_user(
+                junior_detective1, 5, session)['items']
+            assert all(x in open_items_for_junior for x in [
+                       item1, item2, item4, item5, item6])
+
+            # When item3 needs less reviewed it should be prioritized over item4
+            item3.open_reviews_level_1 = 3
+            item3.open_reviews_level_2 = 3
+            session.merge(item3)
+            session.commit
+
+            open_items_for_senior = item_handler.get_open_items_for_user(
+                senior_detective1, 5, session)['items']
+            assert len(open_items_for_senior) == 5
+            assert all(x in open_items_for_senior for x in [
                        item1, item2, item3, item5, item6])
 
             open_items_for_junior = item_handler.get_open_items_for_user(
