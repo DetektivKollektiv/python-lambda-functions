@@ -12,6 +12,7 @@ from core_layer.model.url_model import URL, ItemURL
 from core_layer.model.review_question_model import ItemCriticalQuestion
 from core_layer.handler import review_pair_handler, review_handler
 from core_layer import db_helper
+from sqlalchemy import Column
 
 
 def get_all_items(session, params: dict = {}) -> List[Item]:
@@ -126,7 +127,8 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
     """
 
     items = []
-
+    num_oldest_items = math.floor(num_items/2)
+    num_latest_items = math.floor(num_items/2 + 1)
     # If review in progress exists for user, return the corresponding item(s)
     result = session.query(Review).filter(
         Review.user_id == user.id, Review.status == "in_progress").limit(num_items)
@@ -141,20 +143,15 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
 
     if user.level_id > 1:
         # Get open items for senior review
-        query_base = session.query(Item) \
-            .filter(Item.open_reviews_level_2 > Item.in_progress_reviews_level_2) \
-            .filter(~Item.reviews.any(Review.user_id == user.id)) \
-            .filter(Item.status == "open")
+        query_base = get_query_base_open_items(
+            Item.open_reviews_level_2, Item.in_progress_reviews_level_2, user.id, session)
 
         oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
-            .limit(math.floor(num_items/2)).all()
+            .limit(num_oldest_items).all()
 
-        latest_items = query_base.order_by(Item.open_timestamp.desc()) \
-            .limit(15) \
-            .from_self() \
-            .order_by(Item.open_reviews_level_2.asc(), Item.open_timestamp.desc()) \
-            .limit(math.floor(num_items/2 + 1)) \
-            .all()
+        latest_items = get_latest_items(
+            query_base, Item.open_reviews_level_2, num_latest_items)
+
         result = latest_items + list(set(oldest_items) - set(latest_items))
 
         # If open items are available, return them
@@ -165,20 +162,14 @@ def get_open_items_for_user(user, num_items, session) -> Dict[List[Item], bool]:
             return {'items': items, 'is_open_review': False}
 
     # Get open items for junior review and return them
-    query_base = session.query(Item) \
-        .filter(Item.open_reviews_level_1 > Item.in_progress_reviews_level_1) \
-        .filter(~Item.reviews.any(Review.user_id == user.id)) \
-        .filter(Item.status == "open")
+    query_base = get_query_base_open_items(
+        Item.open_reviews_level_1, Item.in_progress_reviews_level_1, user.id, session)
 
     oldest_items = query_base.order_by(Item.open_timestamp.asc()) \
-        .limit(math.floor(num_items/2)).all()
+        .limit(num_oldest_items).all()
 
-    latest_items = query_base.order_by(Item.open_timestamp.desc()) \
-        .limit(15) \
-        .from_self() \
-        .order_by(Item.open_reviews_level_1.asc(), Item.open_timestamp.desc()) \
-        .limit(math.floor(num_items/2 + 1)) \
-        .all()
+    latest_items = get_latest_items(
+        query_base, Item.open_reviews_level_1, num_latest_items)
 
     result = latest_items + list(set(oldest_items) - set(latest_items))
 
@@ -240,3 +231,19 @@ def update_item_warning_tags(item: Item, session) -> Item:
     session.merge(item)
     session.commit()
     return item
+
+
+def get_query_base_open_items(open_review_col: Column, in_progress_review_col, user_id, session):
+    return session.query(Item) \
+        .filter(open_review_col > in_progress_review_col) \
+        .filter(~Item.reviews.any(Review.user_id == user_id)) \
+        .filter(Item.status == "open")
+
+
+def get_latest_items(query_base, sort_col: Column, limit: int):
+    return query_base.order_by(Item.open_timestamp.desc()) \
+        .limit(15) \
+        .from_self() \
+        .order_by(sort_col.asc(), Item.open_timestamp.desc()) \
+        .limit(limit) \
+        .all()
