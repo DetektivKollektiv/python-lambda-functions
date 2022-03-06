@@ -22,13 +22,12 @@ def confirm_mail_subscription(event):
     else:
         link = 'https://{}.codetekt.org'.format(stage)
 
-    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
-                                     'mail_confirmed_webpage.html'), mode='r', encoding='utf-8').read().format(link)
-
     with Session() as session:                                 
 
         try:
             user_handler.confirm_mail_subscription(mail_id, session)
+            body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                    'mail_confirmed_webpage.html'), mode='r', encoding='utf-8').read().format(link)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},
@@ -36,9 +35,13 @@ def confirm_mail_subscription(event):
             }
 
         except Exception:
+            title = 'Mail-Adresse konnte nicht bestätigt werden'
+            message = 'Deine Mail-Adresse konnte nicht bestätigt werden.'
+            body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                            'mail_subscription_error_webpage.html'), mode='r', encoding='utf-8').read().format(title, message, link)
             response = {
                 "statusCode": 500,
-                "body": "Could not unsubscribe mail. Stacktrace: {}".format(traceback.format_exc())
+                "body": body_html
             }
 
         return helper.set_cors(response, event)
@@ -56,13 +59,12 @@ def unsubscribe_mail(event):
     else:
         link = 'https://{}.codetekt.org'.format(stage)
 
-    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
-                                     'mail_unsubscribed_webpage.html'), mode='r', encoding='utf-8').read().format(link)
-
     with Session() as session:                                 
 
         try:
             user_handler.unsubscribe_mail(mail_id, session)
+            body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                    'mail_unsubscribed_webpage.html'), mode='r', encoding='utf-8').read().format(link)
             response = {
                 'statusCode': 200,
                 'headers': {"content-type": "text/html; charset=utf-8"},
@@ -70,9 +72,13 @@ def unsubscribe_mail(event):
             }
 
         except Exception:
+            title = 'Mail-Adresse konnte nicht ausgetragen werden'
+            message = 'Deine Mail-Adresse konnte nicht ausgetragen werden.'
+            body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
+                                            'mail_subscription_error_webpage.html'), mode='r', encoding='utf-8').read().format(title, message, link)
             response = {
                 "statusCode": 500,
-                "body": "Could not unsubscribe mail. Stacktrace: {}".format(traceback.format_exc())
+                "body": body_html
             }
 
         return helper.set_cors(response, event)

@@ -16,14 +16,22 @@ def mail_id():
     return str(uuid4())
 
 @pytest.fixture
-def event(user_id):
+def event(mail_id):
     return {
         'pathParameters': {
-            'user_id': user_id
+            'mail_id': mail_id
         }
     }
 
-def test_mail_subscription(user_id, mail_id, event, monkeypatch):
+@pytest.fixture
+def event_with_wrong_mail_id():
+    return {
+        'pathParameters': {
+            'mail_id': str(uuid4())
+        }
+    }
+
+def test_mail_subscription(user_id, mail_id, event, event_with_wrong_mail_id, monkeypatch):
 
     # Set environment variable
     monkeypatch.setenv("STAGE", "dev")
@@ -46,3 +54,6 @@ def test_mail_subscription(user_id, mail_id, event, monkeypatch):
         # Unsubscribe
         unsubscribe_mail(event)
         assert session.query(Mail).first().status == "unsubscribed"
+        response = confirm_mail_subscription(event_with_wrong_mail_id)
+        body = response['body']
+        assert 'Deine Mail-Adresse konnte nicht bestätigt werden' in body
