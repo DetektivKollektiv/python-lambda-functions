@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 from uuid import uuid4
 from core_layer.model.tag_model import ItemTag, Tag
@@ -14,8 +15,10 @@ from review_service import create_review
 from ...get_open_items import get_open_items
 from ....tests.helper import event_creator, setup_scenarios
 
+
 class TestGetOpenItems:
-    def test_get_open_items_for_user(self):
+    def test_get_open_items_for_user(self, monkeypatch):
+        monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
         with Session() as session:
 
@@ -23,7 +26,7 @@ class TestGetOpenItems:
                 session)
             session = setup_scenarios.create_questions(session)
 
-            junior_detective1 = user_handler.get_user_by_id("1", session)            
+            junior_detective1 = user_handler.get_user_by_id("1", session)
             junior_detective2 = user_handler.get_user_by_id("2", session)
             junior_detective3 = user_handler.get_user_by_id("3", session)
             junior_detective4 = user_handler.get_user_by_id("4", session)
@@ -37,6 +40,7 @@ class TestGetOpenItems:
             item1.content = "Item 1"
             item1.status = "open"
             item1.item_type_id = "Type1"
+            item1.open_timestamp = datetime.now() + timedelta(seconds=1)
             item1 = item_handler.create_item(item1, session)
 
             url = URL()
@@ -54,24 +58,28 @@ class TestGetOpenItems:
             item2.content = "Item 2"
             item2.status = "open"
             item2.item_type_id = "Type1"
+            item2.open_timestamp = datetime.now() + timedelta(seconds=2)
             item2 = item_handler.create_item(item2, session)
 
             item3 = Item()
             item3.content = "Item 3"
             item3.status = "open"
             item3.item_type_id = "Type1"
+            item3.open_timestamp = datetime.now() + timedelta(seconds=3)
             item3 = item_handler.create_item(item3, session)
 
             item4 = Item()
             item4.content = "Item 4"
             item4.status = "open"
             item4.item_type_id = "Type1"
+            item4.open_timestamp = datetime.now() + timedelta(seconds=4)
             item4 = item_handler.create_item(item4, session)
 
             item5 = Item()
             item5.content = "Item 5"
             item5.status = "open"
             item5.item_type_id = "Type1"
+            item5.open_timestamp = datetime.now() + timedelta(seconds=5)
             item5 = item_handler.create_item(item5, session)
 
             items = item_handler.get_all_items(session)
@@ -123,9 +131,8 @@ class TestGetOpenItems:
             open_items_after_other_review = item_handler.get_open_items_for_user(
                 junior_detective4, 5, session)['items']
             assert len(open_items_after_other_review) == 5
-
             # 4 Junior Detectives reviewing Item 2
-
+            item2 = item_handler.get_item_by_id(item2.id, session)
             jr1 = review_handler.create_review(
                 junior_detective1, item2, session)
             jr2 = review_handler.create_review(
@@ -180,6 +187,7 @@ class TestGetOpenItems:
             assert len(open_items_after_submission) == 4
 
             # SeniorDetective 1 accepting item 3
+            item3 = item_handler.get_item_by_id(item3.id, session)
             sr1 = review_handler.create_review(
                 senior_detective1, item3, session)
             open_item_after_accept = item_handler.get_open_items_for_user(
@@ -280,3 +288,90 @@ class TestGetOpenItems:
             tags = items[0]['tags']
             assert len(tags) == 1
             assert tags[0] == "Test Tag"
+
+    def test_open_items_sorting(self):
+
+        with Session() as session:
+
+            session = setup_scenarios.create_levels_junior_and_senior_detectives(
+                session)
+            session = setup_scenarios.create_questions(session)
+
+            junior_detective1 = user_handler.get_user_by_id("1", session)
+
+            senior_detective1 = user_handler.get_user_by_id("11", session)
+
+            # Creating 5 items
+
+            item1 = Item()
+            item1.content = "Item 1"
+            item1.status = "open"
+            item1.item_type_id = "Type1"
+            item1.open_timestamp = datetime.now() + timedelta(seconds=1)
+            item1 = item_handler.create_item(item1, session)
+
+            item2 = Item()
+            item2.content = "Item 2"
+            item2.status = "open"
+            item2.item_type_id = "Type1"
+            item2.open_timestamp = datetime.now() + timedelta(seconds=2)
+            item2 = item_handler.create_item(item2, session)
+
+            item3 = Item()
+            item3.content = "Item 3"
+            item3.status = "open"
+            item3.item_type_id = "Type1"
+            item3.open_timestamp = datetime.now() + timedelta(seconds=3)
+            item3 = item_handler.create_item(item3, session)
+
+            item4 = Item()
+            item4.content = "Item 4"
+            item4.status = "open"
+            item4.item_type_id = "Type1"
+            item4.open_timestamp = datetime.now() + timedelta(seconds=4)
+            item4 = item_handler.create_item(item4, session)
+
+            item5 = Item()
+            item5.content = "Item 5"
+            item5.status = "open"
+            item5.item_type_id = "Type1"
+            item5.open_timestamp = datetime.now() + timedelta(seconds=5)
+            item5 = item_handler.create_item(item5, session)
+
+            item6 = Item()
+            item6.content = "Item 6"
+            item6.status = "open"
+            item6.item_type_id = "Type1"
+            item6.open_timestamp = datetime.now() + timedelta(seconds=6)
+            item6 = item_handler.create_item(item6, session)
+
+            items = item_handler.get_all_items(session)
+            assert len(items) == 6
+
+            open_items_for_senior = item_handler.get_open_items_for_user(
+                senior_detective1, 5, session)['items']
+            assert len(open_items_for_senior) == 5
+            assert all(x in open_items_for_senior for x in [
+                       item1, item2, item4, item5, item6])
+
+            open_items_for_junior = item_handler.get_open_items_for_user(
+                junior_detective1, 5, session)['items']
+            assert all(x in open_items_for_junior for x in [
+                       item1, item2, item4, item5, item6])
+
+            # When item3 needs less reviewed it should be prioritized over item4
+            item3.open_reviews_level_1 = 3
+            item3.open_reviews_level_2 = 3
+            session.merge(item3)
+            session.commit
+
+            open_items_for_senior = item_handler.get_open_items_for_user(
+                senior_detective1, 5, session)['items']
+            assert len(open_items_for_senior) == 5
+            assert all(x in open_items_for_senior for x in [
+                       item1, item2, item3, item5, item6])
+
+            open_items_for_junior = item_handler.get_open_items_for_user(
+                junior_detective1, 5, session)['items']
+            assert all(x in open_items_for_junior for x in [
+                       item1, item2, item3, item5, item6])
