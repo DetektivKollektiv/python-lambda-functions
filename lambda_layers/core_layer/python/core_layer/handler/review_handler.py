@@ -1,4 +1,6 @@
 from uuid import uuid4
+from datetime import datetime, timedelta
+
 import random
 from sqlalchemy import or_
 from core_layer.db_handler import update_object
@@ -81,8 +83,6 @@ def create_review(user, item, session) -> Review:
     rip.id = str(uuid4())
     rip.item_id = item.id
     rip.user_id = user.id
-    rip.start_timestamp = helper.get_date_time_now()
-    rip.status = "in_progress"
     session.add(rip)
     session.commit()
 
@@ -157,7 +157,7 @@ def compute_review_result(review_answers):
 
 
 def get_old_reviews_in_progress(session):
-    old_time = helper.get_date_time_one_hour_ago()
+    old_time = datetime.now() + timedelta(hours=-1)
     rips = session.query(Review).filter(
         Review.start_timestamp < old_time, Review.status == "in_progress").all()
     return rips
@@ -215,7 +215,7 @@ def create_answers_for_review(review: Review, session):
 
 def close_review(review: Review, session) -> Review:
     review.status = "closed"
-    review.finish_timestamp = helper.get_date_time_now()
+    review.finish_timestamp = datetime.now()
     user_handler.give_experience_point(review.user_id, session)
 
     pair = review_pair_handler.get_review_pair_from_review(review, session)
