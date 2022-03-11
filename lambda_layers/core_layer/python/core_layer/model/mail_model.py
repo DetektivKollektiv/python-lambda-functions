@@ -16,7 +16,7 @@ class Mail(Base):
 
     # Relationships
     # one-to-one
-    user_id = Column(String(36), ForeignKey('users.id')) # adds a ForeignKey with the id of the user
+    user_id = Column(String(36), ForeignKey('users.id', onupdate = "CASCADE", ondelete = "CASCADE")) # adds a ForeignKey with the id of the user
     user = relationship('User', backref = backref('email', uselist = False)) # adds a virtual column 'user' with a link to the User table here - and creates a virtual column 'email' in User table
     # one-to-many
     submissions = relationship('Submission', back_populates = "mail") # adds a 'virtual column' with a list of all submissions belonging to this mail address
