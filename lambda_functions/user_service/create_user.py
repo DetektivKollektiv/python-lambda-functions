@@ -29,13 +29,16 @@ def create_user(event):
                 GroupName = 'Detective'
             )
 
-            # Add mail address if submitted
-            if 'email' in event['request']['userAttributes']:
+            # Add mail address if submitted and set confirmation status
+            if 'custom:mail_subscription' in event['request']['userAttributes']:
+                confirmation_status = event['request']['userAttributes']['custom:mail_subscription']
                 mail = Mail()
                 mail.email = event['request']['userAttributes']['email']
                 mail.user_id = user.id
+                if confirmation_status == 0:
+                    mail.status = 'unsubscribed'
+                elif confirmation_status == 1:
+                    mail.status = 'confirmed'
                 mail_handler.create_mail(mail, session)
-                if mail.status is not 'confirmed':
-                    mail_handler.send_confirmation_mail(mail)
 
         return event

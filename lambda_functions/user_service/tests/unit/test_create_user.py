@@ -30,7 +30,8 @@ def event(user_id, user_name, mail_address):
                  {
                      "userAttributes": {
                          "email": mail_address,
-                         "sub": user_id
+                         "sub": user_id,
+                         "custom:mail_subscription": 0
                      }
                  }
             }
@@ -71,5 +72,8 @@ def test_create_user(event, user_name, mail_address, monkeypatch):
         create_user(event)
 
         # Check if user and mail is created
-        assert session.query(User).first().name == user_name
-        assert session.query(Mail).first().email == mail_address
+        user = session.query(User).first()
+        assert user.name == user_name
+        assert user.email.email == mail_address
+        mail = session.query(Mail).first()
+        assert mail.status == 'unsubscribed'
