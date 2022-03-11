@@ -3,3 +3,5 @@ Prüfe nochmals ob alle Angaben korrekt sind und ob der Fall nicht unseren Nutzu
 
 Der Fall lautete:
 {content}
+
+Keine E-mails mehr erhalten: {mail_unsubscribe_link}
