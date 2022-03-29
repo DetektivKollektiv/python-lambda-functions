@@ -138,10 +138,10 @@ def test_get_user_level_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_
         user_2 = session.query(User).filter(User.id == user_id_2).one()
         user_3 = session.query(User).filter(User.id == user_id_3).one()
         user_4 = session.query(User).filter(User.id == user_id_4).one()
-        user_rank_1 = user_handler.get_user_rank(user_1, True, True, session)
-        user_rank_3 = user_handler.get_user_rank(user_3, True, True, session)
-        user_rank_2 = user_handler.get_user_rank(user_2, True, True, session)
-        user_rank_4 = user_handler.get_user_rank(user_4, True, True, session)
+        user_rank_1 = user_handler.get_user_rank(user_1, True, session)
+        user_rank_3 = user_handler.get_user_rank(user_3, True, session)
+        user_rank_2 = user_handler.get_user_rank(user_2, True, session)
+        user_rank_4 = user_handler.get_user_rank(user_4, True, session)
 
         assert user_rank_1 == 1
         assert user_rank_3 == 1
@@ -206,14 +206,12 @@ def test_exp_needed(fixtures, user_id_1, user_id_2, user_id_3):
         assert exp_needed_3 == 2
 
 
-def test_mail_subscription(fixtures, user_id_1, mail_id):
+def test_mail_subscription(fixtures, mail_id):
 
     with Session() as session:
 
         # Create Mail object
-        mail_obj = Mail(id = mail_id,
-                        user_id = user_id_1
-                        )
+        mail_obj = Mail(id = mail_id)
 
         fixtures.append(mail_obj)
         session.add_all(fixtures)

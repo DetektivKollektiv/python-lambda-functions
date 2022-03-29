@@ -39,10 +39,10 @@ def test_mail_subscription(user_id, mail_id, event, event_with_wrong_mail_id, mo
     with Session() as session:
               
         # Create User object
-        user_obj = User(id = user_id)
+        user_obj = User(id = user_id, mail_id = mail_id)
         level_obj = Level(id = 1)
         # Create Mail object
-        mail_obj = Mail(id = mail_id, user_id = user_id)
+        mail_obj = Mail(id = mail_id)
         session.add_all([user_obj, level_obj, mail_obj])
         session.commit()
 

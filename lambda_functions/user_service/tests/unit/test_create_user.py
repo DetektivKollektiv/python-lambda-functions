@@ -106,7 +106,7 @@ def test_create_user(event_mail_subscription_0, event_mail_subscription_1, event
         # Check if user and mail is created
         user = session.query(User).first()
         assert user.name == user_name
-        assert user.email.email == mail_address
+        assert user.mail.email == mail_address
         mail = session.query(Mail).first()
         assert mail.status == 'unsubscribed'
 

@@ -13,8 +13,8 @@ def mail_id():
     return str(uuid4())
 
 @pytest.fixture
-def user_id():
-    return str(uuid4())
+def user_ids():
+    return [str(uuid4()), str(uuid4())]
 
 @pytest.fixture
 def submission_id():
@@ -25,33 +25,39 @@ def mailaddress():
     return "a@b.c"
 
 @pytest.fixture
-def username():
-    return "Michael Jackson"
+def usernames():
+    return ["Michael Jackson", "Janet Jackson"]
 
 
-def test_mail_model(mail_id, user_id, submission_id, mailaddress, username):
+def test_mail_model(mail_id, user_ids, submission_id, mailaddress, usernames):
 
     with Session() as session:
               
-        # Create User object
-        user_obj = User(id = user_id, 
-                        name = username)
         level_1_obj = Level(id = 1)
 
-        # Create Mail object and check relationship to 'users' table 
         mail_obj = Mail(id = mail_id,
-                        email = mailaddress,
-                        user_id = user_id)
+                        email = mailaddress)
 
-        # Create Submission object
+        user1_obj = User(id = user_ids[0], 
+                         name = usernames[0],
+                         mail_id = mail_id)       
+
+        user2_obj = User(id = user_ids[1],
+                         name = usernames[1],
+                         mail_id = mail_id)
+
         submission_obj = Submission(id = submission_id,
                                     mail_id = mail_id,
                                     submission_date = helper.get_date_time_now())
-        session.add_all([user_obj, level_1_obj, mail_obj, submission_obj])
+
+        session.add_all([level_1_obj, mail_obj, user1_obj, user2_obj, submission_obj])
         session.commit()
 
         assert session.query(Mail).first().email == mailaddress # check: entry in mail model
-        assert session.query(Mail).first().user.name == username # check: relationship to user model
-        assert session.query(User).first().email.id == mail_id # check: reverse direction
+        for i in range(2): # check: 2 users with same mail address
+            assert session.query(Mail).first().users[i].id == user_ids[i]
+            assert session.query(Mail).first().users[i].name == usernames[i] 
+            assert session.query(Mail).first().users[i].mail.email == mailaddress
+            assert session.query(User).all()[i].mail.email == mailaddress
         assert session.query(Mail).first().submissions[0].id == submission_id # check: relationship to submissions model
         assert session.query(Submission).first().mail.email == mailaddress # check: reverse direction

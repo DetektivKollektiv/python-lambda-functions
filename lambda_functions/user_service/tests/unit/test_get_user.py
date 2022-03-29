@@ -18,8 +18,8 @@ def test_get_user():
         session = setup_scenarios.create_levels_junior_and_senior_detectives(
             session)
         junior_detective1 = user_handler.get_user_by_id("1", session)
-        mail = Mail(user_id = junior_detective1.id)
-        mail = mail_handler.create_mail(mail, session)
+        mail = mail_handler.create_mail(Mail(), session)
+        junior_detective1.mail_id = mail.id
 
         event = event_creator.get_create_review_event(
             junior_detective1.id, "abc")

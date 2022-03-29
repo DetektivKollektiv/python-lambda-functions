@@ -21,7 +21,6 @@ def create_user(event):
             user.id = event['request']['userAttributes']['sub']
             if user.id == None or user.name == None:
                 raise Exception("Something went wrong!")
-            user = user_handler.create_user(user, session)
             client = boto3.client('cognito-idp', region_name = "eu-central-1")
             client.admin_add_user_to_group(
                 UserPoolId = event['userPoolId'],
@@ -33,7 +32,7 @@ def create_user(event):
             if 'email' in event['request']['userAttributes']:
                 mail = Mail()
                 mail.email = event['request']['userAttributes']['email']
-                mail.user_id = user.id
+                
                 if 'custom:mail_subscription' in event['request']['userAttributes']:
                     confirmation_status = event['request']['userAttributes']['custom:mail_subscription']                   
                     if confirmation_status == '0':
@@ -42,6 +41,11 @@ def create_user(event):
                         mail.status = 'confirmed'
                 else:
                     mail.status = 'unsubscribed'
-                mail_handler.create_mail(mail, session)
+                mail = mail_handler.create_mail(mail, session)
+
+                # link mail address to user
+                user.mail_id = mail.id
+
+            user_handler.create_user(user, session)
 
         return event

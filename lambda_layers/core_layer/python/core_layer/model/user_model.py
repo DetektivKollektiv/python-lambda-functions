@@ -18,6 +18,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     comment_sentiments = relationship(
         "CommentSentiment", back_populates="user")
+    # many user may belong to one mail
+    mail_id = Column(String(36), ForeignKey('mails.id')) # adds a ForeignKey with the id of the mail
+    mail = relationship('Mail', back_populates = 'users') # adds a 'virtual column' with a link to the mail table    
 
     def to_dict(self):
         return {

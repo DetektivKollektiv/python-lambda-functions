@@ -5,6 +5,7 @@ import logging, os
 from core_layer import helper
 # Model imports
 from core_layer.model.mail_model import Mail
+from core_layer.model.user_model import User
 
 from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 from notification_service.src.sender.mail_sender import MailSender
@@ -65,7 +66,7 @@ def get_mail_by_user_id(user_id, session):
     user_id: string
     """
     
-    mail = session.query(Mail).filter(Mail.user_id == user_id).first()
+    mail = session.query(User).filter(User.id == user_id).first().mail
     return mail
 
 
