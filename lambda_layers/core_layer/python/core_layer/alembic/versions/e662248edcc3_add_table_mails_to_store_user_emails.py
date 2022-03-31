@@ -35,6 +35,10 @@ def upgrade():
     )
 
     op.add_column('submissions', sa.Column('mail_id', sa.String(length=36), nullable=True))
+    op.drop_constraint('mails_ibfk_1', 'mails', type_='foreignkey')
+    op.drop_column('mails', 'user_id')
+    op.add_column('users', sa.Column('mail_id', sa.String(length=36), nullable=True))
+    op.create_foreign_key(None, 'users', 'mails', ['mail_id'], ['id'])   
 
     move_mail_addresses_from_submission_to_mail_model()
 
