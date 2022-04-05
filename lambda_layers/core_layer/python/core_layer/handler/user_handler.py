@@ -1,4 +1,5 @@
 from core_layer.db_handler import update_object
+from core_layer.event_publisher import EventPublisher
 from sqlalchemy import func
 import boto3
 from typing import List
@@ -40,7 +41,7 @@ def delete_user(event, session):
     ------
     nothing
     """
-   
+
     user_id = helper.cognito_id_from_event(event)
     user = session.query(User).get(user_id)
 
@@ -72,7 +73,7 @@ def create_user(user, session):
     user: User
         The inserted user
     """
-    
+
     session.add(user)
     session.commit()
 
@@ -89,6 +90,10 @@ def give_experience_point(user_id, session):
 
     if new_level.id != user.level_id:
         user.level_id = new_level.id
+        EventPublisher.publish_event('codetekt.user_handler',
+                                     'level_up', {
+                                         'user_id': user_id})
+
     update_object(user, session)
 
 
@@ -142,7 +147,8 @@ def get_top_users_by_period(n, p, attr, descending, session) -> List[User]:
         A list including the top n user objects as ordered by attr, desc
     """
 
-    compare_timestamp = helper.get_date_time(datetime.now() - timedelta(weeks=p))
+    compare_timestamp = helper.get_date_time(
+        datetime.now() - timedelta(weeks=p))
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -175,7 +181,7 @@ def get_top_users_by_level(user_level, n, attr, descending, session) -> List[Use
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-    
+
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
