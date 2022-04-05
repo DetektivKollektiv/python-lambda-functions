@@ -22,7 +22,6 @@ def create_submission_db(submission, session):
     """
 
     submission.id = str(uuid4())
-    submission.submission_date = helper.get_date_time_now()
 
     session.add(submission)
     session.commit()
@@ -49,7 +48,7 @@ def confirm_submission(submission_id, session):
 
 def anonymize_unconfirmed_submissions(session):
 
-    two_days_ago = helper.get_date_time(datetime.now() - timedelta(days=2))
+    two_days_ago = datetime.now() - timedelta(days=2)
     submissions = session.query(Submission).filter(
         Submission.status == 'unconfirmed', Submission.submission_date < two_days_ago).all()
     counter = 0

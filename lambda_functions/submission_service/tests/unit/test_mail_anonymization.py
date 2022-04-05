@@ -10,8 +10,7 @@ from core_layer import helper
 
 @pytest.fixture
 def submission1():
-    three_days_ago = helper.get_date_time(
-        datetime.now() - timedelta(days=3))
+    three_days_ago = datetime.now() - timedelta(days=3)
 
     submission = Submission()
     submission.id = str(uuid4())

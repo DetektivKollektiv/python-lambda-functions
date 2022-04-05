@@ -62,6 +62,7 @@ def test_item_model_to_dict_with_reviews(item_id, review_id, review_answer_id, u
         assert len(item_dict['users']) == 1
         assert item_dict['users'][0]['username'] == 'testuser'
         assert item_dict['users'][0]['level_description'] == 'beginner'
+        assert 'T' in item_dict['open_timestamp']
 
         session.delete(user)
         session.expire_all()
