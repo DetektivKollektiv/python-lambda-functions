@@ -4,14 +4,12 @@ from uuid import uuid4
 from sqlalchemy import func
 from datetime import timedelta, datetime
 from core_layer.db_handler import Session
-from core_layer import helper
 from user_service.delete_unconfirmed_mails import delete_unconfirmed_mails
 
 
 @pytest.fixture
 def mail1():
-    three_days_ago = helper.get_date_time(
-        datetime.now() - timedelta(days=3))
+    three_days_ago = datetime.now() - timedelta(days=3)
 
     mail = Mail()
     mail.id = str(uuid4())

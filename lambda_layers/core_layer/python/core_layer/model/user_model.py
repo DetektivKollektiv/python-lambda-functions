@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship
 from .model_base import Base
 
@@ -30,5 +30,5 @@ class User(Base):
             "level": self.level_id,
             "level_description": self.level.description,
             "experience_points": self.experience_points,
-            "sign_up_timestamp": str(self.sign_up_timestamp)
+            "sign_up_timestamp": self.sign_up_timestamp.isoformat() if self.sign_up_timestamp else ""
         }

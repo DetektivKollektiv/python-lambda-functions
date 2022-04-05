@@ -1,8 +1,7 @@
 # External imports
 from uuid import uuid4
+from datetime import datetime
 import logging, os
-# Helper imports
-from core_layer import helper
 # Model imports
 from core_layer.model.mail_model import Mail
 from core_layer.model.user_model import User
@@ -23,7 +22,7 @@ def create_mail(mail, session):
     """
 
     mail.id = str(uuid4())
-    mail.timestamp = helper.get_date_time_now()
+    mail.timestamp = datetime.now()
 
     session.add(mail)
     session.commit()

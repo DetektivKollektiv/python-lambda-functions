@@ -41,7 +41,7 @@ def delete_user(event, session):
     ------
     nothing
     """
-   
+
     user_id = helper.cognito_id_from_event(event)
     user = session.query(User).get(user_id)
 
@@ -73,7 +73,7 @@ def create_user(user, session):
     user: User
         The inserted user
     """
-    
+
     session.add(user)
     session.commit()
 
@@ -143,7 +143,7 @@ def get_top_users_by_period(n, p, attr, descending, session) -> List[User]:
         A list including the top n user objects as ordered by attr, desc
     """
 
-    compare_timestamp = helper.get_date_time(datetime.now() - timedelta(weeks=p))
+    compare_timestamp = datetime.now() - timedelta(weeks=p)
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -176,7 +176,7 @@ def get_top_users_by_level(user_level, n, attr, descending, session) -> List[Use
     users: [User]
         A list including the top n user objects as ordered by attr, desc
     """
-    
+
     sort_column = getattr(User, attr).desc(
     ) if descending else getattr(User, attr)
 
@@ -370,7 +370,7 @@ def unsubscribe_mail(mail_id, session):
 
 def delete_unconfirmed_mails(session):
 
-    two_days_ago = helper.get_date_time(datetime.now() - timedelta(days=2))
+    two_days_ago = datetime.now() - timedelta(days=2)
     mails = session.query(Mail).filter(
         Mail.status == 'unconfirmed', Mail.timestamp < two_days_ago).all()
     counter = 0

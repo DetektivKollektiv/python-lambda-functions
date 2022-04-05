@@ -38,7 +38,7 @@ def test_get_user():
         assert body["solved_cases_today"] == 0
         assert body["exp_needed"] == 5
         sign_up_date = datetime.strptime(
-            body["sign_up_timestamp"], '%Y-%m-%d %H:%M:%S').date()
+            body["sign_up_timestamp"], '%Y-%m-%dT%H:%M:%S').date()
         assert sign_up_date != datetime.today()
 
         item1 = Item(id='item1', status='closed')

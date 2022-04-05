@@ -5,7 +5,7 @@ from core_layer.model.mail_model import Mail
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
 from core_layer.model.submission_model import Submission
-from core_layer import helper
+from datetime import datetime
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def test_mail_model(mail_id, user_ids, submission_id, mailaddress, usernames):
 
         submission_obj = Submission(id = submission_id,
                                     mail_id = mail_id,
-                                    submission_date = helper.get_date_time_now())
+                                    submission_date = datetime.now())
 
         session.add_all([level_1_obj, mail_obj, user1_obj, user2_obj, submission_obj])
         session.commit()
