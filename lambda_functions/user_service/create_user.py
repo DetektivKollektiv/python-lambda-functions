@@ -1,14 +1,13 @@
 import boto3
 import logging
-
 from core_layer import helper
 from core_layer.db_handler import Session
-
 from core_layer.model.user_model import User
-from core_layer.handler import user_handler
+from core_layer.model.mail_model import Mail
+from core_layer.handler import user_handler, mail_handler
 
 
-def create_user(event, context):
+def create_user(event):
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -22,12 +21,31 @@ def create_user(event, context):
             user.id = event['request']['userAttributes']['sub']
             if user.id == None or user.name == None:
                 raise Exception("Something went wrong!")
-            user = user_handler.create_user(user, session)
-            client = boto3.client('cognito-idp')
+            client = boto3.client('cognito-idp', region_name = "eu-central-1")
             client.admin_add_user_to_group(
-                UserPoolId=event['userPoolId'],
-                Username=user.name,
-                GroupName='Detective'
+                UserPoolId = event['userPoolId'],
+                Username = user.name,
+                GroupName = 'Detective'
             )
+
+            # Add mail address if submitted and set confirmation status
+            if 'email' in event['request']['userAttributes']:
+                mail = Mail()
+                mail.email = event['request']['userAttributes']['email']
+                
+                if 'custom:mail_subscription' in event['request']['userAttributes']:
+                    confirmation_status = event['request']['userAttributes']['custom:mail_subscription']                   
+                    if confirmation_status == '0':
+                        mail.status = 'unsubscribed'
+                    elif confirmation_status == '1':
+                        mail.status = 'confirmed'
+                else:
+                    mail.status = 'unsubscribed'
+                mail = mail_handler.create_mail(mail, session)
+
+                # link mail address to user
+                user.mail_id = mail.id
+
+            user_handler.create_user(user, session)
 
         return event
