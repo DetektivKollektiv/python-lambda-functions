@@ -1,6 +1,4 @@
-import os
-
-from notification_service.src.sender.mail_sender import MailSender
+from core_layer.sender.mail_sender import MailSender
 
 from notification_service.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
 
