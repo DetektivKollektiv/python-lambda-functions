@@ -7,7 +7,7 @@ from core_layer.model.mail_model import Mail
 from core_layer.model.user_model import User
 
 from core_layer.handler.notification_template_handler import NotificationTemplateHandler
-from notification_service.src.sender.mail_sender import MailSender
+from core_layer.sender.mail_sender import MailSender
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

@@ -4,8 +4,8 @@ from core_layer.db_handler import Session
 from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 from core_layer.responses import BadRequest, InternalError, Success
 from core_layer.handler import item_handler, mail_handler
-from .sender.mail_sender import MailSender
-from .sender.telegram_sender import TelegramSender
+from core_layer.sender.mail_sender import MailSender
+from core_layer.sender.telegram_sender import TelegramSender
 
 
 logger = logging.getLogger()

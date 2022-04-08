@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from notification_service.src.sender.notification_sender import NotificationSender
+from core_layer.sender.notification_sender import NotificationSender
 
 from notification_service.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
 
