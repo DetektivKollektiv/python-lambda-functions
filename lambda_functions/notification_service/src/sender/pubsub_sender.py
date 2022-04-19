@@ -1,24 +1,49 @@
 import logging
+
+from core_layer.handler.notification_template_handler import NotificationTemplateHandler
 from botocore.exceptions import ClientError
-from core_layer.handler.notification_template_handler import S3NotificationTemplateHandler
-from core_layer.boto_client_provider import BotoClientProvider
-from .notification_sender import NotificationSender
+from core_layer.sender.notification_sender import NotificationSender
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
 class PubsubSender(NotificationSender):
-
-    def __init__(self, notification_template_handler: S3NotificationTemplateHandler) -> None:
+    def __init__(self, notification_template_handler: NotificationTemplateHandler) -> None:
         super().__init__(notification_template_handler)
 
         self._message_type = "pubsub"
 
-    def pubsub_publish(user_id, message):
-        iot_client = BotoClientProvider().get_client('iot-data')
+    def _send_notification_internal(self, user_id, message_type, replacements: dict = None):
+        """Notifies a user in frontend via user_id.
 
-        response = iot_client.publish(topic=user_id, payload={
-            "message": message,
-            "type": "level_up"
-        })
+        Parameters
+        ----------
+        user_id: string
+            The users' user id
+
+        replacements: dict (optional)
+            Dictionary of replacements that should be replaced in the notification message and subject.
+            Key: The placeholder in the message and subject
+            Value: The value to replace the placeholder with
+
+        """
+
+        AWS_REGION = "eu-central-1"
+        message = self._get_text("text", replacements)
+
+        client = self._client_provider.get_client("iot-data", AWS_REGION)
+
+        try:
+            response = client.publish(topic=user_id, payload={
+                "message": message,
+                "type": message_type
+            })
+            logger.info(
+                f"Notification sent via pubsub to user: {user_id}. Message-type: {message_type}")
+        except ClientError as e:
+            logging.exception(
+                f"Could not send message to user: {user_id}. Message-type: {message_type}. Error: {e.response['Error']['Message']}")
+            raise Exception
+
+        pass
