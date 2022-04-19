@@ -14,7 +14,7 @@ class PubsubSender(NotificationSender):
 
         self._message_type = "pubsub"
 
-    def _send_notification_internal(self, user_id, message_type, replacements: dict = None):
+    def _send_notification_internal(self, user_id, replacements: dict = None):
         """Notifies a user in frontend via user_id.
 
         Parameters
@@ -31,19 +31,20 @@ class PubsubSender(NotificationSender):
 
         AWS_REGION = "eu-central-1"
         message = self._get_text("text", replacements)
+        notification_type = self._notification_type
 
         client = self._client_provider.get_client("iot-data", AWS_REGION)
 
         try:
             response = client.publish(topic=user_id, payload={
                 "message": message,
-                "type": message_type
+                "type": notification_type
             })
             logger.info(
-                f"Notification sent via pubsub to user: {user_id}. Message-type: {message_type}")
+                f"Notification sent via pubsub to user: {user_id}. Message-type: {notification_type}")
         except ClientError as e:
             logging.exception(
-                f"Could not send message to user: {user_id}. Message-type: {message_type}. Error: {e.response['Error']['Message']}")
+                f"Could not send message to user: {user_id}. Message-type: {notification_type}. Error: {e.response['Error']['Message']}")
             raise Exception
 
         pass
