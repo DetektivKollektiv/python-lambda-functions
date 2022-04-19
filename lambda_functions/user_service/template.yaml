@@ -55,7 +55,7 @@ Resources:
   LambdaIoTExecutionPolicy:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "detektivkollektiv-user_api-iot-policy-execution-user-service-${STAGE}" # Change for each Role
+      RoleName: !Sub "codetekt-user_api-iot-policy-execution-user-service-${STAGE}" # Change for each Role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -213,5 +213,106 @@ Resources:
             Ref: DEPLOYMENTMODE
           CORS_ALLOW_ORIGIN:
             Ref: CorsAllowOrigin
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  ConfirmMailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-user_api-confirm-mail-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: mail_subscription.confirm_mail_subscription # Change for each lambda, syntax: python_file.function
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /mails/{mail_id}/confirm # Change for each lambda, syntax: db_table/id/name
+            Method: get # Change for each lambda
+            RestApiId:
+              Ref: Api
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"        
+
+  UnsubsribeMailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-user_api-unsubscribe-mail-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: mail_subscription.unsubscribe_mail # Change for each lambda, syntax: python_file.function
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /mails/{mail_id}/unsubscribe # Change for each lambda, syntax: db_table/id/name
+            Method: get # Change for each lambda
+            RestApiId:
+              Ref: Api
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
+          CORS_ALLOW_ORIGIN:
+            Ref: CorsAllowOrigin
+          STAGE:
+            Ref: STAGE
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  DeleteUnconfirmedMailsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "detektivkollektiv-user_api-delete-unconfirmed-mails-${STAGE}"
+      CodeUri: .
+      Handler: delete_unconfirmed_mails.delete_unconfirmed_mails
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: !Sub "detektivkollektiv-rules-delete-unconfirmed-mails-${STAGE}"
+            Description: Schdule for starting deletion of unconfirmed mails every hour
+            Enabled: True
+            Schedule: rate(1 hour)
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

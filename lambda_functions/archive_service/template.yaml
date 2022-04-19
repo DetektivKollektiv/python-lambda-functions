@@ -73,6 +73,10 @@ Resources:
               Ref: Api
             Auth:
               Authorizer: NONE
+            RequestParameters:
+              - method.request.querystring.url:
+                    Required: false
+
       Environment:
         Variables:
           DEPLOYMENTMODE:

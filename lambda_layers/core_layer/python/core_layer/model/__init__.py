@@ -18,3 +18,4 @@ from core_layer.model.tag_model import Tag, ItemTag
 from core_layer.model.item_type_model import ItemType
 from core_layer.model.issue_model import Issue
 from core_layer.model.comment_model import Comment, CommentSentiment
+from core_layer.model.mail_model import Mail

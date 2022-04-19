@@ -120,6 +120,7 @@ def test_verification_process_best_case(monkeypatch):
 
         # reload object instead of refreshing the session
         item = item_handler.get_item_by_id(item.id, session)
+        item = item_handler.update_item_warning_tags(item, session)
         assert item.status == 'closed'
         assert item.in_progress_reviews_level_1 == 0
         assert item.in_progress_reviews_level_2 == 0
@@ -127,12 +128,15 @@ def test_verification_process_best_case(monkeypatch):
         assert item.open_reviews_level_2 == 0
         assert item.open_reviews == 0
         assert item.close_timestamp is not None
+        assert item.warning_tags_calculated == True
+        assert item.result_score == 1
 
         item_dict = item.to_dict(with_warnings=True)
         assert 'warning_tags' in item_dict
         assert len(item_dict['warning_tags']) > 0
         assert 'text' in item_dict['warning_tags'][0]
         assert 'icon' in item_dict['warning_tags'][0]
+        assert item_dict['result_score'] == 0
         session.expire_all()
 
 

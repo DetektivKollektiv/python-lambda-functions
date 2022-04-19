@@ -62,9 +62,27 @@ def test_item_model_to_dict_with_reviews(item_id, review_id, review_answer_id, u
         assert len(item_dict['users']) == 1
         assert item_dict['users'][0]['username'] == 'testuser'
         assert item_dict['users'][0]['level_description'] == 'beginner'
+        assert 'T' in item_dict['open_timestamp']
 
         session.delete(user)
         session.expire_all()
         item_dict = item.to_dict(with_reviews=True, with_comments=True)
         assert item_dict['review_comments'][0]['user'] == None
         assert item_dict['reviews'][0]['user'] == None
+
+
+testdata = [
+    (1, 0),
+    (2, 33),
+    (2.5, 50),
+    (3, 67),
+    (4, 100)
+]
+
+
+@pytest.mark.parametrize("input, expected", testdata)
+def test_result_score_computation(input: float, expected: int):
+    item = Item()
+    item.result_score = input
+    item_dict = item.to_dict()
+    assert item_dict['result_score'] == expected

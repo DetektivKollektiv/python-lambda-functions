@@ -2,7 +2,8 @@ from archive_service.tests.unit.test_post_comment_on_item import item_id
 from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 from core_layer.model.review_model import Review
-from core_layer.handler import user_handler
+from core_layer.model.mail_model import Mail
+from core_layer.handler import user_handler, mail_handler
 from core_layer.db_handler import Session
 from ....tests.helper import event_creator, setup_scenarios
 from ...get_user import get_user
@@ -17,12 +18,15 @@ def test_get_user():
         session = setup_scenarios.create_levels_junior_and_senior_detectives(
             session)
         junior_detective1 = user_handler.get_user_by_id("1", session)
+        mail = mail_handler.create_mail(Mail(), session)
+        junior_detective1.mail_id = mail.id
 
         event = event_creator.get_create_review_event(
             junior_detective1.id, "abc")
         resp = get_user(event, None)
         body = json.loads(resp["body"])
 
+        assert body["mail_status"] == 'unconfirmed'
         assert body["id"] == junior_detective1.id
         assert body["level"] == 1
         assert body["level_description"] == "Junior"
@@ -34,7 +38,7 @@ def test_get_user():
         assert body["solved_cases_today"] == 0
         assert body["exp_needed"] == 5
         sign_up_date = datetime.strptime(
-            body["sign_up_timestamp"], '%Y-%m-%d %H:%M:%S').date()
+            body["sign_up_timestamp"], '%Y-%m-%dT%H:%M:%S').date()
         assert sign_up_date != datetime.today()
 
         item1 = Item(id='item1', status='closed')

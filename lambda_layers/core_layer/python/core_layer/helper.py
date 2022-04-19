@@ -10,36 +10,7 @@ from sqlalchemy import func
 is_test = 'DEPLOYMENTMODE' not in os.environ
 
 
-def get_date_time_now():
-    return func.now()
-    # TODO: Remove this method. Use func.now() and set create_time in model
-    # https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
-    # TODO: Update to newer version of Sqlalchemy Aurora Library and adapt datemanagement accordingly
-
-
-def get_date_time_one_hour_ago():
-    dt = datetime.now() + timedelta(hours=-1)
-    if is_test:
-        return dt
-    else:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_date_time(dt):
-    if is_test:
-        return dt
-    else:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_date_time_str(dt):
-    if isinstance(dt, datetime):
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        return dt
-
-
-def set_cors(response, event):
+def set_cors(response, event, allow_all_origins=False):
     """Adds a CORS header to a response according to the headers found in the event.
 
     Parameters
@@ -48,6 +19,9 @@ def set_cors(response, event):
         The response to be modified
     event: dict
         The Lambda event
+    allow_all_origins: bool, default False
+        If this param is set True, the check for the 'CORS_ALLOW_ORIGIN' environment variable 
+        will be omitted and the header will be set for any origin
 
     Returns
     ------
@@ -66,7 +40,7 @@ def set_cors(response, event):
         if 'origin' in event['headers']:
             source_origin = event['headers']['origin']
 
-        if source_origin and source_origin in allowed_origins:
+        if source_origin and (source_origin in allowed_origins or allow_all_origins):
             if 'headers' not in response:
                 response['headers'] = {}
 
