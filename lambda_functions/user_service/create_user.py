@@ -28,10 +28,17 @@ def create_user(event, context):
                 GroupName = 'Detective'
             )
 
-            # Add mail address if submitted and set confirmation status
+            # Add mail address if submitted and not yet exists, set confirmation status
             if 'email' in event['request']['userAttributes']:
-                mail = Mail()
-                mail.email = event['request']['userAttributes']['email']
+                mail_address = event['request']['userAttributes']['email']
+                existing_mail_from_db = session.query(Mail).filter(Mail.email == mail_address).first()
+
+                if existing_mail_from_db is None:
+                    mail = Mail()
+                    mail.email = mail_address
+                    mail = mail_handler.create_mail(mail, session)
+                else:
+                    mail = existing_mail_from_db
                 
                 if 'custom:mail_subscription' in event['request']['userAttributes']:
                     confirmation_status = event['request']['userAttributes']['custom:mail_subscription']                   
@@ -41,7 +48,8 @@ def create_user(event, context):
                         mail.status = 'confirmed'
                 else:
                     mail.status = 'unsubscribed'
-                mail = mail_handler.create_mail(mail, session)
+
+                session.commit()
 
                 # link mail address to user
                 user.mail_id = mail.id
