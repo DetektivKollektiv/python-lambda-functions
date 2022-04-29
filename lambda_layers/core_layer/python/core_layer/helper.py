@@ -79,7 +79,7 @@ def body_to_object(body, object):
     return object
 
 
-def cognito_id_from_event(event):
+def cognito_id_from_event(event, context):
     """Extracts the cognito user id (=sub) from the event.
 
     Parameters
@@ -97,7 +97,7 @@ def cognito_id_from_event(event):
     return user_id
 
 
-def get_cognito_identity_from_event(event):
+def get_cognito_identity_from_event(event, context):
     """Extracts the current Cognito identity ID from the event.
 
     Parameters

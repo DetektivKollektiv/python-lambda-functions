@@ -10,7 +10,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def confirm_mail_subscription(event):
+def confirm_mail_subscription(event, context):
 
     helper.log_method_initiated("Confirm mail subscription", event, logger)
 
@@ -47,7 +47,7 @@ def confirm_mail_subscription(event):
         return helper.set_cors(response, event)
 
 
-def unsubscribe_mail(event):
+def unsubscribe_mail(event, context):
 
     helper.log_method_initiated("Unsubscribe mail", event, logger)
 

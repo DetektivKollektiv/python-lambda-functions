@@ -7,7 +7,7 @@ from core_layer.model.mail_model import Mail
 from core_layer.handler import user_handler, mail_handler
 
 
-def create_user(event):
+def create_user(event, context):
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
