@@ -42,7 +42,7 @@ def test_delete_unconfirmed_mails(mail1, mail2):
         assert len(mails) == 2
 
         # delete unconfirmed mails
-        delete_unconfirmed_mails(session)
+        delete_unconfirmed_mails(event = "", context = "")
         # check number of mails after deletion and verify 1 of 2 has been deleted
         mails = session.query(Mail).filter(
             Mail.status == "unconfirmed").all()

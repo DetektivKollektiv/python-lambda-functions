@@ -38,6 +38,22 @@ def event_mail_subscription_0(user_id, user_name, mail_address):
     return event
 
 @pytest.fixture
+def event_mail_subscription_0_existing_email(mail_address):
+    event = {
+             "triggerSource": "PostConfirmation_ConfirmSignUp",
+             "userName": "mail_already_exitst_user",
+             "request":
+                 {
+                     "userAttributes": {
+                         "email": mail_address,
+                         "sub": str(uuid4()),
+                         "custom:mail_subscription": '1'
+                     }
+                 }
+            }
+    return event
+
+@pytest.fixture
 def event_mail_subscription_1():
     event = {
              "triggerSource": "PostConfirmation_ConfirmSignUp",
@@ -71,7 +87,7 @@ def event_without_mail_subscription_status():
 
 @mock_ses
 @mock_cognitoidp
-def test_create_user(event_mail_subscription_0, event_mail_subscription_1, event_without_mail_subscription_status, user_name, mail_address, monkeypatch):
+def test_create_user(event_mail_subscription_0, event_mail_subscription_0_existing_email, event_mail_subscription_1, event_without_mail_subscription_status, user_name, mail_address, monkeypatch):
 
 
     # mock required stuff
@@ -84,7 +100,7 @@ def test_create_user(event_mail_subscription_0, event_mail_subscription_1, event
     cognitoidp = boto3.client("cognito-idp", region_name = "eu-central-1")
 
     # add user_pool_id to event as it's requested from there by admin_add_user_to_group method
-    for event in [event_mail_subscription_0, event_mail_subscription_1, event_without_mail_subscription_status]:
+    for event in [event_mail_subscription_0, event_mail_subscription_0_existing_email, event_mail_subscription_1, event_without_mail_subscription_status]:
         response = cognitoidp.create_user_pool(PoolName = "PoolNameString")
         user_pool_id = response['UserPool']['Id']
         event['userPoolId'] = user_pool_id 
@@ -101,7 +117,7 @@ def test_create_user(event_mail_subscription_0, event_mail_subscription_1, event
         level_1_obj = Level(id = 1)
         session.add_all([level_1_obj])
         session.commit()
-        create_user(event_mail_subscription_0)
+        create_user(event_mail_subscription_0, context = "")
 
         # Check if user and mail is created
         user = session.query(User).first()
@@ -111,10 +127,19 @@ def test_create_user(event_mail_subscription_0, event_mail_subscription_1, event
         assert mail.status == 'unsubscribed'
 
         # Check cases with other "custom:mail_subscription" attributes
-        create_user(event_mail_subscription_1)
+        create_user(event_mail_subscription_1, context = "")
         mail = session.query(Mail).all()[1]
         assert mail.status == 'confirmed'
 
-        create_user(event_without_mail_subscription_status)
+        create_user(event_without_mail_subscription_status, context = "")
         mail = session.query(Mail).all()[2]
         assert mail.status == 'unsubscribed'
+
+        # add new user with already existing mail address
+        create_user(event_mail_subscription_0_existing_email, context = "")
+        assert len(session.query(Mail).all()) == 3
+        user = session.query(User).first()
+        assert user.name == user_name
+        assert user.mail.email == mail_address
+        mail = session.query(Mail).first()
+        assert mail.status == 'confirmed'

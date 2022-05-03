@@ -49,11 +49,11 @@ def test_mail_subscription(user_id, mail_id, event, event_with_wrong_mail_id, mo
         # Check mail status
         assert session.query(Mail).first().status == "unconfirmed"
         # Confirm subscription
-        confirm_mail_subscription(event)
+        confirm_mail_subscription(event, context = "")
         assert session.query(Mail).first().status == "confirmed"
         # Unsubscribe
-        unsubscribe_mail(event)
+        unsubscribe_mail(event, context = "")
         assert session.query(Mail).first().status == "unsubscribed"
-        response = confirm_mail_subscription(event_with_wrong_mail_id)
+        response = confirm_mail_subscription(event_with_wrong_mail_id, context = "")
         body = response['body']
         assert 'Deine Mail-Adresse konnte nicht bestätigt werden' in body

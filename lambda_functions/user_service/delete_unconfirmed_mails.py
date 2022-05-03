@@ -7,7 +7,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def delete_unconfirmed_mails(event):
+def delete_unconfirmed_mails(event, context):
 
     helper.log_method_initiated("Delete unconfirmed mails", event, logger)
 

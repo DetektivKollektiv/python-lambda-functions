@@ -40,7 +40,7 @@ def test_double_opt_in(mail_address, monkeypatch):
 
         # Confirm subscription 
         event = {'pathParameters': {'mail_id': mail.id}}
-        response = mail_subscription.confirm_mail_subscription(event)
+        response = mail_subscription.confirm_mail_subscription(event, context = "")
 
         # Check response
         assert response['statusCode'] == 200
