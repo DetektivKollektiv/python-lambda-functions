@@ -63,6 +63,9 @@ class MailSender(NotificationSender):
                     'ToAddresses': [
                         RECIPIENT,
                     ],
+                    'BccAddresses': [
+                        'support@codetekt.org',
+                    ]
                 },
                 Message={
                     'Body': {
