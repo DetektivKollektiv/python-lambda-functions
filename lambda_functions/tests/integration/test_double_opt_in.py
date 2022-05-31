@@ -1,4 +1,6 @@
-import pytest, boto3, os
+import pytest
+import boto3
+import os
 from core_layer.db_handler import Session
 from user_service import mail_subscription
 from core_layer.model.mail_model import Mail
@@ -31,16 +33,17 @@ def test_double_opt_in(mail_address, monkeypatch):
         # Check verification mail
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
-        assert sent_count == 1
+        assert sent_count == 2  # Recipient and BCC
         from moto.ses import ses_backend
         message = ses_backend.sent_messages[0]
         assert mail_address in message.destinations['ToAddresses']
         assert 'Bestätige deine Mail-Adresse' in message.body
         assert mail.id in message.body
 
-        # Confirm subscription 
+        # Confirm subscription
         event = {'pathParameters': {'mail_id': mail.id}}
-        response = mail_subscription.confirm_mail_subscription(event, context = "")
+        response = mail_subscription.confirm_mail_subscription(
+            event, context="")
 
         # Check response
         assert response['statusCode'] == 200
@@ -48,4 +51,4 @@ def test_double_opt_in(mail_address, monkeypatch):
         assert 'https://dev.codetekt.org' in response['body']
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
-        assert sent_count == 1
+        assert sent_count == 2  # Recipient and BCC

@@ -54,7 +54,6 @@ def test_verification_process_best_case(monkeypatch):
         submission = Submission()
         submission.id = 'Submission 1'
         submission.item_id = item.id
-        submission.mail = 'test@test.de'
         submission.status = 'confirmed'
         session.add(submission)
         session.commit()

@@ -14,36 +14,40 @@ import os
 def item_id():
     return str(uuid4())
 
+
 @pytest.fixture
 def mail_id():
     return str(uuid4())
 
+
 @pytest.fixture
 def item(item_id):
-    item = Item(id = item_id,
-                result_score = 3.4,
-                content = 'testcontent')
+    item = Item(id=item_id,
+                result_score=3.4,
+                content='testcontent')
     return item
+
 
 @pytest.fixture
 def mail(mail_id):
-    mail = Mail(id = mail_id,
-                email = "mail@domain.com",
-                status = 'confirmed'
+    mail = Mail(id=mail_id,
+                email="mail@domain.com",
+                status='confirmed'
                 )
     return mail
 
+
 @pytest.fixture
 def submission(item_id, mail_id):
-    submission = Submission(id = str(uuid4()),
-                            item_id = item_id,
-                            mail_id = mail_id)
+    submission = Submission(id=str(uuid4()),
+                            item_id=item_id,
+                            mail_id=mail_id)
     return submission
+
 
 @pytest.fixture
 def event(item_id):
     return {"detail": {"item_id": item_id}}
-
 
 
 def test_item_closed(item, mail, submission, event, monkeypatch):
@@ -53,8 +57,8 @@ def test_item_closed(item, mail, submission, event, monkeypatch):
     os.environ["MOTO"] = ""
     with mock_stepfunctions(), mock_ses():
         # Initialize mock clients
-        ses_client = boto3.client("ses", region_name = "eu-central-1")
-        ses_client.verify_email_identity(EmailAddress = "no-reply@codetekt.org")
+        ses_client = boto3.client("ses", region_name="eu-central-1")
+        ses_client.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
         with Session() as session:
             session.add_all([item, mail, submission])
@@ -66,12 +70,13 @@ def test_item_closed(item, mail, submission, event, monkeypatch):
             # Check notification mail
             send_quota = ses_client.get_send_quota()
             sent_count = int(send_quota["SentLast24Hours"])
-            assert sent_count == 1
+            assert sent_count == 2
             from moto.ses import ses_backend
             sent_messages = ses_backend.sent_messages
             item.id in sent_messages[0].body
             "Dein Fall wurde abgelehnt!" in sent_messages[0].body
-            assert f"https://api.dev.codetekt.org/user_service/mails/{submission.mail.id}/unsubscribe" in sent_messages[0].body
+            assert f"https://api.dev.codetekt.org/user_service/mails/{submission.mail.id}/unsubscribe" in sent_messages[
+                0].body
 
 
 def test_no_item_id(monkeypatch):
