@@ -1,3 +1,4 @@
+from core_layer.model.item_type_model import ItemType
 import pytest
 from core_layer.model.submission_model import Submission
 from core_layer.db_handler import Session
@@ -22,7 +23,7 @@ def event1():
     }
 
 
-def test_dates(event1):
+def test_dates(event1, monkeypatch):
     from moto import mock_ses, mock_stepfunctions
     with mock_stepfunctions(), mock_ses():
         # Initialize mock clients
@@ -36,6 +37,9 @@ def test_dates(event1):
         ses_client.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     with Session() as session:
+        monkeypatch.setenv("STAGE", "dev")
+
+        session.add(ItemType(id='1'))
         submissions = session.query(Submission).all()
         response = submit_item(event1, None)
         assert response['statusCode'] == 201
