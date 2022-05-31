@@ -74,7 +74,7 @@ def test_item_closed(item, mail, submission, event, monkeypatch):
             from moto.ses import ses_backend
             sent_messages = ses_backend.sent_messages
             item.id in sent_messages[0].body
-            "Dein Fall wurde gelöst!" in sent_messages[0].body
+            assert "Dein Fall wurde gelöst!" in sent_messages[0].body
             assert f"https://api.dev.codetekt.org/user_service/mails/{submission.mail.id}/unsubscribe" in sent_messages[
                 0].body
 
