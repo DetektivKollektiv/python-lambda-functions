@@ -66,7 +66,7 @@ def submit_item(event, context):
             setattr(submission, 'ip_address', ip_address)
 
             try:
-                # Item already exists, item_id in submission is the id of the found item                
+                # Item already exists, item_id in submission is the id of the found item
                 item = item_handler.get_item_by_content(content, session)
                 submission.item_id = item.id
                 new_item_created = False
@@ -81,22 +81,25 @@ def submit_item(event, context):
                 new_item_created = True
 
                 if content:
-                    str_urls = re.findall('http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', content)
+                    str_urls = re.findall(
+                        'http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', content)
                     url_handler.prepare_and_store_urls(item, str_urls, session)
 
                 submission.item_id = item.id
 
             # Create submission
-            submission = submission_handler.create_submission_db(submission, session)
+            submission = submission_handler.create_submission_db(
+                submission, session)
 
             # Create email, link it to submission and send confirmation mail
             if email_address:
-                mail = mail_handler.get_mail_by_email_address(email_address, session)
-                if mail == None: # only create if not already exists
+                mail = mail_handler.get_mail_by_email_address(
+                    email_address, session)
+                if mail == None:  # only create if not already exists
                     mail = Mail()
                     mail.email = email_address
                     mail = mail_handler.create_mail(mail, session)
-                    
+
                 if mail.status is not 'confirmed':
                     mail_handler.send_confirmation_mail(mail)
 
@@ -124,17 +127,20 @@ def submit_item(event, context):
                 "statusCode": 400,
                 "body": "Could not create item and/or submission. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
             }
+            response_cors = helper.set_cors(response, event, True)
+            return response_cors
 
-    ## start SearchFactChecks only for safe items
+    # start SearchFactChecks only for safe items
     if (item.status != 'Unsafe') and (new_item_created == True):
         stage = os.environ['STAGE']
         client.start_execution(
-            stateMachineArn = 'arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-' + stage,
-            name = 'SFC_' + item.id,
-            input = "{\"item\":{"
-                    "\"id\":\"" + item.id + "\","
-                                          "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
+            stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-' + stage,
+            name='SFC_' + item.id,
+            input="{\"item\":{"
+            "\"id\":\"" + item.id + "\","
+            "\"content\":\"" +
+            remove_control_characters(item.content) + "\" } }"
         )
 
-    response_cors = helper.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, True)
     return response_cors
