@@ -125,7 +125,7 @@ def test_submit_item(event1, event2, event_item_with_confirmed_mail_address, con
             submit_item(event2, None)
 
             # Check database entries
-            assert session.query(Item).count() == 1  # items didn't increase
+            assert session.query(Item).count() == 1  # items didn"t increase
             # submissions increased
             assert session.query(Submission).count() == 2
             first_item_id = session.query(Item.id).first()[0]
