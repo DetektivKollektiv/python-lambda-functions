@@ -100,7 +100,7 @@ def submit_item(event, context):
                     mail.email = email_address
                     mail = mail_handler.create_mail(mail, session)
 
-                if mail.status is not 'confirmed':
+                if mail.status != 'confirmed':
                     mail_handler.send_confirmation_mail(mail)
 
                 submission.mail_id = mail.id
