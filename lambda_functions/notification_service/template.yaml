@@ -109,3 +109,36 @@ Resources:
             Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
+
+  NotifyLevelUp: # Change for each lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "codetekt-notifications-level-up-${STAGE}" # Change for each lambda
+      CodeUri: .
+      Handler: src.level_up_handler.handle_level_up # Change for each lambda
+      Runtime: python3.8
+      MemorySize: 832
+      Role:
+        Fn::GetAtt:
+          - LambdaExecutionRole
+          - Arn
+      Tracing: Active
+      Events:
+        EventBridge:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - codetekt.user_handler
+              detail-type:
+                - level_up
+      Environment:
+        Variables:
+          DEPLOYMENTMODE:
+            Ref: DEPLOYMENTMODE
+          DBNAME:
+            Ref: DBNAME
+          NOTIFICATION_TEMPLATE_BUCKET:
+            Ref: NotificationTemplateBucket
+      Layers:
+        - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

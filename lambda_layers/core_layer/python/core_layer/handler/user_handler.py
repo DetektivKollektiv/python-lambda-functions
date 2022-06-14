@@ -1,4 +1,5 @@
 from core_layer.db_handler import update_object
+from core_layer.event_publisher import EventPublisher
 from sqlalchemy import func
 import boto3
 from typing import List
@@ -90,6 +91,10 @@ def give_experience_point(user_id, session):
 
     if new_level.id != user.level_id:
         user.level_id = new_level.id
+        EventPublisher().publish_event('codetekt.user_handler',
+                                       'level_up', {
+                                           'user_id': user_id})
+
     update_object(user, session)
 
 
@@ -346,7 +351,7 @@ def confirm_mail_subscription(mail_id, session):
     mail_id: required
         The mail_id to set as confirmed
     """
-    
+
     mail_obj = session.query(Mail).filter(Mail.id == mail_id).one()
     mail_obj.status = 'confirmed'
 
@@ -361,7 +366,7 @@ def unsubscribe_mail(mail_id, session):
     mail_id: required
         The mail_id to be unsubscribed
     """
-    
+
     mail_obj = session.query(Mail).filter(Mail.id == mail_id).one()
     mail_obj.status = 'unsubscribed'
 

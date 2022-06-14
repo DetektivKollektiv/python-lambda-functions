@@ -1,0 +1,1 @@
+Herzlichen Glückwunsch {name}! Du bist aufgestiegen und hast nun Level {level} erreicht. Weiter so! 
