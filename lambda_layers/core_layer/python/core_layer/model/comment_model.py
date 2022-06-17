@@ -1,6 +1,8 @@
 from datetime import datetime
+import re
 from core_layer.model.submission_model import Submission
 from sqlalchemy import Column, DateTime, String, ForeignKey, func
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import Boolean, Text
 from .model_base import Base
@@ -9,7 +11,8 @@ from .model_base import Base
 class Comment(Base):
     __tablename__ = 'comments'
     id = Column(String(36), primary_key=True)
-    timestamp = Column(DateTime, server_default=func.now())
+    timestamp = Column(
+        DateTime, server_default=func.now(), nullable=False)
     # e.g. published, flagged, cleared, removed
     status = Column(String(100), default="published")
     comment = Column(Text)
@@ -31,6 +34,8 @@ class Comment(Base):
     item = relationship("Item", back_populates="comments")
     submission_id = Column(String(36), ForeignKey('submissions.id'))
     submission = relationship("Submission", back_populates="comments")
+    review_id = Column(String(36), ForeignKey('reviews.id'))
+    review = relationship("Review", back_populates='comment')
     review_answer_id = Column(String(36), ForeignKey('review_answers.id'))
     review_anser = relationship("ReviewAnswer", back_populates="comments")
     parent_comment_id = Column(String(36), ForeignKey('comments.id'))
@@ -39,10 +44,11 @@ class Comment(Base):
 
     def to_dict(self) -> dict:
         return {
-            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if isinstance(self.timestamp, datetime) else self.timestamp,
+            "id": self.id,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else "" if self.timestamp else "",
             'comment': self.comment,
             'is_review_comment': str(self.is_review_comment),
-            'user': self.user.name if self.user else 'deleted'
+            'user': self.user.name if self.user else None
         }
 
 

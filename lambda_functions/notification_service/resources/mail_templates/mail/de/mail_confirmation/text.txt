@@ -1,0 +1,1 @@
+Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {mail_confirmation_link}

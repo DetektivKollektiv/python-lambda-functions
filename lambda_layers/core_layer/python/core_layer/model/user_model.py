@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, DateTime, String, Integer, ForeignKey, func, Float, Boolean, Text
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship
 from .model_base import Base
 
@@ -18,6 +18,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     comment_sentiments = relationship(
         "CommentSentiment", back_populates="user")
+    # many user may belong to one mail
+    mail_id = Column(String(36), ForeignKey('mails.id')) # adds a ForeignKey with the id of the mail
+    mail = relationship('Mail', back_populates = 'users') # adds a 'virtual column' with a link to the mail table    
 
     def to_dict(self):
         return {
@@ -27,5 +30,5 @@ class User(Base):
             "level": self.level_id,
             "level_description": self.level.description,
             "experience_points": self.experience_points,
-            "sign_up_timestamp": str(self.sign_up_timestamp)
+            "sign_up_timestamp": self.sign_up_timestamp.isoformat() if self.sign_up_timestamp else ""
         }

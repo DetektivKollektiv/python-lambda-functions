@@ -10,36 +10,7 @@ from sqlalchemy import func
 is_test = 'DEPLOYMENTMODE' not in os.environ
 
 
-def get_date_time_now():
-    return func.now()
-    # TODO: Remove this method. Use func.now() and set create_time in model
-    # https://stackoverflow.com/questions/13370317/sqlalchemy-default-datetime
-    # TODO: Update to newer version of Sqlalchemy Aurora Library and adapt datemanagement accordingly
-
-
-def get_date_time_one_hour_ago():
-    dt = datetime.now() + timedelta(hours=-1)
-    if is_test:
-        return dt
-    else:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_date_time(dt):
-    if is_test:
-        return dt
-    else:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_date_time_str(dt):
-    if isinstance(dt, datetime):
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        return dt
-
-
-def set_cors(response, event):
+def set_cors(response, event, allow_all_origins=False):
     """Adds a CORS header to a response according to the headers found in the event.
 
     Parameters
@@ -48,6 +19,9 @@ def set_cors(response, event):
         The response to be modified
     event: dict
         The Lambda event
+    allow_all_origins: bool, default False
+        If this param is set True, the check for the 'CORS_ALLOW_ORIGIN' environment variable 
+        will be omitted and the header will be set for any origin
 
     Returns
     ------
@@ -66,7 +40,7 @@ def set_cors(response, event):
         if 'origin' in event['headers']:
             source_origin = event['headers']['origin']
 
-        if source_origin and source_origin in allowed_origins:
+        if source_origin and (source_origin in allowed_origins or allow_all_origins):
             if 'headers' not in response:
                 response['headers'] = {}
 
@@ -121,6 +95,26 @@ def cognito_id_from_event(event):
     user_id = str(event['requestContext']['identity']
                   ['cognitoAuthenticationProvider']).split("CognitoSignIn:", 1)[1]
     return user_id
+
+
+def get_cognito_identity_from_event(event):
+    """Extracts the current Cognito identity ID from the event.
+
+    Parameters
+    ----------
+    event: dict
+        The Lambda event
+
+    Returns
+    ------
+    cognito_identity_id: str
+        The Cognito identity ID
+    """
+
+    cognito_identity_id = str(
+        event['requestContext']['identity']['cognitoIdentityId'])
+
+    return cognito_identity_id
 
 
 def log_method_initiated(method_name, event, logger):
@@ -179,6 +173,8 @@ def get_secret(secret_name, region_name="eu-central-1"):
 
 # If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
+
+
 def get_google_api_key():
     secret_name = "google/api_key"
     region_name = "eu-central-1"

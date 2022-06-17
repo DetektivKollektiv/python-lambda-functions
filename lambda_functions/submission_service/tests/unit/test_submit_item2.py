@@ -61,7 +61,7 @@ def test_submit_safe_item(monkeypatch):
             assert session.query(Item).count() == 1
             assert session.query(Submission).count() == 1
             submission = session.query(Submission).first()
-            assert submission.status != 'Unsafe'
+            assert submission.mail.email == 'test@test.de'
             assert session.query(Submission.ip_address).first()[0] == '1.2.3.4'
 
 
@@ -94,7 +94,7 @@ def test_submit_unsafe_item(monkeypatch):
             assert session.query(Item).count() == 1
             assert session.query(Submission).count() == 1
             submission = session.query(Submission).first()
-            assert submission.status == 'Unsafe'
+            assert submission.mail.email == 'test@test.de'
             assert submission.item.urls[0].url.unsafe is None
             assert submission.item.urls[1].url.unsafe == "GOOGLE:MALWARE"
 
@@ -130,7 +130,7 @@ def test_submit_content_with_url_without_http(monkeypatch):
             assert session.query(Item).count() == 1
             assert session.query(Submission).count() == 1
             submission = session.query(Submission).first()
-            assert submission.status != 'Unsafe'
+            assert submission.mail.email == 'test@test.de'
             assert len(submission.item.urls) == 0
 
 def create_event_body(content):

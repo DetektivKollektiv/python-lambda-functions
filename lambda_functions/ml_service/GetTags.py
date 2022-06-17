@@ -271,6 +271,9 @@ def create_tagreport(event, context):
                 sim_input.append("\""+term_test+"\"" + ",\""+tag+"\"")
                 terms_new.append(tag)
         # call sagemaker endpoint for similarity prediction to verify if tags are in vocabulary
+        # limit number of model calls (10 calls with 100 predictions each last about 15s)
+        if (len(sim_input))>1000:
+            sim_input = sim_input[0:1000]
         while (len(sim_input))>0:
             # do similarity prediction for 100 tags at most
             payload_list = sim_input[0:100]

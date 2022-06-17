@@ -50,6 +50,7 @@ Resources:
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonSESFullAccess
+        - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
 
   GetOpenItemsFunction: # Change for each lambda
     Type: AWS::Serverless::Function
@@ -164,7 +165,7 @@ Resources:
         Echo:
           Type: Api
           Properties:
-            Path: /reviews/{review_id} # Change for each lambda
+            Path: /review # Change for each lambda
             Method: get # Change for each lambda
             RestApiId:
               Ref: Api

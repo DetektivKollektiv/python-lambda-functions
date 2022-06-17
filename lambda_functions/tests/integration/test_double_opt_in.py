@@ -1,97 +1,51 @@
-from moto import mock_ses
-from moto.ses import ses_backend
-import boto3
-import pytest
-from uuid import uuid4
-from core_layer.model import Item, Submission
+import pytest, boto3, os
 from core_layer.db_handler import Session
-from submission_service.confirm_submission import confirm_submission
+from user_service import mail_subscription
+from core_layer.model.mail_model import Mail
+from moto import mock_ses
+from core_layer.handler import mail_handler
 
 
 @pytest.fixture
-def item():
-    item = Item()
-    item.id = str(uuid4())
-    item.content = "Test"
-    item.result_score = 1.000
-    return item
-
-
-@pytest.fixture
-def submission_id():
-    return str(uuid4())
+def mail_address():
+    return "mail@provider.com"
 
 
 @mock_ses
-def test_mail_notification(item, submission_id, monkeypatch):
-    monkeypatch.setenv("STAGE", "dev")
-    from review_service import notifications
+def test_double_opt_in(mail_address, monkeypatch):
 
+    # mock required stuff
+    monkeypatch.setenv("STAGE", "dev")
+    os.environ["MOTO"] = ""
     conn = boto3.client("ses", region_name="eu-central-1")
     conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
 
     with Session() as session:
 
-        submission = Submission()
-        submission.id = submission_id
-        submission.mail = "test@test.de"
-        submission.item = item
+        # Add mail address to DB and send verificiation mail
+        mail = Mail()
+        mail.email = mail_address
+        mail_handler.create_mail(mail, session)
+        mail_handler.send_confirmation_mail(mail)
 
-        session.add(item)
-        session.add(submission)
-        session.commit()
-
-        notifications.notify_users(session, item)
-
-        send_quota = conn.get_send_quota()
-        sent_count = int(send_quota["SentLast24Hours"])
-        assert sent_count == 0
-
-        event = {
-            'pathParameters': {
-                'submission_id': submission_id
-            }
-        }
-        response = confirm_submission(event, None)
-        assert response['statusCode'] == 200
-        assert response['headers']['content-type'] == 'text/html; charset=utf-8'
-        assert 'Mail-Adresse erfolgreich bestätigt!' in response['body']
-        assert 'https://dev.codetekt.org' in response['body']
-
-        notifications.notify_users(session, item)
-
+        # Check verification mail
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 1
-
+        from moto.ses import ses_backend
         message = ses_backend.sent_messages[0]
-        assert 'test@test.de' in message.destinations['ToAddresses']
-        assert 'Dein Fall wurde gel&ouml;st' in message.body
-        assert '1.0' in message.body
-        assert 'nicht vertrauenswürdig' in message.body
+        assert mail_address in message.destinations['ToAddresses']
+        assert 'Bestätige deine Mail-Adresse' in message.body
+        assert mail.id in message.body
 
+        # Confirm subscription 
+        event = {'pathParameters': {'mail_id': mail.id}}
+        response = mail_subscription.confirm_mail_subscription(event, context = "")
 
-# Use this to send a confirmation email to your adress
-def test_mail_confirmation(submission_id, item, monkeypatch):
-    monkeypatch.setenv("STAGE", "dev")
-    from submission_service import submit_item
-
-    with Session() as session:
-
-        submission = Submission()
-        submission.id = submission_id
-        submission.mail = "test@test.de"
-        submission.item = item
-        
-        session.add(item)
-        session.add(submission)
-        session.commit()
-        
-        submission = session.query(Submission).filter(
-            Submission.id == submission_id).one()
-        # Add you mail adress here in local testing mode
-        submission.mail = "test@test.de"
-        
-        session.merge(submission)
-        session.commit()
-        submit_item.send_confirmation_mail(submission)        
+        # Check response
+        assert response['statusCode'] == 200
+        assert 'Mail-Adresse erfolgreich bestätigt!' in response['body']
+        assert 'https://dev.codetekt.org' in response['body']
+        send_quota = conn.get_send_quota()
+        sent_count = int(send_quota["SentLast24Hours"])
+        assert sent_count == 1

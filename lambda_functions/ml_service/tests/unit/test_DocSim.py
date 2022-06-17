@@ -2,8 +2,9 @@ from core_layer.db_handler import Session
 
 from core_layer.model.item_model import Item
 from ml_service import ExtractClaim, GetLanguage, GetKeyPhrases, GetEntities, SearchFactChecks
-from core_layer.handler import item_handler
+from core_layer.handler import item_handler, url_handler
 import os
+import re
 
 import logging
 
@@ -154,25 +155,41 @@ class TestDocSim:
                     "stepfunction": {}
                 },
                 {
-                    "claim": "https://www.spiegel.de/wissenschaft/medizin/corona-krise-bringt-rekord-rueckgang-der-co2-emissionen-a-81f70390-624d-4717-ba35-f3bc130ad8df",
-                    "factcheck": "",
+                    "claim": "Es gibt fünf Gruppen in Deutschland, denen steigende Energiekosten ziemlich egal sind. Millionäre, Hartzer, Flüchtlinge, Migranten, Häftlinge. Der Rest geht arbeiten und bezahlt das",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/09/steigende-stromkosten-betreffen-auch-gefluechtete-und-hartz-iv-empfaenger/",
                     "stepfunction": {}
                 },
                 {
-                    "claim": "Kinderarzt besorgt: Corona-Geimpfte sind Teil eines medizinischen Experiments: https://www.compact-online.de/kinderarzt-besorgt-corona-geimpfte-sind-teil-eines-medizinischen-experiments/",
-                    "factcheck": "",
+                    "claim": "https://t.me/rabbitresearch/6103",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/11/astroworld-festival-warum-es-zu-herzstillstaenden-bei-opfern-von-massenpaniken-kommt/",
                     "stepfunction": {}
                 },
                 {
-                    "claim": "Baden-Württemberg: Zwangseinweisung für hartnäckige Quarantäneverweigerer beschlossen: https://de.rt.com/inland/110251-baden-wurttemberg-zwangseinweisung-fur-hartnackige/",
-                    "factcheck": "",
+                    "claim": "https://t.me/medusa_auge/66",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/09/nein-in-italien-sind-nicht-nur-3-783-menschen-an-covid-19-gestorben/",
                     "stepfunction": {}
                 },
                 {
-                    "claim": "Gesundheitsexperten warnen vor kurzfristigen, aber heftigen Nebenwirkungen einer Corona-Impfung https://de.rt.com/inland/110211-gesundheitsexperten-warnen-vor-kurzfristigen-aber-heftigen-nebenwirkungen-corona-impfung/",
-                    "factcheck": "",
+                    "claim": "https://t.me/rabbitresearch/5867",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/05/queensland-australien-quarantaenezentrum-ist-fuer-einreisende-nicht-fuer-ungeimpfte/",
                     "stepfunction": {}
                 },
+                {
+                    "claim": "https://politikstube.com/lettland-ungeimpfte-duerfen-kuenftig-keinen-supermarkt-mehr-betreten/",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/04/lettland-duerfen-geimpfte-und-ungeimpfte-im-supermarkt-einkaufen/",
+                    "stepfunction": {}
+                },
+                {
+                    "claim": "https://www.facebook.com/christin.friedemann.5/posts/4744025482297806",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/03/nein-geimpfte-zaehlen-nicht-als-ungeimpfte-sobald-sie-symptome-entwickeln/",
+                    "stepfunction": {}
+                },
+                {
+                    "claim": "https://www.facebook.com/permalink.php?story_fbid=248120460708233&id=100065308425434",
+                    "factcheck": "https://correctiv.org/faktencheck/2021/11/02/nein-argentinien-setzt-die-covid-19-impfstoffe-von-moderna-und-pfizer-nicht-bis-2023-aus/",
+                    "stepfunction": {}
+                },
+
             ]
 
             # search fact checks for all items
@@ -188,6 +205,9 @@ class TestDocSim:
                 item = Item()
                 item.content = claim_factcheck_dicts[i]["claim"]
                 item = item_handler.create_item(item, session)
+                if item.content:
+                    str_urls = re.findall('http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', item.content)
+                    url_handler.prepare_and_store_urls(item, str_urls, session)
                 claim_factcheck_dicts[i]["stepfunction"]["item"] =  {
                         "id": item.id,
                         "content": item.content,

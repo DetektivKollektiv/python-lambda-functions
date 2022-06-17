@@ -1,0 +1,16 @@
+<html>
+<p>&nbsp;</p>
+<p><a href="http://codetekt.org/"> <img style="display: block; margin-left: auto; margin-right: auto;" src="https://codetekt-logo.s3.eu-central-1.amazonaws.com/codetekt_V2_rgb%404x.png" alt="codetekt" width="300" /> </a></p>
+<h1 style="color: #fac800; text-align: center;">Dein Fall wurde gelöst!</h1>
+<p>Hi! Unsere Community hat deinen Fall gelöst.</p>
+<h2>Der Vertrauensindex beträgt <strong>{rating} von 100</strong>. Damit ist dein Fall <strong>{rating_text}</strong>.</h2>
+<p>Was bedeutet das?</p>
+<div style="width: inherit; max-width: 400px; background-color: #c62828; padding: 10px 15px 10px 15px; border-radius: 5px;">0 - 33: nicht vertrauenswürdig</div>
+<div style="width: inherit; max-width: 400px; background-color: #e57373; padding: 10px 15px 10px 15px; border-radius: 5px;">34 - 66: eher nicht vertrauenswürdig</div>
+<div style="width: inherit; max-width: 400px; background-color: #66bb6a; padding: 10px 15px 10px 15px; border-radius: 5px;">67 - 83: eher vertrauenswürdig</div>
+<div style="width: inherit; max-width: 400px; background-color: #1b5e20; padding: 10px 15px 10px 15px; border-radius: 5px;">84 - 100: vertrauenswürdig</div>
+<p>Mehr Details zu deinem Fall findest du in unserem <a href="https://codetekt.org/archive/{item_id}">Archiv</a>.<br /><br />Wir danken dir für deine Unterstützung in unserer Mission für mehr Transparenz!</p>
+<p>Dein Fall lautete: <br />{content}</p>
+<p>Antworten auf diese Mail werden nicht gelesen.</p>
+<p><a href="{mail_unsubscribe_link}">Keine E-mails mehr erhalten</a>.</p>
+</html>
