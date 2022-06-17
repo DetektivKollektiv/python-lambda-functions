@@ -2,8 +2,9 @@ from core_layer.db_handler import Session
 from core_layer.handler import user_handler
 from ..helper import setup_scenarios
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_level_system():
+def test_level_system(database_fixture):
 
     with Session() as session:
 

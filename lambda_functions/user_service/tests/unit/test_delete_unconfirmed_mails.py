@@ -6,6 +6,7 @@ from datetime import timedelta, datetime
 from core_layer.db_handler import Session
 from user_service.delete_unconfirmed_mails import delete_unconfirmed_mails
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def mail1():
@@ -28,7 +29,7 @@ def mail2():
     return mail
 
 
-def test_delete_unconfirmed_mails(mail1, mail2):
+def test_delete_unconfirmed_mails(mail1, mail2, database_fixture):
 
     with Session() as session:
 

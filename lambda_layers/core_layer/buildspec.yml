@@ -30,6 +30,9 @@ phases:
       - pip install -r "lambda_layers/core_layer/requirements.txt" --target lambda_layers/core_layer/python/lib/python3.8/site-packages/
       - pip install alembic sqlalchemy mysqlclient sqlalchemy-aurora-data-api
 
+      - pip install awscli-local
+      - pip install localstack
+
   pre_build:
     commands:
       # verify the validity of the state machine definition
@@ -41,6 +44,9 @@ phases:
       - chmod 400 vm_keypair.pem
 
       - ssh -tt -i vm_keypair.pem -o "StrictHostKeyChecking no" -L 3307:${DB_URL}:3306 ${EC2_URL} &
+
+      - localstack start
+      - awslocal ses verify-email-identity --email-address no-reply@codetekt.org
 
       # Discover and run unit tests in the 'tests' directory. For more information, see <https://docs.python.org/3/library/unittest.html#test-discovery>
       - python -m pytest

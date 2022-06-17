@@ -5,6 +5,7 @@ from core_layer.db_handler import Session
 from submission_service.submit_item import submit_item
 import boto3
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def event1():
@@ -23,7 +24,7 @@ def event1():
     }
 
 
-def test_dates(event1, monkeypatch):
+def test_dates(event1, monkeypatch, database_fixture):
     from moto import mock_ses, mock_stepfunctions
     with mock_stepfunctions(), mock_ses():
         # Initialize mock clients

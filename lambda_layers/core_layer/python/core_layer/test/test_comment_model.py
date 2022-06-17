@@ -9,6 +9,7 @@ from core_layer.model.submission_model import Submission
 from core_layer.model.issue_model import Issue
 from core_layer.handler import comment_handler
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def item_id():
@@ -40,7 +41,7 @@ def event(user2_id):
     }
 
 
-def test_comment_model(event, item_id, user1_id, user2_id, submission_id):
+def test_comment_model(event, item_id, user1_id, user2_id, submission_id, database_fixture):
 
     with Session() as session:
 

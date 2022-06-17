@@ -6,6 +6,7 @@ from core_layer.model.item_model import Item
 from core_layer.model.review_model import Review
 from core_layer.model.review_question_model import ReviewQuestion
 from ....tests.helper import event_creator, setup_scenarios
+from core_layer.test.helper.fixtures import database_fixture
 
 
 @pytest.fixture
@@ -30,14 +31,14 @@ def test_bad_request():
         assert response['statusCode'] == 400
 
 
-def test_no_item_found(junior_user_id):
+def test_no_item_found(junior_user_id, database_fixture):
     with Session() as session:
         event = event_creator.get_create_review_event(junior_user_id, "wrong_item")
         response = create_review.create_review(event, None)
         assert response['statusCode'] == 404
 
 
-def test_create_review(item_id, junior_user_id, senior_user_id):
+def test_create_review(item_id, junior_user_id, senior_user_id, database_fixture):
 
     with Session() as session:
 

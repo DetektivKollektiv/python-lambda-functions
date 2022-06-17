@@ -8,7 +8,7 @@ from core_layer.db_handler import Session
 import boto3
 from moto import mock_ses, mock_stepfunctions
 import os
-
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def item_id():
@@ -50,7 +50,7 @@ def event(item_id):
     return {"detail": {"item_id": item_id}}
 
 
-def test_item_rejected(item, mail, submission, event, monkeypatch):
+def test_item_rejected(item, mail, submission, event, monkeypatch, database_fixture):
 
     # Set environment variable
     monkeypatch.setenv("STAGE", "dev")
@@ -71,8 +71,8 @@ def test_item_rejected(item, mail, submission, event, monkeypatch):
             send_quota = ses_client.get_send_quota()
             sent_count = int(send_quota["SentLast24Hours"])
             assert sent_count == 2
-            from moto.ses import ses_backend
-            sent_messages = ses_backend.sent_messages
+            from moto.ses import ses_backends
+            sent_messages = ses_backends["global"].sent_messages
             item.id in sent_messages[0].body
             assert "Dein Fall wurde abgelehnt!" in sent_messages[0].body
             assert f"https://api.dev.codetekt.org/user_service/mails/{submission.mail.id}/unsubscribe" in sent_messages[

@@ -4,6 +4,7 @@ from uuid import uuid4
 from core_layer.db_handler import Session
 
 from core_layer.model import Item, ItemType
+from core_layer.test.helper.fixtures import database_fixture
 from ...get_items import get_items
 
 
@@ -50,7 +51,7 @@ def get_event(attribute, value):
     }
 
 
-def test_get_items(test_item_type, item1, item2, item_with_type):
+def test_get_items(test_item_type, item1, item2, item_with_type, database_fixture):
     
     with Session() as session:
         

@@ -5,8 +5,9 @@ from ....tests.helper import event_creator, setup_scenarios
 from ...get_user_ranking import get_user_ranking
 import json
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_get_user_ranking():
+def test_get_user_ranking(database_fixture):
 
     with Session() as session:
         session = setup_scenarios.create_users_for_ranking(session)

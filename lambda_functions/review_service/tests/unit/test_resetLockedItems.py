@@ -10,6 +10,8 @@ from core_layer.model import Item
 from core_layer.handler import item_handler
 from ...reset_locked_items import reset_locked_items
 
+from core_layer.test.helper.fixtures import database_fixture
+
 
 @pytest.fixture
 def item():
@@ -51,7 +53,7 @@ def pair(old_junior_review, new_senior_review):
     return pair
 
 
-def test_reset_locked_items(item, pair, old_junior_review, new_senior_review):
+def test_reset_locked_items(item, pair, old_junior_review, new_senior_review, database_fixture):
 
     with Session() as session:
 
