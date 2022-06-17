@@ -33,8 +33,7 @@ def test_empty_event(monkeypatch):
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
     response = attach_iot_policy.attach_iot_policy(EVENT_EMPTY, None)
-    response_dict = json.loads(response)
-    assert response_dict['statusCode'] == 400
+    assert response['statusCode'] == 400
 
 
 def test_no_identity(monkeypatch):
@@ -42,8 +41,7 @@ def test_no_identity(monkeypatch):
 
     response = attach_iot_policy.attach_iot_policy(
         EVENT_USER_ID_NO_IDENTITY, None)
-    response_dict = json.loads(response)
-    assert response_dict['statusCode'] == 400
+    assert response['statusCode'] == 400
 
 
 def test_no_user_id(monkeypatch):
@@ -51,5 +49,4 @@ def test_no_user_id(monkeypatch):
 
     response = attach_iot_policy.attach_iot_policy(
         EVENT_IDENTITY_NO_USER_ID, None)
-    response_dict = json.loads(response)
-    assert response_dict['statusCode'] == 400
+    assert response['statusCode'] == 400

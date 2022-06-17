@@ -42,8 +42,8 @@ class NotificationTemplateHandler(NotificationTemplateHandlerBase):
     def _get_notification_template(self, notification_type: str, message_type: str, content_type: str, language: str):
 
         template_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 
-                                                          '../../../../..',
-                                                          'lambda_functions/notification_service/resources/mail_templates', 
+                                                          '..',
+                                                          'resources/mail_templates', 
                                                           f'{message_type}/{language}/{notification_type}/{content_type}.txt'
                                                           )
                                              )
