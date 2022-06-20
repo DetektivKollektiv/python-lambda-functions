@@ -48,6 +48,9 @@ phases:
       python: 3.8
       ruby: latest
     commands:
+      - python3 -m venv venv
+      - . venv/bin/activate
+    
       # Upgrade pip to the latest version
       - echo $LOCATION
       - printenv
@@ -71,7 +74,14 @@ phases:
       # Install statelint to verify the validity of the state machine definition
       - gem install statelint
 
-      - pip install pytest moto
+      # Install dependencies for tests
+      - pip install pytest
+      - pip install sqlalchemy moto boto3 docker aws_requests_auth bs4
+      - pip install virtualenvwrapper
+      
+      - add2virtualenv lambda_functions
+      - add2virtualenv lambda_layers/core_layer/python
+      
       # Call the test installation script only if it exists
       - TEST_INSTALL_FILE="lambda_functions/${LOCATION}/tests/install.sh"
       - test -f $TEST_INSTALL_FILE && sh $TEST_INSTALL_FILE || echo "$TEST_INSTALL_FILE not found"
