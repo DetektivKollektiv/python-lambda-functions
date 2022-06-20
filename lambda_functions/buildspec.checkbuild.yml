@@ -48,8 +48,6 @@ phases:
       python: 3.8
       ruby: latest
     commands:
-      - python3 -m venv venv
-      - . venv/bin/activate
     
       # Upgrade pip to the latest version
       - echo $LOCATION
@@ -77,10 +75,8 @@ phases:
       # Install dependencies for tests
       - pip install pytest
       - pip install sqlalchemy moto boto3 docker aws_requests_auth bs4
-      - pip install virtualenvwrapper
       
-      - add2virtualenv lambda_functions
-      - add2virtualenv lambda_layers/core_layer/python
+      - export PYTHONPATH="${PYTHONPATH}:lambda_functions:lambda_layers/core_layer/python"
       
       # Call the test installation script only if it exists
       - TEST_INSTALL_FILE="lambda_functions/${LOCATION}/tests/install.sh"
