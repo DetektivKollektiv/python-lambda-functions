@@ -3,7 +3,9 @@ from core_layer.db_handler import Session
 from core_layer.model.review_question_model import ReviewQuestion
 from core_layer.model.review_answer_model import AnswerOption
 
-def test_questions_and_answers():
+from core_layer.test.helper.fixtures import database_fixture
+
+def test_questions_and_answers(database_fixture):
     with Session() as session:
 
         q1 = ReviewQuestion()

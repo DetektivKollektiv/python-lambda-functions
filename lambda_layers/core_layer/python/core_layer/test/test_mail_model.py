@@ -7,6 +7,7 @@ from core_layer.model.level_model import Level
 from core_layer.model.submission_model import Submission
 from datetime import datetime
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def mail_id():
@@ -29,7 +30,7 @@ def usernames():
     return ["Michael Jackson", "Janet Jackson"]
 
 
-def test_mail_model(mail_id, user_ids, submission_id, mailaddress, usernames):
+def test_mail_model(mail_id, user_ids, submission_id, mailaddress, usernames, database_fixture):
 
     with Session() as session:
               

@@ -6,6 +6,7 @@ from core_layer.model.item_model import Item
 from core_layer.model.user_model import User
 from core_layer.model.level_model import Level
 from archive_service.post_comment_on_item import post_comment_on_item
+from core_layer.test.helper.fixtures import database_fixture
 
 
 @pytest.fixture
@@ -33,7 +34,7 @@ def event(item_id, user_id):
     }
 
 
-def test_post_comment_on_item(event, item_id, user_id):
+def test_post_comment_on_item(event, item_id, user_id, database_fixture):
 
     with Session() as session:
 

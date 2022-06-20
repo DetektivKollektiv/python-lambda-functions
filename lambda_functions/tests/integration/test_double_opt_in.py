@@ -7,6 +7,7 @@ from core_layer.model.mail_model import Mail
 from moto import mock_ses
 from core_layer.handler import mail_handler
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def mail_address():
@@ -14,7 +15,7 @@ def mail_address():
 
 
 @mock_ses
-def test_double_opt_in(mail_address, monkeypatch):
+def test_double_opt_in(mail_address, monkeypatch, database_fixture):
 
     # mock required stuff
     monkeypatch.setenv("STAGE", "dev")
@@ -34,8 +35,8 @@ def test_double_opt_in(mail_address, monkeypatch):
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 2  # Recipient and BCC
-        from moto.ses import ses_backend
-        message = ses_backend.sent_messages[0]
+        from moto.ses import ses_backends
+        message = ses_backends["global"].sent_messages[0]
         assert mail_address in message.destinations['ToAddresses']
         assert 'Bestätige deine Mail-Adresse' in message.body
         assert mail.id in message.body

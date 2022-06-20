@@ -7,7 +7,7 @@ import json
 import os
 from datetime import date, datetime
 from archive_service.get_closed_items import get_closed_items
-import logging
+from core_layer.test.helper.fixtures import database_fixture
 
 
 def get_url_event(url):
@@ -18,7 +18,7 @@ def get_url_event(url):
     }
 
 
-def test_get_closed_items():
+def test_get_closed_items(database_fixture):
 
     # pre-stuff
     os.environ["STAGE"] = "dev"

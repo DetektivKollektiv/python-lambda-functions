@@ -2,6 +2,7 @@ from uuid import uuid4
 from core_layer.model import Item
 from core_layer.db_handler import Session
 from admin_service.update_item import update_item
+from core_layer.test.helper.fixtures import database_fixture
 
 
 def get_item():
@@ -58,5 +59,4 @@ def test_update_item():
         event = get_event(item.id, 'NotAnItemAttribute', 'open')
         response = update_item(event, None)
         item = session.query(Item).one()
-        assert response['statusCode'] == 400    
-    
+        assert response['statusCode'] == 400

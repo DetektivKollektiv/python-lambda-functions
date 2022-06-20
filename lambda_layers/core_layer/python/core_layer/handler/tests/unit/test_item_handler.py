@@ -2,8 +2,9 @@ from core_layer.model.item_model import Item
 from core_layer.handler import item_handler
 from core_layer.db_handler import Session
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_create_item():
+def test_create_item(database_fixture):
     with Session() as session:
         item = Item()
         item.content = "Testitem"

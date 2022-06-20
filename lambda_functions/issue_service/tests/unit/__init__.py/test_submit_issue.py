@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from moto import mock_ses
-from moto.ses import ses_backend
+from moto.ses import ses_backends
 import boto3
 from core_layer.helper import body_to_object
 from core_layer.model.issue_model import Issue
@@ -9,6 +9,7 @@ from core_layer.model.item_model import Item
 from core_layer.db_handler import Session
 from issue_service.submit_issue import submit_issue
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def item():
@@ -71,7 +72,7 @@ def item_event(item):
 
 
 @mock_ses
-def test_submit_issue(good_event, bad_event):
+def test_submit_issue(good_event, bad_event, database_fixture):
     
     conn = boto3.client("ses", region_name="eu-central-1")
     conn.verify_email_identity(EmailAddress="no-reply@codetekt.org")
@@ -86,7 +87,7 @@ def test_submit_issue(good_event, bad_event):
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 1
-        message = ses_backend.sent_messages[0]
+        message = ses_backends["global"].sent_messages[0]
         assert 'support@codetekt.org' in message.destinations['ToAddresses']
         assert good_event['body']['message'] in message.body
         # Check database entry
@@ -126,7 +127,7 @@ def test_submit_issue(good_event, bad_event):
         send_quota = conn.get_send_quota()
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 2
-        message = ses_backend.sent_messages[1]
+        message = ses_backends["global"].sent_messages[1]
         assert 'support@codetekt.org' in message.destinations['ToAddresses']
         assert item_event['body']['message'] in message.body
         assert item.id in message.body

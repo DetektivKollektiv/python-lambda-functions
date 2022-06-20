@@ -8,6 +8,7 @@ from core_layer.db_handler import Session
 from core_layer.handler.tests.unit.helper import level_creator, user_creator, review_creator, item_creator
 from core_layer.model.mail_model import Mail
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def user_id_1():
@@ -104,7 +105,7 @@ def mail_id():
     return str(uuid4())
 
 
-def test_get_user_total_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_4):
+def test_get_user_total_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_4, database_fixture):
     
     with Session() as session:
 
@@ -127,7 +128,7 @@ def test_get_user_total_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_
         assert user_rank_4 == 3
 
 
-def test_get_user_level_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_4):
+def test_get_user_level_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_4, database_fixture):
 
     with Session() as session:
 
@@ -149,7 +150,7 @@ def test_get_user_level_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_
         assert user_rank_4 == 2
 
 
-def test_get_total_solved_cases(fixtures, user_id_1, user_id_2, user_id_3):
+def test_get_total_solved_cases(fixtures, user_id_1, user_id_2, user_id_3, database_fixture):
 
     with Session() as session:
 
@@ -168,7 +169,7 @@ def test_get_total_solved_cases(fixtures, user_id_1, user_id_2, user_id_3):
         assert solved_cases_3 == 1
 
 
-def test_get_today_solved_cases(fixtures, user_id_1, user_id_2, user_id_3):
+def test_get_today_solved_cases(fixtures, user_id_1, user_id_2, user_id_3, database_fixture):
 
     with Session() as session:
 
@@ -187,7 +188,7 @@ def test_get_today_solved_cases(fixtures, user_id_1, user_id_2, user_id_3):
         assert solved_cases_3 == 1
 
 
-def test_exp_needed(fixtures, user_id_1, user_id_2, user_id_3):
+def test_exp_needed(fixtures, user_id_1, user_id_2, user_id_3, database_fixture):
 
     with Session() as session:
 
@@ -206,7 +207,7 @@ def test_exp_needed(fixtures, user_id_1, user_id_2, user_id_3):
         assert exp_needed_3 == 2
 
 
-def test_mail_subscription(fixtures, mail_id):
+def test_mail_subscription(fixtures, mail_id, database_fixture):
 
     with Session() as session:
 

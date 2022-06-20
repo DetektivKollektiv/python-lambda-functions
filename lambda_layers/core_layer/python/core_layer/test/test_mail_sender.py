@@ -1,6 +1,6 @@
 from core_layer.sender.mail_sender import MailSender
 
-from notification_service.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
+from .mocks.mock_notification_template_handler import MockNotificationTemplateHandler
 
 # awslocal ses verify-email-identity --email-address no-reply@codetekt.org
 

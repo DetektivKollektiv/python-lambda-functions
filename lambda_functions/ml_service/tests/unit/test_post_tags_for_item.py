@@ -6,8 +6,9 @@ from core_layer.handler import item_handler
 import json
 import os
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_post_tags_for_item():
+def test_post_tags_for_item(database_fixture):
     # pre-stuff
     os.environ["STAGE"] = "dev"
 

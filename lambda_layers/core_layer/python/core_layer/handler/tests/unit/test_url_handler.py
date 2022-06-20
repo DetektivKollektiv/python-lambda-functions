@@ -4,8 +4,10 @@ from core_layer.handler import item_handler, url_handler, claimant_handler
 from core_layer.model.item_model import Item
 from core_layer.db_handler import Session
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_prepare_and_store_urls():
+
+def test_prepare_and_store_urls(database_fixture):
     with Session() as session:
         str_urls = ["https://smopo.ch/zehntausende-als-falsche-coronatote-deklariert/"]
 
@@ -20,7 +22,7 @@ def test_prepare_and_store_urls():
         assert item.status != 'Unsafe'
 
 
-def test_prepare_and_store_urls_with_unsafe_items():
+def test_prepare_and_store_urls_with_unsafe_items(database_fixture):
     with Session() as session:
         str_urls = ["http://testsafebrowsing.appspot.com/s/malware.html"]
 
@@ -34,7 +36,7 @@ def test_prepare_and_store_urls_with_unsafe_items():
 
         assert item.status == 'Unsafe'
 
-def test_prepare_and_store_urls_multiply_urls():
+def test_prepare_and_store_urls_multiply_urls(database_fixture):
     with Session() as session:
         str_urls = ["https://smopo.ch/zehntausende-als-falsche-coronatote-deklariert/", "https://www.google.de/" ]
 
@@ -48,7 +50,7 @@ def test_prepare_and_store_urls_multiply_urls():
 
         assert item.status != 'Unsafe'
 
-def test_prepare_and_store_urls_multiply_urls_with_unsafe_items():
+def test_prepare_and_store_urls_multiply_urls_with_unsafe_items(database_fixture):
     with Session() as session:
         str_urls = ["http://testsafebrowsing.appspot.com/s/phishing.html",
                     "https://www.google.de/" ]
@@ -62,7 +64,7 @@ def test_prepare_and_store_urls_multiply_urls_with_unsafe_items():
 
         assert item.status == 'Unsafe'
 
-def test_prepare_and_store_urls_for_localhost_url():
+def test_prepare_and_store_urls_for_localhost_url(database_fixture):
     with Session() as session:
         str_urls = ["http://LOCALHOST/utes-moma-127-8-altmaier-will-haertere-strafen-bei-verstoessen-gegen-die-corona-regeln/",
                     "http://127.0.0.1/utes-moma-127-8-altmaier-will-haertere-strafen-bei-verstoessen-gegen-die-corona-regeln/"]
@@ -74,7 +76,7 @@ def test_prepare_and_store_urls_for_localhost_url():
         assert item.urls == []
         assert item.status != 'Unsafe'
 
-def test_prepare_and_store_urls_localhost_url_skipped():
+def test_prepare_and_store_urls_localhost_url_skipped(database_fixture):
     with Session() as session:
         str_urls = ["http://localhost:8080/index.html", "https://www.google.de/" ]
 

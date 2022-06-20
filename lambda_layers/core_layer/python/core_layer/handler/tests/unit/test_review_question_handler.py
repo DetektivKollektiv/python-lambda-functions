@@ -8,6 +8,7 @@ from core_layer.handler import review_question_handler
 from core_layer.db_handler import Session
 from core_layer.handler.tests.unit.helper import item_type_creator, review_question_creator, review_creator, item_creator
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def type_id_1():
@@ -84,7 +85,7 @@ def fixtures(type_id_1, type_id_2, question_id_1, question_id_2, question_id_3, 
     return [type1, type2, question1, question2, question3, item1, item2, review1, review2]
 
 
-def test_get_all_questions(fixtures):
+def test_get_all_questions(fixtures, database_fixture):
 
     with Session() as session:
 
@@ -96,7 +97,7 @@ def test_get_all_questions(fixtures):
         assert len(review_questions) == 3
 
 
-def test_get_question_by_id(fixtures, question_id_1, question_id_2, question_id_3):
+def test_get_question_by_id(fixtures, question_id_1, question_id_2, question_id_3, database_fixture):
     with Session() as session:
 
         session.add_all(fixtures)
@@ -116,7 +117,7 @@ def test_get_question_by_id(fixtures, question_id_1, question_id_2, question_id_
         assert review_question_3.id == question_id_3
 
 
-def test_get_question_by_type_id(fixtures, type_id_1, type_id_2, question_id_1, question_id_2):
+def test_get_question_by_type_id(fixtures, type_id_1, type_id_2, question_id_1, question_id_2, database_fixture):
     with Session() as session:
 
         session.add_all(fixtures)
@@ -135,7 +136,7 @@ def test_get_question_by_type_id(fixtures, type_id_1, type_id_2, question_id_1, 
         assert len(review_questions_3) == 0
 
 
-def test_get_all_parent_questions(fixtures, child_question1, type_id_1):
+def test_get_all_parent_questions(fixtures, child_question1, type_id_1, database_fixture):
     with Session() as session:
 
         session.add_all(fixtures)

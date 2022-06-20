@@ -1,5 +1,5 @@
 from moto import mock_ses
-from moto.ses import ses_backend
+from moto.ses import ses_backends
 import pytest
 import boto3
 import os
@@ -9,6 +9,8 @@ from core_layer.db_handler import Session
 from core_layer.model import Mail
 from core_layer.model import Submission
 from core_layer.handler.mail_handler import send_confirmation_mail
+
+from core_layer.test.helper.fixtures import database_fixture
 
 
 @pytest.fixture
@@ -34,7 +36,7 @@ def submission(mail_id):
 
 
 @mock_ses
-def test_confirmation_mail(submission, mail, monkeypatch):
+def test_confirmation_mail(submission, mail, monkeypatch, database_fixture):
 
     monkeypatch.setenv("STAGE", "dev")
     os.environ["MOTO"] = ""
@@ -55,7 +57,7 @@ def test_confirmation_mail(submission, mail, monkeypatch):
         sent_count = int(send_quota["SentLast24Hours"])
         assert sent_count == 2  # To recipient and BCC
 
-        message = ses_backend.sent_messages[0]
+        message = ses_backends["global"].sent_messages[0]
         assert 'test@test.de' in message.destinations['ToAddresses']
         assert 'Bestätige deine Mail-Adresse' in message.body
         assert mail.id in message.body

@@ -17,6 +17,7 @@ from core_layer.db_handler import Session
 
 from uuid import uuid4
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def item_id():
@@ -52,7 +53,7 @@ def generate_review_answer(answer, review_id, review_question_id):
     return ReviewAnswer(id=str(uuid4()), review_id=review_id, review_question_id=review_question_id, answer=answer, comment='Test Review Answer')
 
 
-def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, item_tag_id, monkeypatch):
+def test_get_review(item_id, review_id, review_question_id, user_id, tag_id, item_tag_id, monkeypatch, database_fixture):
     """
     Gets a simple Review
     """

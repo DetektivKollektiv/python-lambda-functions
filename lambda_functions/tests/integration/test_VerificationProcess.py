@@ -11,9 +11,10 @@ from ...review_service.create_review import create_review
 from ...review_service.update_review import update_review
 from moto import mock_events
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @mock_events
-def test_verification_process_best_case(monkeypatch):
+def test_verification_process_best_case(monkeypatch, database_fixture):
     monkeypatch.setenv("STAGE", "dev")
     monkeypatch.setenv("MOTO", "1")
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
@@ -139,7 +140,7 @@ def test_verification_process_best_case(monkeypatch):
         session.expire_all()
 
 
-def test_verification_process_worst_case(monkeypatch):
+def test_verification_process_worst_case(monkeypatch, database_fixture):
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
     with Session() as session:
@@ -250,7 +251,7 @@ def test_verification_process_worst_case(monkeypatch):
         session.expire_all()
 
 
-def test_create_review():
+def test_create_review(database_fixture):
 
     with Session() as session:
         session = setup_scenarios.create_levels_junior_and_senior_detectives(

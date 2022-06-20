@@ -8,6 +8,7 @@ from core_layer.model import comment_model
 from core_layer.model.comment_model import Comment
 import pytest
 from uuid import uuid4
+from core_layer.test.helper.fixtures import database_fixture
 
 
 @pytest.fixture()
@@ -43,7 +44,7 @@ def get_event(item_id):
     }
 
 
-def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment_id):
+def test_get_closed_items(item_id, review_id, review_answer_id, user_id, comment_id, database_fixture):
     os.environ["STAGE"] = "dev"
 
     with Session() as session:

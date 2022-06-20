@@ -10,6 +10,8 @@ from core_layer.model.review_model import Review
 from core_layer.model.comment_model import Comment
 from ....tests.helper import event_creator, setup_scenarios
 
+from core_layer.test.helper.fixtures import database_fixture
+
 
 @pytest.fixture
 def item_id():
@@ -26,7 +28,7 @@ def senior_user_id():
     return "11"
 
 
-def test_update_review(item_id, junior_user_id, senior_user_id, monkeypatch):
+def test_update_review(item_id, junior_user_id, senior_user_id, monkeypatch, database_fixture):
 
     monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
     with Session() as session:

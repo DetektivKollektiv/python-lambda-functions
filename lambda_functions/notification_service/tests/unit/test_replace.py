@@ -2,7 +2,7 @@ import pytest
 
 from core_layer.sender.notification_sender import NotificationSender
 
-from notification_service.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
+from core_layer.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
 
 TEST_STRING = "Dein Fall {placeholder1} wurde gelöst! {placeholder2}"
 TEST_STRING_ONE_PLACEHOLDER = "Dein Fall {placeholder1} wurde gelöst!"

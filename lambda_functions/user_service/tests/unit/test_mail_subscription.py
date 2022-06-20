@@ -6,6 +6,7 @@ from core_layer.db_handler import Session
 from core_layer.model.mail_model import Mail
 from core_layer.model.level_model import Level
 
+from core_layer.test.helper.fixtures import database_fixture
 
 @pytest.fixture
 def user_id():
@@ -31,7 +32,7 @@ def event_with_wrong_mail_id():
         }
     }
 
-def test_mail_subscription(user_id, mail_id, event, event_with_wrong_mail_id, monkeypatch):
+def test_mail_subscription(user_id, mail_id, event, event_with_wrong_mail_id, monkeypatch, database_fixture):
 
     # Set environment variable
     monkeypatch.setenv("STAGE", "dev")

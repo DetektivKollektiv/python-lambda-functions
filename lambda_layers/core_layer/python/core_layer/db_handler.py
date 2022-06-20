@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 import os
+from this import d
 
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -75,3 +76,9 @@ def add_object(obj, session):
         logging.exception('Could not store object.')
         session.rollback()
         return None
+
+def init_database():
+    Base.metadata.create_all(db)
+
+def clear_database():
+    Base.metadata.drop_all(db)

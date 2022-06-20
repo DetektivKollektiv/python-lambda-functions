@@ -3,7 +3,7 @@ import pytest
 
 from core_layer.sender.notification_sender import NotificationSender
 
-from notification_service.test.mocks.mock_notification_template_handler import MockNotificationTemplateHandler
+from .mocks.mock_notification_template_handler import MockNotificationTemplateHandler
 
 
 this_file = os.path.dirname(__file__)

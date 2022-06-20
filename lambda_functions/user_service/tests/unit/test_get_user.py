@@ -10,8 +10,9 @@ from ...get_user import get_user
 import json
 from datetime import datetime
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_get_user():
+def test_get_user(database_fixture):
 
     with Session() as session:
 

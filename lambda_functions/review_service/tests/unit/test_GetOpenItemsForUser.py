@@ -14,10 +14,11 @@ from review_service.update_review import update_review
 from review_service import create_review
 from ...get_open_items import get_open_items
 from ....tests.helper import event_creator, setup_scenarios
+from core_layer.test.helper.fixtures import database_fixture
 
 
 class TestGetOpenItems:
-    def test_get_open_items_for_user(self, monkeypatch):
+    def test_get_open_items_for_user(self, monkeypatch, database_fixture):
         monkeypatch.setenv("CORS_ALLOW_ORIGIN", "http://localhost:4200")
 
         with Session() as session:

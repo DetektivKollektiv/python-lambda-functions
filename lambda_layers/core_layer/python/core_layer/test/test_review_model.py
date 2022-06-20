@@ -6,8 +6,9 @@ from core_layer.model.tag_model import Tag, ItemTag
 from core_layer.model import Level
 from uuid import uuid4
 
+from core_layer.test.helper.fixtures import database_fixture
 
-def test_tags_to_dict():
+def test_tags_to_dict(database_fixture):
     with Session() as session:
         user = User(id=str(uuid4()), name='user1')
         level = Level(id=1, description='beginner')
