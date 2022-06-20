@@ -71,6 +71,7 @@ phases:
       # Install statelint to verify the validity of the state machine definition
       - gem install statelint
 
+      - pip install pytest moto
       # Call the test installation script only if it exists
       - TEST_INSTALL_FILE="lambda_functions/${LOCATION}/tests/install.sh"
       - test -f $TEST_INSTALL_FILE && sh $TEST_INSTALL_FILE || echo "$TEST_INSTALL_FILE not found"
