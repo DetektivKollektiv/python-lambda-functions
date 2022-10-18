@@ -10,6 +10,8 @@ aiohttp==3.7.4
     # via -r requirements.in
 async-timeout==3.0.1
     # via aiohttp
+asyncio==3.4.3
+    # via -r requirements.in
 attrs==20.3.0
     # via aiohttp
 aws-requests-auth==0.4.3
@@ -39,7 +41,7 @@ multidict==5.1.0
     # via
     #   aiohttp
     #   yarl
-pycares==3.1.1
+pycares==4.2.0
     # via aiodns
 pycparser==2.20
     # via cffi
