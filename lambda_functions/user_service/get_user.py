@@ -3,7 +3,7 @@ import json
 import traceback
 from core_layer import helper
 from core_layer.db_handler import Session
-from core_layer.handler import user_handler
+from core_layer.handler import user_handler, mail_handler
 
 
 def get_user(event, context):
@@ -29,6 +29,11 @@ def get_user(event, context):
                 solved_cases_today = user_handler.get_solved_cases(
                     user, True, session)
                 exp_needed = user_handler.get_needed_exp(user, session)
+                try:
+                    mail = mail_handler.get_mail_by_user_id(id, session)
+                    user_dict['mail_status'] = mail.status
+                except:
+                    user_dict['mail_status'] = 'none'
                 user_dict['progress'] = progress
                 user_dict['total_rank'] = total_rank
                 user_dict['level_rank'] = level_rank

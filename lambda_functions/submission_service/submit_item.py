@@ -6,13 +6,13 @@ import io
 import traceback
 import unicodedata
 import boto3
-from botocore.exceptions import ClientError
 
 from core_layer import helper
 from core_layer.db_handler import Session
 from core_layer.model.item_model import Item
 from core_layer.model.submission_model import Submission
-from core_layer.handler import item_handler, submission_handler, url_handler
+from core_layer.model.mail_model import Mail
+from core_layer.handler import item_handler, submission_handler, url_handler, mail_handler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -55,6 +55,10 @@ def submit_item(event, context):
             if "item" in body_dict:
                 del body_dict["item"]
 
+            if "mail" in body_dict:
+                email_address = body_dict["mail"]
+                del body_dict["mail"]
+
             submission = Submission()
             helper.body_to_object(body_dict, submission)
             # add ip address
@@ -62,7 +66,7 @@ def submit_item(event, context):
             setattr(submission, 'ip_address', ip_address)
 
             try:
-                # Item already exists, item_id in submission is the id of the found item                
+                # Item already exists, item_id in submission is the id of the found item
                 item = item_handler.get_item_by_content(content, session)
                 submission.item_id = item.id
                 new_item_created = False
@@ -77,17 +81,31 @@ def submit_item(event, context):
                 new_item_created = True
 
                 if content:
-                    str_urls = re.findall('http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', content)
+                    str_urls = re.findall(
+                        'http[s]?://(?:[a-zA-ZäöüÄÖÜ]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', content)
                     url_handler.prepare_and_store_urls(item, str_urls, session)
 
                 submission.item_id = item.id
-                submission.status = item.status
 
             # Create submission
-            submission_handler.create_submission_db(submission, session)
-            if submission.mail:
-                if item.status != 'Unsafe':
-                    send_confirmation_mail(submission)
+            submission = submission_handler.create_submission_db(
+                submission, session)
+
+            # Create email, link it to submission and send confirmation mail
+            if email_address:
+                mail = mail_handler.get_mail_by_email_address(
+                    email_address, session)
+                if mail == None:  # only create if not already exists
+                    mail = Mail()
+                    mail.email = email_address
+                    mail = mail_handler.create_mail(mail, session)
+
+                if mail.status != 'confirmed':
+                    mail_handler.send_confirmation_mail(mail)
+
+                submission.mail_id = mail.id
+                session.add(submission)
+                session.commit()
 
             # Create response
             if item.status == 'Unsafe':
@@ -109,73 +127,20 @@ def submit_item(event, context):
                 "statusCode": 400,
                 "body": "Could not create item and/or submission. Check HTTP POST payload. Stacktrace: {}".format(traceback.format_exc())
             }
+            response_cors = helper.set_cors(response, event, True)
+            return response_cors
 
-    ## start SearchFactChecks only for safe items
+    # start SearchFactChecks only for safe items
     if (item.status != 'Unsafe') and (new_item_created == True):
         stage = os.environ['STAGE']
         client.start_execution(
             stateMachineArn='arn:aws:states:eu-central-1:891514678401:stateMachine:SearchFactChecks_new-' + stage,
             name='SFC_' + item.id,
             input="{\"item\":{"
-                    "\"id\":\"" + item.id + "\","
-                                          "\"content\":\"" + remove_control_characters(item.content) + "\" } }"
+            "\"id\":\"" + item.id + "\","
+            "\"content\":\"" +
+            remove_control_characters(item.content) + "\" } }"
         )
 
-    response_cors = helper.set_cors(response, event)
+    response_cors = helper.set_cors(response, event, True)
     return response_cors
-
-
-def send_confirmation_mail(submission: Submission):
-    stage = os.environ['STAGE']
-    if stage == 'prod':
-        confirmation_link = 'https://api.codetekt.org/submission_service/submissions/{}/confirm'.format(
-            submission.id)
-    else:
-        confirmation_link = 'https://api.{}.codetekt.org/submission_service/submissions/{}/confirm'.format(
-            stage, submission.id)
-
-    if submission.mail:
-        recipient = submission.mail
-    else:
-        return
-    sender = "codetekt <no-reply@codetekt.org>"
-    subject = 'Bestätige deine Mail-Adresse'
-
-    body_text = "Bitte bestätige deine Mailadresse durch Klick auf folgenden Link {}".format(confirmation_link)
-    body_html = io.open(os.path.join(os.path.dirname(__file__), 'resources',
-                                     'confirmation_file_body.html'), mode='r', encoding='utf-8').read().format(confirmation_link)
-
-    charset = "UTF-8"
-    client = boto3.client('ses', region_name='eu-central-1')
-    try:
-        response = client.send_email(
-            Destination={
-                'ToAddresses': [
-                    recipient,
-                ],
-            },
-            Message={
-                'Body': {
-                    'Html': {
-                        'Charset': charset,
-                        'Data': body_html,
-                    },
-                    'Text': {
-                        'Charset': charset,
-                        'Data': body_text,
-                    },
-                },
-                'Subject': {
-                    'Charset': charset,
-                    'Data': subject,
-                },
-            },
-            Source=sender,
-        )
-        logger.info("Confirmation email sent for submission with ID: {}. SES Message ID: {}".format(
-            submission.id, response['MessageId']))
-
-    except ClientError as e:
-        logging.exception("Could not send confirmation mail for submission with ID: {}. SNS Error: {}".format(
-            submission.id, e.response['Error']['Message']))
-        pass

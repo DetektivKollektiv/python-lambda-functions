@@ -70,6 +70,8 @@ Resources:
             Ref: DBNAME
           NOTIFICATION_TEMPLATE_BUCKET:
             Ref: NotificationTemplateBucket
+          STAGE:
+            Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
 
@@ -103,5 +105,7 @@ Resources:
             Ref: DBNAME
           NOTIFICATION_TEMPLATE_BUCKET:
             Ref: NotificationTemplateBucket
+          STAGE:
+            Ref: STAGE
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

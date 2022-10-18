@@ -6,6 +6,7 @@ from core_layer.model import User
 from core_layer.handler import user_handler
 from core_layer.db_handler import Session
 from core_layer.handler.tests.unit.helper import level_creator, user_creator, review_creator, item_creator
+from core_layer.model.mail_model import Mail
 
 
 @pytest.fixture
@@ -98,6 +99,10 @@ def fixtures(item_id_1, item_id_2, user_id_1, user_id_2, user_id_3, user_id_4, r
 
     return[item1, item2, level1, level2, level3, user1, user2, user3, user4, closed_review1, closed_review2, closed_review3, closed_review4, open_review1, open_review2]
 
+@pytest.fixture
+def mail_id():
+    return str(uuid4())
+
 
 def test_get_user_total_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_4):
     
@@ -133,10 +138,10 @@ def test_get_user_level_rank(fixtures, user_id_1, user_id_2, user_id_3, user_id_
         user_2 = session.query(User).filter(User.id == user_id_2).one()
         user_3 = session.query(User).filter(User.id == user_id_3).one()
         user_4 = session.query(User).filter(User.id == user_id_4).one()
-        user_rank_1 = user_handler.get_user_rank(user_1, True, True, session)
-        user_rank_3 = user_handler.get_user_rank(user_3, True, True, session)
-        user_rank_2 = user_handler.get_user_rank(user_2, True, True, session)
-        user_rank_4 = user_handler.get_user_rank(user_4, True, True, session)
+        user_rank_1 = user_handler.get_user_rank(user_1, True, session)
+        user_rank_3 = user_handler.get_user_rank(user_3, True, session)
+        user_rank_2 = user_handler.get_user_rank(user_2, True, session)
+        user_rank_4 = user_handler.get_user_rank(user_4, True, session)
 
         assert user_rank_1 == 1
         assert user_rank_3 == 1
@@ -199,3 +204,26 @@ def test_exp_needed(fixtures, user_id_1, user_id_2, user_id_3):
         assert exp_needed_1 == 5
         assert exp_needed_2 == 4
         assert exp_needed_3 == 2
+
+
+def test_mail_subscription(fixtures, mail_id):
+
+    with Session() as session:
+
+        # Create Mail object
+        mail_obj = Mail(id = mail_id)
+
+        fixtures.append(mail_obj)
+        session.add_all(fixtures)
+        session.commit()
+
+        # Check default mail status
+        assert session.query(Mail).first().status == "unconfirmed"
+
+        # Check mail confirmation
+        user_handler.confirm_mail_subscription(mail_id, session)
+        assert session.query(Mail).first().status == "confirmed"
+
+        # Check mail unsubscription
+        user_handler.unsubscribe_mail(mail_id, session)
+        assert session.query(Mail).first().status == "unsubscribed"
