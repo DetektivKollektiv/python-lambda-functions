@@ -56,7 +56,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-archive_api-get_all_closed_items-${STAGE}"
       CodeUri: .
       Handler: get_closed_items.get_closed_items
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -94,7 +94,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-archive_api-get_item-${STAGE}"
       CodeUri: .
       Handler: get_item.get_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -129,7 +129,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-archive_api-post_comment_on_item-${STAGE}"
       CodeUri: .
       Handler: post_comment_on_item.post_comment_on_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:

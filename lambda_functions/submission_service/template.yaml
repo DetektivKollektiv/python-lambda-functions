@@ -59,7 +59,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-submission_api-submit-item-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: submit_item.submit_item # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -97,7 +97,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-submission_api-get-item-types-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: get_item_types.get_item_types # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:

@@ -60,7 +60,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-get_factcheck_by_itemid-${STAGE}"
       CodeUri: .
       Handler: get_online_factcheck.get_online_factcheck
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -94,7 +94,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-SearchFactChecks-${STAGE}"
       CodeUri: .
       Handler: SearchFactChecks.get_FactChecks
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -116,7 +116,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-UpdateFactcheckModels-${STAGE}"
       CodeUri: .
       Handler: UpdateFactChecks.update_factcheck_models
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-ml-requirements-${STAGE}:1"
@@ -145,7 +145,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-GetLanguage-${STAGE}"
       CodeUri: .
       Handler: GetLanguage.get_language
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -158,7 +158,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-GetKeyPhrases-${STAGE}"
       CodeUri: .
       Handler: GetKeyPhrases.get_phrases
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -177,7 +177,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-GetEntities-${STAGE}"
       CodeUri: .
       Handler: GetEntities.get_entities
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -190,7 +190,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-GetTags-${STAGE}"
       CodeUri: .
       Handler: GetEntities.get_tags
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -203,7 +203,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-PredictTags-${STAGE}"
       CodeUri: .
       Handler: GetTags.predict_tags
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -224,7 +224,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-CreateTagReport-${STAGE}"
       CodeUri: .
       Handler: GetTags.create_tagreport
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -255,7 +255,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-get_tags_by_itemid-${STAGE}"
       CodeUri: .
       Handler: GetTags.get_tags_for_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -286,7 +286,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-post_tags_by_itemid-${STAGE}"
       CodeUri: .
       Handler: GetTags.post_tags_for_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -317,7 +317,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-ExtractClaim-${STAGE}"
       CodeUri: .
       Handler: ExtractClaim.extract_claim
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -339,7 +339,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-GetSentiment-${STAGE}"
       CodeUri: .
       Handler: GetSentiment.get_sentiment
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -352,7 +352,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-UpdateItem-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.update_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -373,7 +373,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreFactChecks-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_factchecks
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -394,7 +394,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemEntities-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itementities
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -415,7 +415,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemTags-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemtags
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -436,7 +436,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemSentiment-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemsentiment
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"
@@ -457,7 +457,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-ml_api-StoreItemKeyphrases-${STAGE}"
       CodeUri: .
       Handler: EnrichItem.store_itemphrases
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Layers:
         - !Sub "arn:aws:lambda:eu-central-1:891514678401:layer:detektivkollektiv-core-layer-${STAGE}:1"

@@ -46,7 +46,7 @@ Resources:
       FunctionName: !Sub "codetekt-notifications-item-closed-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: src.item_closed_handler.handle_item_closed # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -81,7 +81,7 @@ Resources:
       FunctionName: !Sub "codetekt-notifications-item-rejected-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: src.item_rejected_handler.handle_item_rejected # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:

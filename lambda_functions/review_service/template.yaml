@@ -58,7 +58,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-review_api-get-open-items-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: get_open_items.get_open_items # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -90,7 +90,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-review_api-create-review-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: create_review.create_review # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -122,7 +122,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-review_api-update-review-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: update_review.update_review # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -154,7 +154,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-review_api-get-review-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: get_review.get_review # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -186,7 +186,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-review_api-reset_locked_items-${STAGE}"
       CodeUri: .
       Handler: reset_locked_items.reset_locked_items
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
