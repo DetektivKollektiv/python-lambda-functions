@@ -40,7 +40,7 @@ batch:
 phases:
   install:
     runtime-versions:
-      python: 3.8
+      python: 3.10
       ruby: latest
     commands:
       # Upgrade pip to the latest version

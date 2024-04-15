@@ -6,7 +6,7 @@ env:
 phases:
   install:
     runtime-versions:
-      python: 3.8
+      python: 3.10
       ruby: latest
     commands:
       # Upgrade pip to the latest version
@@ -25,7 +25,7 @@ phases:
       - gem install cfn-nag
 
       # Install requirements
-      - pip install -r "lambda_layers/ml_requirements_layer/requirements.txt" --target lambda_layers/ml_requirements_layer/python/lib/python3.8/site-packages/
+      - pip install -r "lambda_layers/ml_requirements_layer/requirements.txt" --target lambda_layers/ml_requirements_layer/python/lib/python3.10/site-packages/
 
   pre_build:
     commands:

@@ -4,7 +4,7 @@
         {
             "type": "aws-sam",
             "request": "direct-invoke",
-            "name": "python-lambda-functions:review_answer_handler.create_review_answer (python3.8)",
+            "name": "python-lambda-functions:review_answer_handler.create_review_answer (python3.10)",
             "invokeTarget": {
                 "target": "code",
                 "projectRoot": "lambda_functions",
@@ -14,7 +14,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/create_review_answer.json"
                 },
@@ -27,7 +27,7 @@
         {
             "type": "aws-sam",
             "request": "direct-invoke",
-            "name": "python-lambda-functions:user_handler.delete_user (python3.8)",
+            "name": "python-lambda-functions:user_handler.delete_user (python3.10)",
             "invokeTarget": {
                 "target": "code",
                 "projectRoot": "lambda_functions",
@@ -37,7 +37,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/delete_user.json"
                 },
@@ -50,7 +50,7 @@
         {
             "type": "aws-sam",
             "request": "direct-invoke",
-            "name": "python-lambda-functions:app.get_all_items (python3.8)",
+            "name": "python-lambda-functions:app.get_all_items (python3.10)",
             "invokeTarget": {
                 "target": "code",
                 "projectRoot": "lambda_functions",
@@ -60,7 +60,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {},
                 "environmentVariables": {
                     "DBNAME": "development_db",
@@ -82,7 +82,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/submit_review.json"
                 },
@@ -106,7 +106,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/accept_item.json"
                 },
@@ -130,7 +130,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/accept_item.json"
                 },
@@ -154,7 +154,7 @@
                 "containerBuild": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/get_open_items_for_user.json"
                 },
@@ -179,7 +179,7 @@
                 "skipNewImageCheck": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/get_item_by_id.json"
                 },
@@ -204,7 +204,7 @@
                 "skipNewImageCheck": true
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "path": "test-payloads/closed_item_feedback.json"
                 },
@@ -229,7 +229,7 @@
                 "skipNewImageCheck": false
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {},
                 "environmentVariables": {
                     "STAGE": "dev",
@@ -252,7 +252,7 @@
                 "skipNewImageCheck": false
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "json": {
                         "item": {
@@ -298,7 +298,7 @@
                 "skipNewImageCheck": false
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "json": {
                         "pathParameters": {
@@ -328,7 +328,7 @@
                 "skipNewImageCheck": false
             },
             "lambda": {
-                "runtime": "python3.8",
+                "runtime": "python3.10",
                 "payload": {
                     "json": {
                         "item": {

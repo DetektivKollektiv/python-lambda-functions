@@ -56,7 +56,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-admin_api-update_item-${STAGE}"
       CodeUri: .
       Handler: update_item.update_item
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -88,7 +88,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-admin_api-get_items-${STAGE}"
       CodeUri: .
       Handler: get_items.get_items
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:

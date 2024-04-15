@@ -57,7 +57,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-issue_api-submit_issue-${STAGE}"
       CodeUri: .
       Handler: submit_issue.submit_issue
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
