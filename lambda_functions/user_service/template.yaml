@@ -76,7 +76,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-create-user-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: create_user.create_user # Change for each lambda
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -100,7 +100,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-delete_user-${STAGE}"
       CodeUri: .
       Handler: delete_user.delete_user
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -131,7 +131,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-get_user-${STAGE}"
       CodeUri: .
       Handler: get_user.get_user
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -162,7 +162,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-get_user_ranking-${STAGE}"
       CodeUri: .
       Handler: get_user_ranking.get_user_ranking
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -193,7 +193,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-attach_iot_policy-${STAGE}"
       CodeUri: .
       Handler: attach_iot_policy.attach_iot_policy
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -222,7 +222,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-confirm-mail-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: mail_subscription.confirm_mail_subscription # Change for each lambda, syntax: python_file.function
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -258,7 +258,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-unsubscribe-mail-${STAGE}" # Change for each lambda
       CodeUri: .
       Handler: mail_subscription.unsubscribe_mail # Change for each lambda, syntax: python_file.function
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:
@@ -294,7 +294,7 @@ Resources:
       FunctionName: !Sub "detektivkollektiv-user_api-delete-unconfirmed-mails-${STAGE}"
       CodeUri: .
       Handler: delete_unconfirmed_mails.delete_unconfirmed_mails
-      Runtime: python3.8
+      Runtime: python3.10
       MemorySize: 832
       Role:
         Fn::GetAtt:

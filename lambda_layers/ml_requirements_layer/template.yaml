@@ -14,4 +14,4 @@ Resources:
       Description: Dependencies for the DetektivKollektiv app.
       ContentUri: .
       CompatibleRuntimes:
-        - python3.8
+        - python3.10
